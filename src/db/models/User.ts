@@ -1,18 +1,12 @@
 import mongoose from "mongoose";
 
-interface IUser extends mongoose.Document{
-    uid: string;    
-    name: string;
+interface IUser extends mongoose.Document{  
+    username: string;
     createdAt: Date;
 }
 
 const UserSchema = new mongoose.Schema({
-    uid: {
-        type: String,
-        required: true,
-        unique: true,
-    },
-    name: {
+    username: {
         type: String,
         required: true,
     },
