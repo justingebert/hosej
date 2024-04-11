@@ -1,66 +1,36 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useUser } from "../../context/UserContext";
 
 type User = {
   _id: string;
   username: string;
 };
 
-const QuestionsPage = () => {
-  const [userName, setUserName] = useState("");
+const SignInPage = () => {
+  const { createUser, setUser, getAllUsers } = useUser();
   const [users, setUsers] = useState<User[]>([]);
-  const [selectedUser, setSelectedUser] = useState("");
-
-  const router = useRouter();
+  const [userName, setUserName] = useState("");
+  const [selectedUserName, setSelectedUserName] = useState("");
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await fetch("/api/users");
-        const data = await response.json();
-        setUsers(data);
-        const storedUser = localStorage.getItem("selectedUser");
-        if (storedUser) {
-          setSelectedUser(storedUser);
-        }
-      } catch (error) {
-        console.error("Failed to fetch users:", error);
-      }
-      const selectedUser = localStorage.getItem("selectedUser");
-
-      if (selectedUser) {
-        router.push("/dashboard/daily");
-      }
+    const fetchData = async () => {
+      const users = await getAllUsers();
+      setUsers(users);
     };
-
-    fetchUsers();
+    fetchData();
   }, []);
 
-  const createUser = async () => {
-    try {
-      const response = await fetch("/api/users", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ username: userName }),
-      });
-      const newUser = await response.json();
-      console.log("User:", newUser);
-      setUsers((prevUsers) => [...prevUsers, newUser]);
-      handleUserSelect(newUser.username);
-    } catch (error) {
-      console.error("Failed to create user:", error);
+  //TODO should be seperated into two functions
+  const handleCreateOrSelectUser = () => {
+    if (userName) {
+      createUser(userName);
+    } else if (selectedUserName) {
+      setUser(selectedUserName);
     }
   };
 
-  const handleUserSelect = (username: string) => {
-    setSelectedUser(username);
-    localStorage.setItem("selectedUser", username);
-  };
-
-  const buttonLabel = userName ? "Create" : selectedUser ? "Select" : "Start";
+  const buttonLabel = userName ? "Create" : userName ? "Select" : "Start";
 
   return (
     <div>
@@ -77,10 +47,13 @@ const QuestionsPage = () => {
         {users.map((user) => (
           <button
             key={user._id}
-            onClick={() => handleUserSelect(user.username)}
+            onClick={() => {
+              setSelectedUserName(user.username);
+              setUserName("");
+            }}
             style={{
               backgroundColor:
-                selectedUser === user.username ? "lightblue" : "initial",
+                userName === user.username ? "lightblue" : "initial",
               margin: "0 5px",
             }}
           >
@@ -88,9 +61,9 @@ const QuestionsPage = () => {
           </button>
         ))}
       </div>
-      <button onClick={userName ? createUser : () => {}}>{buttonLabel}</button>
+      <button onClick={handleCreateOrSelectUser}>{buttonLabel}</button>
     </div>
   );
 };
 
-export default QuestionsPage;
+export default SignInPage;
