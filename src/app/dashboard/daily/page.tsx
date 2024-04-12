@@ -1,7 +1,9 @@
+"use client";
+
 import React, { useState, useEffect } from "react";
 import { useUser } from "../../../context/UserContext";
-import VoteOptions from "../../../components/VotingOptions.client";
-import VoteResults from "../../../components/VoteResults.client";
+import VoteOptions from "../../../Components/VotingOptions.client";
+import VoteResults from "../../../Components/VoteResults.client";
 
 const DailyQuestionPage = () => {
   const { username } = useUser();
@@ -10,10 +12,11 @@ const DailyQuestionPage = () => {
 
   useEffect(() => {
     const fetchQuestion = async () => {
-      const res = await fetch(`/api/question/daily?username=${username}`);
+      const res = await fetch(`/api/question/daily`);
       const data = await res.json();
       setQuestion(data.question);
-      setUserHasVoted(data.userHasVoted);
+      const hasVoted = data.question.answers.some((answer: any) => answer.username === username);
+      setUserHasVoted(hasVoted);
     };
 
     if (username) {

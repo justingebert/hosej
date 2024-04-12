@@ -18,10 +18,11 @@ interface IQuestion extends mongoose.Document {
   options?: any;
   answers: [{ userId: mongoose.Schema.Types.ObjectId; response: any }];
   createdAt: Date;
+  used: boolean;
 }
 
 const questionSchema = new mongoose.Schema({
-  category: { type: String, required: true },
+  category: { type: String },
   questionType: {
     type: String,
     required: true,
@@ -31,11 +32,12 @@ const questionSchema = new mongoose.Schema({
   options: { type: mongoose.Schema.Types.Mixed, required: false },
   answers: [
     {
-      userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      username: { type: mongoose.Schema.Types.String, ref: "User" },
       response: { type: mongoose.Schema.Types.Mixed },
     },
   ],
   createdAt: { type: Date, default: Date.now },
+  used: { type: Boolean, default: false },
 });
 
 const Question = mongoose.model<IQuestion>("Question", questionSchema);

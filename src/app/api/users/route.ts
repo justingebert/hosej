@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
 import dbConnect from "../../../db/dbConnect";
 import User from "../../../db/models/User";
 
-export async function GET(req: any, res: NextResponse) {
+export async function GET(req: Request, res: NextResponse) {
   await dbConnect();
   const users = await User.find({});
   return NextResponse.json(users);
