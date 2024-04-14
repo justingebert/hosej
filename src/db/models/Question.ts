@@ -40,6 +40,6 @@ const questionSchema = new mongoose.Schema({
   used: { type: Boolean, default: false },
 });
 
-const Question = mongoose.model<IQuestion>("Question", questionSchema);
+const Question = mongoose.models.Question || mongoose.model<IQuestion>("Question", questionSchema);
 
 export default Question;

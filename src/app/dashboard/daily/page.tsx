@@ -15,6 +15,7 @@ const DailyQuestionPage = () => {
       const res = await fetch(`/api/question/daily`);
       const data = await res.json();
       setQuestion(data.question);
+      console.log(data.question);
       const hasVoted = data.question.answers.some((answer: any) => answer.username === username);
       setUserHasVoted(hasVoted);
     };

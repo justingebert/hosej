@@ -1,9 +1,8 @@
 import mongoose from "mongoose";
 import dbConnect from "../../../../db/dbConnect";
 import Question from "../../../../db/models/Question";
+import User from "../../../../db/models/User";
 import { NextResponse } from 'next/server'
-
-
 
 export async function GET(req: Request, res: NextResponse){
     await dbConnect();
@@ -12,13 +11,15 @@ export async function GET(req: Request, res: NextResponse){
         if (!question) {
             return NextResponse.json({ message: "No questions available" });
         }
-        if (question.questionType.startsWith("user-")) {
-            const users = await User.find({}); // Fetch all users
+        if (question.questionType.startsWith("users-")) {
+            const users = await User.find({}); 
             question.options = users.map(user => ({
-                id: user._id,
-                name: user.username // or whatever property you use to label the user
+                name: user.username
             }));
         }
         return NextResponse.json({ question });
+    }
+    catch (error) {
+        return NextResponse.json({ message: error });
     }
 }

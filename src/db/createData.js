@@ -1,4 +1,19 @@
+import mongoose from "mongoose";
 import Question from "./models/Question";
+require('dotenv').config({ path: './.env.local' });
+
+const MONGODB_URI = process.env.MONGODB_URI;
+
+console.log(process.env);
+
+if (!MONGODB_URI) {
+  throw new Error(
+    "Please define the MONGODB_URI environment variable inside .env.local",
+  );
+}
+
+mongoose.connect(MONGODB_URI, {
+});
 
 const createData = async () => {
     const questions = [
@@ -42,3 +57,11 @@ const createData = async () => {
     await Question.deleteMany({});
     await Question.insertMany(questions);
 }
+
+createData().then(() => {
+    console.log("Data created successfully");
+    process.exit();
+}).catch((error) => {
+    console.log("Error creating data", error);
+    process.exit(1);
+})

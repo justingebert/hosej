@@ -10,9 +10,10 @@ ple
     - copy from nextjs example
 - want to store user in localstorage, turns out a bit complciated with next
 
+
 # problems:
 
 
 
 # TODO:
-- 
+- pass results on vote
