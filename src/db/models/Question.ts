@@ -32,12 +32,13 @@ const questionSchema = new mongoose.Schema({
   options: { type: mongoose.Schema.Types.Mixed, required: false },
   answers: [
     {
-      username: { type: mongoose.Schema.Types.String, ref: "User" },
-      response: { type: mongoose.Schema.Types.Mixed },
+      username: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true},
+      response: { type: mongoose.Schema.Types.Mixed, required: true},
     },
   ],
   createdAt: { type: Date, default: Date.now },
   used: { type: Boolean, default: false },
+  active: { type: Boolean, default: false },
 });
 
 const Question = mongoose.models.Question || mongoose.model<IQuestion>("Question", questionSchema);

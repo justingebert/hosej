@@ -1,31 +1,54 @@
-'use client';
+"use client";
 
 import { useUser } from "@/context/UserContext";
-import React from "react";
+import { set } from "mongoose";
+import React, { useState } from "react";
 
-const VoteOptions = ({ questionId, options, onVote }) => {
+const VoteOptions = ({ questionId, options, onVote }:any) => {
   const { username } = useUser();
+  const [selectedOption, setSelectedOption] = useState<any>(null);
 
-  const submitVote = async (option) => {
+  const submitVote = async () => {
     await fetch(`/api/question/vote`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ questionId, option, username }),
+      body: JSON.stringify({ questionId: questionId, option: selectedOption.name, user: username }),
     });
     onVote(); // Callback to update state in the parent component
   };
 
   return (
-    <div>
+    <>
       <h2>Choose your answer:</h2>
-      {options.map((option, index) => (
-        <button key={index} onClick={() => submitVote(option)}>
-          {option.name}
-        </button>
-      ))}
-    </div>
+      <div>
+        {options.map((option, index) => (
+          <button
+            className={`rounded m-2 p-2 ${
+              selectedOption?.name === option.name ? "bg-slate-300" : "bg-slate-600"
+            }`}
+            key={index}
+            onClick={() => {
+              setSelectedOption(option);
+            }}
+          >
+            {option.name}
+          </button>
+        ))}
+      </div>
+      <button
+        onClick={() => {
+          if(selectedOption){
+            submitVote();
+          }
+          
+        }}
+        className={`rounded m-2 p-2 bg-red-100 hover:bg-red-300`}
+      >
+        Submit
+      </button>
+    </>
   );
 };
 

@@ -22,7 +22,7 @@ const SignInPage = () => {
   }, []);
 
   //TODO should be seperated into two functions
-  const handleCreateOrSelectUser = () => {
+  const handleCreateOrSelectUser = () => {;
     if (userName) {
       createUser(userName);
     } else if (selectedUserName) {
@@ -51,17 +51,13 @@ const SignInPage = () => {
               setSelectedUserName(user.username);
               setUserName("");
             }}
-            style={{
-              backgroundColor:
-                userName === user.username ? "lightblue" : "initial",
-              margin: "0 5px",
-            }}
+            className={`rounded m-2 p-2 ${selectedUserName === user.username ? 'bg-slate-300' : 'bg-slate-600'}`}
           >
             {user.username}
           </button>
         ))}
       </div>
-      <button onClick={handleCreateOrSelectUser}>{buttonLabel}</button>
+      <button onClick={handleCreateOrSelectUser} className=" bg-red-100 rounded p-2">{buttonLabel}</button>
     </div>
   );
 };

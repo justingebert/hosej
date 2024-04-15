@@ -45,6 +45,7 @@ export const UserProvider = ({ children }:any) => {
   const setUser = async (username: string) => {
     setUsername(username);
     localStorage.setItem("user", username);
+    router.push("/dashboard/daily")
   };
 
   const getAllUsers = async () => {

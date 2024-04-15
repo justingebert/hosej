@@ -12,11 +12,9 @@ export default function RootLayout({
 }>) {
   return (
     <html>
-      <UserProvider>
         <body>
-        {children}
+          <UserProvider>{children}</UserProvider>
         </body>
-      </UserProvider>
     </html>
     
   );

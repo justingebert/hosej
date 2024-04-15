@@ -12,8 +12,9 @@ ple
 
 
 # problems:
+- daily question getter should work simple but need extra work like eventbrifge
 
 
 
 # TODO:
-- pass results on vote
+- questions left
