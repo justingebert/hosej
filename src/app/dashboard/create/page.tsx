@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
-import { Input } from "@/Components/ui/input";
-import { Button } from "@/Components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import Link from 'next/link'
 
 //TODO improve error handeling

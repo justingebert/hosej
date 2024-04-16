@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import { useUser } from "../../../context/UserContext";
-import VoteOptions from "../../../Components/VotingOptions.client";
-import VoteResults from "../../../Components/VoteResults.client";
-import { Button } from "@/Components/ui/button"
+import VoteOptions from "../../../components/VotingOptions.client";
+import VoteResults from "../../../components/VoteResults.client";
+import { Button } from "@/components/ui/button"
 import Link from 'next/link';
 import { unstable_noStore } from "next/cache";
 import { useRouter } from "next/navigation";
