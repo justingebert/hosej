@@ -17,7 +17,7 @@ export async function GET(req: NextRequest){
             return NextResponse.json({ message: "Question not found" });
         }
 
-        const voteCounts = question.answers.reduce((acc, answer) => {
+        const voteCounts = question.answers.reduce((acc: any, answer:any) => {
             acc[answer.response] = (acc[answer.response] || 0) + 1;
             return acc;
         }, {});
@@ -28,7 +28,7 @@ export async function GET(req: NextRequest){
         //const results = Object.entries(voteCounts).map(([option, votes]) => ({ option, votes }));
         
         //percentage:
-        const results = Object.entries(voteCounts).map(([option, votes]) => {
+        const results = Object.entries(voteCounts).map(([option, votes]:[string,any]) => {
             const percentage = Math.round((votes / totalVotes) * 100);
             return { option, votes, percentage: percentage };
         });

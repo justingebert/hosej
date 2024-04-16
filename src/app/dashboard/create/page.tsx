@@ -10,7 +10,7 @@ const CreateQuestionPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e:any) => {
     setLoading(true);
     setError(null);
 
@@ -33,7 +33,7 @@ const CreateQuestionPage = () => {
       if (!response.ok) throw new Error("Failed to create question");
       alert("Question created successfully!");
       setQuestion("");
-    } catch (err) {
+    } catch (err:any) {
       setError(err.message);
     } finally {
       setLoading(false);

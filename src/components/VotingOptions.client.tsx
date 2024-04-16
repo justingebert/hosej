@@ -27,7 +27,7 @@ const VoteOptions = ({ questionId, options, onVote }: any) => {
   return (
     <>
       <div className="grid grid-cols-2 gap-4 ">
-        {options.map((option, index) => (
+        {options.map((option:any, index:any) => (
           <Button
             key={index}
             onClick={() => {
