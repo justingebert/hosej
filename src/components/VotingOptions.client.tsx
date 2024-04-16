@@ -3,7 +3,7 @@
 import { useUser } from "@/context/UserContext";
 import { set } from "mongoose";
 import React, { useState } from "react";
-import { Button } from "@/Components/ui/button";
+import { Button } from "@/components/ui/button";
 
 const VoteOptions = ({ questionId, options, onVote }: any) => {
   const { username } = useUser();
