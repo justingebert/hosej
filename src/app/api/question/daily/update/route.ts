@@ -3,6 +3,8 @@ import dbConnect from "../../../../../db/dbConnect";
 import Question from "../../../../../db/models/Question";
 import User from "../../../../../db/models/User";
 import { NextResponse } from 'next/server'
+import { Button } from "@/Components/ui/button"
+
 
 //TODO questions left parameters
 
@@ -24,7 +26,9 @@ async function selectDailyQuestion() {
     question.active = true;
     question.used = true;
     await question.save();
-  
+    
+    console.log(question)
+
     return question;
   }
 
@@ -41,6 +45,7 @@ export async function GET(req: Request){
             question.options = users.map(user => ({
                 name: user.username
             }));
+            question.save();
         }
 
         return NextResponse.json({ question });

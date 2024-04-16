@@ -25,14 +25,21 @@ export async function GET(req: Request){
         if (!question) {
             return NextResponse.json({ message: "No questions available" });
         }
-        /* if (question.questionType.startsWith("users-")) {
-            const users = await User.find({}); 
-            question.options = users.map(user => ({
-                name: user.username
-            }));
-        } */
-
-        return NextResponse.json({ question });
+        
+        const populatedQuestion = await Question.findById(question._id)
+            .populate({
+                path: 'answers.username', 
+                select: 'username -_id'
+            }).exec();
+            if (populatedQuestion.questionType.startsWith("users-")) {
+                const users = await User.find({});
+                populatedQuestion.options = users.map(user => ({
+                    name: user.username
+                }));
+                await populatedQuestion.save();
+            }
+        
+        return NextResponse.json({ question: populatedQuestion });
     }
     catch (error) {
         return NextResponse.json({ message: error });

@@ -22,8 +22,17 @@ export async function GET(req: NextRequest){
             return acc;
         }, {});
 
+        const totalVotes = question.answers.length;
+
+        //vote count:
+        //const results = Object.entries(voteCounts).map(([option, votes]) => ({ option, votes }));
         
-        const results = Object.entries(voteCounts).map(([option, votes]) => ({ option, votes }));
+        //percentage:
+        const results = Object.entries(voteCounts).map(([option, votes]) => {
+            const percentage = Math.round((votes / totalVotes) * 100);
+            return { option, votes, percentage: percentage };
+        });
+        
         return Response.json({ results: results });
     }
     catch (error) {

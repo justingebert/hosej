@@ -12,6 +12,7 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider = ({ children }:any) => {
   const [username, setUsername] = useState('');
+  const [userId, setUserId] = useState(''); 
   const router = useRouter();
 
   useEffect(() => {

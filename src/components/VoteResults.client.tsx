@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, { useState, useEffect } from "react";
 
@@ -18,9 +18,17 @@ const VoteResults = ({ questionId }) => {
 
   return (
     <div>
-      <h2>Results:</h2>
       {results.map((result, index) => (
-        <div className="bg-slate-100" key={index}>{`${result.option}: ${result.votes}`}</div>
+        <div key={index} className="bg-slate-100 p-1 my-2 rounded-md relative">
+        <div
+          className="bg-slate-200 h-10   rounded"
+          style={{ width: `${result.percentage}%` }}
+        ></div>
+        <div className="absolute inset-0 flex justify-between px-3 items-center">
+          <span>{result.option}</span>
+          <span>{result.percentage + " %"}</span>
+        </div>
+    </div>
       ))}
     </div>
   );
