@@ -20,7 +20,7 @@ const DailyQuestionPage = () => {
     unstable_noStore()
     const fetchQuestion = async () => {
       router.refresh()
-      const res = await fetch(`/api/question/daily`);
+      const res = await fetch(`/api/question/daily`, { cache: 'no-store' });
       const data = await res.json();
 
       console.log(data);
@@ -38,7 +38,7 @@ const DailyQuestionPage = () => {
   }, [username]);
 
   const getNewQuestion = async () => {
-    const res = await fetch(`/api/question/daily/update`);
+    const res = await fetch(`/api/question/daily/update`, { cache: 'no-store' });
     const data = await res.json();
     
     if(data.question){

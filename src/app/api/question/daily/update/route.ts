@@ -4,7 +4,7 @@ import Question from "../../../../../db/models/Question";
 import User from "../../../../../db/models/User";
 import { NextResponse } from 'next/server'
 
-
+export const revalidate = 0
 //TODO questions left parameters
 
 async function selectDailyQuestion() {

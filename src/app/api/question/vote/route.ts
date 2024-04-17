@@ -4,6 +4,8 @@ import Question from "../../../../db/models/Question";
 import { NextResponse } from 'next/server'
 import User from "../../../../db/models/User";
 
+export const revalidate = 0
+
 export async function POST(req: Request){
     const data = await req.json();
     const { questionId, option, user } = data;

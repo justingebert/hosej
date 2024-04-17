@@ -5,6 +5,7 @@ import User from "../../../../db/models/User";
 import { NextResponse } from 'next/server'
 
 //TODO questions left parameters
+export const revalidate = 0
 
 async function getDailyQuestion() {
     await dbConnect();

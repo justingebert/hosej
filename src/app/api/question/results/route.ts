@@ -6,6 +6,8 @@ import Question from "../../../../db/models/Question";
 import User from "../../../../db/models/User";
 import { NextResponse, type NextRequest } from 'next/server'
 
+export const revalidate = 0
+
 export async function GET(req: NextRequest){
     const searchParams = req.nextUrl.searchParams
     const questionId = searchParams.get('questionId') 

@@ -6,6 +6,8 @@ import Question from "../../../db/models/Question";
 import User from "../../../db/models/User";
 import { NextResponse, type NextRequest } from 'next/server'
 
+export const revalidate = 0
+
 //TODO improve error handeling
 export async function POST(req: NextRequest){
     await dbConnect();

@@ -7,7 +7,7 @@ const VoteResults = ({ questionId }:any) => {
 
   useEffect(() => {
     const fetchResults = async () => {
-      const res = await fetch(`/api/question/results?questionId=${questionId}`);
+      const res = await fetch(`/api/question/results?questionId=${questionId}`, { cache: 'no-store' });
       const data = await res.json();
       console.log(data);
       setResults(data.results);
