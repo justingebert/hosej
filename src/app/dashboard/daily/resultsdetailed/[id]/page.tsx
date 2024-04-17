@@ -14,11 +14,12 @@ import { Separator } from "@/components/ui/separator"
 
 
 export default async function ResultsDetailPage({ params }: { params: { id: string } }) {
-    const questionId = params.id;
+  await dbConnect();  
+  const questionId = params.id;
     
-    await dbConnect();
+  console.log(questionId);
 
-    await user.find({});
+    await user.find({}); //TODO find better solution to avoid missing sschema error
     const question = await Question.findById(questionId).populate("answers.username");
 
     const groupedResponses:any = {};
