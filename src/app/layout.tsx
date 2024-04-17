@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { UserProvider } from "../context/UserContext";
 import "./globals.css";
 import { AppWrapper } from "../components/AppWrapper";
+import { Analytics } from "@vercel/analytics/react"
 
 export const metadata = {
   manifest: "manifest.json",
@@ -19,6 +20,7 @@ export default function RootLayout({
     <html>
         <body>
           <AppWrapper>{children}</AppWrapper>
+          <Analytics />
         </body>
     </html>
     
