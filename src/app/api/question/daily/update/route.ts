@@ -36,8 +36,8 @@ export async function GET(req: Request){
     try{
         const question = await selectDailyQuestion();
         console.log(question)
-        if (!question) {
-            return NextResponse.json({ message: "No questions available" });
+        if (question === undefined) {
+            return NextResponse.json({ message: "No questions available"});
         }
         if (question.questionType.startsWith("users-")) {
             const users = await User.find({}); 

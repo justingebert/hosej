@@ -41,6 +41,10 @@ const DailyQuestionPage = () => {
     const res = await fetch(`/api/question/daily/update`, { cache: 'no-store' });
     const data = await res.json();
     
+    if(data.message){
+      alert(data.message);
+    }
+
     if(data.question){
       setQuestion(data.question);
       console.log(data.question);
