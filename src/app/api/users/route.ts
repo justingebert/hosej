@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
-import dbConnect from "../../../db/dbConnect";
-import user from "../../../db/models/user";
+import dbConnect from "@/db/dbConnect";
+import user from "@/db/models/User";
 
 export const revalidate = 0
 

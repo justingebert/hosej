@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import dbConnect from "@/db/dbConnect";
 import Question from "@/db/models/Question";
-import user from "@/db/models/user";
+import user from "@/db/models/User";
 import Link from "next/link";
 import { Button } from "@/components/ui/button"
 import {

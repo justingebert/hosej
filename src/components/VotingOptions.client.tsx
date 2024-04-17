@@ -10,19 +10,6 @@ const VoteOptions = ({ questionId, options, onVote }: any) => {
   const [selectedOption, setSelectedOption] = useState<any>(null);
 
   const submitVote = async () => {
-  
-  await fetch(`/api/question/vote`, {
-      method: "POST",
-      headers: {
-          "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-          questionId: questionId,
-          option: selectedOption.name,
-          userThatVoted: username,
-      }),
-  });
-  
 
     await fetch(`/api/question/vote`, {
       method: "POST",

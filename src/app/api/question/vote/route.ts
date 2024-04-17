@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
-import dbConnect from "../../../../db/dbConnect";
-import Question from "../../../../db/models/Question";
+import dbConnect from "@/db/dbConnect";
+import Question from "@/db/models/Question";
 import { NextResponse } from 'next/server'
-import user from "../../../../db/models/user";
+import user from "@/db/models/User";
 import { use } from "react";
 
 export const revalidate = 0

@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
-import dbConnect from "../../../../db/dbConnect";
-import Question from "../../../../db/models/Question";
-import user from "../../../../db/models/user";
+import dbConnect from "@/db/dbConnect";
+import Question from "@/db/models/Question";
+import user from "@/db/models/User";
 import { NextResponse } from 'next/server'
 
 //TODO questions left parameters
