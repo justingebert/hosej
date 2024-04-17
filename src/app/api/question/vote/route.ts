@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import dbConnect from "@/db/dbConnect";
 import Question from "@/db/models/Question";
 import { NextResponse } from 'next/server'
-import user from "@/db/models/User";
+import user from "@/db/models/user";
 import { use } from "react";
 
 export const revalidate = 0

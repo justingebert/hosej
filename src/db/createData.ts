@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import Question from "./models/Question";
-import user from "./models/User";
+import user from "./models/user";
 require('dotenv').config({ path: './.env.local' });
 
 const MONGODB_URI = process.env.MONGODB_URI;
