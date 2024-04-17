@@ -18,6 +18,7 @@ export default async function ResultsDetailPage({ params }: { params: { id: stri
     
     await dbConnect();
 
+    await user.find({});
     const question = await Question.findById(questionId).populate("answers.username");
 
     const groupedResponses:any = {};

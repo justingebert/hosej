@@ -9,7 +9,7 @@ const withPWA = withPWAInit({
   dest: "public",
   reloadOnOnline: true,
   swcMinify: true,
-  disable: true//process.env.NODE_ENV === "development",
+  disable: process.env.NODE_ENV === "development",
 });
 
 const nextConfig = {
