@@ -9,6 +9,8 @@ ple
 - usiing mongoose and nextjs semms more difficult -> multiple connections poosiblle (dont understand yet)
     - copy from nextjs example
 - want to store user in localstorage, turns out a bit complciated with next
+- build ui with shadcn/ui
+- deploy to vercel and later convert to pwa with npm package
 
 
 # problems:

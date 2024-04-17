@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import dbConnect from "../../../../../db/dbConnect";
 import Question from "../../../../../db/models/Question";
-import User from "../../../../../db/models/User";
+import user from "../../../../../db/models/user";
 import { NextResponse } from 'next/server'
 
 export const revalidate = 0
@@ -40,7 +40,7 @@ export async function GET(req: Request){
             return NextResponse.json({ message: "No questions available"});
         }
         if (question.questionType.startsWith("users-")) {
-            const users = await User.find({}); 
+            const users = await user.find({}); 
             question.options = users.map(user => ({
                 name: user.username
             }));

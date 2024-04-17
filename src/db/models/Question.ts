@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import user from "./user";
 
 enum QuestionType {
   UsersSelectOne = "users-select-one",
@@ -32,7 +33,7 @@ const questionSchema = new mongoose.Schema({
   options: { type: mongoose.Schema.Types.Mixed, required: false },
   answers: [
     {
-      username: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true},
+      username: { type: mongoose.Schema.Types.ObjectId, ref: "user", required: true},
       response: { type: mongoose.Schema.Types.Mixed, required: true},
     },
   ],

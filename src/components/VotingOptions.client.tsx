@@ -10,6 +10,20 @@ const VoteOptions = ({ questionId, options, onVote }: any) => {
   const [selectedOption, setSelectedOption] = useState<any>(null);
 
   const submitVote = async () => {
+  
+  await fetch(`/api/question/vote`, {
+      method: "POST",
+      headers: {
+          "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+          questionId: questionId,
+          option: selectedOption.name,
+          userThatVoted: username,
+      }),
+  });
+  
+
     await fetch(`/api/question/vote`, {
       method: "POST",
       headers: {
@@ -18,7 +32,8 @@ const VoteOptions = ({ questionId, options, onVote }: any) => {
       body: JSON.stringify({
         questionId: questionId,
         option: selectedOption.name,
-        user: username,
+        userThatVoted: username,
+        lalalalala: "lalalalala",
       }),
     });
     onVote(); // Callback to update state in the parent component

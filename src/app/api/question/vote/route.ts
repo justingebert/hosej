@@ -2,13 +2,15 @@ import mongoose from "mongoose";
 import dbConnect from "../../../../db/dbConnect";
 import Question from "../../../../db/models/Question";
 import { NextResponse } from 'next/server'
-import User from "../../../../db/models/User";
+import user from "../../../../db/models/user";
+import { use } from "react";
 
 export const revalidate = 0
 
 export async function POST(req: Request){
     const data = await req.json();
-    const { questionId, option, user } = data;
+    const { questionId, option, userThatVoted } = data;
+    console.log(data);
     await dbConnect();
     const question = await Question.findById(questionId);
     if (!question) {
@@ -16,7 +18,9 @@ export async function POST(req: Request){
         return NextResponse.json({ message: "Question not found" });
     }
 
-    const votingUser = await User.findOne({ username: user });
+    console.log(userThatVoted);
+    const votingUser = await user.findOne({ username: userThatVoted });
+    console.log(votingUser);
 
     const updatedQuestion = await Question.findByIdAndUpdate(
         questionId,

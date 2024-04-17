@@ -4,11 +4,14 @@ import "./globals.css";
 import { AppWrapper } from "../components/AppWrapper";
 import { Analytics } from "@vercel/analytics/react"
 
-export const metadata = {
-  manifest: "manifest.json",
+export let metadata:any = {
   title: "HoseJ",
   description: "HoseJ",
 };
+
+if (process.env.NODE_ENV !== "development"){
+  metadata.manifest = "manifest.json";
+}
 
 
 export default function RootLayout({

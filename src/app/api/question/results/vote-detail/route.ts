@@ -1,9 +1,9 @@
 
 
 import mongoose from "mongoose";
-import dbConnect from "../../../../db/dbConnect";
-import Question from "../../../../db/models/Question";
-import user from "../../../../db/models/user";
+import dbConnect from "../../../../../db/dbConnect";
+import Question from "../../../../../db/models/Question";
+import user from "../../../../../db/models/user";
 import { NextResponse, type NextRequest } from 'next/server'
 
 export const revalidate = 0

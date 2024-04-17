@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import dbConnect from "../../../../db/dbConnect";
 import Question from "../../../../db/models/Question";
-import User from "../../../../db/models/User";
+import user from "../../../../db/models/user";
 import { NextResponse } from 'next/server'
 
 //TODO questions left parameters
@@ -33,7 +33,7 @@ export async function GET(req: Request){
                 select: 'username -_id'
             }).exec();
             if (populatedQuestion.questionType.startsWith("users-")) {
-                const users = await User.find({});
+                const users = await user.find({});
                 populatedQuestion.options = users.map(user => ({
                     name: user.username
                 }));
