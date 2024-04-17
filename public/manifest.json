@@ -1,0 +1,27 @@
+{
+    "name": "HoseJ",
+    "short_name": "HoseJ",
+    "icons": [
+      {
+        "src": "/appicon.jpg",
+        "sizes": "360x360",
+        "type": "image/png",
+        "purpose": "any maskable"
+      },
+      {
+        "src": "/appicon.jpg",
+        "sizes": "360x360",
+        "type": "image/png"
+      },
+      {
+        "src": "/appicon.jpg",
+        "sizes": "360x360",
+        "type": "image/png"
+      }
+    ],
+    "theme_color": "#FFFFFF",
+    "background_color": "#FFFFFF",
+    "start_url": "/",
+    "display": "standalone",
+    "orientation": "portrait"
+  }
