@@ -19,4 +19,5 @@ ple
 
 
 # TODO:
-- questions left
+- [ ] multiple question types
+- [ ] multiple questions per day with shadcn/ui tabs
