@@ -22,6 +22,7 @@ ple
 - vote if question is bad ->
 - trichter counter
 - rating durchschnitt
+- add swiping libary?
 
 
 # TODO:
