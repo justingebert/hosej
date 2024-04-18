@@ -18,12 +18,12 @@ export async function GET(req: NextRequest){
         if (!question) {
             return NextResponse.json({ message: "Question not found" });
         }
-
         const voteCounts = question.answers.reduce((acc: any, answer:any) => {
             acc[answer.response] = (acc[answer.response] || 0) + 1;
             return acc;
         }, {});
 
+        const totalUsers = await user.countDocuments();
         const totalVotes = question.answers.length;
 
         //vote count:
@@ -35,7 +35,7 @@ export async function GET(req: NextRequest){
             return { option, votes, percentage: percentage };
         });
         
-        return Response.json({ results: results });
+        return Response.json({ results: results, totalVotes: totalVotes, totalUsers: totalUsers});
     }
     catch (error) {
         return NextResponse.json({ message: error });

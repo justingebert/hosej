@@ -11,11 +11,17 @@ ple
 - want to store user in localstorage, turns out a bit complciated with next
 - build ui with shadcn/ui
 - deploy to vercel and later convert to pwa with npm package
+- continue adding features like new question types, 
 
 
 # problems:
 - daily question getter should work simple but need extra work like eventbrifge
 
+
+## ideen:
+- vote if question is bad ->
+- trichter counter
+- rating durchschnitt
 
 
 # TODO:

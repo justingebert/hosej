@@ -34,10 +34,12 @@ export async function GET(req: Request){
             }).exec();
             if (populatedQuestion.questionType.startsWith("users-")) {
                 const users = await user.find({});
-                populatedQuestion.options = users.map(user => ({
-                    name: user.username
-                }));
+                populatedQuestion.options = users.map(user => user.username);
                 await populatedQuestion.save();
+            }
+            if (populatedQuestion.questionType.startsWith("rating")) {
+                populatedQuestion.options = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
+                populatedQuestion.save();
             }
         
         return NextResponse.json({ question: populatedQuestion });

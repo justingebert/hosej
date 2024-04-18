@@ -26,7 +26,6 @@ const DailyQuestionPage = () => {
       console.log(data);
       if(data.question){
         setQuestion(data.question);
-        console.log(data.question);
         const hasVoted = data.question.answers.some((answer: any) => answer.username.username === username);
         setUserHasVoted(hasVoted);
       }
@@ -67,11 +66,10 @@ const DailyQuestionPage = () => {
           <h1>{question.question}</h1>
         </div>
           {userHasVoted ? (
-            <VoteResults questionId={question._id} />
+            <VoteResults question={question} />
           ) : (
             <VoteOptions
-              questionId={question._id}
-              options={question.options}
+              question={question}
               onVote={() => setUserHasVoted(true)}
             />
           )}

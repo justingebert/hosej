@@ -5,7 +5,7 @@ import { set } from "mongoose";
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 
-const VoteOptions = ({ questionId, options, onVote }: any) => {
+const VoteOptions = ({ question, onVote }: any) => {
   const { username } = useUser();
   const [selectedOption, setSelectedOption] = useState<any>(null);
 
@@ -17,10 +17,9 @@ const VoteOptions = ({ questionId, options, onVote }: any) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        questionId: questionId,
-        option: selectedOption.name,
+        questionId: question._id,
+        option: selectedOption,
         userThatVoted: username,
-        lalalalala: "lalalalala",
       }),
     });
     onVote(); // Callback to update state in the parent component
@@ -29,7 +28,7 @@ const VoteOptions = ({ questionId, options, onVote }: any) => {
   return (
     <>
       <div className="grid grid-cols-2 gap-4 ">
-        {options.map((option:any, index:any) => (
+        {question.options.map((option:any, index:any) => (
           <Button
             key={index}
             onClick={() => {
@@ -37,7 +36,7 @@ const VoteOptions = ({ questionId, options, onVote }: any) => {
             }}
             variant={selectedOption === option ? "default" : "secondary"}
           >
-            {option.name}
+            {option}
           </Button>
         ))}
       </div>

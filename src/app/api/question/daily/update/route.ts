@@ -41,9 +41,11 @@ export async function GET(req: Request){
         }
         if (question.questionType.startsWith("users-")) {
             const users = await user.find({}); 
-            question.options = users.map(user => ({
-                name: user.username
-            }));
+            question.options = users.map(user => user.username);
+            question.save();
+        }
+        if (question.questionType.startsWith("rating")) {
+            question.options = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
             question.save();
         }
 

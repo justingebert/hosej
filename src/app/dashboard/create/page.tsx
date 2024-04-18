@@ -28,6 +28,11 @@ const CreateQuestionPage = () => {
     setOptions(updatedOptions);
   };
 
+  const handleRemoveOption = (index) => {
+    const updatedOptions = options.filter((_, idx) => idx !== index);
+    setOptions(updatedOptions);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -79,19 +84,21 @@ const CreateQuestionPage = () => {
         Frage muss mit einem Namen von uns beantwortbar sein! (Wer trollt der fliegt!)
       </p>
       {error && <p style={{ color: "red" }}>{error}</p>}
+      <div className="mt-5">
       <Select value={questionType} onValueChange={setQuestionType}>
         <SelectTrigger className="w-[340px]">
           <SelectValue placeholder="Select Question Type" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="users-select-one">Select One User</SelectItem>
-          <SelectItem value="users-select-multiple">Select Multiple Users</SelectItem>
+          {/* <SelectItem value="users-select-multiple">Select Multiple Users</SelectItem> */}
           <SelectItem value="custom-select-one">Select One Custom Option</SelectItem>
-          <SelectItem value="custom-select-multiple">Select Multiple Custom Options</SelectItem>
-          <SelectItem value="text">Text</SelectItem>
+          {/* <SelectItem value="custom-select-multiple">Select Multiple Custom Options</SelectItem> */}
+          {/* <SelectItem value="text">Text</SelectItem> */}
           <SelectItem value="rating">Rating (1-10)</SelectItem>
         </SelectContent>
       </Select>
+      </div>
       <div className="mt-5">
         <Input
           type="text"
@@ -103,17 +110,22 @@ const CreateQuestionPage = () => {
       </div>
       {questionType.startsWith("custom") && (
         <>
+        <div className="mt-5">
           {options.map((option, index) => (
-            <div key={index} className="mt-2">
+            <div key={index} className="mt-2 flex">
               <Input
                 type="text"
                 placeholder={`Option ${index + 1}`}
                 value={option}
                 onChange={(e) => handleOptionChange(e.target.value, index)}
               />
+              <Button className=" ml-2" variant="destructive" onClick={() => handleRemoveOption(index)}>
+                <img src="/trash.svg" alt="Delete" style={{ height: '20px' }} />
+              </Button>
             </div>
           ))}
-          <Button onClick={handleAddOption}>Add Option</Button>
+          </div>
+          <Button onClick={handleAddOption} className="mt-5">Add Option</Button>
         </>
       )}
       <div className="flex justify-center mt-20">
