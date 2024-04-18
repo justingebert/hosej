@@ -10,33 +10,34 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import Image from "next/image";
 
 const CreateQuestionPage = () => {
   const [question, setQuestion] = useState("");
   const [questionType, setQuestionType] = useState("");
   const [options, setOptions] = useState([""]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<String>("");
 
   const handleAddOption = () => {
     setOptions([...options, ""]);
   };
 
-  const handleOptionChange = (value, index) => {
+  const handleOptionChange = (value:any, index:any) => {
     const updatedOptions = [...options];
     updatedOptions[index] = value;
     setOptions(updatedOptions);
   };
 
-  const handleRemoveOption = (index) => {
+  const handleRemoveOption = (index:any) => {
     const updatedOptions = options.filter((_, idx) => idx !== index);
     setOptions(updatedOptions);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e:any) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
+    setError('');
 
     if (questionType.startsWith("custom") && options.length < 2) {
       setError("Please add at least two options for custom selections.");
@@ -65,7 +66,7 @@ const CreateQuestionPage = () => {
       setQuestion("");
       setOptions([""]);
       setQuestionType("");
-    } catch (err) {
+    } catch (err:any) {
       setError(err.message);
     } finally {
       setLoading(false);
@@ -120,7 +121,7 @@ const CreateQuestionPage = () => {
                 onChange={(e) => handleOptionChange(e.target.value, index)}
               />
               <Button className=" ml-2" variant="destructive" onClick={() => handleRemoveOption(index)}>
-                <img src="/trash.svg" alt="Delete" style={{ height: '20px' }} />
+                <Image src="/trash.svg" alt="Delete" style={{ height: '20px' }} />
               </Button>
             </div>
           ))}
