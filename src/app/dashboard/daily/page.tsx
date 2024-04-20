@@ -55,15 +55,17 @@ const DailyQuestionPage = () => {
       alert(data.message);
     }
 
-    if (data.question) {
-      setQuestions(data.question);
-      console.log(data.question);
-      const hasVoted = data.question.answers.some(
-        (answer: any) => answer.username === username
-      );
-      setUserHasVoted(hasVoted);
-    }
-    router.refresh();
+    if (data.questions) {
+      setQuestions(data.questions);
+      console.log(data.questions);
+      const votes = data.questions.reduce((acc: any, question: any) => {
+        acc[question._id] = question.answers.some(
+          (answer: any) => answer.username.username === username
+        );
+        return acc;
+      }, {});
+      setUserHasVoted(votes);
+    };
   };
 
   const defaultTab = searchParams.get('returnTo') || (questions.length > 0 ? questions[0]._id : undefined);
