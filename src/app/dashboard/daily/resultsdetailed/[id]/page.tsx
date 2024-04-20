@@ -34,7 +34,7 @@ export default async function ResultsDetailPage({ params }: { params: { id: stri
   return (
     <div className="m-6">
       <div className="flex items-center">
-        <Link className="text-lg leading-none mr-auto cursor-pointer" href="/dashboard/daily">
+        <Link className="text-lg leading-none mr-auto cursor-pointer" href={`/dashboard/daily?returnTo=${params.id}`}>
           ← 
         </Link>
       </div>

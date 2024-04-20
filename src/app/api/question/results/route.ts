@@ -34,6 +34,8 @@ export async function GET(req: NextRequest){
             const percentage = Math.round((votes / totalVotes) * 100);
             return { option, votes, percentage: percentage };
         });
+
+        results.sort((a, b) => b.votes - a.votes);
         
         return Response.json({ results: results, totalVotes: totalVotes, totalUsers: totalUsers});
     }

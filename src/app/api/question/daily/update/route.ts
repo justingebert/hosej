@@ -2,56 +2,61 @@ import mongoose from "mongoose";
 import dbConnect from "@/db/dbConnect";
 import Question from "@/db/models/Question";
 import user from "@/db/models/user";
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 export const revalidate = 0
 //TODO questions left parameters
 
-async function selectDailyQuestion() {
+
+async function selectDailyQuestions(limit: number) {
     await dbConnect();
 
-    const oldQuestion = await Question.findOne({ category: "Daily", used: true, active: true});
-    if (oldQuestion) {
-        oldQuestion.active = false;
-        await oldQuestion.save();
-    }
-  
-    let question = await Question.findOne({ category: "Daily", used: false, active: false});
-    console.log(question)
-    if (!question) {
-        return undefined;
-    }
+    // Deactivate old questions
+    await Question.updateMany(
+        { category: "Daily", used: true, active: true },
+        { $set: { active: false } }
+    );
 
-    question.active = true;
-    question.used = true;
-    await question.save();
+    // Fetch new questions
+    const questions = await Question.find({ category: "Daily", used: false, active: false })
+                                    .limit(limit)
+                                    .exec();
     
-    console.log(question)
+    // Activate questions
+    questions.forEach(async (question) => {
+        question.active = true;
+        question.used = true;
+        await question.save();
+    });
 
-    return question;
-  }
+    return questions;
+}
 
-export async function GET(req: Request){
+export async function GET(req: Request) {
+    const count = 3;
+
     await dbConnect();
-    try{
-        const question = await selectDailyQuestion();
-        console.log(question)
-        if (question === undefined) {
-            return NextResponse.json({ message: "No questions available"});
+    try {
+        const questions = await selectDailyQuestions(count);
+        if (!questions.length) {
+            return NextResponse.json({ message: "No questions available" });
         }
-        if (question.questionType.startsWith("users-")) {
-            const users = await user.find({}); 
-            question.options = users.map(user => user.username);
-            question.save();
-        }
-        if (question.questionType.startsWith("rating")) {
-            question.options = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
-            question.save();
+        
+        //populate questions
+        for (const question of questions) {
+            if (question.questionType.startsWith("users-")) {
+                const users = await user.find({});
+                question.options = users.map(u => u.username);
+                await question.save();
+            }
+            if (question.questionType.startsWith("rating")) {
+                question.options = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
+                await question.save();
+            }
         }
 
-        return NextResponse.json({ question });
-    }
-    catch (error) {
+        return NextResponse.json({ questions });
+    } catch (error) {
         return NextResponse.json({ message: error });
     }
 }

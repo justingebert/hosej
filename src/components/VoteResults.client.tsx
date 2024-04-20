@@ -28,7 +28,7 @@ const VoteResults = ({ question }: any) => {
         {numOfVotes}
       </div>
       {results.map((result: any, index) => (
-        <Link key={index} href={`/dashboard/daily/resultsdetailed/${question._id}`}>
+        <Link key={index} href={`/dashboard/daily/resultsdetailed/${question._id}?returnTo=${question._id}`}>
           <div className="bg-slate-100 p-1 my-2 rounded-md relative">
             <div
               className="bg-slate-200 h-10   rounded"
