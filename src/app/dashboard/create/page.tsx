@@ -121,7 +121,7 @@ const CreateQuestionPage = () => {
                 onChange={(e) => handleOptionChange(e.target.value, index)}
               />
               <Button className=" ml-2" variant="destructive" onClick={() => handleRemoveOption(index)}>
-                <Image src="/trash.svg" alt="Delete" style={{ height: '20px' }} />
+                  <Image src="/trash.svg" alt="Delete" width={20} height={20} objectFit="contain"  /> 
               </Button>
             </div>
           ))}

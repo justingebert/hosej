@@ -63,6 +63,7 @@ const DailyQuestionPage = () => {
       );
       setUserHasVoted(hasVoted);
     }
+    router.refresh();
   };
 
   const defaultTab = searchParams.get('returnTo') || (questions.length > 0 ? questions[0]._id : undefined);
