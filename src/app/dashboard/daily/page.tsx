@@ -17,13 +17,17 @@ function QuestionsTabs({ questions, userHasVoted, setUserHasVoted }:any) {
 
   return (
     <Tabs defaultValue={defaultTab}>
+        <div className="flex justify-center mt-5">
       <TabsList>
+
         {questions.map((question:any, index:number) => (
           <TabsTrigger key={question._id} value={question._id}>
             {"Daily " + (index + 1)}
           </TabsTrigger>
         ))}
+
       </TabsList>
+        </div>
       {questions.map((question:any) => (
         <TabsContent key={question._id} value={question._id}>
           <h2 className="font-bold text-center mt-10">{question.question}</h2>
