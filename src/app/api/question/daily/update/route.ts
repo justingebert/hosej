@@ -33,7 +33,7 @@ async function selectDailyQuestions(limit: number) {
 }
 
 export async function GET(req: Request) {
-    const count = 3;
+    const count = 2;
 
     await dbConnect();
     try {
