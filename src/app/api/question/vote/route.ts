@@ -18,10 +18,13 @@ export async function POST(req: Request){
         return NextResponse.json({ message: "Question not found" });
     }
 
-    console.log(userThatVoted);
     const votingUser = await user.findOne({ username: userThatVoted });
-    console.log(votingUser);
 
+    const hasVoted = question.answers.some((answer:any)=> answer.username.equals(votingUser._id));
+
+    if (hasVoted) {
+        return NextResponse.json({ message: "You have already voted" });
+    }
     const updatedQuestion = await Question.findByIdAndUpdate(
         questionId,
         { $push: { answers: { username: votingUser._id, response: option } } },
