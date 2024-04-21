@@ -24,7 +24,7 @@ export default function RootLayout({
     <html>
         <head>
         <link rel="manifest" href="/manifest.json" id="manifest" />
-        <link rel="icon" href="/appicon.jpg" />
+        <link rel="icon" href="AppIcons/favicon.ico" />
         </head>
         <body>
           <AppWrapper>{children}</AppWrapper>

@@ -10,6 +10,18 @@ import { unstable_noStore } from "next/cache";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from 'next/navigation'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+
 
 function QuestionsTabs({ questions, userHasVoted, setUserHasVoted }:any) {
   const searchParams = useSearchParams();
@@ -52,6 +64,8 @@ const DailyQuestionPage = () => {
   const [questions, setQuestions] = useState<any>([]);
   const [userHasVoted, setUserHasVoted] = useState<any>({});
   const [activeTab, setActiveTab] = useState<string | undefined>();
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
   const router = useRouter();
 
   useEffect(() => {
@@ -87,7 +101,8 @@ const DailyQuestionPage = () => {
     const data = await res.json();
 
     if (data.message) {
-      alert(data.message);
+      setAlertMessage(data.message);
+      setIsAlertOpen(true);
     }
 
     if (data.questions) {
@@ -102,8 +117,6 @@ const DailyQuestionPage = () => {
       setUserHasVoted(votes);
     };
   };
-
-  //const defaultTab = searchParams.get('returnTo') || (questions.length > 0 ? questions[0]._id : undefined);
 
   return (
     <div className="m-6">
@@ -133,6 +146,18 @@ const DailyQuestionPage = () => {
           Get New Questions
         </Button>
       </div>
+      {isAlertOpen && (
+                <AlertDialog open={isAlertOpen} >
+                    <AlertDialogContent className="rounded-lg w-3/4">
+                        <AlertDialogDescription>
+                            {alertMessage}
+                        </AlertDialogDescription>
+                        <AlertDialogFooter>
+                            <AlertDialogAction onClick={() => setIsAlertOpen(false)}>OK</AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+            )}
     </div>
   );
 };

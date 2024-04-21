@@ -11,6 +11,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import Image from "next/image";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+
 
 const CreateQuestionPage = () => {
   const [question, setQuestion] = useState("");
@@ -18,6 +30,8 @@ const CreateQuestionPage = () => {
   const [options, setOptions] = useState([""]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<String>("");
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
 
   const handleAddOption = () => {
     setOptions([...options, ""]);
@@ -62,7 +76,8 @@ const CreateQuestionPage = () => {
       });
 
       if (!response.ok) throw new Error("Failed to create question");
-      alert("Question created successfully!");
+      setAlertMessage("Question created successfully!");
+      setIsAlertOpen(true);
       setQuestion("");
       setOptions([""]);
       setQuestionType("");
@@ -73,11 +88,15 @@ const CreateQuestionPage = () => {
     }
   };
 
+  const closeAlert = () => {
+    setIsAlertOpen(false);
+  };
+
   return (
     <div className="m-6">
       <div className="flex items-center">
         <Link className="text-lg leading-none mr-auto cursor-pointer" href="/">
-          ← Back
+          ←
         </Link>
       </div>
       <h1 className="text-center m-5">Create Question</h1>
@@ -121,7 +140,7 @@ const CreateQuestionPage = () => {
                 onChange={(e) => handleOptionChange(e.target.value, index)}
               />
               <Button className=" ml-2" variant="destructive" onClick={() => handleRemoveOption(index)}>
-                  <Image src="/trash.svg" alt="Delete" width={20} height={20} objectFit="contain"  /> 
+                  <Image src="AppIcons/trash.svg" alt="Delete" width={20} height={20} objectFit="contain"  /> 
               </Button>
             </div>
           ))}
@@ -134,6 +153,18 @@ const CreateQuestionPage = () => {
           {loading ? "Creating..." : "Create Question"}
         </Button>
       </div>
+      {isAlertOpen && (
+        <AlertDialog open={isAlertOpen} >
+          <AlertDialogContent className="rounded-lg w-3/4" >
+            <AlertDialogDescription>
+              {alertMessage}
+            </AlertDialogDescription>
+            <AlertDialogFooter>
+              <AlertDialogAction onClick={closeAlert}>OK</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </div>
   );
 };
