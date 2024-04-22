@@ -9,8 +9,8 @@
         "purpose": "any maskable"
       },
       {
-        "src": "/appicon.jpg",
-        "sizes": "360x360",
+        "src": "AppIcons/icon-512-maskable.png",
+        "sizes": "512x512",
         "type": "image/png"
       },
       {
