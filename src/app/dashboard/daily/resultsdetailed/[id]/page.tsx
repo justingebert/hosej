@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { ArrowLeft } from 'lucide-react';
 
 export default async function ResultsDetailPage({params }: {params: { id: string };}) {
   await dbConnect();
@@ -41,7 +42,7 @@ const sortedGroupedResponses = Object.fromEntries(entries);
           className="text-lg leading-none mr-auto cursor-pointer"
           href={`/dashboard/daily?returnTo=${params.id}`}
         >
-          ←
+          <ArrowLeft/>
         </Link>
       </div>
       <div className="grid grid-cols-1 mt-5">
@@ -56,7 +57,7 @@ const sortedGroupedResponses = Object.fromEntries(entries);
                   {usernames.map((username: any, idx: number) => (
                     <div
                       key={idx}
-                      className="m-2 p-2 bg-black rounded-lg text-center text-white font-bold"
+                      className="m-2 p-2 bg-primary rounded-lg text-center text-primary-foreground font-bold"
                     >
                       {username}
                     </div>

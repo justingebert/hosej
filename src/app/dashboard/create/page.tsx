@@ -22,6 +22,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { ArrowLeft } from 'lucide-react';
 
 
 const CreateQuestionPage = () => {
@@ -96,7 +97,7 @@ const CreateQuestionPage = () => {
     <div className="m-6">
       <div className="flex items-center">
         <Link className="text-lg leading-none mr-auto cursor-pointer" href="/">
-          ←
+          <ArrowLeft />
         </Link>
       </div>
       <h1 className="text-center m-5">Create Question</h1>
