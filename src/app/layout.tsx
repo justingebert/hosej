@@ -3,6 +3,9 @@ import { UserProvider } from "../context/UserContext";
 import "./globals.css";
 import { AppWrapper } from "../components/AppWrapper";
 import { Analytics } from "@vercel/analytics/react"
+import { ThemeProvider } from "@/components/theme-provider"
+
+
 
 export let metadata:any = {
   title: "HoseJ",
@@ -24,10 +27,12 @@ export default function RootLayout({
     <html>
         <head>
         <link rel="manifest" href="/manifest.json" id="manifest" />
-        <link rel="icon" href="/appicon.jpg" />
+        <link rel="icon" href="AppIcons/favicon.ico" />
         </head>
         <body>
-          <AppWrapper>{children}</AppWrapper>
+          <AppWrapper>
+            {children}
+            </AppWrapper>
           <Analytics />
         </body>
     </html>

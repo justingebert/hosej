@@ -29,9 +29,9 @@ const VoteResults = ({ question }: any) => {
       </div>
       {results.map((result: any, index) => (
         <Link key={index} href={`/dashboard/daily/resultsdetailed/${question._id}?returnTo=${question._id}`}>
-          <div className="bg-slate-100 p-1 my-2 rounded-md relative">
+          <div className="bg-secondary p-1 my-2 rounded-md relative">
             <div
-              className="bg-slate-200 h-10   rounded"
+              className="bg-secondarydark h-10 rounded"
               style={{ width: `${result.percentage}%` }}
             ></div>
             <div className="absolute inset-0 flex justify-between px-3 items-center">

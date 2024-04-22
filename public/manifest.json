@@ -3,8 +3,8 @@
     "short_name": "HoseJ",
     "icons": [
       {
-        "src": "/appicon.jpg",
-        "sizes": "360x360",
+        "src": "AppIcons/icon-192-maskable.png",
+        "sizes": "192x192",
         "type": "image/png",
         "purpose": "any maskable"
       },
@@ -14,8 +14,8 @@
         "type": "image/png"
       },
       {
-        "src": "/appicon.jpg",
-        "sizes": "360x360",
+        "src": "AppIcons/icon-192-maskable.png",
+        "sizes": "192x192",
         "type": "image/png"
       }
     ],
