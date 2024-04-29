@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import ChatComponent from "./Chat.client";
 
 const VoteResults = ({ question }: any) => {
   const [results, setResults] = useState([]);
@@ -41,6 +42,7 @@ const VoteResults = ({ question }: any) => {
           </div>
         </Link>
       ))}
+      <ChatComponent questionId={question._id} />
     </div>
   );
 };
