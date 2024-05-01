@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 type UserContextType = {
   username: string;
   createUser: (username: string) => Promise<void>;
-  setUser: (username: string) => void;
+  setUser: (username: string, userId: string) => void;
   getAllUsers: () => Promise<any[]>;
 };
 
@@ -36,14 +36,16 @@ export const UserProvider = ({ children }:any) => {
       const newUser = await response.json();
       console.log("User created:", newUser);
       setUsername(username);
+      setUserId(newUser._id);
       localStorage.setItem("user", username); 
+      //localStorage.setItem("userId", userId); 
       router.push("/dashboard/daily");
     } catch (error) {
       console.error("Failed to create user:", error);
     }
   };
 
-  const setUser = async (username: string) => {
+  const setUser = async (username: string, userId:string) => {
     setUsername(username);
     localStorage.setItem("user", username);
     router.push("/dashboard/daily")

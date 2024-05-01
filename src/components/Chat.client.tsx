@@ -19,7 +19,7 @@ function ChatComponent({ questionId }:any) {
     }, [questionId]);
 
     const handleSendMessage = async () => {
-        const messageData = { questionId, message: newMessage, user: username };
+        const messageData = { questionId, message: newMessage, username: username };
         const response = await fetch('/api/question/messages', {
             method: 'POST',
             headers: {
@@ -37,12 +37,14 @@ function ChatComponent({ questionId }:any) {
     };
 
     return (
-      <div>
+      <div className="p-4">
         <div>
           {messages.length > 0 ? (
-            messages.map((msg:any, index:number) => (
-              <div key={index}>
-                {msg.user?.username || "Unknown User"}: {msg.message}
+            messages.map((msg: any, index: number) => (
+              <div key={index} className={`flex mb-2 ${msg.username === username ? 'justify-end' : 'justify-start'}`}>
+                <div className={`inline-block p-2 rounded-lg max-w-xs ${msg.user.username === username ? 'bg-green-200' : 'bg-gray-200'}`}>
+                  <strong>{msg.user?.username}:</strong> {msg.message}
+                </div>
               </div>
             ))
           ) : (
@@ -50,10 +52,12 @@ function ChatComponent({ questionId }:any) {
           )}
         </div>
         <input
+          className="w-full p-2 border rounded"
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
+          placeholder="Type a message..."
         />
-        <button onClick={handleSendMessage}>Send</button>
+        <button className="mt-2 w-full bg-blue-500 text-white p-2 rounded" onClick={handleSendMessage}>Send</button>
       </div>
     );
 }
