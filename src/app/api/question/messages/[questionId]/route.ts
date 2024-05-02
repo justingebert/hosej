@@ -15,11 +15,9 @@ export async function GET(req: NextRequest,  { params }: { params: { questionId:
     try{
         const Users = await user.find();
         const messages = await ChatMessage.find({ question: questionId }).populate('user', 'username').sort({ createdAt: 1 });;
-        console.log("test");
         if(!messages){
             return NextResponse.json({ message: "No messages found" });
         }
-        await console.log(messages);
         return NextResponse.json(messages);
     }
     catch (error) {
