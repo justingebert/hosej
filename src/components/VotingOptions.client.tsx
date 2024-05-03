@@ -35,6 +35,8 @@ const VoteOptions = ({ question, onVote }: any) => {
               setSelectedOption(option);
             }}
             variant={selectedOption === option ? "default" : "secondary"}
+            className="p-2"
+            style={{ whiteSpace: "normal", height: "100%" }}
           >
             {option}
           </Button>

@@ -119,7 +119,7 @@ const DailyQuestionPage = () => {
   };
 
   return (
-    <div className="m-6">
+    <div className="m-6 mb-1">
       <div className="flex items-center">
         <Link className="text-lg leading-none mr-auto cursor-pointer" href="/">
           <ArrowLeft/>
@@ -141,7 +141,7 @@ const DailyQuestionPage = () => {
         <Button
           onClick={getNewQuestions}
           variant={"outline"}
-          className="absolute bottom-7"
+          //className="absolute bottom-7"
         >
           Get New Questions
         </Button>

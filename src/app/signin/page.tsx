@@ -15,6 +15,7 @@ const SignInPage = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [userName, setUserName] = useState("");
   const [selectedUserName, setSelectedUserName] = useState("");
+  const [selectedUserId, setSelectedUserId] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -29,7 +30,7 @@ const SignInPage = () => {
     if (userName) {
       createUser(userName);
     } else if (selectedUserName) {
-      setUser(selectedUserName);
+      setUser(selectedUserName, selectedUserId);
     }
   };
 
@@ -53,6 +54,7 @@ const SignInPage = () => {
             key={user._id}
             onClick={() => {
               setSelectedUserName(user.username);
+              setSelectedUserId(user._id);
               setUserName("");
             }}
             //className={`rounded m-2 p-2 ${selectedUserName === user.username ? 'bg-slate-300' : 'bg-slate-600'}`}
