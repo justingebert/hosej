@@ -16,11 +16,10 @@ export async function POST(req: NextRequest){
     const { questionId, username, message} = data;
     try{
         const sendingUser = await user.findOne({username: username});
-        const newMessage = new ChatMessage({ question: questionId, user: sendingUser, message });
+        const newMessage = new ChatMessage({ question: questionId, user: sendingUser._id, message: message });
         await newMessage.save();
-        const sendMessage = await newMessage.populate('user', 'username').execPopulate();
-
-        return NextResponse.json({ message: sendMessage});
+        const sendMessage = await newMessage.populate('user', 'username');
+        return NextResponse.json({ sendMessage});
     }
     catch (error) {
         console.log(error);

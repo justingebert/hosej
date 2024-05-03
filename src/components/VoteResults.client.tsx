@@ -15,7 +15,6 @@ const VoteResults = ({ question }: any) => {
         { cache: "no-store" }
       );
       const data = await res.json();
-      console.log(data);
       setResults(data.results);
       setNumOfVotes(`${data.totalVotes} of ${data.totalUsers} voted`);
     };
@@ -28,6 +27,7 @@ const VoteResults = ({ question }: any) => {
       <div className="flex justify-center">
         {numOfVotes}
       </div>
+      <div className="mb-10">
       {results.map((result: any, index) => (
         <Link key={index} href={`/dashboard/daily/resultsdetailed/${question._id}?returnTo=${question._id}`}>
           <div className="bg-secondary p-1 my-2 rounded-md relative">
@@ -42,7 +42,8 @@ const VoteResults = ({ question }: any) => {
           </div>
         </Link>
       ))}
-      <ChatComponent questionId={question._id} />
+      </div>
+      <ChatComponent questionId={question._id}/>
     </div>
   );
 };
