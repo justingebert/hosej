@@ -64,8 +64,6 @@ const DailyQuestionPage = () => {
   const [questions, setQuestions] = useState<any>([]);
   const [userHasVoted, setUserHasVoted] = useState<any>({});
   const [activeTab, setActiveTab] = useState<string | undefined>();
-  const [isAlertOpen, setIsAlertOpen] = useState(false);
-  const [alertMessage, setAlertMessage] = useState('');
   const router = useRouter();
 
   useEffect(() => {
@@ -94,30 +92,6 @@ const DailyQuestionPage = () => {
     }
   }, [username]);
 
-  const getNewQuestions = async () => {
-    const res = await fetch(`/api/question/daily/update`, {
-      cache: "no-store",
-    });
-    const data = await res.json();
-
-    if (data.message) {
-      setAlertMessage(data.message);
-      setIsAlertOpen(true);
-    }
-
-    if (data.questions) {
-      setQuestions(data.questions);
-      console.log(data.questions);
-      const votes = data.questions.reduce((acc: any, question: any) => {
-        acc[question._id] = question.answers.some(
-          (answer: any) => answer.username.username === username
-        );
-        return acc;
-      }, {});
-      setUserHasVoted(votes);
-    };
-  };
-
   return (
     <div className="m-6 mb-1">
       <div className="flex items-center">
@@ -137,27 +111,6 @@ const DailyQuestionPage = () => {
       ) : (
         <div className="text-center">Loading questions...</div>
       )}
-      <div className="flex justify-center m-2 ">
-        <Button
-          onClick={getNewQuestions}
-          variant={"outline"}
-          //className="absolute bottom-7"
-        >
-          Get New Questions
-        </Button>
-      </div>
-      {isAlertOpen && (
-                <AlertDialog open={isAlertOpen} >
-                    <AlertDialogContent className="rounded-lg w-3/4">
-                        <AlertDialogDescription>
-                            {alertMessage}
-                        </AlertDialogDescription>
-                        <AlertDialogFooter>
-                            <AlertDialogAction onClick={() => setIsAlertOpen(false)}>OK</AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
-            )}
     </div>
   );
 };
