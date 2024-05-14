@@ -4,7 +4,7 @@ import "./globals.css";
 import { AppWrapper } from "../components/AppWrapper";
 import { Analytics } from "@vercel/analytics/react"
 import { ThemeProvider } from "@/components/theme-provider"
-
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 
 export let metadata:any = {
@@ -34,6 +34,7 @@ export default function RootLayout({
             {children}
             </AppWrapper>
           <Analytics />
+          <SpeedInsights />
         </body>
     </html>
     
