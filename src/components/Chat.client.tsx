@@ -54,7 +54,7 @@ function ChatComponent({ questionId }:any) {
               <div></div>
           )}
       </div>
-      <div className="sticky bottom-0 left-0 bg-background w-full p-3">
+      <div className="sticky bottom-0 left-0 bg-background w-full p-3 pb-9">
                 <div className=" flex gap-2">
                     <Input
                         className="flex-grow p-2"
