@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import { UserProvider } from "../context/UserContext";
 import "./globals.css";
 import { AppWrapper } from "../components/AppWrapper";
-import { Analytics } from "@vercel/analytics/react"
+/* import { Analytics } from "@vercel/analytics/react" */
 import { ThemeProvider } from "@/components/theme-provider"
-import { SpeedInsights } from "@vercel/speed-insights/next"
-
+/* import { SpeedInsights } from "@vercel/speed-insights/next"
+ */
 
 export let metadata:any = {
   title: "HoseJ",
@@ -33,8 +33,8 @@ export default function RootLayout({
           <AppWrapper>
             {children}
             </AppWrapper>
-          <Analytics />
-          <SpeedInsights />
+          {/* <Analytics /> */}
+         {/*  <SpeedInsights /> */}
         </body>
     </html>
     
