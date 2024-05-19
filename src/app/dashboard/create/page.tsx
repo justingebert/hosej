@@ -101,9 +101,6 @@ const CreateQuestionPage = () => {
         </Link>
       </div>
       <h1 className="text-center m-5">Create Question</h1>
-      <p className="text-center mt-20">
-        Frage muss mit einem Namen von uns beantwortbar sein! (Wer trollt der fliegt!)
-      </p>
       {error && <p style={{ color: "red" }}>{error}</p>}
       <div className="mt-5">
       <Select value={questionType} onValueChange={setQuestionType}>
@@ -115,7 +112,7 @@ const CreateQuestionPage = () => {
           {/* <SelectItem value="users-select-multiple">Select Multiple Users</SelectItem> */}
           <SelectItem value="custom-select-one">Select One Custom Option</SelectItem>
           {/* <SelectItem value="custom-select-multiple">Select Multiple Custom Options</SelectItem> */}
-          {/* <SelectItem value="text">Text</SelectItem> */}
+          <SelectItem value="text">Text</SelectItem>
           <SelectItem value="rating">Rating (1-10)</SelectItem>
         </SelectContent>
       </Select>

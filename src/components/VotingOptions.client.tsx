@@ -1,15 +1,17 @@
 "use client";
 
 import { useUser } from "@/context/UserContext";
-import { set } from "mongoose";
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea"
 
-const VoteOptions = ({ question, onVote }: any) => {
+const VoteOptions = ({ question, onVote }:any) => {
   const { username } = useUser();
-  const [selectedOption, setSelectedOption] = useState<any>(null);
+  const [selectedOption, setSelectedOption] = useState(null);
+  const [textResponse, setTextResponse] = useState("");
 
   const submitVote = async () => {
+    const response = question.questionType === "text" ? textResponse : selectedOption;
 
     await fetch(`/api/question/vote`, {
       method: "POST",
@@ -18,7 +20,7 @@ const VoteOptions = ({ question, onVote }: any) => {
       },
       body: JSON.stringify({
         questionId: question._id,
-        option: selectedOption,
+        response: response,
         userThatVoted: username,
       }),
     });
@@ -27,25 +29,35 @@ const VoteOptions = ({ question, onVote }: any) => {
 
   return (
     <>
-      <div className="grid grid-cols-2 gap-4 ">
-        {question.options.map((option:any, index:any) => (
-          <Button
-            key={index}
-            onClick={() => {
-              setSelectedOption(option);
-            }}
-            variant={selectedOption === option ? "default" : "secondary"}
-            className="p-2"
-            style={{ whiteSpace: "normal", height: "100%" }}
-          >
-            {option}
-          </Button>
-        ))}
-      </div>
-      <div className="flex justify-center ">
+      {question.questionType === "text" ? (
+        <div className="flex flex-col items-center">
+          <Textarea
+            value={textResponse}
+            onChange={(e) => setTextResponse(e.target.value)}
+            placeholder="Enter your response"
+          />
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-4">
+          {question.options.map((option:any, index:number) => (
+            <Button
+              key={index}
+              onClick={() => {
+                setSelectedOption(option);
+              }}
+              variant={selectedOption === option ? "default" : "secondary"}
+              className="p-2"
+              style={{ whiteSpace: "normal", height: "100%" }}
+            >
+              {option}
+            </Button>
+          ))}
+        </div>
+      )}
+      <div className="flex justify-center">
         <Button
           onClick={() => {
-            if (selectedOption) {
+            if (question.questionType === "text" ? textResponse : selectedOption) {
               submitVote();
             }
           }}

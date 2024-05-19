@@ -9,7 +9,7 @@ export const revalidate = 0
 
 export async function POST(req: Request){
     const data = await req.json();
-    const { questionId, option, userThatVoted } = data;
+    const { questionId, response, userThatVoted } = data;
     
     await dbConnect();
     const question = await Question.findById(questionId);
@@ -27,7 +27,7 @@ export async function POST(req: Request){
     }
     const updatedQuestion = await Question.findByIdAndUpdate(
         questionId,
-        { $push: { answers: { username: votingUser._id, response: option } } },
+        { $push: { answers: { username: votingUser._id, response: response } } },
         { new: true, runValidators: true }
     );
     return NextResponse.json({ message: "Vote submitted" });
