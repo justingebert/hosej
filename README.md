@@ -25,5 +25,3 @@
 
 
 # TODO:
-- [ ] multiple question types
-- [ ] multiple questions per day with shadcn/ui tabs
