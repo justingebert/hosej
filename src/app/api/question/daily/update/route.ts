@@ -22,12 +22,16 @@ async function selectDailyQuestions(limit: number) {
                                     .limit(limit)
                                     .exec();
     
+    console.log('found',questions);
+
     // Activate questions
     questions.forEach(async (question) => {
         question.active = true;
         question.used = true;
         await question.save();
     });
+
+    console.log("activated",questions);
 
     return questions;
 }
@@ -38,7 +42,10 @@ export async function GET(req: Request) {
     await dbConnect();
     try {
         const questions = await selectDailyQuestions(count);
+        console.log(questions);
+
         if (!questions.length) {
+            console.log("No questions available");
             return NextResponse.json({ message: "No questions available" });
         }
         
