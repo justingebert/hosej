@@ -10,24 +10,23 @@ export const revalidate = 0
 async function selectDailyQuestions(limit: number) {
     await dbConnect();
 
-    // Deactivate old questions
     await Question.updateMany(
         { category: "Daily", used: true, active: true },
         { $set: { active: false } }
     );
-
+    
     // Fetch new questions
     const questions = await Question.find({ category: "Daily", used: false, active: false })
                                     .limit(limit)
                                     .exec();
-    
+
     // Activate questions
-    questions.forEach(async (question) => {
+    for (const question of questions) {
         question.active = true;
         question.used = true;
         await question.save();
-    });
-
+    }
+   
     return questions;
 }
 
@@ -45,7 +44,7 @@ export async function GET(req: Request) {
         for (const question of questions) {
             if (question.questionType.startsWith("users-")) {
                 const users = await user.find({});
-                question.options = users.map(u => u.username);
+                question.options = await users.map(u => u.username);
                 await question.save();
             }
             if (question.questionType.startsWith("rating")) {
@@ -55,7 +54,8 @@ export async function GET(req: Request) {
         }
 
         return NextResponse.json({ questions });
-    } catch (error) {
-        return NextResponse.json({ message: error });
+    } catch (error:any) {
+        console.error('Error:', error); 
+        return NextResponse.json({ message: error.message || 'An error occurred', error })
     }
 }
