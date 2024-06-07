@@ -51,13 +51,21 @@ export default function Home() {
           </DropdownMenu>
         </div>
       </div>
-      <div className="flex h-screen">
-        <Button
-          className="m-auto p-8 font-bold text-lg"
-          onClick={() => router.push("/dashboard/daily")}
-        >
-          Daily
-        </Button>
+      <div className="flex h-screen items-center justify-center">
+        <div className="flex flex-col items-center gap-20">
+          <Button
+            className="p-8 font-bold text-lg"
+            onClick={() => router.push("/dashboard/rally")}
+          >
+            Rally
+          </Button>
+          <Button
+            className="p-8 font-bold text-lg"
+            onClick={() => router.push("/dashboard/daily")}
+          >
+            Daily
+          </Button>
+        </div>
       </div>
       <div className=" flex justify-center">
         <Button

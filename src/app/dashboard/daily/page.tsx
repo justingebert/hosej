@@ -73,7 +73,7 @@ const DailyQuestionPage = () => {
       const res = await fetch(`/api/question/daily`, { cache: "no-store" });
       const data = await res.json();
 
-      console.log(data);
+      console.log(username);
       if (data.questions) {
         setQuestions(data.questions);
         const votes = data.questions.reduce((acc: any, question: any) => {
