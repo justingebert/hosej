@@ -14,6 +14,12 @@ export async function GET(req: Request){
             return NextResponse.json({ message: "No active rally" , rally: null});
         }
 
+        const currentTime = new Date();
+        if (currentTime >= new Date(rally.endTime) && !rally.votingOpen) {
+            rally.votingOpen = true;
+            await rally.save();
+        }
+
         return NextResponse.json({rally});
     }
     catch (error) {

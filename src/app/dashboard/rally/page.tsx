@@ -10,11 +10,11 @@ import { useUser } from "@/context/UserContext";
 export default function RallyPage() {
     const { username } = useUser();
     const [rally, setRally] = useState<IRally>();
+    const [submissions, setSubmissions] = useState([])
     const [file, setFile] = useState<File | null>(null)
     const [uploading, setUploading] = useState(false)
     const [userUploaded, setUserUpaloaded] = useState(false)
     const [uploadCount, setUploadCount] = useState(0)
-   
 
     useEffect(() => {
         const fetchRally = async () => {
@@ -22,12 +22,12 @@ export default function RallyPage() {
             const data = await response.json();
             if(data.rally){
               setRally(data.rally);
-              console.log(data.rally.submissions[0].username);
-              console.log(username);
               const submission = await data.rally.submissions.some((submission:any) => submission.username == username);
               await setUploadCount(data.rally.submissions.length);
               await setUserUpaloaded(submission);
-              console.log(submission);
+            }
+            if(data.rally.votingOpen){
+                setSubmissions(data.rally.submissions)
             }
         }
         fetchRally();
@@ -78,7 +78,7 @@ export default function RallyPage() {
 
     const createRallySubmission = async (rallyId: string, userId: string, imageUrl: string) => {
         const response = await fetch(
-            '/api/rally/createsubmission',
+            '/api/rally/submission',
             {
                 method: 'POST',
                 headers: {
@@ -188,6 +188,23 @@ export default function RallyPage() {
                         <p className="text-center text-red-500">No ongoing rally</p>
                     )}
                 </div>
+                {rally?.votingOpen && (
+                    <div>
+                        <h2 className="text-xl font-bold text-center">Voting</h2>
+                        <div>
+                            {submissions.length > 0 ? (
+                                submissions.map((submission, index) => (
+                                    <div key={index}>
+                                        <img src={submission.imageUrl} alt="submission" />
+                                        <p>{submission.username}</p>
+                                    </div>
+                                ))
+                            ) : (
+                                <p>No submissions to vote on yet.</p>
+                            )}
+                        </div>
+                    </div>
+                )}
       </div>
         </>
     );

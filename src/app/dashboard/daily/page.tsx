@@ -10,17 +10,7 @@ import { unstable_noStore } from "next/cache";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from 'next/navigation'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+
 import { ArrowLeft } from 'lucide-react';
 
 function QuestionsTabs({ questions, userHasVoted, setUserHasVoted }:any) {
