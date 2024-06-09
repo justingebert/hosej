@@ -23,9 +23,11 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { ArrowLeft } from 'lucide-react';
+import { useUser } from "@/context/UserContext";
 
 
 const CreateQuestionPage = () => {
+  const {username} = useUser()
   const [question, setQuestion] = useState("");
   const [questionType, setQuestionType] = useState("");
   const [options, setOptions] = useState([""]);
@@ -65,9 +67,12 @@ const CreateQuestionPage = () => {
       questionType: questionType,
       question: question,
       options: questionType.startsWith("custom") ? options : undefined,
+      submittedBy: username
     };
 
+    
     try {
+      console.log(questionData)
       const response = await fetch("/api/question/", {
         method: "POST",
         headers: {
