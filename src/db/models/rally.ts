@@ -17,7 +17,7 @@ export interface IRally extends mongoose.Document {
   submissions: IPictureSubmission[];
   startTime: Date;
   endTime: Date;
-  resultsShown: boolean;
+  resultsShowning: boolean;
   votingOpen: boolean;
   used: boolean;
   active: boolean;

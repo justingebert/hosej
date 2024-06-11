@@ -6,6 +6,9 @@ import { useEffect, useState } from "react";
 import {IRally} from "@/db/models/rally";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/context/UserContext";
+import RallyVoteCarousel from "@/components/VotingOptionsRally.clent";
+import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 export default function RallyPage() {
     const { username } = useUser();
@@ -15,6 +18,7 @@ export default function RallyPage() {
     const [uploading, setUploading] = useState(false)
     const [userUploaded, setUserUpaloaded] = useState(false)
     const [uploadCount, setUploadCount] = useState(0)
+    const router = useRouter();
 
     useEffect(() => {
         const fetchRally = async () => {
@@ -78,7 +82,7 @@ export default function RallyPage() {
 
     const createRallySubmission = async (rallyId: string, userId: string, imageUrl: string) => {
         const response = await fetch(
-            '/api/rally/submission',
+            '/api/rally/submissions',
             {
                 method: 'POST',
                 headers: {
@@ -122,9 +126,24 @@ export default function RallyPage() {
             alert(error.message);
         } finally {
             setUploading(false);
+            router.refresh()
         }
     };
     
+    const handleVote = async (submissionId: string) => {	
+        /* await fetch(`/api/rally/vote`, {	
+            method: "POST",	
+            headers: {	
+                "Content-Type": "application/json",	
+            },	
+            body: JSON.stringify({	
+                rallyId: rally?._id,
+                submissionId: submissionId,
+                userThatVoted: username,
+            }),
+        }); */
+        cn('Voted for submission:', submissionId);
+    }
 
     function calcTimeLeft(endTime: Date):any {
         const difference = +new Date(endTime) - +new Date();
@@ -142,46 +161,50 @@ export default function RallyPage() {
 
     return (
         <>
-        <div className="m-6 mb-1">
-        <div className="flex items-center">
-            <Link className="text-lg leading-none mr-auto cursor-pointer" href="/">
-            <ArrowLeft/>
-            </Link>
-        </div>
-        <h1 className="text-xl font-bold text-center">Rally</h1>
-        <div>
+          <div className="m-6 mb-1">
+                <div className="flex items-center">
+                    <Link className="text-lg leading-none mr-auto cursor-pointer" href="/">
+                        <ArrowLeft />
+                    </Link>
+                </div>
+                <h1 className="text-xl font-bold text-center">Rally</h1>
+                <div>
                     {rally ? (
                         <div>
-                            <div>
+                            <div className="mb-20 mt-10 text-center">
                                 {rally.task}
                             </div>
-                            <div>
-                                time left: {calcTimeLeft(rally.endTime).days} days {calcTimeLeft(rally.endTime).hours} hours
-                            </div>
-                            <div>
-                                {uploadCount} images uploaded
-                            </div>
-                            {userUploaded ? (
-                                <div className="text-center text-green-500">
-                                    You have already submitted an image.
-                                </div>
-                            ) : (
-                                <form onSubmit={handleSubmit}>
-                                    <input
-                                        id="file"
-                                        type="file"
-                                        onChange={(e) => {
-                                            const files = e.target.files;
-                                            if (files) {
-                                                setFile(files[0]);
-                                            }
-                                        }}
-                                        accept="image/png, image/jpeg"
-                                    />
-                                    <Button type="submit" disabled={uploading}>
-                                        Upload
-                                    </Button>
-                                </form>
+                            {!rally.votingOpen && (
+                                <>
+                                    <div>
+                                        time left: {calcTimeLeft(rally.endTime).days} days {calcTimeLeft(rally.endTime).hours} hours
+                                    </div>
+                                    <div>
+                                        {uploadCount} images uploaded
+                                    </div>
+                                    {userUploaded ? (
+                                        <div className="text-center text-green-500">
+                                            You have already submitted an image.
+                                        </div>
+                                    ) : (
+                                        <form onSubmit={handleSubmit}>
+                                            <input
+                                                id="file"
+                                                type="file"
+                                                onChange={(e) => {
+                                                    const files = e.target.files;
+                                                    if (files) {
+                                                        setFile(files[0]);
+                                                    }
+                                                }}
+                                                accept="image/png, image/jpeg"
+                                            />
+                                            <Button type="submit" disabled={uploading}>
+                                                Upload
+                                            </Button>
+                                        </form>
+                                    )}
+                                </>
                             )}
                         </div>
                     ) : (
@@ -189,23 +212,11 @@ export default function RallyPage() {
                     )}
                 </div>
                 {rally?.votingOpen && (
-                    <div>
-                        <h2 className="text-xl font-bold text-center">Voting</h2>
-                        <div>
-                            {submissions.length > 0 ? (
-                                submissions.map((submission, index) => (
-                                    <div key={index}>
-                                        <img src={submission.imageUrl} alt="submission" />
-                                        <p>{submission.username}</p>
-                                    </div>
-                                ))
-                            ) : (
-                                <p>No submissions to vote on yet.</p>
-                            )}
-                        </div>
+                    <div className="m-10 mt-20">
+                    <RallyVoteCarousel rallyId={rally._id} onVote={handleVote} />
                     </div>
                 )}
-      </div>
+            </div>
         </>
     );
 }
