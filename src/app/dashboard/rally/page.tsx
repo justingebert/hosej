@@ -7,8 +7,8 @@ import {IRally} from "@/db/models/rally";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/context/UserContext";
 import RallyVoteCarousel from "@/components/VotingOptionsRally.clent";
-import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import RallyResults from "@/components/VoteResultsRally.client";
 
 export default function RallyPage() {
     const { username } = useUser();
@@ -29,9 +29,7 @@ export default function RallyPage() {
               const submission = await data.rally.submissions.some((submission:any) => submission.username == username);
               await setUploadCount(data.rally.submissions.length);
               await setUserUpaloaded(submission);
-            }
-            if(data.rally.votingOpen){
-                setSubmissions(data.rally.submissions)
+              await setSubmissions(data.rally.submissions)
             }
         }
         fetchRally();
@@ -130,19 +128,8 @@ export default function RallyPage() {
         }
     };
     
-    const handleVote = async (submissionId: string) => {	
-        /* await fetch(`/api/rally/vote`, {	
-            method: "POST",	
-            headers: {	
-                "Content-Type": "application/json",	
-            },	
-            body: JSON.stringify({	
-                rallyId: rally?._id,
-                submissionId: submissionId,
-                userThatVoted: username,
-            }),
-        }); */
-        cn('Voted for submission:', submissionId);
+    const handleVote = async () => {	
+        router.refresh();
     }
 
     function calcTimeLeft(endTime: Date):any {
@@ -214,6 +201,11 @@ export default function RallyPage() {
                 {rally?.votingOpen && (
                     <div className="m-10 mt-20">
                     <RallyVoteCarousel rallyId={rally._id} onVote={handleVote} />
+                    </div>
+                )}
+                {rally?.resultsShowing && (
+                    <div className="m-10 mt-20">
+                        <RallyResults submissions={submissions} />
                     </div>
                 )}
             </div>

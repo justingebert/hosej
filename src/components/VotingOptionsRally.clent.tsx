@@ -20,6 +20,8 @@ const RallyVoteCarousel = ({ rallyId, onVote }: any) => {
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [api, setApi] = useState<CarouselApi | null>(null);
   const [current, setCurrent] = useState(0);
+  const [hasVoted, setHasVoted] = useState(false);
+
 
   useEffect(() => {
     const fetchSubmissions = async () => {
@@ -29,10 +31,16 @@ const RallyVoteCarousel = ({ rallyId, onVote }: any) => {
       if (data.submissions.length > 0) {
         setSelectedSubmission(data.submissions[0]._id);
       }
+
+        // Check if the user has already voted
+      const userHasVoted = data.submissions.some((submission:any) =>
+        submission.votes.some((vote:any) => vote.username === username)
+      );
+      setHasVoted(userHasVoted);
     };
 
     fetchSubmissions();
-  }, [rallyId]);
+  }, [rallyId, username]);
 
   useEffect(() => {
     if (!api || submissions.length === 0) return;
@@ -59,7 +67,7 @@ const RallyVoteCarousel = ({ rallyId, onVote }: any) => {
       return;
     }
 
-    await fetch(`/api/rally/vote`, {
+    await fetch(`/api/rally/submissions/vote`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

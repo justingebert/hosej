@@ -3,26 +3,32 @@ import dbConnect from "@/db/dbConnect";
 import Rally from "@/db/models/rally";
 import { NextResponse } from 'next/server'
 
-//TODO questions left parameters
-export const revalidate = 0
-
-export async function GET(req: Request){
-    await dbConnect();
+export async function POST(req: Request){
     try{
-        const rally = await Rally.findOne({ active: true });
+        await dbConnect();
+        const { rallyId, submissionId, userThatVoted } = await req.json()
+
+        const rally = await Rally.findById(rallyId);
         if (!rally) {
-            return NextResponse.json({ message: "No active rally" , rally: null});
+            return NextResponse.json({ message: 'Rally not found' });
         }
-
-        const currentTime = new Date();
-        if (currentTime >= new Date(rally.endTime) && !rally.votingOpen) {
-            rally.votingOpen = true;
-            await rally.save();
+        const submission = rally.submissions.id(submissionId);
+        if (!submission) {
+            return NextResponse.json({ message: 'Submission not found' });
         }
+        const user = submission.votes.find((vote) => vote.username === userThatVoted);
+        if (user) {
+            return NextResponse.json({ message: 'User already voted' });
+        }
+        submission.votes.push({ username: userThatVoted });
+        
+        await rally.save();
 
-        return NextResponse.json({rally});
-    }
-    catch (error) {
+        console.log(rally)
+       
+        return NextResponse.json("Vote added successfully")
+    }catch (error) {
+        console.error(error)
         return NextResponse.json({ message: error });
     }
 }
