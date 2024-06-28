@@ -1,12 +1,19 @@
 'use client';
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 
-const RallyResults = ({ submissions }) => {
-  if (!submissions || submissions.length === 0) {
-    return <p>No submissions to show.</p>;
-  }
+const RallyResults = ({ rallyId }) => {
+  const [submissions, setSubmissions] = useState<any[]>([]);
+  
+  useEffect(() => {
+    const fetchSubmissions = async () => {
+      const response = await fetch(`/api/rally/submissions/${rallyId}`);
+      const data = await response.json();
+      setSubmissions(data.submissions);
+    };
+    fetchSubmissions();
+  }, [rallyId]);
 
   return (
     <div>

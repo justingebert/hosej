@@ -205,7 +205,7 @@ export default function RallyPage() {
                 )}
                 {rally?.resultsShowing && (
                     <div className="m-10 mt-20">
-                        <RallyResults submissions={submissions} />
+                        <RallyResults rallyId={rally._id} />
                     </div>
                 )}
             </div>
