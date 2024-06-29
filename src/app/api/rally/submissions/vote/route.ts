@@ -23,8 +23,6 @@ export async function POST(req: Request){
         submission.votes.push({ username: userThatVoted });
         
         await rally.save();
-
-        console.log(rally)
        
         return NextResponse.json("Vote added successfully")
     }catch (error) {

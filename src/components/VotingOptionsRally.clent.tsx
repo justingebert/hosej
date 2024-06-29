@@ -13,6 +13,7 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 const RallyVoteCarousel = ({ rallyId, onVote }: any) => {
   const { username } = useUser();
@@ -21,6 +22,7 @@ const RallyVoteCarousel = ({ rallyId, onVote }: any) => {
   const [api, setApi] = useState<CarouselApi | null>(null);
   const [current, setCurrent] = useState(0);
   const [hasVoted, setHasVoted] = useState(false);
+  const router = useRouter();
 
 
   useEffect(() => {
@@ -79,6 +81,8 @@ const RallyVoteCarousel = ({ rallyId, onVote }: any) => {
       }),
     });
 
+    setHasVoted(true);
+
     onVote(); // Callback to update state in the parent component
   };
 
@@ -108,11 +112,17 @@ const RallyVoteCarousel = ({ rallyId, onVote }: any) => {
         <CarouselPrevious />
         <CarouselNext />
       </Carousel>
-      <div className="flex justify-center">
-        <Button onClick={submitVote} className="m-5">
-          Vote for this
-        </Button>
-      </div>
+      {hasVoted ? (
+        <div className="flex justify-center">
+          <p>You have already voted!</p>
+        </div>
+      ) : (
+        <div className="flex justify-center">
+          <Button onClick={submitVote} className="m-5">
+            Vote for this
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

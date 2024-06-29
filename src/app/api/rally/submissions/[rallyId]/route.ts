@@ -21,18 +21,14 @@ export async function GET(req: Request, { params }: { params: { rallyId: string 
             return NextResponse.json({ message: "No active rally" , rally: null});
         }
         
-        console.log("Fetching submissions");
         const submissions = await Promise.all(
             rally.submissions.map(async (submission) => {
-                console.log(`Processing submission: ${submission._id}`);
                 
                 const urlObject = new URL(submission.imageUrl);
                 let s3Key = urlObject.pathname;
-                console.log(`S3 key: ${s3Key}`);
                 if (s3Key.startsWith('/')) {
                     s3Key = s3Key.substring(2); // Remove leading '//'
                 }
-                console.log(`S3 key: ${s3Key}`);
 
                 const command = new GetObjectCommand({
                     Bucket: process.env.AWS_BUCKET_NAME,
@@ -55,11 +51,7 @@ export async function GET(req: Request, { params }: { params: { rallyId: string 
             })
         );
 
-        console.log("Submissions fetched successfully:", submissions);
         return NextResponse.json({ submissions });
-
-        console.log(submissions);
-        return NextResponse.json({submissions});
     }
     catch (error) {
         return NextResponse.json({ message: error });
