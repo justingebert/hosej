@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-interface IPictureSubmission {
+export interface IPictureSubmission {
   userId: mongoose.Schema.Types.ObjectId;
   username: string;
   imageUrl: string; 

@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import dbConnect from "@/db/dbConnect";
-import Rally from "@/db/models/rally";
+import Rally, { IPictureSubmission } from "@/db/models/rally";
 import { NextResponse } from 'next/server'
 
 export async function POST(req: Request){
@@ -16,7 +16,7 @@ export async function POST(req: Request){
         if (!submission) {
             return NextResponse.json({ message: 'Submission not found' });
         }
-        const user = submission.votes.find((vote) => vote.username === userThatVoted);
+        const user = submission.votes.find((vote:{username:string}) => vote.username === userThatVoted);
         if (user) {
             return NextResponse.json({ message: 'User already voted' });
         }
