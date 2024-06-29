@@ -119,7 +119,7 @@ export default function RallyPage() {
             const submissionResponse = await createRallySubmission(rally?._id as string, username, imageUrl);
             console.log('Submission successful:', submissionResponse);
             alert('Upload and submission successful!');
-        } catch (error) {
+        } catch (error:any) {
             console.error(error);
             alert(error.message);
         } finally {

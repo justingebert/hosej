@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 
-const RallyResults = ({ rallyId }) => {
+const RallyResults = ({ rallyId }:any) => {
   const [submissions, setSubmissions] = useState<any[]>([]);
   
   useEffect(() => {
