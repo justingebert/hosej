@@ -73,7 +73,7 @@ export default function Home() {
           className="absolute bottom-20"
           onClick={() => router.push("/dashboard/create")}
         >
-          Create Question
+          Create
         </Button>
       </div>
     </div>
