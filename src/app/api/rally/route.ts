@@ -21,7 +21,7 @@ export async function GET(req: Request){
         }
 
         const totalUsers = await user.countDocuments({});
-        const totalVotes = rally.submissions.reduce((acc, submission) => acc + submission.votes.length, 0);
+        const totalVotes = rally.submissions.reduce((acc:any, submission:any) => acc + submission.votes.length, 0);
         const allUsersVoted = totalVotes >= totalUsers;
 
         if (allUsersVoted) {
