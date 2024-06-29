@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect, Suspense} from "react";
 import { useUser } from "../../../context/UserContext";
-import VoteOptions from "../../../components/VotingOptions.client";
-import VoteResults from "../../../components/VoteResults.client";
+import VoteOptions from "../../../components/Question/VotingOptions.client";
+import VoteResults from "../../../components/Question/VoteResults.client";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { unstable_noStore } from "next/cache";

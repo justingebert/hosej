@@ -36,12 +36,13 @@ const pictureSubmissionSchema = new mongoose.Schema({
 const rallySchema = new mongoose.Schema({
   task: { type: String, required: true },
   submissions: [pictureSubmissionSchema],
-  startTime: { type: Date, default: Date.now, required: true },
-  endTime: { type: Date, required: true },
+  startTime: { type: Date, required: false },
+  endTime: { type: Date, required: false },
   resultsShowing: { type: Boolean, default: false },
   votingOpen: { type: Boolean, default: false },
   used: { type: Boolean, default: false },
   active: { type: Boolean, default: false },
+  lengthInDays: { type: Number, required: true },
 });
 
 const Rally = mongoose.models.Rally || mongoose.model<IRally>("Rally", rallySchema);

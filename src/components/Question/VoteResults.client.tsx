@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import ChatComponent from "./Chat.client";
+import ChatComponent from "../Chat.client";
 
 const VoteResults = ({ question }: any) => {
   const [results, setResults] = useState([]);

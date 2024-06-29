@@ -6,9 +6,9 @@ import { useEffect, useState } from "react";
 import {IRally} from "@/db/models/rally";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/context/UserContext";
-import RallyVoteCarousel from "@/components/VotingOptionsRally.clent";
+import RallyVoteCarousel from "@/components/Rally/VotingOptionsRally.clent";
 import { useRouter } from "next/navigation";
-import RallyResults from "@/components/VoteResultsRally.client";
+import RallyResults from "@/components/Rally/VoteResultsRally.client";
 
 export default function RallyPage() {
     const { username } = useUser();
