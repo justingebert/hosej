@@ -22,10 +22,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { useUser } from "@/context/UserContext";
 
 
 
 const CreateQuestionPage = () => {
+  const {username} = useUser()
   const [question, setQuestion] = useState("");
   const [questionType, setQuestionType] = useState("");
   const [options, setOptions] = useState([""]);
@@ -65,6 +67,7 @@ const CreateQuestionPage = () => {
       questionType: questionType,
       question: question,
       options: questionType.startsWith("custom") ? options : undefined,
+      submittedBy: username
     };
 
     try {

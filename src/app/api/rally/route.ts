@@ -45,11 +45,13 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     await dbConnect();
-    const { task, lengthInDays } = await req.json();
+    const { task, lengthInDays, submittedBy } = await req.json();
 
+    //TODO this is different - garbage 
     const newRally = new Rally({
       task,
       lengthInDays,
+      submittedBy,
     });
 
     await newRally.save();

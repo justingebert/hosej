@@ -11,9 +11,10 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
 } from "@/components/ui/alert-dialog";
-import { ArrowLeft } from 'lucide-react';
+import { useUser } from "@/context/UserContext";
 
 const CreateRallyPage = () => {
+  const {username} = useUser()
   const [task, setTask] = useState("");
   const [lengthInDays, setLengthInDays] = useState("");
   const [loading, setLoading] = useState(false);
@@ -29,6 +30,7 @@ const CreateRallyPage = () => {
     const rallyData = {
       task: task,
       lengthInDays: Number(lengthInDays),
+      submittedBy: username 
     };
 
     try {

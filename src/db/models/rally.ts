@@ -20,6 +20,8 @@ export interface IRally extends mongoose.Document {
   votingOpen: boolean;
   used: boolean;
   active: boolean;
+  lengthInDays: number;
+  submittedBy: string;
 }
 
 const pictureSubmissionSchema = new mongoose.Schema({
@@ -43,6 +45,7 @@ const rallySchema = new mongoose.Schema({
   used: { type: Boolean, default: false },
   active: { type: Boolean, default: false },
   lengthInDays: { type: Number, required: true },
+  submittedBy: { type: String, required: true },
 });
 
 const Rally = mongoose.models.Rally || mongoose.model<IRally>("Rally", rallySchema);
