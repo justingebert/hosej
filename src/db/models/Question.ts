@@ -19,6 +19,8 @@ interface IQuestion extends mongoose.Document {
   answers: [{ userId: mongoose.Schema.Types.ObjectId; response: any }];
   createdAt: Date;
   used: boolean;
+  active: boolean;
+  submittedBy: String
 }
 
 const questionSchema = new mongoose.Schema({
@@ -39,6 +41,7 @@ const questionSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   used: { type: Boolean, default: false },
   active: { type: Boolean, default: false },
+  submittedBy: {type: String}
 });
 
 const Question = mongoose.models.Question || mongoose.model<IQuestion>("Question", questionSchema);
