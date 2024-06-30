@@ -1,46 +1,33 @@
 "use client";
 
-import React, { useState, useEffect, Suspense} from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useUser } from "../../../context/UserContext";
-import VoteOptions from "../../../components/VotingOptions.client";
-import VoteResults from "../../../components/VoteResults.client";
+import VoteOptions from "../../../components/Question/VotingOptions.client";
+import VoteResults from "../../../components/Question/VoteResults.client";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { unstable_noStore } from "next/cache";
 import { useRouter } from "next/navigation";
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 import { ArrowLeft } from 'lucide-react';
+import {  ClipLoader } from "react-spinners";
 
-function QuestionsTabs({ questions, userHasVoted, setUserHasVoted }:any) {
+function QuestionsTabs({ questions, userHasVoted, setUserHasVoted }: any) {
   const searchParams = useSearchParams();
   const defaultTab = searchParams.get('returnTo') || (questions.length > 0 ? questions[0]._id : undefined);
 
   return (
     <Tabs defaultValue={defaultTab}>
-        <div className="flex justify-center mt-5">
-      <TabsList>
-
-        {questions.map((question:any, index:number) => (
-          <TabsTrigger key={question._id} value={question._id}>
-            {"Daily " + (index + 1)}
-          </TabsTrigger>
-        ))}
-
-      </TabsList>
-        </div>
-      {questions.map((question:any) => (
+      <div className="flex justify-center mt-5">
+        <TabsList>
+          {questions.map((question: any, index: number) => (
+            <TabsTrigger key={question._id} value={question._id}>
+              {"Daily " + (index + 1)}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </div>
+      {questions.map((question: any) => (
         <TabsContent key={question._id} value={question._id}>
           <h2 className="font-bold text-center mt-10">{question.question}</h2>
           <div className="mt-10">
@@ -67,13 +54,12 @@ const DailyQuestionPage = () => {
   const router = useRouter();
 
   useEffect(() => {
-    unstable_noStore();
     const fetchQuestions = async () => {
       router.refresh();
       const res = await fetch(`/api/question/daily`, { cache: "no-store" });
       const data = await res.json();
 
-      console.log(data);
+      console.log(username);
       if (data.questions) {
         setQuestions(data.questions);
         const votes = data.questions.reduce((acc: any, question: any) => {
@@ -83,7 +69,9 @@ const DailyQuestionPage = () => {
           return acc;
         }, {});
         setUserHasVoted(votes);
-
+      }
+      if (data.message) {
+        alert(data.message);//TODO improve
       }
     };
 
@@ -93,15 +81,19 @@ const DailyQuestionPage = () => {
   }, [username]);
 
   return (
-    <div className="m-6 mb-1">
-      <div className="flex items-center">
+    <div className="flex flex-col items-center justify-center h-screen">
+      <div className="flex items-center w-full px-6 mb-1 mt-6">
         <Link className="text-lg leading-none mr-auto cursor-pointer" href="/">
           <ArrowLeft/>
         </Link>
       </div>
       <h1 className="text-xl font-bold text-center">Daily Questions</h1>
       {questions.length > 0 ? (
-        <Suspense fallback={<div>Loading questions...</div>}>
+        <Suspense fallback={
+          <div className="flex items-center justify-center h-full">
+            <ClipLoader size={50} color={"#FFFFFF"} loading={true} />
+          </div>
+        }>
           <QuestionsTabs
             questions={questions}
             userHasVoted={userHasVoted}
@@ -109,7 +101,9 @@ const DailyQuestionPage = () => {
           />
         </Suspense>
       ) : (
-        <div className="text-center">Loading questions...</div>
+        <div className="flex items-center justify-center h-full">
+          <ClipLoader size={50} color={"#FFFFFF"} loading={true} />
+        </div>
       )}
     </div>
   );

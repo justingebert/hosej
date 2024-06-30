@@ -1,7 +1,8 @@
 import mongoose from "mongoose";
 import Question from "./models/Question";
 import user from "./models/user";
-require('dotenv').config({ path: './.env.local' });
+import Rally from "./models/rally";
+require('dotenv').config({ path: '../../.env.local' });
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
@@ -15,7 +16,7 @@ mongoose.connect(MONGODB_URI, {
 });
 
 const createData = async () => {
-    const questions = [
+    /* const questions = [
         {
         category: "Daily",
         questionType: "users-select-one",
@@ -79,7 +80,58 @@ const createData = async () => {
     await Question.insertMany(questions);
 
     await user.deleteMany({});
-    await user.insertMany(users);
+    await user.insertMany(users); */
+
+    const rallies = [
+      {
+        task: "Take a photo of the sunset",
+        startTime: new Date(),
+        endTime: new Date(new Date().getTime() + 24 * 60 * 60 * 1000),
+        resultsShown: false,
+        used: false,
+        active: true,
+        submissions: [],
+      },
+      {
+        task: "Capture the essence of spring",
+        startTime: new Date(),
+        endTime: new Date(new Date().getTime() + 24 * 60 * 60 * 1000),
+        resultsShown: false,
+        used: false,
+        active: false,
+        submissions: [],
+      },
+      {
+        task: "Photograph your favorite food",
+        startTime: new Date(),
+        endTime: new Date(new Date().getTime() + 24 * 60 * 60 * 1000),
+        resultsShown: false,
+        used: false,
+        active: false,
+        submissions: [],
+      },
+      {
+        task: "Showcase a local landmark",
+        startTime: new Date(),
+        endTime: new Date(new Date().getTime() + 24 * 60 * 60 * 1000),
+        resultsShown: false,
+        used: false,
+        active: false,
+        submissions: [],
+      },
+      {
+        task: "Find beauty in the mundane",
+        startTime: new Date(),
+        endTime: new Date(new Date().getTime() + 24 * 60 * 60 * 1000),
+        resultsShown: false,
+        used: false,
+        active: false,
+        submissions: [],
+      },
+    ];
+  
+    await Rally.deleteMany({});
+    await Rally.insertMany(rallies);
 }
 
 createData().then(() => {

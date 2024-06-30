@@ -18,6 +18,9 @@ const nextConfig = {
             fullUrl: true,
         }
     },
+    images: {
+        domains: ['hosej-rally-bucket.s3.eu-central-1.amazonaws.com'],
+    },
 };
 
 export default withPWA(nextConfig);
