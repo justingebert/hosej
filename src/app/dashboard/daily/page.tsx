@@ -81,17 +81,17 @@ const DailyQuestionPage = () => {
   }, [username]);
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen">
-      <div className="flex items-center w-full px-6 mb-1 mt-6">
+    <div className="m-6 mb-1">
+      <div className="flex items-center">
         <Link className="text-lg leading-none mr-auto cursor-pointer" href="/">
-          <ArrowLeft/>
+          <ArrowLeft />
         </Link>
       </div>
       <h1 className="text-xl font-bold text-center">Daily Questions</h1>
       {questions.length > 0 ? (
         <Suspense fallback={
-          <div className="flex items-center justify-center h-full">
-            <ClipLoader size={50} color={"#FFFFFF"} loading={true} />
+          <div className="flex items-center justify-center h-screen">
+            <ClipLoader size={50} color={"FFFFFF"} loading={true} />
           </div>
         }>
           <QuestionsTabs
@@ -101,8 +101,8 @@ const DailyQuestionPage = () => {
           />
         </Suspense>
       ) : (
-        <div className="flex items-center justify-center h-full">
-          <ClipLoader size={50} color={"#FFFFFF"} loading={true} />
+        <div className="flex items-center justify-center ">
+          <ClipLoader size={50} color={"FFFFFF"} loading={true}/>
         </div>
       )}
     </div>
