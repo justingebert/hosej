@@ -17,6 +17,7 @@ export async function GET(req: Request) {
     const currentTime = new Date();
     if (currentTime >= new Date(rally.endTime) && !rally.votingOpen) {
       rally.votingOpen = true;
+      rally.resultsShowing = false;
       await rally.save();
     }
 

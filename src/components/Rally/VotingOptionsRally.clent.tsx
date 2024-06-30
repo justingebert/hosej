@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/carousel";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import Modal from 'react-modal';
 
 const RallyVoteCarousel = ({ rallyId, onVote }: any) => {
   const { username } = useUser();
@@ -22,6 +23,8 @@ const RallyVoteCarousel = ({ rallyId, onVote }: any) => {
   const [api, setApi] = useState<CarouselApi | null>(null);
   const [current, setCurrent] = useState(0);
   const [hasVoted, setHasVoted] = useState(false);
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const router = useRouter();
 
 
@@ -34,7 +37,7 @@ const RallyVoteCarousel = ({ rallyId, onVote }: any) => {
         setSelectedSubmission(data.submissions[0]._id);
       }
 
-        // Check if the user has already voted
+      // Check if the user has already voted
       const userHasVoted = data.submissions.some((submission:any) =>
         submission.votes.some((vote:any) => vote.username === username)
       );
@@ -63,6 +66,16 @@ const RallyVoteCarousel = ({ rallyId, onVote }: any) => {
     };
   }, [api, submissions]);
 
+  const openModal = (imageUrl: string) => {
+    setSelectedImage(imageUrl);
+    setModalIsOpen(true);
+  };
+
+  const closeModal = () => {
+    setSelectedImage(null);
+    setModalIsOpen(false);
+  };
+
   const submitVote = async () => {
     if (!selectedSubmission) {
       alert("Please select a submission to vote for.");
@@ -86,32 +99,51 @@ const RallyVoteCarousel = ({ rallyId, onVote }: any) => {
     onVote(); // Callback to update state in the parent component
   };
 
+  const customStyles = {
+    content: {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      border: 'none',
+      background: 'none',
+      overflow: 'auto', // Ensure the content can scroll on mobile
+    },
+    overlay: {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: 'rgba(0, 0, 0, 0.75)',
+      zIndex: 1000, // Ensure the overlay is on top
+    },
+  };
+
   return (
-    <div>
-      <Carousel setApi={setApi} className="w-full max-w-xs">
-        <CarouselContent>
+    <div >
+      <div className="flex justify-center">
+      <Carousel setApi={setApi} className="w-full max-w-xs mb-20 mt-5" orientation="vertical">
+        <CarouselContent className="h-[340px]">
           {submissions.map((submission, index) => (
             <CarouselItem key={submission._id}>
-              <div className="p-1">
                 <Card>
                   <CardContent className="flex aspect-square items-center justify-center p-6">
                     <Image
                       src={submission.imageUrl}
                       alt={`Submission by ${submission.username}`}
-                      className="object-cover w-full h-full"
+                      className="object-cover w-full h-full cursor-pointer"
                       width={300}
                       height={300}
                       priority={index === 0} // Add priority to the first image
+                      onClick={() => openModal(submission.imageUrl)}
                     />
                   </CardContent>
                 </Card>
-              </div>
             </CarouselItem>
           ))}
         </CarouselContent>
         <CarouselPrevious />
         <CarouselNext />
       </Carousel>
+      </div>
       {hasVoted ? (
         <div className="flex justify-center">
           <p>You have already voted!</p>
@@ -123,6 +155,22 @@ const RallyVoteCarousel = ({ rallyId, onVote }: any) => {
           </Button>
         </div>
       )}
+      <Modal
+        isOpen={modalIsOpen}
+        ariaHideApp={false}
+        onRequestClose={closeModal}
+        contentLabel="Image Modal"
+        className="flex justify-center items-center"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-50"
+        style={customStyles}
+      >
+        {selectedImage && (
+          <div className=" p-4 rounded">
+            <Image src={selectedImage} alt="Selected Submission" width={600} height={600} />
+            <Button onClick={closeModal} className="mt-4 p-2 bg-gray-800 text-white rounded">Close</Button>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };
