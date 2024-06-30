@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import dbConnect from "@/db/dbConnect";
+import dbConnect from "@/lib/dbConnect";
 import Question from "@/db/models/Question";
 import user from "@/db/models/user";
 import Link from "next/link";

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, Suspense } from "react";
-import { useUser } from "../../../context/UserContext";
+import { useUser } from "../../../components/UserContext";
 import VoteOptions from "../../../components/Question/VotingOptions.client";
 import VoteResults from "../../../components/Question/VoteResults.client";
 import { Button } from "@/components/ui/button";

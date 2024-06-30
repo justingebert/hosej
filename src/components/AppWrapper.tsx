@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { UserProvider } from "../context/UserContext";
+import { UserProvider } from "./UserContext";
 import { ThemeProvider } from "@/components/theme-provider"
 
 export const AppWrapper = ({ children }: { children: ReactNode }) => {

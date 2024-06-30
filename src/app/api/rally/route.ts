@@ -1,11 +1,11 @@
-import dbConnect from "@/db/dbConnect";
+import dbConnect from "@/lib/dbConnect";
 import Rally from "@/db/models/rally";
 import { NextResponse } from "next/server";
 import user from "@/db/models/user";
 
-//TODO questions left parameters
 export const revalidate = 0;
 
+//get current rally and set state
 export async function GET(req: Request) {
   try {
     await dbConnect();
@@ -42,6 +42,7 @@ export async function GET(req: Request) {
   }
 }
 
+//create rally
 export async function POST(req: Request) {
   try {
     await dbConnect();

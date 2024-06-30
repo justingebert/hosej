@@ -1,8 +1,8 @@
-import mongoose from "mongoose";
-import dbConnect from "@/db/dbConnect";
-import Rally, { IPictureSubmission } from "@/db/models/rally";
+import dbConnect from "@/lib/dbConnect";
+import Rally from "@/db/models/rally";
 import { NextResponse } from 'next/server'
 
+//vote on a submission
 export async function POST(req: Request){
     try{
         await dbConnect();

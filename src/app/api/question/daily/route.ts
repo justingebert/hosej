@@ -1,5 +1,4 @@
-import mongoose from "mongoose";
-import dbConnect from "@/db/dbConnect";
+import dbConnect from "@/lib/dbConnect";
 import Question from "@/db/models/Question";
 import user from "@/db/models/user";
 import { NextResponse } from 'next/server'
@@ -7,17 +6,28 @@ import { NextResponse } from 'next/server'
 //TODO questions left parameters
 export const revalidate = 0
 
+//get active daily questions
 async function getDailyQuestion() {
+  try {
     await dbConnect();
-  
-    let questions = await Question.find({ category: "Daily", used: true, active: true});
+
+    let questions = await Question.find({
+      category: "Daily",
+      used: true,
+      active: true,
+    });
     if (!questions) {
-        return undefined;
+      return [];
     }
-  
+
     return questions;
+  } catch (error) {
+    console.error(error);
+    return undefined;
+  }
 }
 
+//populate questions
 async function populateAndSaveQuestions(questions:any) {
     const populatedQuestions = await Promise.all(questions.map(async (question:any) => {
         const populatedQuestion = await Question.findById(question._id).populate({
@@ -40,12 +50,11 @@ async function populateAndSaveQuestions(questions:any) {
     return populatedQuestions;
 }
 
-
-
+//return active daily questions
 export async function GET(req: Request){
-    await dbConnect();
     try{
-        
+        await dbConnect();
+
         const questions = await getDailyQuestion();
         if (!questions) {
             return NextResponse.json({ message: "No questions available" });
@@ -56,6 +65,7 @@ export async function GET(req: Request){
         return NextResponse.json({ questions: updatedQuestions });
     }
     catch (error) {
+        console.error(error);
         return NextResponse.json({ message: error });
     }
 }

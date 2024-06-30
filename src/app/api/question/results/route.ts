@@ -1,19 +1,17 @@
-
-
-import mongoose from "mongoose";
-import dbConnect from "@/db/dbConnect";
+import dbConnect from "@/lib/dbConnect";
 import Question from "@/db/models/Question";
 import user from "@/db/models/user";
 import { NextResponse, type NextRequest } from 'next/server'
 
 export const revalidate = 0
 
+//get results for a question by searchparam id
 export async function GET(req: NextRequest){
-    const searchParams = req.nextUrl.searchParams
-    const questionId = searchParams.get('questionId') 
-    await dbConnect();
-    
     try{
+        const searchParams = req.nextUrl.searchParams
+        const questionId = searchParams.get('questionId') 
+
+        await dbConnect();
         const question = await Question.findById(questionId);
         if (!question) {
             return NextResponse.json({ message: "Question not found" });
@@ -40,6 +38,7 @@ export async function GET(req: NextRequest){
         return Response.json({ results: results, totalVotes: totalVotes, totalUsers: totalUsers});
     }
     catch (error) {
+        console.log(error);
         return NextResponse.json({ message: error });
     }
 }
