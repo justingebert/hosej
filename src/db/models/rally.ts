@@ -1,3 +1,4 @@
+import { create } from "domain";
 import mongoose from "mongoose";
 
 export interface IPictureSubmission {
@@ -46,6 +47,7 @@ const rallySchema = new mongoose.Schema({
   active: { type: Boolean, default: false },
   lengthInDays: { type: Number, required: true },
   submittedBy: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now },
 });
 
 const Rally = mongoose.models.Rally || mongoose.model<IRally>("Rally", rallySchema);

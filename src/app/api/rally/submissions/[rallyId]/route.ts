@@ -1,21 +1,20 @@
-import dbConnect from "@/db/dbConnect";
+import dbConnect from "@/lib/dbConnect";
 import Rally from "@/db/models/rally";
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { NextResponse } from 'next/server'
 
-
 const s3 = new S3Client({
     region: process.env.AWS_REGION,
   });
 
-//TODO questions left parameters
 export const revalidate = 0
 
+//get submissions for a rally
 export async function GET(req: Request, { params }: { params: { rallyId: string } }){
-    await dbConnect();
     const rallyId = params.rallyId;
     try{
+        await dbConnect();
         const rally = await Rally.findById(rallyId);
         if (!rally) {
             return NextResponse.json({ message: "No active rally" , rally: null});
@@ -53,6 +52,7 @@ export async function GET(req: Request, { params }: { params: { rallyId: string 
         return NextResponse.json({ submissions });
     }
     catch (error) {
+        console.log(error);
         return NextResponse.json({ message: error });
     }
 }

@@ -11,6 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { History } from "lucide-react";
 
 export default function Home() {
   const router = useRouter();
@@ -27,6 +28,11 @@ export default function Home() {
   return (
     <div className="flex flex-col h-screen justify-between">
       <div className="flex justify-center items-center mt-10 w-full relative">
+      <div className="absolute left-10">
+      <Button variant="outline" size="icon" onClick={() => {router.push("/dashboard/history")}}>
+        <History />
+      </Button>
+      </div>
         <h1 className="text-4xl font-bold">HoseJ</h1>
         <div className="absolute right-10">
           <DropdownMenu>

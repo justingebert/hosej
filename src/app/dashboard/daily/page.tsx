@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, Suspense } from "react";
-import { useUser } from "../../../context/UserContext";
+import { useUser } from "../../../components/UserContext";
 import VoteOptions from "../../../components/Question/VotingOptions.client";
 import VoteResults from "../../../components/Question/VoteResults.client";
 import { Button } from "@/components/ui/button";
@@ -32,7 +32,7 @@ function QuestionsTabs({ questions, userHasVoted, setUserHasVoted }: any) {
           <h2 className="font-bold text-center mt-10">{question.question}</h2>
           <div className="mt-10">
             {userHasVoted[question._id] ? (
-              <VoteResults question={question} />
+              <VoteResults question={question} avaiable={true}/>
             ) : (
               <VoteOptions
                 question={question}

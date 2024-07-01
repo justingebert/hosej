@@ -11,7 +11,7 @@ enum QuestionType {
   Sequence = "sequence",
 }
 
-interface IQuestion extends mongoose.Document {
+export interface IQuestion extends mongoose.Document {
   category: string;
   questionType: QuestionType;
   question: string;

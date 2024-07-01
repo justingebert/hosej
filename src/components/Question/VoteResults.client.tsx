@@ -3,8 +3,9 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import ChatComponent from "../Chat.client";
+import { Separator } from "@/components/ui/separator"
 
-const VoteResults = ({ question }: any) => {
+const VoteResults = ({ question, avaiable}: any) => {
   const [results, setResults] = useState([]);
   const [numOfVotes, setNumOfVotes] = useState('');
 
@@ -43,7 +44,8 @@ const VoteResults = ({ question }: any) => {
         </Link>
       ))}
       </div>
-      <ChatComponent questionId={question._id}/>
+      <Separator />
+      <ChatComponent questionId={question._id} avaiable={avaiable}/>
     </div>
   );
 };

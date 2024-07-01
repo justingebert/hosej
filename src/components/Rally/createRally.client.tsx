@@ -11,7 +11,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
 } from "@/components/ui/alert-dialog";
-import { useUser } from "@/context/UserContext";
+import { useUser } from "@/components/UserContext";
 
 const CreateRallyPage = () => {
   const {username} = useUser()
