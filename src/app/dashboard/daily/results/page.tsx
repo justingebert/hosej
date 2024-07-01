@@ -42,7 +42,7 @@ const ResultsPage = () => {
         <div>
           <h1 className="text-xl font-bold text-center mb-10 mt-10">{question.question}</h1>
           <div className="flex flex-col items-center mb-10">
-            {question.options.map((option: any, index: number) => (
+            {question.questionType !== "text" && question.options && question.options.map((option: any, index: number) => (
               <div key={index} className="p-4 m-2 bg-primary text-primary-foreground rounded-lg w-full max-w-md ">
                 {option}
               </div>
