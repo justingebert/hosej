@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from 'next/navigation';
 import Link from "next/link";
 import { ArrowLeft } from 'lucide-react';
@@ -57,4 +57,10 @@ const ResultsPage = () => {
   );
 };
 
-export default ResultsPage;
+const ResultsPageWrapper = () => (
+  <Suspense fallback={<div className="flex items-center justify-center h-screen"><ClipLoader size={50} color={"#FFFFFF"} loading={true} /></div>}>
+    <ResultsPage />
+  </Suspense>
+);
+
+export default ResultsPageWrapper;
