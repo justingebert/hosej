@@ -55,7 +55,7 @@ const QuestionHistoryPage = () => {
                 <CardTitle>{question.question}</CardTitle>
               </CardHeader>
               <CardContent>
-                <Link href={`/dashboard/daily/resultsdetailed/${question._id}`}>
+                <Link href={`/dashboard/daily/results?questionid=${question._id}`}>
                   <Button>View Results</Button>
                 </Link>
               </CardContent>

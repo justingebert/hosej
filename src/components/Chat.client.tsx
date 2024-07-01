@@ -5,7 +5,7 @@ import { Send } from 'lucide-react'
 import { Input } from "@/components/ui/input"
 
 
-function ChatComponent({ questionId }:any) {
+function ChatComponent({ questionId, avaiable }:any) {
     const [messages, setMessages] = useState<any>([]);
     const [newMessage, setNewMessage] = useState('');
     const { username } = useUser();
@@ -54,19 +54,22 @@ function ChatComponent({ questionId }:any) {
               <div></div>
           )}
       </div>
-      <div className="sticky bottom-0 left-0 bg-background w-full p-3 pb-9">
-                <div className=" flex gap-2">
-                    <Input
-                        className="flex-grow p-2"
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                        placeholder="Type a message..."
-                    />
-                    <Button onClick={handleSendMessage}>
-                        <Send size={20}/>
-                    </Button>
-                </div>
-        </div>
+      {avaiable && (
+          <div className="sticky bottom-0 left-0 bg-background w-full p-3 pb-9">
+          <div className=" flex gap-2">
+              <Input
+                  className="flex-grow p-2"
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  placeholder="Type a message..."
+              />
+              <Button onClick={handleSendMessage}>
+                  <Send size={20}/>
+              </Button>
+          </div>
+  </div>
+        )}
+      
   </div>
     );
 }
