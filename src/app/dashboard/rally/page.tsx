@@ -47,8 +47,7 @@ export default function RallyPage() {
   }, [username]);
 
   const getPresignedUrl = async (filename: string, contentType: string) => {
-    const response = await fetch(
-      process.env.NEXT_PUBLIC_BASE_URL + "/api/rally/uploadimage",
+    const response = await fetch( "/api/rally/uploadimage",
       {
         method: "POST",
         headers: {
