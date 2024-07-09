@@ -6,18 +6,15 @@ import { useEffect, useState } from "react";
 import { IRally } from "@/db/models/rally";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/components/UserContext";
-import RallyVoteCarousel from "@/components/Rally/VotingOptionsRally.clent";
+import RallyVoteCarousel from "@/components/Rally/VotingOptionsRally.client";
 import { useRouter } from "next/navigation";
 import RallyResults from "@/components/Rally/VoteResultsRally.client";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import imageCompression from 'browser-image-compression';
 
 export default function RallyPage() {
   const { username } = useUser();
@@ -25,7 +22,8 @@ export default function RallyPage() {
   const [submissions, setSubmissions] = useState([]);
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [userUploaded, setUserUpaloaded] = useState(false);
+  const [userUploaded, setUserUploaded] = useState(false);
+  const [userVoted, setUserVoted] = useState(false);
   const [uploadCount, setUploadCount] = useState(0);
   const router = useRouter();
 
@@ -35,32 +33,35 @@ export default function RallyPage() {
       const data = await response.json();
       if (data.rally) {
         setRally(data.rally);
-        const submission = await data.rally.submissions.some(
-          (submission: any) => submission.username == username
+        const userHasUploaded = data.rally.submissions.some(
+          (submission: any) => submission.username === username
         );
-        await setUploadCount(data.rally.submissions.length);
-        await setUserUpaloaded(submission);
-        await setSubmissions(data.rally.submissions);
+        setUploadCount(data.rally.submissions.length);
+        setUserUploaded(userHasUploaded);
+        setSubmissions(data.rally.submissions);
+
+        const userHasVoted = data.rally.submissions.some((submission: any) =>
+          submission.votes.some((vote: any) => vote.username === username)
+        );
+        setUserVoted(userHasVoted);
       }
     };
     fetchRally();
   }, [username]);
 
   const getPresignedUrl = async (filename: string, contentType: string) => {
-    const response = await fetch( "/api/rally/uploadimage",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          filename,
-          contentType,
-          userid: username,
-          rallyId: rally?._id,
-        }),
-      }
-    );
+    const response = await fetch("/api/rally/uploadimage", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        filename,
+        contentType,
+        userid: username,
+        rallyId: rally?._id,
+      }),
+    });
 
     if (!response.ok) {
       const responseText = await response.text();
@@ -70,11 +71,7 @@ export default function RallyPage() {
     return response.json();
   };
 
-  const uploadToS3 = async (
-    url: string,
-    fields: Record<string, string>,
-    file: File
-  ) => {
+  const uploadToS3 = async (url: string, fields: Record<string, string>, file: File) => {
     const formData = new FormData();
 
     Object.entries(fields).forEach(([key, value]) => {
@@ -95,11 +92,7 @@ export default function RallyPage() {
     return fields.key; // Return the key to construct the image URL
   };
 
-  const createRallySubmission = async (
-    rallyId: string,
-    userId: string,
-    imageUrl: string
-  ) => {
+  const createRallySubmission = async (rallyId: string, userId: string, imageUrl: string) => {
     const response = await fetch("/api/rally/submissions", {
       method: "POST",
       headers: {
@@ -131,8 +124,18 @@ export default function RallyPage() {
     setUploading(true);
 
     try {
-      const { url, fields } = await getPresignedUrl(file.name, file.type);
-      const key = await uploadToS3(url, fields, file);
+      // Compress and resize the image
+      const options = {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1024,
+        useWebWorker: true,
+      };
+      const compressedFile = await imageCompression(file, options);
+      console.log(`Original file size: ${file.size / 1024 / 1024} MB`);
+      console.log(`Compressed file size: ${compressedFile.size / 1024 / 1024} MB`);
+
+      const { url, fields } = await getPresignedUrl(compressedFile.name, compressedFile.type);
+      const key = await uploadToS3(url, fields, compressedFile);
       const imageUrl = `${url}/${key}`; // Construct the image URL
       const submissionResponse = await createRallySubmission(
         rally?._id as string,
@@ -141,7 +144,7 @@ export default function RallyPage() {
       );
       console.log("Submission successful:", submissionResponse);
       alert("Upload and submission successful!"); //TODO improve
-      setUserUpaloaded(true)
+      setUserUploaded(true);
     } catch (error: any) {
       console.error(error);
       alert(error.message);
@@ -173,25 +176,20 @@ export default function RallyPage() {
     <>
       <div className="m-4 mb-1">
         <div className="flex items-center">
-          <Link
-            className="text-lg leading-none mr-auto cursor-pointer"
-            href="/"
-          >
+          <Link className="text-lg leading-none mr-auto cursor-pointer" href="/">
             <ArrowLeft />
           </Link>
         </div>
         <h1 className="text-xl font-bold text-center">Rally</h1>
-        <div >
+        <div>
           {rally ? (
             <div>
               <h2 className="mt-5 text-lg text-center">{rally.task}</h2>
-              {!rally.votingOpen && !rally.resultsShowing && (
+              {!rally.votingOpen && (
                 <div>
-
                   <div className="mt-5 text-xs text-center">
                     {calcTimeLeft(rally.endTime).days} days{" "}
-                    {calcTimeLeft(rally.endTime).hours} hours
-                    left
+                    {calcTimeLeft(rally.endTime).hours} hours left
                   </div>
 
                   <Card className="mt-20">
@@ -214,36 +212,39 @@ export default function RallyPage() {
                             accept="image/png, image/jpeg"
                           />
                           <div className="flex justify-center">
-                          <Button
-                            type="submit"
-                            disabled={uploading}
-                            className="mt-2 w-full"
-                          >
-                            Upload
-                          </Button>
+                            <Button
+                              type="submit"
+                              disabled={uploading}
+                              className="mt-2 w-full"
+                            >
+                              Upload
+                            </Button>
                           </div>
                         </form>
                       )}
                     </CardContent>
                   </Card>
+                  <div className="absolute bottom-5 left-0 right-0 text-center">
+            {uploadCount} uploads
+          </div>
                 </div>
               )}
             </div>
           ) : (
             <p className="text-center text-red-500">No ongoing rally</p>
           )}
-          <div className="absolute bottom-5 left-0 right-0 text-center">{uploadCount} uploads</div>
+          
         </div>
-        {rally?.votingOpen && (
-          <div className="mt-10">
-            <RallyVoteCarousel rallyId={rally._id} onVote={handleVote} />
-          </div>
-        )}
-        {rally?.resultsShowing && (
-          <div className="mt-5">
-            <RallyResults rallyId={rally._id} />
-          </div>
-        )}
+        {rally?.votingOpen &&
+          (userVoted ? (
+            <div className="mt-5">
+              <RallyResults rallyId={rally._id} />
+            </div>
+          ) : (
+            <div className="mt-10">
+              <RallyVoteCarousel rallyId={rally?._id} onVote={handleVote} />
+            </div>
+          ))}
       </div>
     </>
   );
