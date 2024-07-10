@@ -21,15 +21,10 @@ export async function GET(req: Request) {
       await rally.save();
     }
 
-    //this makes no sense 
-    if (rally.votingOpen && currentTime >= new Date(rally.endTime)) {
-      rally.endTime = new Date(currentTime.getTime() + 24 * 60 * 60 * 1000); // Set end time for results period
-      await rally.save();
-    }
-
     if (rally.votingOpen && currentTime >= new Date(rally.endTime)) {
       rally.active = false;
       rally.used = true;
+      rally.votingOpen = false;
       await rally.save();
 
       // Start a new rally

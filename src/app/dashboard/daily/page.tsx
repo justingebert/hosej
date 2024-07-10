@@ -78,7 +78,7 @@ const DailyQuestionPage = () => {
     if (username) {
       fetchQuestions();
     }
-  }, [username]);
+  }, [username, router]);
 
   return (
     <div className="m-6 mb-1">
