@@ -2,52 +2,51 @@
 
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { IRally } from "@/db/models/rally";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/components/UserContext";
 import RallyVoteCarousel from "@/components/Rally/VotingOptionsRally.client";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import RallyResults from "@/components/Rally/VoteResultsRally.client";
 import {
   Card,
   CardContent,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ClipLoader } from "react-spinners";
 import imageCompression from 'browser-image-compression';
 
-export default function RallyPage() {
+function RallyTabs({ rallies, userHasVoted, setUserHasVoted }: any) {
+  const searchParams = useSearchParams();
+  const defaultTab = searchParams.get('returnTo') || (rallies.length > 0 ? rallies[0]._id : undefined);
+
+  return (
+    <Tabs defaultValue={defaultTab}>
+      <div className="flex justify-center mt-5">
+        <TabsList>
+          {rallies.map((rally: any, index: number) => (
+            <TabsTrigger key={rally._id} value={rally._id}>
+              {"Rally " + (index + 1)}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </div>
+      {rallies.map((rally: any) => (
+        <TabsContent key={rally._id} value={rally._id}>
+          <RallyTabContent rally={rally} userHasVoted={userHasVoted} setUserHasVoted={setUserHasVoted} />
+        </TabsContent>
+      ))}
+    </Tabs>
+  );
+}
+
+function RallyTabContent({ rally, userHasVoted, setUserHasVoted }: any) {
   const { username } = useUser();
-  const [rally, setRally] = useState<IRally>();
-  const [submissions, setSubmissions] = useState([]);
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [userUploaded, setUserUploaded] = useState(false);
-  const [userVoted, setUserVoted] = useState(false);
-  const [uploadCount, setUploadCount] = useState(0);
   const router = useRouter();
-
-  useEffect(() => {
-    const fetchRally = async () => {
-      const response = await fetch("/api/rally");
-      const data = await response.json();
-      if (data.rally) {
-        setRally(data.rally);
-        const userHasUploaded = data.rally.submissions.some(
-          (submission: any) => submission.username === username
-        );
-        setUploadCount(data.rally.submissions.length);
-        setUserUploaded(userHasUploaded);
-        setSubmissions(data.rally.submissions);
-
-        const userHasVoted = data.rally.submissions.some((submission: any) =>
-          submission.votes.some((vote: any) => vote.username === username)
-        );
-        setUserVoted(userHasVoted);
-      }
-    };
-    fetchRally();
-  }, [username]);
 
   const getPresignedUrl = async (filename: string, contentType: string) => {
     const response = await fetch("/api/rally/uploadimage", {
@@ -59,7 +58,7 @@ export default function RallyPage() {
         filename,
         contentType,
         userid: username,
-        rallyId: rally?._id,
+        rallyId: rally._id,
       }),
     });
 
@@ -138,13 +137,13 @@ export default function RallyPage() {
       const key = await uploadToS3(url, fields, compressedFile);
       const imageUrl = `${url}/${key}`; // Construct the image URL
       const submissionResponse = await createRallySubmission(
-        rally?._id as string,
+        rally._id,
         username,
         imageUrl
       );
       console.log("Submission successful:", submissionResponse);
       alert("Upload and submission successful!"); //TODO improve
-      setUserUploaded(true);
+      setUserHasVoted((prev: any) => ({ ...prev, [rally._id]: true }));
     } catch (error: any) {
       console.error(error);
       alert(error.message);
@@ -155,6 +154,7 @@ export default function RallyPage() {
   };
 
   const handleVote = async () => {
+    setUserHasVoted((prev: any) => ({ ...prev, [rally._id]: true }));
     router.refresh();
   };
 
@@ -174,79 +174,124 @@ export default function RallyPage() {
 
   return (
     <>
-      <div className="m-4 mb-1">
-        <div className="flex items-center">
-          <Link className="text-lg leading-none mr-auto cursor-pointer" href="/">
-            <ArrowLeft />
-          </Link>
-        </div>
-        <h1 className="text-xl font-bold text-center">Rally</h1>
+      <h2 className="mt-5 text-lg text-center">{rally.task}</h2>
+      {!rally.votingOpen && (
         <div>
-          {rally ? (
-            <div>
-              <h2 className="mt-5 text-lg text-center">{rally.task}</h2>
-              {!rally.votingOpen && (
-                <div>
-                  <div className="mt-5 text-xs text-center">
-                    {calcTimeLeft(rally.endTime).days} days{" "}
-                    {calcTimeLeft(rally.endTime).hours} hours left
-                  </div>
-
-                  <Card className="mt-20">
-                    <CardContent className="p-2">
-                      {userUploaded ? (
-                        <div className="text-center text-green-500 mb-4">
-                          You have already submitted an image.
-                        </div>
-                      ) : (
-                        <form onSubmit={handleSubmit}>
-                          <Input
-                            id="file"
-                            type="file"
-                            onChange={(e) => {
-                              const files = e.target.files;
-                              if (files) {
-                                setFile(files[0]);
-                              }
-                            }}
-                            accept="image/png, image/jpeg"
-                          />
-                          <div className="flex justify-center">
-                            <Button
-                              type="submit"
-                              disabled={uploading}
-                              className="mt-2 w-full"
-                            >
-                              Upload
-                            </Button>
-                          </div>
-                        </form>
-                      )}
-                    </CardContent>
-                  </Card>
-                  <div className="absolute bottom-5 left-0 right-0 text-center">
-            {uploadCount} uploads
+          <div className="mt-5 text-xs text-center">
+            {calcTimeLeft(rally.endTime).days} days{" "}
+            {calcTimeLeft(rally.endTime).hours} hours left
           </div>
+
+          <Card className="mt-20">
+            <CardContent className="p-2">
+              {userHasVoted[rally._id] ? (
+                <div className="text-center text-green-500 mb-4">
+                  You have already submitted an image.
                 </div>
+              ) : (
+                <form onSubmit={handleSubmit}>
+                  <Input
+                    id="file"
+                    type="file"
+                    onChange={(e) => {
+                      const files = e.target.files;
+                      if (files) {
+                        setFile(files[0]);
+                      }
+                    }}
+                    accept="image/png, image/jpeg"
+                  />
+                  <div className="flex justify-center">
+                    <Button
+                      type="submit"
+                      disabled={uploading}
+                      className="mt-2 w-full"
+                    >
+                      Upload
+                    </Button>
+                  </div>
+                </form>
               )}
-            </div>
-          ) : (
-            <p className="text-center text-red-500">No ongoing rally</p>
-          )}
-          
+            </CardContent>
+          </Card>
+          <div className="absolute bottom-5 left-0 right-0 text-center">
+            {rally.submissions.length} uploads
+          </div>
         </div>
-        {rally?.votingOpen &&
-          (userVoted ? (
-            <div className="mt-5">
-              <RallyResults rallyId={rally._id} />
-            </div>
-          ) : (
-            <div className="mt-10">
-              <RallyVoteCarousel rallyId={rally?._id} onVote={handleVote} />
-            </div>
-          ))}
-      </div>
+      )}
+      {rally.votingOpen &&
+        (userHasVoted[rally._id] ? (
+          <div className="mt-5">
+            <RallyResults rallyId={rally._id} />
+          </div>
+        ) : (
+          <div className="mt-10">
+            <RallyVoteCarousel rallyId={rally._id} onVote={handleVote} />
+          </div>
+        ))}
     </>
   );
 }
-  
+
+const RallyPage = () => {
+  const { username } = useUser();
+  const [rallies, setRallies] = useState<any[]>([]);
+  const [userHasVoted, setUserHasVoted] = useState<any>({});
+  const router = useRouter();
+
+  useEffect(() => {
+    const fetchRallies = async () => {
+      router.refresh();
+      const res = await fetch("/api/rally", { cache: "no-store" });
+      const data = await res.json();
+
+      if (data.rallies) {
+        setRallies(data.rallies);
+        const votes = data.rallies.reduce((acc: any, rally: any) => {
+          acc[rally._id] = rally.submissions.some((submission: any) =>
+            submission.votes.some((vote: any) => vote.username === username)
+          );
+          return acc;
+        }, {});
+        setUserHasVoted(votes);
+      }
+      if (data.message) {
+        alert(data.message); //TODO improve
+      }
+    };
+
+    if (username) {
+      fetchRallies();
+    }
+  }, [username, router]);
+
+  return (
+    <div className="m-6 mb-1">
+      <div className="flex items-center">
+        <Link className="text-lg leading-none mr-auto cursor-pointer" href="/">
+          <ArrowLeft />
+        </Link>
+      </div>
+      <h1 className="text-xl font-bold text-center">Rallies</h1>
+      {rallies.length > 0 ? (
+        <Suspense fallback={
+          <div className="flex items-center justify-center h-screen">
+            <ClipLoader size={50} color={"FFFFFF"} loading={true} />
+          </div>
+        }>
+          <RallyTabs
+            rallies={rallies}
+            userHasVoted={userHasVoted}
+            setUserHasVoted={setUserHasVoted}
+          />
+        </Suspense>
+      ) : (
+        <div className="flex items-center justify-center ">
+          <ClipLoader size={50} color={"FFFFFF"} loading={true} />
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default RallyPage;

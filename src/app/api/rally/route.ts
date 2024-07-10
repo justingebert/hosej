@@ -2,6 +2,8 @@ import dbConnect from "@/lib/dbConnect";
 import Rally from "@/db/models/rally";
 import { NextResponse } from "next/server";
 
+const MAX_RALLIES = 2;
+
 export const revalidate = 0;
 
 //get current rally and set state
@@ -10,37 +12,41 @@ export async function GET(req: Request) {
     await dbConnect();
     const currentTime = new Date();
 
-    const rally = await Rally.findOne({ active: true});
-    if (!rally) {
-      return NextResponse.json({ message: "No active rally", rally: null });
+    // Find all active rallies
+    const rallies = await Rally.find({ active: true }).limit(MAX_RALLIES);
+
+    if (rallies.length === 0) {
+      return NextResponse.json({ message: "No active rallies", rallies: [] });
     }
 
-   if (currentTime >= new Date(rally.endTime) && !rally.votingOpen) {
-      rally.votingOpen = true;
-      rally.endTime = new Date(currentTime.getTime() + 24 * 60 * 60 * 1000); // Set end time for voting period
-      await rally.save();
-    }
+    for (let rally of rallies) {
+      if (currentTime >= new Date(rally.endTime) && !rally.votingOpen) {
+        rally.votingOpen = true;
+        rally.endTime = new Date(currentTime.getTime() + 24 * 60 * 60 * 1000); // Set end time for voting period
+        await rally.save();
+      }
 
-    if (rally.votingOpen && currentTime >= new Date(rally.endTime)) {
-      rally.active = false;
-      rally.used = true;
-      rally.votingOpen = false;
-      await rally.save();
+      if (rally.votingOpen && currentTime >= new Date(rally.endTime)) {
+        rally.active = false;
+        rally.used = true;
+        rally.votingOpen = false;
+        await rally.save();
 
-      // Start a new rally
-      const newRally = await Rally.findOne({ active: false, used: false });
-      if (newRally) {
-        newRally.active = true;
-        newRally.startTime = currentTime;
-        newRally.endTime = new Date(currentTime.getTime() + newRally.lengthInDays * 24 * 60 * 60 * 1000); // Set end time based on lengthInDays
-        await newRally.save();
+        // Start a new rally
+        const newRally = await Rally.findOne({ active: false, used: false });
+        if (newRally) {
+          newRally.active = true;
+          newRally.startTime = currentTime;
+          newRally.endTime = new Date(currentTime.getTime() + newRally.lengthInDays * 24 * 60 * 60 * 1000); // Set end time based on lengthInDays
+          await newRally.save();
+        }
       }
     }
 
-    return NextResponse.json({ rally });
-  } catch (error) {
+    return NextResponse.json({ rallies });
+  } catch (error:any) {
     console.error(error);
-    return NextResponse.json({ message: error });
+    return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }
 
