@@ -1,7 +1,6 @@
 import dbConnect from "@/lib/dbConnect";
 import Rally from "@/db/models/rally";
 import { NextResponse } from "next/server";
-import user from "@/db/models/user";
 
 export const revalidate = 0;
 
@@ -9,30 +8,33 @@ export const revalidate = 0;
 export async function GET(req: Request) {
   try {
     await dbConnect();
-    const rally = await Rally.findOne({ active: true });
+    const currentTime = new Date();
+
+    const rally = await Rally.findOne({ active: true});
     if (!rally) {
       return NextResponse.json({ message: "No active rally", rally: null });
     }
 
-    const currentTime = new Date();
-    if (currentTime >= new Date(rally.endTime) && !rally.votingOpen) {
+   if (currentTime >= new Date(rally.endTime) && !rally.votingOpen) {
       rally.votingOpen = true;
-      rally.resultsShowing = false;
+      rally.endTime = new Date(currentTime.getTime() + 24 * 60 * 60 * 1000); // Set end time for voting period
       await rally.save();
     }
 
-    const totalUsers = await user.countDocuments({});
-    const totalVotes = rally.submissions.reduce(
-      (acc: any, submission: any) => acc + submission.votes.length,
-      0
-    );
-    const allUsersVoted = totalVotes >= totalUsers;
-
-    if (allUsersVoted) {
-      rally.votingOpen = false;
-      rally.resultsShowing = true;
+    if (rally.votingOpen && currentTime >= new Date(rally.endTime)) {
+      rally.active = false;
       rally.used = true;
+      rally.votingOpen = false;
       await rally.save();
+
+      // Start a new rally
+      const newRally = await Rally.findOne({ active: false, used: false });
+      if (newRally) {
+        newRally.active = true;
+        newRally.startTime = currentTime;
+        newRally.endTime = new Date(currentTime.getTime() + newRally.lengthInDays * 24 * 60 * 60 * 1000); // Set end time based on lengthInDays
+        await newRally.save();
+      }
     }
 
     return NextResponse.json({ rally });

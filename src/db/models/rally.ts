@@ -1,4 +1,3 @@
-import { create } from "domain";
 import mongoose from "mongoose";
 
 export interface IPictureSubmission {
@@ -17,7 +16,6 @@ export interface IRally extends mongoose.Document {
   submissions: IPictureSubmission[];
   startTime: Date;
   endTime: Date;
-  resultsShowing: boolean;
   votingOpen: boolean;
   used: boolean;
   active: boolean;
@@ -41,7 +39,6 @@ const rallySchema = new mongoose.Schema({
   submissions: [pictureSubmissionSchema],
   startTime: { type: Date, required: false },
   endTime: { type: Date, required: false },
-  resultsShowing: { type: Boolean, default: false },
   votingOpen: { type: Boolean, default: false },
   used: { type: Boolean, default: false },
   active: { type: Boolean, default: false },
