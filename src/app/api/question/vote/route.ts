@@ -3,6 +3,8 @@ import Question from "@/db/models/Question";
 import { NextResponse } from 'next/server'
 import user from "@/db/models/user";
 
+const POINTS = 1;
+
 export const revalidate = 0
 
 //vote on a question
@@ -31,6 +33,9 @@ export async function POST(req: Request) {
       { $push: { answers: { username: votingUser._id, response: response } } },
       { new: true, runValidators: true }
     );
+
+    votingUser.points.push(votingUser.points[votingUser.points.length - 1] + POINTS);
+    votingUser.save();
 
     return NextResponse.json({ message: "Vote submitted" });
   } catch (error) {

@@ -1,6 +1,9 @@
 import dbConnect from "@/lib/dbConnect";
 import Question from "@/db/models/Question";
 import { NextResponse, type NextRequest } from 'next/server'
+import user from "@/db/models/user";
+
+const POINTS = 3;
 
 export const revalidate = 0
 
@@ -17,6 +20,11 @@ export async function POST(req: NextRequest){
         if(!question){
             return NextResponse.json({ message: "No question found" });
         }
+
+        const submittingUser = await user.findOne({ username: data.submittedBy });
+
+        submittingUser.points.push(submittingUser.points[submittingUser.points.length - 1] + POINTS);
+        submittingUser.save();
 
         return Response.json({ message: "Created Question"});
     }

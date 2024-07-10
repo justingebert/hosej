@@ -2,6 +2,8 @@ import Rally from "@/db/models/rally";
 import dbConnect from "@/lib/dbConnect";
 import user from "@/db/models/user";
 
+const POINTS = 2
+
 //create submission 
 export async function POST(request: Request) {
   try {
@@ -25,6 +27,9 @@ export async function POST(request: Request) {
     if (!updatedRally) {
       return Response.json({ message: "Rally not found" });
     }
+
+    sendUser.points.push(sendUser.points[sendUser.points.length - 1] + POINTS);
+    sendUser.save();
 
     return Response.json({
       message: "Picture submission added successfully",
