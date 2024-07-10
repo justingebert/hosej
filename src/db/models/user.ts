@@ -12,7 +12,7 @@ const UserSchema = new mongoose.Schema({
     },
     points: {
         type: [Number],
-        default: [1000]
+        default: [0]
     },
     createdAt: {
         type: Date, 
