@@ -22,7 +22,7 @@ export async function POST(req: Request){
         if (user) {
             return NextResponse.json({ message: 'User already voted' });
         }
-        submission.votes.push({ username: userThatVoted });
+        submission.votes.push({ username: userThatVoted, time: Date.now() });
         
         await rally.save();
 

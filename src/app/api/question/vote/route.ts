@@ -30,7 +30,7 @@ export async function POST(req: Request) {
 
     const updatedQuestion = await Question.findByIdAndUpdate(
       questionId,
-      { $push: { answers: { username: votingUser._id, response: response } } },
+      { $push: { answers: { username: votingUser._id, response: response, time: Date.now() } } },
       { new: true, runValidators: true }
     );
 

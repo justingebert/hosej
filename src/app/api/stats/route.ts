@@ -10,13 +10,14 @@ export const revalidate = 0
 export async function GET(req: Request, res: NextResponse) {
   await dbConnect();
 
+
   const userCount = await user.countDocuments({});
-    const questionCount = await Question.countDocuments({});
-    const questionsLeftCount = await Question.countDocuments({used: false});
-    const messagesCount = await ChatMessage.countDocuments({});
-    const RallyCount = await Rally.countDocuments({});
-    const RalliesLeftCount = await Rally.countDocuments({used: false});
-    
-    return NextResponse.json({userCount, questionCount, questionsLeftCount, messagesCount, RallyCount, RalliesLeftCount});
+  const questionCount = await Question.countDocuments({});
+  const questionsLeftCount = await Question.countDocuments({ used: false });
+  const messagesCount = await ChatMessage.countDocuments({});
+  const RallyCount = await Rally.countDocuments({});
+  const RalliesLeftCount = await Rally.countDocuments({ used: false });
+
+  return NextResponse.json({ userCount, questionCount, questionsLeftCount, messagesCount, RallyCount, RalliesLeftCount });
 }
 

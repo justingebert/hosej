@@ -16,6 +16,7 @@ export async function POST(request: Request) {
       userId: sendUser._id,
       username: sendUser.username,
       imageUrl: imageUrl,
+      time: Date.now(),
     };
     ``;
     const updatedRally = await Rally.findByIdAndUpdate(

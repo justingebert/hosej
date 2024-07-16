@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { History } from "lucide-react";
+import Link from "next/link";
 
 export default function Home() {
   const router = useRouter();
@@ -33,7 +34,9 @@ export default function Home() {
         <History />
       </Button>
       </div>
-        <h1 className="text-4xl font-bold">HoseJ</h1>
+        <Link href="/dashboard/stats">
+          <h1 className="text-4xl font-bold">HoseJ</h1>
+        </Link>
         <div className="absolute right-10">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

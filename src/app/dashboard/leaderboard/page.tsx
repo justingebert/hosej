@@ -52,14 +52,14 @@ const LeaderboardPage = () => {
         <TableHeader>
           <TableRow>
             <TableHead className="w-[100px]">Username</TableHead>
-            <TableHead>Total Points</TableHead>
+            <TableHead className="text-right">Points</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {sortedUsers.map((user) => (
             <TableRow key={user._id}>
               <TableCell className="font-medium">{user.username}</TableCell>
-              <TableCell>{getCurrentPoints(user.points)}</TableCell>
+              <TableCell className="text-right" >{getCurrentPoints(user.points)}</TableCell>
             </TableRow>
           ))}
         </TableBody>
