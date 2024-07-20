@@ -18,7 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ClipLoader } from "react-spinners";
 import imageCompression from 'browser-image-compression';
 
-function RallyTabs({ rallies, userHasVoted, setUserHasVoted }: any) {
+function RallyTabs({ rallies, userHasVoted, userHasUploaded, setUserHasVoted }: any) {
   const searchParams = useSearchParams();
   const defaultTab = searchParams.get('returnTo') || (rallies.length > 0 ? rallies[0]._id : undefined);
 
@@ -35,14 +35,14 @@ function RallyTabs({ rallies, userHasVoted, setUserHasVoted }: any) {
       </div>
       {rallies.map((rally: any) => (
         <TabsContent key={rally._id} value={rally._id}>
-          <RallyTabContent rally={rally} userHasVoted={userHasVoted} setUserHasVoted={setUserHasVoted} />
+          <RallyTabContent rally={rally} userHasVoted={userHasVoted} userHasUploaded={userHasUploaded} setUserHasVoted={setUserHasVoted} />
         </TabsContent>
       ))}
     </Tabs>
   );
 }
 
-function RallyTabContent({ rally, userHasVoted, setUserHasVoted }: any) {
+function RallyTabContent({ rally, userHasVoted, userHasUploaded,setUserHasVoted }: any) {
   const { username } = useUser();
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -184,7 +184,7 @@ function RallyTabContent({ rally, userHasVoted, setUserHasVoted }: any) {
 
           <Card className="mt-20">
             <CardContent className="p-2">
-              {userHasVoted[rally._id] ? (
+              {userHasUploaded[rally._id] ? (
                 <div className="text-center text-green-500 mb-4">
                   You have already submitted an image.
                 </div>
@@ -237,6 +237,7 @@ const RallyPage = () => {
   const { username } = useUser();
   const [rallies, setRallies] = useState<any[]>([]);
   const [userHasVoted, setUserHasVoted] = useState<any>({});
+  const [userUploaded, setUserUploaded] = useState<any>({});
   const router = useRouter();
 
   useEffect(() => {
@@ -254,6 +255,13 @@ const RallyPage = () => {
           return acc;
         }, {});
         setUserHasVoted(votes);
+        const userHasUploaded = data.rallies.reduce((acc: any, rally: any) => {
+          acc[rally._id] = rally.submissions.some((submission: any) =>
+            submission.username === username
+          );
+          return acc;
+        }, {});
+        setUserUploaded(userHasUploaded);
       }
       if (data.message) {
         alert(data.message); //TODO improve
@@ -282,6 +290,7 @@ const RallyPage = () => {
           <RallyTabs
             rallies={rallies}
             userHasVoted={userHasVoted}
+            userHasUploaded={userUploaded}
             setUserHasVoted={setUserHasVoted}
           />
         </Suspense>
