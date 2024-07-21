@@ -1,8 +1,10 @@
 import dbConnect from "@/lib/dbConnect";
 import Rally from "@/db/models/rally";
 import { NextResponse } from "next/server";
+import user from "@/db/models/user";
 
 const MAX_RALLIES = 2;
+const POINTS = 3;
 
 export const revalidate = 0;
 
@@ -64,6 +66,9 @@ export async function POST(req: Request) {
     });
 
     await newRally.save();
+
+    const submittingUser = await user.findOne({ username: submittedBy });
+    await submittingUser.addPoints(POINTS);
 
     return NextResponse.json({ message: "Rally created successfully" });
   } catch (error: any) {

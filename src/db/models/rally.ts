@@ -7,7 +7,9 @@ export interface IPictureSubmission {
   votes: [
     {
       username: String
-    }
+      time: Date
+    },
+    time: Date
   ];
 }
 
@@ -30,6 +32,7 @@ const pictureSubmissionSchema = new mongoose.Schema({
   votes: [
     {
       username: { type: String, required: true},
+      time:     { type: Date},
     }
   ]
 });

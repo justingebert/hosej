@@ -2,6 +2,8 @@ import dbConnect from "@/lib/dbConnect";
 import Rally from "@/db/models/rally";
 import { NextResponse } from 'next/server'
 
+const POINTS = 1;
+
 //vote on a submission
 export async function POST(req: Request){
     try{
@@ -20,9 +22,12 @@ export async function POST(req: Request){
         if (user) {
             return NextResponse.json({ message: 'User already voted' });
         }
-        submission.votes.push({ username: userThatVoted });
+        submission.votes.push({ username: userThatVoted, time: Date.now() });
         
         await rally.save();
+
+        const votingUser = await user.findOne({ username: userThatVoted });
+        await votingUser.addPoints(POINTS);
        
         return NextResponse.json("Vote added successfully")
     }catch (error) {

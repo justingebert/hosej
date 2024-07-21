@@ -1,3 +1,4 @@
+import { time } from "console";
 import mongoose from "mongoose";
 
 enum QuestionType {
@@ -16,7 +17,7 @@ export interface IQuestion extends mongoose.Document {
   questionType: QuestionType;
   question: string;
   options?: any;
-  answers: [{ userId: mongoose.Schema.Types.ObjectId; response: any }];
+  answers: [{ userId: mongoose.Schema.Types.ObjectId; response: any, time: Date}];
   createdAt: Date;
   used: boolean;
   active: boolean;
@@ -36,6 +37,7 @@ const questionSchema = new mongoose.Schema({
     {
       username: { type: mongoose.Schema.Types.ObjectId, ref: "user", required: true},
       response: { type: mongoose.Schema.Types.Mixed, required: true},
+      time:     { type: Date},
     },
   ],
   createdAt: { type: Date, default: Date.now },
