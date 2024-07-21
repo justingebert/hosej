@@ -10,6 +10,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 type PointsEntry = {
   points: number;
@@ -53,6 +55,11 @@ const LeaderboardPage = () => {
 
   return (
     <div className="m-6">
+      <div className="flex w-full mb-4 justify-between">
+        <Link className="my-auto" href="/">
+          <ArrowLeft />
+        </Link>
+      </div>
       <Table>
         <TableCaption>Leaderboard</TableCaption>
         <TableHeader>

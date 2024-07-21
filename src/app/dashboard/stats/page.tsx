@@ -31,6 +31,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
+import { useRouter } from "next/navigation";
 
 type Statistics = {
   userCount: number;
@@ -53,6 +54,7 @@ const StatsPage = () => {
   const [stats, setStats] = useState<Statistics | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { setTheme } = useTheme();
+  const router = useRouter();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -201,8 +203,8 @@ const StatsPage = () => {
             </span>
           </div>
         </CardContent>
-        <CardFooter className="flex justify-center">
-          <Button variant="outline">Create</Button>
+        <CardFooter className="flex justify-center z-10">
+            <Button variant="outline" onClick={() => router.push("/dashboard/create")}>Create</Button>
         </CardFooter>
       </Card>
 
@@ -271,8 +273,8 @@ const StatsPage = () => {
             </span>
           </div>
         </CardContent>
-        <CardFooter className="flex justify-center">
-          <Button variant="outline">Create</Button>
+        <CardFooter className="flex justify-center z-10">
+            <Button variant="outline" onClick={() => router.push("/dashboard/create")} >Create</Button>
         </CardFooter>
       </Card>
 
