@@ -34,8 +34,7 @@ export async function POST(req: Request) {
       { new: true, runValidators: true }
     );
 
-    votingUser.points.push(votingUser.points[votingUser.points.length - 1] + POINTS);
-    votingUser.save();
+    await votingUser.addPoints(POINTS);
 
     return NextResponse.json({ message: "Vote submitted" });
   } catch (error) {

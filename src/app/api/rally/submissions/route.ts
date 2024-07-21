@@ -29,8 +29,7 @@ export async function POST(request: Request) {
       return Response.json({ message: "Rally not found" });
     }
 
-    sendUser.points.push(sendUser.points[sendUser.points.length - 1] + POINTS);
-    sendUser.save();
+    await sendUser.addPoints(POINTS);
 
     return Response.json({
       message: "Picture submission added successfully",

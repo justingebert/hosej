@@ -3,12 +3,11 @@
 import React, { useState, useEffect } from "react";
 import { ClipLoader } from "react-spinners";
 import Link from "next/link";
-import { ArrowLeft, Divide } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { RadialBarChart, RadialBar, PolarRadiusAxis, Label } from "recharts";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -16,8 +15,6 @@ import {
 import {
   ChartConfig,
   ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
 } from "@/components/ui/chart";
 import {
   Table,
@@ -25,14 +22,22 @@ import {
   TableCell,
   TableRow,
 } from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
 
 type Statistics = {
   userCount: number;
-  questionCount: number;
+  questionsUsedCount: number;
   questionsLeftCount: number;
   messagesCount: number;
-  RallyCount: number;
+  RalliesUsedCount: number;
   RalliesLeftCount: number;
 };
 
@@ -47,6 +52,7 @@ const fetchStatistics = async (): Promise<Statistics> => {
 const StatsPage = () => {
   const [stats, setStats] = useState<Statistics | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { setTheme } = useTheme();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -73,47 +79,69 @@ const StatsPage = () => {
   }
 
   const chartDataQuestions = [
-    { questionCount: stats.questionCount, questionsLeftCount: stats.questionsLeftCount }];
+    { questionsUsedCount: stats.questionsUsedCount, questionsLeftCount: stats.questionsLeftCount }
+  ];
 
-  const totalQuestions = chartDataQuestions[0].questionCount + chartDataQuestions[0].questionsLeftCount;
+  const totalQuestions = chartDataQuestions[0].questionsUsedCount + chartDataQuestions[0].questionsLeftCount;
 
   const chartDataRallies = [
-    { name: 'Rallies', value: stats.RallyCount },
-    { name: 'Rallies Left', value: stats.RalliesLeftCount }
+    { RalliesUsedCount: stats.RalliesUsedCount, RalliesLeftCount: stats.RalliesLeftCount }
   ];
+
+  const totalRallies = chartDataRallies[0].RalliesUsedCount + chartDataRallies[0].RalliesLeftCount;
 
   const chartConfig = {
     questions: {
       label: "Questions",
-      color: "#8284d8",
+      color: "hsl(var(--chart-1))",
     },
     questionsleft: {
       label: "Questions Left",
-      color: "#82ca9d",
+      color: "hsl(var(--chart-3))",
     },
     rallies: {
       label: "Rallies",
-      color: "#8884d8",
+      color: "hsl(var(--chart-1))",
     },
-    "Rallies Left": {
+    ralliesleft: {
       label: "Rallies Left",
-      color: "#82ca9d",
+      color: "hsl(var(--chart-4))",
     },
   } satisfies ChartConfig;
 
   return (
     <div className="m-6 flex flex-col items-center">
-      <div className="flex items-center w-full mb-4">
-        <Link className="text-lg leading-none mr-auto cursor-pointer" href="/">
+      <div className="flex w-full mb-4 justify-between">
+        <Link className="my-auto" href="/">
           <ArrowLeft />
         </Link>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="icon">
+              <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+              <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+              <span className="sr-only">Toggle theme</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => setTheme("light")}>
+              Light
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setTheme("dark")}>
+              Dark
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setTheme("system")}>
+              System
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <Card className="flex flex-col mb-4 w-full">
         <CardHeader className="items-center">
           <CardTitle>Questions</CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-1 items-center">
+        <CardContent className="flex flex-col items-center -mt-6">
           <ChartContainer
             config={chartConfig}
             className="mx-auto aspect-square w-full"
@@ -123,14 +151,12 @@ const StatsPage = () => {
               endAngle={180}
               innerRadius={80}
               outerRadius={130}
-              className=""
             >
               <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
                 <Label
                   content={({ viewBox }) => {
                     if (viewBox && "cx" in viewBox && "cy" in viewBox) {
                       return (
-
                         <text x={viewBox.cx} y={viewBox.cy} textAnchor="middle">
                           <tspan
                             x={viewBox.cx}
@@ -147,7 +173,7 @@ const StatsPage = () => {
                             Questions
                           </tspan>
                         </text>
-                      )
+                      );
                     }
                   }}
                 />
@@ -160,7 +186,7 @@ const StatsPage = () => {
                 className="stroke-transparent stroke-2"
               />
               <RadialBar
-                dataKey="questionCount"
+                dataKey="questionsUsedCount"
                 stackId="a"
                 fill="var(--color-questions)"
                 cornerRadius={3}
@@ -168,27 +194,33 @@ const StatsPage = () => {
               />
             </RadialBarChart>
           </ChartContainer>
+          <div className="-mt-20 text-center text-xl">
+            Questions Left:{" "}
+            <span className="text-chart-3 font-bold">
+              {stats.questionsLeftCount}
+            </span>
+          </div>
         </CardContent>
         <CardFooter className="flex justify-center">
           <Button variant="outline">Create</Button>
         </CardFooter>
       </Card>
 
-      <Card className="flex flex-col">
-        <CardHeader className="items-center pb-0">
+      <Card className="flex flex-col mb-4 w-full">
+        <CardHeader className="items-center">
           <CardTitle>Rallies</CardTitle>
-          <CardDescription>Total and Remaining</CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-1 items-center pb-0">
+        <CardContent className="flex flex-col items-center -mt-6">
           <ChartContainer
             config={chartConfig}
-            className="mx-auto aspect-square w-full max-w-[250px] p-10"
+            className="mx-auto aspect-square w-full"
           >
             <RadialBarChart
               data={chartDataRallies}
               endAngle={180}
               innerRadius={80}
               outerRadius={130}
+              className=""
             >
               <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
                 <Label
@@ -201,7 +233,7 @@ const StatsPage = () => {
                             y={(viewBox.cy || 0) - 16}
                             className="fill-foreground text-2xl font-bold"
                           >
-                            {stats.RallyCount.toLocaleString()}
+                            {totalRallies.toLocaleString()}
                           </tspan>
                           <tspan
                             x={viewBox.cx}
@@ -211,21 +243,39 @@ const StatsPage = () => {
                             Rallies
                           </tspan>
                         </text>
-                      )
+                      );
                     }
                   }}
                 />
               </PolarRadiusAxis>
               <RadialBar
-                dataKey="value"
+                dataKey="RalliesLeftCount"
+                stackId="a"
+                fill="var(--color-ralliesleft)"
+                cornerRadius={3}
+                className="stroke-transparent stroke-2"
+              />
+              <RadialBar
+                dataKey="RalliesUsedCount"
+                stackId="a"
                 fill="var(--color-rallies)"
-                cornerRadius={5}
+                cornerRadius={3}
                 className="stroke-transparent stroke-2"
               />
             </RadialBarChart>
           </ChartContainer>
+          <div className="-mt-20 text-center text-xl">
+            Rallies Left:{" "}
+            <span className="text-chart-4 font-bold">
+              {stats.RalliesLeftCount}
+            </span>
+          </div>
         </CardContent>
+        <CardFooter className="flex justify-center">
+          <Button variant="outline">Create</Button>
+        </CardFooter>
       </Card>
+
       <Table className="w-full max-w-md mb-4">
         <TableBody>
           <TableRow>
@@ -238,7 +288,6 @@ const StatsPage = () => {
           </TableRow>
         </TableBody>
       </Table>
-
     </div>
   );
 };

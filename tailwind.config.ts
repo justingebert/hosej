@@ -1,3 +1,4 @@
+import { BarChart3 } from "lucide-react"
 import type { Config } from "tailwindcss"
 
 const config = {
@@ -56,6 +57,7 @@ const config = {
           DEFAULT: "hsl(var(--secondary-darker))",
           foreground: "hsl(var(--secondary-darker-foreground))",
         },
+        chart3: "hsl(var(--chart-3))",
       },
       borderRadius: {
         lg: "var(--radius)",

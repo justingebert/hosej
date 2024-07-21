@@ -27,8 +27,7 @@ export async function POST(req: Request){
         await rally.save();
 
         const votingUser = await user.findOne({ username: userThatVoted });
-        votingUser.points.push(votingUser.points[votingUser.points.length - 1] + POINTS);
-        votingUser.save();
+        await votingUser.addPoints(POINTS);
        
         return NextResponse.json("Vote added successfully")
     }catch (error) {

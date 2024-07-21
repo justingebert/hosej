@@ -22,9 +22,7 @@ export async function POST(req: NextRequest){
         }
 
         const submittingUser = await user.findOne({ username: data.submittedBy });
-
-        submittingUser.points.push(submittingUser.points[submittingUser.points.length - 1] + POINTS);
-        submittingUser.save();
+        await submittingUser.addPoints(POINTS);
 
         return Response.json({ message: "Created Question"});
     }
