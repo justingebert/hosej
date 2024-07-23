@@ -8,8 +8,10 @@ import Link from "next/link";
 import { ArrowLeft } from 'lucide-react';
 import CreateQuestionPage from "@/components/Question/createQuestion.client";
 import CreateRallyPage from "@/components/Rally/createRally.client";
+import useFcmToken from "../../../../hooks/useFcmToken";
 
 const CreatePage = () => {
+
   return (
     <div className="m-6">
       <div className="flex items-center">

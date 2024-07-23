@@ -9,7 +9,10 @@ const withPWA = withPWAInit({
   dest: "public",
   reloadOnOnline: true,
   swcMinify: true,
-  disable: process.env.NODE_ENV === "development",
+  //disable: process.env.NODE_ENV === "development",
+  //disable: true
+  ustomWorkerDest: "public", // defaults to `dest`
+  customWorkerPrefix: "firebase-messaging-sw",
 });
 
 const nextConfig = {

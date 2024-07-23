@@ -13,10 +13,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { History } from "lucide-react";
 import Link from "next/link";
+import useFcmToken from "../../hooks/useFcmToken";
 
 export default function Home() {
   const router = useRouter();
   const { setTheme } = useTheme();
+  const { fcmToken, notificationPermissionStatus } = useFcmToken();
+  // Use the token as needed
+  fcmToken && console.log('FCM token:', fcmToken);
 
   useEffect(() => {
     const user = localStorage.getItem("user");
@@ -68,6 +72,7 @@ export default function Home() {
           Create
         </Button>
       </div>
+      <button>sendNot</button>
     </div>
   );
 }
