@@ -4,16 +4,11 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
-import { Moon, Sun } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { History } from "lucide-react";
 import Link from "next/link";
 import useFcmToken from "../../hooks/useFcmToken";
+import { getMessaging, onMessage } from 'firebase/messaging';
+import app from "@/firebase";
 
 export default function Home() {
   const router = useRouter();
@@ -28,6 +23,19 @@ export default function Home() {
     if (!user) {
       router.push("/signin");
     }
+
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+      const messaging = getMessaging(app);
+      const unsubscribe = onMessage(messaging, (payload) => {
+        console.log('Foreground push notification received:', payload);
+        // Handle the received push notification while the app is in the foreground
+        // You can display a notification or update the UI based on the payload
+      });
+      return () => {
+        unsubscribe(); // Unsubscribe from the onMessage event
+      };
+    }
+
   }, [router]);
 
   return (
