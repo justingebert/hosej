@@ -80,7 +80,6 @@ const DailyQuestionPage = () => {
     }
   }, [username, router]);
 
-  
   return (
     <>
       <BackLink href={'/'} />
