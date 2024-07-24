@@ -30,7 +30,7 @@ export default function RootLayout({
         <link rel="icon" href="AppIcons/favicon.ico" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"></meta>
         </head>
-        <body>
+        <body className="m-6">
           <AppWrapper>
             {children}
             </AppWrapper>

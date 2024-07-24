@@ -1,16 +1,16 @@
 "use client";
 
 import React, { useState, useEffect, Suspense } from "react";
-import { useUser } from "../../../components/UserContext";
-import VoteOptions from "../../../components/Question/VotingOptions.client";
-import VoteResults from "../../../components/Question/VoteResults.client";
-import { Button } from "@/components/ui/button";
+import { useUser } from "@/components/UserContext";
+import VoteOptions from "@/components/Question/VotingOptions.client";
+import VoteResults from "@/components/Question/VoteResults.client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft } from 'lucide-react';
 import {  ClipLoader } from "react-spinners";
+import BackLink from "@/components/BackLink";
 
 function QuestionsTabs({ questions, userHasVoted, setUserHasVoted }: any) {
   const searchParams = useSearchParams();
@@ -81,12 +81,8 @@ const DailyQuestionPage = () => {
   }, [username, router]);
 
   return (
-    <div className="m-6 mb-1">
-      <div className="flex items-center">
-        <Link className="text-lg leading-none mr-auto cursor-pointer" href="/">
-          <ArrowLeft />
-        </Link>
-      </div>
+    <>
+      <BackLink href={'/'} />
       <h1 className="text-xl font-bold text-center">Daily Questions</h1>
       {questions.length > 0 ? (
         <Suspense fallback={
@@ -105,7 +101,7 @@ const DailyQuestionPage = () => {
           <ClipLoader size={50} color={"FFFFFF"} loading={true}/>
         </div>
       )}
-    </div>
+    </>
   );
 };
 

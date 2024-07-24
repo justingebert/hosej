@@ -7,6 +7,7 @@ import { useUser } from "@/components/UserContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ClipLoader } from "react-spinners";
+import BackLink from "@/components/BackLink";
 
 const QuestionHistoryPage = () => {
   const { username } = useUser();
@@ -40,12 +41,8 @@ const QuestionHistoryPage = () => {
   };
 
   return (
-    <div className="m-6 mb-1">
-      <div className="flex items-center">
-        <Link className="text-lg leading-none mr-auto cursor-pointer" href="/">
-          <ArrowLeft />
-        </Link>
-      </div>
+    <>
+      <BackLink href={'/'} />
       <h1 className="text-xl font-bold text-center">Question History</h1>
       <div className="mt-5">
         {questions.length > 0 ? (
@@ -75,7 +72,7 @@ const QuestionHistoryPage = () => {
           </div >
         )}
       </div>
-    </div>
+    </>
   );
 };
 

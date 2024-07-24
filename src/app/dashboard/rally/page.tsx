@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ClipLoader } from "react-spinners";
 import imageCompression from 'browser-image-compression';
+import BackLink from "@/components/BackLink";
 
 function RallyTabs({ rallies, userHasVoted, userHasUploaded, setUserHasVoted }: any) {
   const searchParams = useSearchParams();
@@ -274,12 +275,8 @@ const RallyPage = () => {
   }, [username, router]);
 
   return (
-    <div className="m-6 mb-1">
-      <div className="flex items-center">
-        <Link className="text-lg leading-none mr-auto cursor-pointer" href="/">
-          <ArrowLeft />
-        </Link>
-      </div>
+    <>
+      <BackLink href={'/'} />
       <h1 className="text-xl font-bold text-center">Rallies</h1>
       {rallies.length > 0 ? (
         <Suspense fallback={
@@ -299,7 +296,7 @@ const RallyPage = () => {
           <ClipLoader size={50} color={"FFFFFF"} loading={true} />
         </div>
       )}
-    </div>
+    </>
   );
 };
 

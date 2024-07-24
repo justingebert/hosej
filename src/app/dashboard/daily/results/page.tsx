@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowLeft } from 'lucide-react';
 import { ClipLoader } from "react-spinners";
 import VoteResults from "@/components/Question/VoteResults.client";
+import BackLink from "@/components/BackLink";
 
 const ResultsPage = () => {
   const searchParams = useSearchParams();
@@ -28,12 +29,8 @@ const ResultsPage = () => {
   }, [questionId]);
 
   return (
-    <div className="m-6 mb-1">
-      <div className="flex items-center">
-        <Link className="text-lg leading-none mr-auto cursor-pointer" href="/dashboard/history">
-          <ArrowLeft />
-        </Link>
-      </div>
+    <>
+      <BackLink href={'/dashboard/history'} />
       {loading ? (
         <div className="flex items-center justify-center h-screen">
           <ClipLoader size={50} color={"#FFFFFF"} loading={true} />
@@ -53,7 +50,7 @@ const ResultsPage = () => {
       ) : (
         <div className="text-center">Question not found</div>
       )}
-    </div>
+    </>
   );
 };
 
