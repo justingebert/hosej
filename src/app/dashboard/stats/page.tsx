@@ -1,9 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ClipLoader } from "react-spinners";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import { RadialBarChart, RadialBar, PolarRadiusAxis, Label } from "recharts";
 import {
   Card,
@@ -22,18 +19,11 @@ import {
   TableCell,
   TableRow,
 } from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Moon, Sun } from "lucide-react";
-import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 import BackLink from "@/components/BackLink";
 import ThemeSelector from "@/components/ThemeSelector";
+import Loader from "@/components/Loader";
 
 type Statistics = {
   userCount: number;
@@ -53,19 +43,21 @@ const fetchStatistics = async (): Promise<Statistics> => {
 };
 
 const StatsPage = () => {
+  const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<Statistics | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const { setTheme } = useTheme();
   const router = useRouter();
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const statsData = await fetchStatistics();
         setStats(statsData);
       } catch (error: any) {
         setError(error.message);
       }
+      setLoading(false);
     };
     fetchData();
   }, []);
@@ -74,13 +66,8 @@ const StatsPage = () => {
     return <p className="text-red-500">{error}</p>;
   }
 
-  if (!stats) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <ClipLoader size={50} color={"#000000"} loading={true} />
-      </div>
-    );
-  }
+  if (loading) return <Loader loading={true} />
+  if (!stats) return <p>No statistics avaiable</p>
 
   const chartDataQuestions = [
     { questionsUsedCount: stats.questionsUsedCount, questionsLeftCount: stats.questionsLeftCount }

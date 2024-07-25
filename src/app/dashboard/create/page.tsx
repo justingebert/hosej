@@ -4,8 +4,6 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
-import Link from "next/link";
-import { ArrowLeft } from 'lucide-react';
 import CreateQuestionPage from "@/components/Question/createQuestion.client";
 import CreateRallyPage from "@/components/Rally/createRally.client";
 import BackLink from "@/components/BackLink";

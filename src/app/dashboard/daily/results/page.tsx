@@ -2,11 +2,10 @@
 
 import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from 'next/navigation';
-import Link from "next/link";
-import { ArrowLeft } from 'lucide-react';
 import { ClipLoader } from "react-spinners";
 import VoteResults from "@/components/Question/VoteResults.client";
 import BackLink from "@/components/BackLink";
+import Loader from "@/components/Loader";
 
 const ResultsPage = () => {
   const searchParams = useSearchParams();
@@ -28,27 +27,31 @@ const ResultsPage = () => {
     }
   }, [questionId]);
 
+  if (loading) return <Loader loading={true} />
+  if (!question) return <p>No Question avaiable</p>
+
   return (
     <>
-      <BackLink href={'/dashboard/history'} />
-      {loading ? (
-        <div className="flex items-center justify-center h-screen">
-          <ClipLoader size={50} color={"#FFFFFF"} loading={true} />
-        </div>
-      ) : question ? (
+      <BackLink href={"/dashboard/history"} />
+      {question && (
         <div>
-          <h1 className="text-xl font-bold text-center mb-10 mt-10">{question.question}</h1>
+          <h1 className="text-xl font-bold text-center mb-10 mt-10">
+            {question.question}
+          </h1>
           <div className="flex flex-col items-center mb-10">
-            {question.questionType !== "text" && question.options && question.options.map((option: any, index: number) => (
-              <div key={index} className="p-4 m-2 bg-primary text-primary-foreground rounded-lg w-full max-w-md ">
-                {option}
-              </div>
-            ))}
+            {question.questionType !== "text" &&
+              question.options &&
+              question.options.map((option: any, index: number) => (
+                <div
+                  key={index}
+                  className="p-4 m-2 bg-primary text-primary-foreground rounded-lg w-full max-w-md "
+                >
+                  {option}
+                </div>
+              ))}
           </div>
-          <VoteResults question={question} available={false} className="mt-2"/>
+          <VoteResults question={question} available={false} className="mt-2" />
         </div>
-      ) : (
-        <div className="text-center">Question not found</div>
       )}
     </>
   );
