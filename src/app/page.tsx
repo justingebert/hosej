@@ -10,12 +10,35 @@ import useFcmToken from "../../hooks/useFcmToken";
 import { getMessaging, onMessage } from 'firebase/messaging';
 import app from "@/firebase";
 
+const sendTokenToServer = async (token: string) => {
+  try {
+    const response = await fetch('/api/register-push', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ token: token }),
+    });
+
+    if (response.ok) {
+      console.log('Token sent to server successfully.');
+    } else {
+      console.error('Failed to send token to server.');
+    }
+  } catch (error) {
+    console.error('An error occurred while sending the token to the server:', error);
+  }
+};
+
 export default function Home() {
   const router = useRouter();
   const { setTheme } = useTheme();
   const { fcmToken, notificationPermissionStatus } = useFcmToken();
   // Use the token as needed
-  fcmToken && console.log('FCM token:', fcmToken);
+  fcmToken && sendTokenToServer(fcmToken);
+
+
+
 
   useEffect(() => {
     const user = localStorage.getItem("user");
