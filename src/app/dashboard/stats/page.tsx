@@ -1,9 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ClipLoader } from "react-spinners";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import { RadialBarChart, RadialBar, PolarRadiusAxis, Label } from "recharts";
 import {
   Card,
@@ -22,16 +19,12 @@ import {
   TableCell,
   TableRow,
 } from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Moon, Sun } from "lucide-react";
-import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
+import BackLink from "@/components/BackLink";
+import ThemeSelector from "@/components/ThemeSelector";
+import Loader from "@/components/Loader";
+import Header from "@/components/Header";
 
 type Statistics = {
   userCount: number;
@@ -51,19 +44,21 @@ const fetchStatistics = async (): Promise<Statistics> => {
 };
 
 const StatsPage = () => {
+  const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<Statistics | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const { setTheme } = useTheme();
   const router = useRouter();
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const statsData = await fetchStatistics();
         setStats(statsData);
       } catch (error: any) {
         setError(error.message);
       }
+      setLoading(false);
     };
     fetchData();
   }, []);
@@ -72,13 +67,8 @@ const StatsPage = () => {
     return <p className="text-red-500">{error}</p>;
   }
 
-  if (!stats) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <ClipLoader size={50} color={"#000000"} loading={true} />
-      </div>
-    );
-  }
+  if (loading) return <Loader loading={true} />
+  if (!stats) return <p>No statistics avaiable</p>
 
   const chartDataQuestions = [
     { questionsUsedCount: stats.questionsUsedCount, questionsLeftCount: stats.questionsLeftCount }
@@ -112,32 +102,9 @@ const StatsPage = () => {
   } satisfies ChartConfig;
 
   return (
-    <div className="m-6 flex flex-col items-center">
-      <div className="flex w-full mb-4 justify-between">
-        <Link className="my-auto" href="/">
-          <ArrowLeft />
-        </Link>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon">
-              <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-              <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-              <span className="sr-only">Toggle theme</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => setTheme("light")}>
-              Light
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme("dark")}>
-              Dark
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setTheme("system")}>
-              System
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+    <div >
+      <Header href="/" rightComponent={<ThemeSelector />} />
+
 
       <Card className="flex flex-col mb-4 w-full">
         <CardHeader className="items-center">

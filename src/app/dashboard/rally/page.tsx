@@ -1,7 +1,5 @@
 "use client";
 
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 import { useEffect, useState, Suspense } from "react";
 import { IRally } from "@/db/models/rally";
 import { Button } from "@/components/ui/button";
@@ -15,8 +13,10 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ClipLoader } from "react-spinners";
 import imageCompression from 'browser-image-compression';
+import BackLink from "@/components/BackLink";
+import Loader from "@/components/Loader";
+import Header from "@/components/Header";
 
 function RallyTabs({ rallies, userHasVoted, userHasUploaded, setUserHasVoted }: any) {
   const searchParams = useSearchParams();
@@ -24,15 +24,16 @@ function RallyTabs({ rallies, userHasVoted, userHasUploaded, setUserHasVoted }: 
 
   return (
     <Tabs defaultValue={defaultTab}>
-      <div className="flex justify-center mt-5">
-        <TabsList>
+             <TabsList
+        className="grid w-full"
+        style={{ gridTemplateColumns: `repeat(${rallies.length}, minmax(0, 1fr))` }}
+      >
           {rallies.map((rally: any, index: number) => (
             <TabsTrigger key={rally._id} value={rally._id}>
               {"Rally " + (index + 1)}
             </TabsTrigger>
           ))}
         </TabsList>
-      </div>
       {rallies.map((rally: any) => (
         <TabsContent key={rally._id} value={rally._id}>
           <RallyTabContent rally={rally} userHasVoted={userHasVoted} userHasUploaded={userHasUploaded} setUserHasVoted={setUserHasVoted} />
@@ -178,8 +179,8 @@ function RallyTabContent({ rally, userHasVoted, userHasUploaded,setUserHasVoted 
       {!rally.votingOpen && (
         <div>
           <div className="mt-5 text-xs text-center">
-            {calcTimeLeft(rally.endTime).days} days{" "}
-            {calcTimeLeft(rally.endTime).hours} hours left
+            {calcTimeLeft(rally.endTime).days}d {" "}
+            {calcTimeLeft(rally.endTime).hours}h left
           </div>
 
           <Card className="mt-20">
@@ -234,6 +235,7 @@ function RallyTabContent({ rally, userHasVoted, userHasUploaded,setUserHasVoted 
 }
 
 const RallyPage = () => {
+  const [loading, setLoading] = useState(true);
   const { username } = useUser();
   const [rallies, setRallies] = useState<any[]>([]);
   const [userHasVoted, setUserHasVoted] = useState<any>({});
@@ -242,6 +244,7 @@ const RallyPage = () => {
 
   useEffect(() => {
     const fetchRallies = async () => {
+      setLoading(true);
       router.refresh();
       const res = await fetch("/api/rally", { cache: "no-store" });
       const data = await res.json();
@@ -266,6 +269,7 @@ const RallyPage = () => {
       if (data.message) {
         alert(data.message); //TODO improve
       }
+      setLoading(false);
     };
 
     if (username) {
@@ -273,33 +277,19 @@ const RallyPage = () => {
     }
   }, [username, router]);
 
+  if (loading) return <Loader loading={true} />
+  if (!rallies) return <p>No Rally avaiable</p>
+
   return (
-    <div className="m-6 mb-1">
-      <div className="flex items-center">
-        <Link className="text-lg leading-none mr-auto cursor-pointer" href="/">
-          <ArrowLeft />
-        </Link>
-      </div>
-      <h1 className="text-xl font-bold text-center">Rallies</h1>
-      {rallies.length > 0 ? (
-        <Suspense fallback={
-          <div className="flex items-center justify-center h-screen">
-            <ClipLoader size={50} color={"FFFFFF"} loading={true} />
-          </div>
-        }>
-          <RallyTabs
+    <>
+      <Header href="/" title="Rallies" />
+      <RallyTabs
             rallies={rallies}
             userHasVoted={userHasVoted}
             userHasUploaded={userUploaded}
             setUserHasVoted={setUserHasVoted}
           />
-        </Suspense>
-      ) : (
-        <div className="flex items-center justify-center ">
-          <ClipLoader size={50} color={"FFFFFF"} loading={true} />
-        </div>
-      )}
-    </div>
+    </>
   );
 };
 

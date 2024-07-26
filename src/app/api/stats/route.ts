@@ -11,7 +11,7 @@ export async function GET(req: Request, res: NextResponse) {
   await dbConnect();
 
   const userCount = await user.countDocuments({});
-  const questionsUsedCount = await Question.countDocuments({});
+  const questionsUsedCount = await Question.countDocuments({used: true});
   const questionsLeftCount = await Question.countDocuments({ used: false });
   const messagesCount = await ChatMessage.countDocuments({});
   const RalliesUsedCount = await Rally.countDocuments({ used: true });

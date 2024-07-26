@@ -2,8 +2,6 @@
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import Image from "next/image";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,7 +11,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useUser } from "@/components/UserContext";
 
-const CreateRallyPage = () => {
+const CreateRally = () => {
   const {username} = useUser()
   const [task, setTask] = useState("");
   const [lengthInDays, setLengthInDays] = useState("");
@@ -49,6 +47,8 @@ const CreateRallyPage = () => {
       setLengthInDays("");
     } catch (err:any) {
       setError(err.message);
+      setAlertMessage("Failed to create rally");
+      setIsAlertOpen(true);
     } finally {
       setLoading(false);
     }
@@ -60,8 +60,6 @@ const CreateRallyPage = () => {
 
   return (
     <div>
-      <h1 className="text-center m-5">Create Rally</h1>
-      {error && <p style={{ color: "red" }}>{error}</p>}
       <div className="mt-5">
         <Input
           type="text"
@@ -80,7 +78,7 @@ const CreateRallyPage = () => {
           required
         />
       </div>
-      <div className="flex justify-center mt-20">
+      <div className="flex justify-center fixed bottom-20 left-0 w-full p-2 bg-background">
         <Button onClick={handleSubmit} disabled={loading || !task.trim() || !lengthInDays}>
           {loading ? "Creating..." : "Create Rally"}
         </Button>
@@ -101,4 +99,4 @@ const CreateRallyPage = () => {
   );
 };
 
-export default CreateRallyPage;
+export default CreateRally;

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { UserProvider } from "../components/UserContext";
 import "./globals.css";
 import { AppWrapper } from "../components/AppWrapper";
 /* import { Analytics } from "@vercel/analytics/react" */
@@ -26,11 +25,11 @@ export default function RootLayout({
   return (
     <html>
         <head>
-        <link rel="manifest" href="/manifest.json" id="manifest" />
-        <link rel="icon" href="AppIcons/favicon.ico" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"></meta>
+          <link rel="manifest" href="/manifest.json" id="manifest" />
+          <link rel="icon" href="AppIcons/favicon.ico" />
+          <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
         </head>
-        <body>
+        <body className="m-6">
           <AppWrapper>
             {children}
             </AppWrapper>

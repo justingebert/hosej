@@ -37,7 +37,7 @@ const SignInPage = () => {
   const buttonLabel = userName ? "Create" : userName ? "Select" : "Start";
 
   return (
-    <div className="m-6">
+    <>
       <div className="mb-20">
         <Label htmlFor="userName">User Name:</Label>
         <Input
@@ -67,7 +67,7 @@ const SignInPage = () => {
       <div className="flex justify-center m-10">
         <Button onClick={handleCreateOrSelectUser} variant={"default"}>{buttonLabel}</Button>
       </div>
-    </div>
+      </>
   );
 };
 

@@ -1,16 +1,15 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
-import { useUser } from "../../../components/UserContext";
-import VoteOptions from "../../../components/Question/VotingOptions.client";
-import VoteResults from "../../../components/Question/VoteResults.client";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import React, { useState, useEffect } from "react";
+import { useUser } from "@/components/UserContext";
+import VoteOptions from "@/components/Question/VotingOptions.client";
+import VoteResults from "@/components/Question/VoteResults.client";
 import { useRouter } from "next/navigation";
 import { useSearchParams } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft } from 'lucide-react';
-import {  ClipLoader } from "react-spinners";
+import BackLink from "@/components/BackLink";
+import Loader from "@/components/Loader";
+import Header from "@/components/Header";
 
 function QuestionsTabs({ questions, userHasVoted, setUserHasVoted }: any) {
   const searchParams = useSearchParams();
@@ -18,15 +17,16 @@ function QuestionsTabs({ questions, userHasVoted, setUserHasVoted }: any) {
 
   return (
     <Tabs defaultValue={defaultTab}>
-      <div className="flex justify-center mt-5">
-        <TabsList>
+      <TabsList
+        className="grid w-full"
+        style={{ gridTemplateColumns: `repeat(${questions.length}, minmax(0, 1fr))` }}
+      >
           {questions.map((question: any, index: number) => (
             <TabsTrigger key={question._id} value={question._id}>
               {"Daily " + (index + 1)}
             </TabsTrigger>
           ))}
         </TabsList>
-      </div>
       {questions.map((question: any) => (
         <TabsContent key={question._id} value={question._id}>
           <h2 className="font-bold text-center mt-10">{question.question}</h2>
@@ -47,6 +47,7 @@ function QuestionsTabs({ questions, userHasVoted, setUserHasVoted }: any) {
 }
 
 const DailyQuestionPage = () => {
+  const [loading, setLoading] = useState(true);
   const { username } = useUser();
   const [questions, setQuestions] = useState<any>([]);
   const [userHasVoted, setUserHasVoted] = useState<any>({});
@@ -55,6 +56,7 @@ const DailyQuestionPage = () => {
 
   useEffect(() => {
     const fetchQuestions = async () => {
+      setLoading(true);
       router.refresh();
       const res = await fetch(`/api/question/daily`, { cache: "no-store" });
       const data = await res.json();
@@ -73,6 +75,7 @@ const DailyQuestionPage = () => {
       if (data.message) {
         alert(data.message);//TODO improve
       }
+      setLoading(false);
     };
 
     if (username) {
@@ -80,32 +83,18 @@ const DailyQuestionPage = () => {
     }
   }, [username, router]);
 
+  if (loading) return <Loader loading={true} />
+  if (!questions) return <p>No Questions avaiable</p>
+
   return (
-    <div className="m-6 mb-1">
-      <div className="flex items-center">
-        <Link className="text-lg leading-none mr-auto cursor-pointer" href="/">
-          <ArrowLeft />
-        </Link>
-      </div>
-      <h1 className="text-xl font-bold text-center">Daily Questions</h1>
-      {questions.length > 0 ? (
-        <Suspense fallback={
-          <div className="flex items-center justify-center h-screen">
-            <ClipLoader size={50} color={"FFFFFF"} loading={true} />
-          </div>
-        }>
-          <QuestionsTabs
-            questions={questions}
-            userHasVoted={userHasVoted}
-            setUserHasVoted={setUserHasVoted}
-          />
-        </Suspense>
-      ) : (
-        <div className="flex items-center justify-center ">
-          <ClipLoader size={50} color={"FFFFFF"} loading={true}/>
-        </div>
-      )}
-    </div>
+    <>
+      <Header href="/" title="Daily Questions" />
+      <QuestionsTabs
+        questions={questions}
+        userHasVoted={userHasVoted}
+        setUserHasVoted={setUserHasVoted}
+      />
+    </>
   );
 };
 

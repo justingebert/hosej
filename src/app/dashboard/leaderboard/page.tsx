@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/table";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import BackLink from "@/components/BackLink";
+import Header from "@/components/Header";
 
 type PointsEntry = {
   points: number;
@@ -54,14 +56,9 @@ const LeaderboardPage = () => {
   const sortedUsers = users.sort((a, b) => getCurrentPoints(b.points) - getCurrentPoints(a.points));
 
   return (
-    <div className="m-6">
-      <div className="flex w-full mb-4 justify-between">
-        <Link className="my-auto" href="/">
-          <ArrowLeft />
-        </Link>
-      </div>
+    <>
+      <Header href="/" title="Leaderboard" />
       <Table>
-        <TableCaption>Leaderboard</TableCaption>
         <TableHeader>
           <TableRow>
             <TableHead className="w-[100px]">Username</TableHead>
@@ -82,7 +79,7 @@ const LeaderboardPage = () => {
         </TableBody>
       </Table>
       {error && <p className="text-red-500">{error}</p>}
-    </div>
+    </>
   );
 };
 
