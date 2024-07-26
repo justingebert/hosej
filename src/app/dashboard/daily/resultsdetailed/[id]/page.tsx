@@ -37,7 +37,7 @@ const sortedGroupedResponses = Object.fromEntries(entries);
   return (
     <>
       <BackLink href={`/dashboard/daily?returnTo=${params.id}`} />
-      <div className="grid grid-cols-1 gap-5">
+      <div className="grid grid-cols-1 gap-5 mb-7">
         {Object.entries(sortedGroupedResponses).map(
           ([response, usernames]: any, index) => (
             <Card className="w-full max-w-md mx-auto text-center" key={index}>

@@ -4,8 +4,8 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
-import CreateQuestionPage from "@/components/Question/createQuestion.client";
-import CreateRallyPage from "@/components/Rally/createRally.client";
+import CreateQuestion from "@/components/Question/createQuestion.client";
+import CreateRally from "@/components/Rally/createRally.client";
 import BackLink from "@/components/BackLink";
 
 const CreatePage = () => {
@@ -19,10 +19,10 @@ const CreatePage = () => {
           <TabsTrigger value="create-rally">Create Rally</TabsTrigger>
         </TabsList>
         <TabsContent value="create-question">
-          <CreateQuestionPage />
+          <CreateQuestion />
         </TabsContent>
         <TabsContent value="create-rally">
-          <CreateRallyPage />
+          <CreateRally />
         </TabsContent>
       </Tabs>
       </div>

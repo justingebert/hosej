@@ -2,7 +2,6 @@
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-
 import {
   Select,
   SelectContent,
@@ -14,7 +13,6 @@ import Image from "next/image";
 import {
   AlertDialog,
   AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -26,7 +24,7 @@ import { useUser } from "@/components/UserContext";
 
 
 
-const CreateQuestionPage = () => {
+const CreateQuestion = () => {
   const {username} = useUser()
   const [question, setQuestion] = useState("");
   const [questionType, setQuestionType] = useState("");
@@ -87,6 +85,8 @@ const CreateQuestionPage = () => {
       setQuestionType("");
     } catch (err:any) {
       setError(err.message);
+      setAlertMessage("Failed to create question");
+      setIsAlertOpen(true);
     } finally {
       setLoading(false);
     }
@@ -97,20 +97,18 @@ const CreateQuestionPage = () => {
   };
 
   return (
-    <div>
-      <h1 className="text-center m-5">Create Question</h1>
-      {error && <p style={{ color: "red" }}>{error}</p>}
+    <>
       <div className="mt-5">
       <Select value={questionType} onValueChange={setQuestionType}>
         <SelectTrigger>
           <SelectValue placeholder="Select Question Type" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="users-select-one">Select One User</SelectItem>
+          <SelectItem value="users-select-one">Vote One User</SelectItem>
           {/* <SelectItem value="users-select-multiple">Select Multiple Users</SelectItem> */}
-          <SelectItem value="custom-select-one">Select One Custom Option</SelectItem>
+          <SelectItem value="custom-select-one">Vote One Custom Option</SelectItem>
           {/* <SelectItem value="custom-select-multiple">Select Multiple Custom Options</SelectItem> */}
-          <SelectItem value="text">Text</SelectItem>
+          <SelectItem value="text">Text Reply</SelectItem>
           <SelectItem value="rating">Rating (1-10)</SelectItem>
         </SelectContent>
       </Select>
@@ -128,26 +126,28 @@ const CreateQuestionPage = () => {
         <>
         <div className="mt-5">
           {options.map((option, index) => (
-            <div key={index} className="mt-2 flex">
+            <div key={index} className="mt-2 flex w-full">
               <Input
                 type="text"
                 placeholder={`Option ${index + 1}`}
                 value={option}
                 onChange={(e) => handleOptionChange(e.target.value, index)}
               />
-              <Button className=" ml-2" variant="destructive" onClick={() => handleRemoveOption(index)}>
-                  <Image src="/AppIcons/trash.svg" alt="Delete" width={20} height={20} objectFit="contain"  /> 
+              <Button className="ml-2 w-10 p-2" variant="destructive" onClick={() => handleRemoveOption(index)}>
+                  <Image src="/AppIcons/trash.svg" alt="Delete" width={20} height={20} /> 
               </Button>
             </div>
           ))}
           </div>
-          <Button onClick={handleAddOption} className="mt-5">Add Option</Button>
+          <div className="flex justify-end mt-5 ">
+          <Button variant="secondary" className="w-10" onClick={handleAddOption} >+</Button>
+          </div>
         </>
       )}
-      <div className="flex justify-center mt-20">
-        <Button onClick={handleSubmit} disabled={loading || !question.trim()}>
-          {loading ? "Creating..." : "Create Question"}
-        </Button>
+      <div className="flex justify-center fixed bottom-20 left-0 w-full p-2 bg-background">
+          <Button onClick={handleSubmit} disabled={loading || !question.trim()}>
+            {loading ? "Creating..." : "Create Question"}
+          </Button>
       </div>
       {isAlertOpen && (
         <AlertDialog open={isAlertOpen} >
@@ -161,8 +161,8 @@ const CreateQuestionPage = () => {
           </AlertDialogContent>
         </AlertDialog>
       )}
-    </div>
+    </>
   );
 };
 
-export default CreateQuestionPage;
+export default CreateQuestion;

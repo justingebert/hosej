@@ -9,6 +9,7 @@ import { useSearchParams } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BackLink from "@/components/BackLink";
 import Loader from "@/components/Loader";
+import Header from "@/components/Header";
 
 function QuestionsTabs({ questions, userHasVoted, setUserHasVoted }: any) {
   const searchParams = useSearchParams();
@@ -16,15 +17,16 @@ function QuestionsTabs({ questions, userHasVoted, setUserHasVoted }: any) {
 
   return (
     <Tabs defaultValue={defaultTab}>
-      <div className="flex justify-center mt-5">
-        <TabsList>
+      <TabsList
+        className="grid w-full"
+        style={{ gridTemplateColumns: `repeat(${questions.length}, minmax(0, 1fr))` }}
+      >
           {questions.map((question: any, index: number) => (
             <TabsTrigger key={question._id} value={question._id}>
               {"Daily " + (index + 1)}
             </TabsTrigger>
           ))}
         </TabsList>
-      </div>
       {questions.map((question: any) => (
         <TabsContent key={question._id} value={question._id}>
           <h2 className="font-bold text-center mt-10">{question.question}</h2>
@@ -86,8 +88,7 @@ const DailyQuestionPage = () => {
 
   return (
     <>
-      <BackLink href={'/'} />
-      <h1 className="text-xl font-bold text-center">Daily Questions</h1>
+      <Header href="/" title="Daily Questions" />
       <QuestionsTabs
         questions={questions}
         userHasVoted={userHasVoted}

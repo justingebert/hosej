@@ -9,7 +9,7 @@ import {
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 
-const ThemeSelector = () => {
+function ThemeSelector() {
   const { setTheme } = useTheme();
 
   return (

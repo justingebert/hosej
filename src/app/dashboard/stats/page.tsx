@@ -24,6 +24,7 @@ import { useRouter } from "next/navigation";
 import BackLink from "@/components/BackLink";
 import ThemeSelector from "@/components/ThemeSelector";
 import Loader from "@/components/Loader";
+import Header from "@/components/Header";
 
 type Statistics = {
   userCount: number;
@@ -101,10 +102,9 @@ const StatsPage = () => {
   } satisfies ChartConfig;
 
   return (
-    <div className="">
-      <BackLink href="/">
-        <ThemeSelector />
-      </BackLink>
+    <div >
+      <Header href="/" rightComponent={<ThemeSelector />} />
+
 
       <Card className="flex flex-col mb-4 w-full">
         <CardHeader className="items-center">

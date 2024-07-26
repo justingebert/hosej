@@ -13,6 +13,7 @@ import {
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import BackLink from "@/components/BackLink";
+import Header from "@/components/Header";
 
 type PointsEntry = {
   points: number;
@@ -56,9 +57,8 @@ const LeaderboardPage = () => {
 
   return (
     <>
-      <BackLink href={'/'} />
+      <Header href="/" title="Leaderboard" />
       <Table>
-        <TableCaption>Leaderboard</TableCaption>
         <TableHeader>
           <TableRow>
             <TableHead className="w-[100px]">Username</TableHead>

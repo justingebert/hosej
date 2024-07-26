@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import BackLink from "@/components/BackLink";
 import Loader from "@/components/Loader";
+import Header from "@/components/Header";
 
 
 //attach newly paged questions 
@@ -46,9 +47,8 @@ const QuestionHistoryPage = () => {
 
   return (
     <>
-      <BackLink href={'/'} />
-      <h1 className="text-xl font-bold text-center">Question History</h1>
-      <div className="mt-5">
+      <Header href="/" title="Question Hisotry" />
+      <div>
         {questions && questions.map((question) => (
             <Card key={question._id} className="mb-4">
               <CardHeader>

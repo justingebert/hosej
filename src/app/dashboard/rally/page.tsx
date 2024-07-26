@@ -16,6 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import imageCompression from 'browser-image-compression';
 import BackLink from "@/components/BackLink";
 import Loader from "@/components/Loader";
+import Header from "@/components/Header";
 
 function RallyTabs({ rallies, userHasVoted, userHasUploaded, setUserHasVoted }: any) {
   const searchParams = useSearchParams();
@@ -23,15 +24,16 @@ function RallyTabs({ rallies, userHasVoted, userHasUploaded, setUserHasVoted }: 
 
   return (
     <Tabs defaultValue={defaultTab}>
-      <div className="flex justify-center mt-5">
-        <TabsList>
+             <TabsList
+        className="grid w-full"
+        style={{ gridTemplateColumns: `repeat(${rallies.length}, minmax(0, 1fr))` }}
+      >
           {rallies.map((rally: any, index: number) => (
             <TabsTrigger key={rally._id} value={rally._id}>
               {"Rally " + (index + 1)}
             </TabsTrigger>
           ))}
         </TabsList>
-      </div>
       {rallies.map((rally: any) => (
         <TabsContent key={rally._id} value={rally._id}>
           <RallyTabContent rally={rally} userHasVoted={userHasVoted} userHasUploaded={userHasUploaded} setUserHasVoted={setUserHasVoted} />
@@ -177,8 +179,8 @@ function RallyTabContent({ rally, userHasVoted, userHasUploaded,setUserHasVoted 
       {!rally.votingOpen && (
         <div>
           <div className="mt-5 text-xs text-center">
-            {calcTimeLeft(rally.endTime).days} days{" "}
-            {calcTimeLeft(rally.endTime).hours} hours left
+            {calcTimeLeft(rally.endTime).days}d {" "}
+            {calcTimeLeft(rally.endTime).hours}h left
           </div>
 
           <Card className="mt-20">
@@ -280,8 +282,7 @@ const RallyPage = () => {
 
   return (
     <>
-      <BackLink href={'/'} />
-      <h1 className="text-xl font-bold text-center">Rallies</h1>
+      <Header href="/" title="Rallies" />
       <RallyTabs
             rallies={rallies}
             userHasVoted={userHasVoted}
