@@ -14,6 +14,7 @@ if (!admin.apps.length) {
 
 export async function POST(req: Request, res: NextResponse) {
 
+  console.log(req)
   const {title, body}  = await req.json();
 
   try {

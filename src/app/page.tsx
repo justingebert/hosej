@@ -111,6 +111,7 @@ export default function Home() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ title: '🚨HoseJ Rally', body: '🚨JETZT VOTEN DU FISCH🚨' }),
+          cache: 'no-cache',
         });
       }}>
         sendNot
