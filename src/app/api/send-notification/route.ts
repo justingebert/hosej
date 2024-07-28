@@ -6,7 +6,7 @@ import admin from "firebase-admin";
 const dynamic = 'force-dynamic'
 
 if (!admin.apps.length) {
-    const serviceAccount = require(process.env.FIREBASE_SERVICE_ACCOUNT as string);
+    const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT as string;
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
     });
