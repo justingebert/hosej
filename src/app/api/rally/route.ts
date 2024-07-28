@@ -26,6 +26,19 @@ export async function GET(req: Request) {
         rally.votingOpen = true;
         rally.endTime = new Date(currentTime.getTime() + 24 * 60 * 60 * 1000); // Set end time for voting period
         await rally.save();
+
+        const notificationResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/send-notification`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ title: '🚨HoseJ Rally !!🚨', body: '🚨JETZT VOTEN DU FISCH🚨' }),
+          cache: 'no-cache'
+        });
+      
+        if (!notificationResponse.ok) {
+          throw new Error('Failed to send notification');
+        }
       }
 
       if (rally.votingOpen && currentTime >= new Date(rally.endTime)) {
@@ -41,6 +54,19 @@ export async function GET(req: Request) {
           newRally.startTime = currentTime;
           newRally.endTime = new Date(currentTime.getTime() + newRally.lengthInDays * 24 * 60 * 60 * 1000); // Set end time based on lengthInDays
           await newRally.save();
+
+          const notificationResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/send-notification`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ title: '🚨HoseJ Rally!!🚨', body: '🚨NEUE RALLY HAT BEGONNEN DU FISCH🚨' }),
+            cache: 'no-cache'
+          });
+        
+          if (!notificationResponse.ok) {
+            throw new Error('Failed to send notification');
+          }
         }
       }
     }

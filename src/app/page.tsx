@@ -34,11 +34,12 @@ export default function Home() {
   const router = useRouter();
   const { setTheme } = useTheme();
   const { fcmToken, notificationPermissionStatus } = useFcmToken();
-  // Use the token as needed
-  fcmToken && sendTokenToServer(fcmToken);
 
-
-
+  useEffect(() => {
+    if (fcmToken) {
+      sendTokenToServer(fcmToken);
+    }
+  }, [fcmToken]);
 
   useEffect(() => {
     const user = localStorage.getItem("user");

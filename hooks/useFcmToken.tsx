@@ -1,10 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getMessaging, getToken } from 'firebase/messaging';
 import firebaseApp from '@/firebase';
-import { send } from 'process';
- 
-
-
 
 const useFcmToken = () => {
   const [token, setToken] = useState('');
@@ -25,7 +21,7 @@ const useFcmToken = () => {
           if (permission === 'granted') {
             const currentToken = await getToken(messaging, {
               vapidKey:
-                process.env.NEXT_PUBLIC_FIREBASE_FCM_VAPID_KEY,
+                process.env.FIREBASE_FCM_VAPID_KEY,
             });
             if (currentToken) {
               setToken(currentToken);

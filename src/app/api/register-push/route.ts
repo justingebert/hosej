@@ -11,10 +11,15 @@ export async function POST(req: any, res: NextResponse) {
     if (!token) {
       return NextResponse.json({ message: "token is required" });
     }
-  
     try {
+      const existingToken = await FcmToken.findOne({ token: token });
+      if (existingToken) {
+        return NextResponse.json({ message: 'Token already exists' }, { status: 200 });
+      }
+
+      // If the token does not exist, add it to the database
       const newToken = await FcmToken.create({ token });
-      return NextResponse.json(newToken);
+    return NextResponse.json(newToken, { status: 201 });
     } catch (error) {
       return NextResponse.json({ message: "Error saving FcmToken", error });
     }

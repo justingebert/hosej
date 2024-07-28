@@ -1,41 +1,75 @@
+import dbConnect from "@/lib/dbConnect";
+import { NextResponse } from "next/server";
+import FcmToken from "@/db/models/FcmToken";
 import admin from "firebase-admin";
-import { Message } from "firebase-admin/messaging";
-import { NextRequest, NextResponse } from "next/server";
-import { fetchToken, messaging } from "@/firebase";
-// Initialize Firebase Admin SDK
+
+const dynamic = 'force-dynamic'
+
 if (!admin.apps.length) {
-  const serviceAccount = require("@/service_key.json");
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-  });
+    const serviceAccount = require(process.env.FIREBASE_SERVICE_ACCOUNT as string);
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+    });
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(req: Request, res: NextResponse) {
 
-    
-  const { title, message, link } = await request.json();
-  
-  const token = await fetchToken() as string;
-
-  
-  const payload: Message = {
-    token,
-    notification: {
-      title: title,
-      body: message,
-    },
-    webpush: link && {
-      fcmOptions: {
-        link,
-      },
-    },
-  };
+  const {title, body}  = await req.json();
 
   try {
-    await admin.messaging().send(payload);
+    await dbConnect();
+    const tokenDocs = await FcmToken.find();
+    
+    // Extract token values
+    const tokens = tokenDocs.map(doc => doc.token);
 
-    return NextResponse.json({ success: true, message: "Notification sent!" });
+    if (tokens.length === 0) {
+      return NextResponse.json({ message: 'No tokens available to send messages' }, { status: 400 });
+    }
+    
+    //TODO add andriod/apple specific incons?
+    const message = {
+      notification: {
+        title: title,
+        body: body,
+        image: "./AppIcons/apple-touch-icon.png",
+      },
+      android: {
+        notification: {
+          icon: './AppIcons/apple-touch-icon.png',
+        },
+      },
+      apns: {
+        payload: {
+          aps: {
+            badge: 1,
+            sound: dynamic,
+            "interruption-level": "time-sensitive",
+            alert: {
+              title: title,
+              body: body,
+          },
+        },
+      },
+    },
+
+      tokens: tokens,
+  };
+
+    console.log("Sending notification...");
+    const response = await admin.messaging().sendEachForMulticast(message);
+    response.responses.forEach((resp, idx) => {
+      if (!resp.success) {
+        console.error(`Error sending to token ${tokens[idx]}:`, resp.error);
+      }
+    });
+    //TODO failure
+    console.log(`${response.successCount} messages were sent successfully`);
+    console.log(`${response.failureCount} messages failed`);
+
+    return NextResponse.json({ message: `${response.successCount} messages were sent successfully` });
   } catch (error) {
-    return NextResponse.json({ success: false, error });
+    console.error("Error sending messages:", error);
+    return NextResponse.json({ message: "Error sending messages", error });
   }
 }

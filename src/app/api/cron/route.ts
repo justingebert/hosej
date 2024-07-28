@@ -60,6 +60,19 @@ export async function GET(req: Request) {
       }
     }
 
+    const notificationResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/send-notification`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ title: '🚨HoseJ Fragen!!🚨', body: '🚨JETZT VOTEN DU FISCH🚨' }),
+      cache: 'no-cache'
+    });
+  
+    if (!notificationResponse.ok) {
+      throw new Error('Failed to send notification');
+    }
+
     return NextResponse.json({ questions });
   } catch (error: any) {
     console.error(error);
