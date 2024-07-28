@@ -21,7 +21,7 @@ const useFcmToken = () => {
           if (permission === 'granted') {
             const currentToken = await getToken(messaging, {
               vapidKey:
-                process.env.FIREBASE_FCM_VAPID_KEY,
+                process.env.NEXT_PUBLIC_FIREBASE_FCM_VAPID_KEY,
             });
             if (currentToken) {
               setToken(currentToken);
