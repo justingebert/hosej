@@ -23,5 +23,6 @@
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/db/createData.ts", "public/firebase-messaging-sw.js"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"],
+  "types": ["@ducanh2912/next-pwa/workbox"]
 }

@@ -14,6 +14,7 @@ const withPWA = withPWAInit({
   //ustomWorkerDest: "public", // defaults to `dest`
   //customWorkerPrefix: "firebase-messaging-sw",
   //sw: 'firebase-messaging-sw.js' 
+  register: false,
 });
 
 const nextConfig = {

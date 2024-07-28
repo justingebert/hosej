@@ -40,6 +40,7 @@ next-env.d.ts
 /public/*.js
 /public/*.js.map
 !/public/firebase-messaging-sw.js
+!/public/firebase-config.js
 
 /src/db/*.js
 /src/db/models/*.js
