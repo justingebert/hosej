@@ -8,11 +8,12 @@ import withPWAInit from "@ducanh2912/next-pwa";
 const withPWA = withPWAInit({
   dest: "public",
   reloadOnOnline: true,
-  swcMinify: true,
+  //swcMinify: true,
   //disable: process.env.NODE_ENV === "development",
   //disable: true
-  ustomWorkerDest: "public", // defaults to `dest`
-  customWorkerPrefix: "firebase-messaging-sw",
+  //ustomWorkerDest: "public", // defaults to `dest`
+  //customWorkerPrefix: "firebase-messaging-sw",
+  sw: 'firebase-messaging-sw.js' 
 });
 
 const nextConfig = {
