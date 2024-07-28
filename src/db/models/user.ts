@@ -66,7 +66,7 @@ UserSchema.methods.addPoints = async function (points: number) {
   // Add the new points entry
   const previousPoints = this.points.length > 0 ? this.points[this.points.length - 1].points : 0;
   const newPoints = points + previousPoints;
-  this.points.push({ newPoints, date: today });
+  this.points.push({ points: newPoints, date: today });
 
   // Save the updated user document
   await this.save();

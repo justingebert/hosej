@@ -62,9 +62,9 @@ export default function Home() {
   }, [router]);
 
   return (
-    <div className="flex flex-col h-screen justify-between">
-      <div className="flex justify-center items-center mt-10 w-full relative">
-      <div className="absolute left-10">
+    <div className="flex flex-col justify-between min-h-screen">
+      <div className="flex justify-between items-center mt-4 w-full">
+      <div className="">
       <Button variant="outline" size="icon" onClick={() => {router.push("/dashboard/history")}}>
         <History />
       </Button>
@@ -72,7 +72,7 @@ export default function Home() {
         <Link href="/dashboard/stats">
           <h1 className="text-4xl font-bold">HoseJ</h1>
         </Link>
-        <div className="absolute right-10">
+        <div className="">
           <Button variant="outline" size="icon" onClick={() => {router.push("/dashboard/leaderboard")}}>
           👖
         </Button>
