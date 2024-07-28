@@ -104,7 +104,17 @@ export default function Home() {
           Create
         </Button>
       </div>
-      <button>sendNot</button>
+      <Button className="mb-10" onClick={async () => {
+        await fetch('/api/send-notification', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ title: '🚨HoseJ Rally', body: '🚨JETZT VOTEN DU FISCH🚨' }),
+        });
+      }}>
+        sendNot
+      </Button>
     </div>
   );
 }
