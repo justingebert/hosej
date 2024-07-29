@@ -3,7 +3,6 @@ import "./globals.css";
 import { AppWrapper } from "../components/AppWrapper";
 /* import { Analytics } from "@vercel/analytics/react" */
 import { ThemeProvider } from "@/components/theme-provider"
-import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 /* import { SpeedInsights } from "@vercel/speed-insights/next"
  */
 
@@ -16,6 +15,8 @@ export let metadata:any = {
 /* if (process.env.NODE_ENV !== "development"){
   metadata.manifest = "manifest.json";
 } */
+
+
 
 
 export default function RootLayout({
@@ -32,7 +33,6 @@ export default function RootLayout({
         </head>
         <body className="m-6">
           <AppWrapper>
-          <ServiceWorkerRegister />
             {children}
             </AppWrapper>
           {/* <Analytics /> */}

@@ -1,23 +1,15 @@
-
-
 /** @type {import('next').NextConfig} */
 
+import withSerwistInit from "@serwist/next";
 
-import withPWAInit from "@ducanh2912/next-pwa";
-
-const withPWA = withPWAInit({
-  dest: "public",
-  reloadOnOnline: true,
-  swcMinify: true,
-  //disable: process.env.NODE_ENV === "development",
-  //disable: true
-  //ustomWorkerDest: "public", // defaults to `dest`
-  //customWorkerPrefix: "firebase-messaging-sw",
-  //sw: 'firebase-messaging-sw.js' 
-  register: false,
+const withSerwist = withSerwistInit({
+  // Note: This is only an example. If you use Pages Router,
+  // use something else that works, such as "service-worker/index.ts".
+  swSrc: "src/sw.ts",
+  swDest: "public/firebase-messaging-sw.js",
 });
 
-const nextConfig = {
+export default withSerwist({
     logging: {
         fetches:{
             fullUrl: true,
@@ -26,6 +18,4 @@ const nextConfig = {
     images: {
         domains: ['hosej-rally-bucket.s3.eu-central-1.amazonaws.com'],
     },
-};
-
-export default withPWA(nextConfig);
+});

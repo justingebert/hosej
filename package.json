@@ -9,8 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.592.0",
-    "@aws-sdk/s3-presigned-post": "^3.588.0",
+    "@aws-sdk/client-s3": "^3.529.0",
+    "@aws-sdk/s3-presigned-post": "^3.529.0",
     "@aws-sdk/s3-request-presigner": "^3.592.0",
     "@aws-sdk/signature-v4-crt": "^3.451.0",
     "@ducanh2912/next-pwa": "^10.2.6",
@@ -22,6 +22,7 @@
     "@radix-ui/react-separator": "^1.0.3",
     "@radix-ui/react-slot": "^1.0.2",
     "@radix-ui/react-tabs": "^1.0.4",
+    "@serwist/next": "^9.0.5",
     "@smithy/node-http-handler": "^3.0.0",
     "@vercel/analytics": "^1.2.2",
     "@vercel/speed-insights": "^1.0.10",
@@ -61,6 +62,7 @@
     "eslint-config-next": "14.1.4",
     "esm": "^3.2.25",
     "postcss": "^8",
+    "serwist": "^9.0.5",
     "tailwindcss": "^3.3.0",
     "ts-node": "^10.9.2",
     "typescript": "^5"
