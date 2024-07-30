@@ -7,6 +7,7 @@ export async function POST(req: any, res: NextResponse) {
   
     const data = await req.json();
     const token = data.token;
+    const username = data.username;
     console.log('token:', token);
     if (!token) {
       return NextResponse.json({ message: "token is required" });
@@ -18,7 +19,7 @@ export async function POST(req: any, res: NextResponse) {
       }
 
       // If the token does not exist, add it to the database
-      const newToken = await FcmToken.create({ token });
+      const newToken = await FcmToken.create({ token: token, username: username });
     return NextResponse.json(newToken, { status: 201 });
     } catch (error) {
       return NextResponse.json({ message: "Error saving FcmToken", error });

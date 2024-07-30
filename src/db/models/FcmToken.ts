@@ -1,9 +1,14 @@
 import mongoose from "mongoose";
+import user from "./user";
 
 const FcmSchema = new mongoose.Schema({
   token: {
     type: String,
     required: true,
+  },
+  user: {
+    type: String,
+    ref: user,
   },
   createdAt: {
     type: Date,

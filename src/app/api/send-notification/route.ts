@@ -35,11 +35,6 @@ export async function POST(req: Request, res: NextResponse) {
         body: body,
       },
       tokens: tokens,
-      android: {
-        notification: {
-          icon: 'AppIcons/apple-touch-icon.png',
-        },
-      },
   };
 
     console.log("Sending notification...");

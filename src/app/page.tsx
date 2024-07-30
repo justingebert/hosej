@@ -11,14 +11,15 @@ import { useUser } from "@/components/UserContext";
 import { Input } from "@/components/ui/input";
 import { set } from "mongoose";
 
-const sendTokenToServer = async (token: string) => {
+
+const sendTokenToServer = async (token: string, username:string) => {
   try {
     const response = await fetch('/api/register-push', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ token: token }),
+      body: JSON.stringify({ token: token, username: username }),
     });
 
     if (response.ok) {
@@ -42,7 +43,7 @@ export default function Home() {
 
   useEffect(() => {
     if (fcmToken) {
-      sendTokenToServer(fcmToken);
+      sendTokenToServer(fcmToken, username);
     }
   }, [fcmToken]);
 
