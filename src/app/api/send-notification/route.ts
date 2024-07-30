@@ -33,27 +33,7 @@ export async function POST(req: Request, res: NextResponse) {
       notification: {
         title: title,
         body: body,
-        image: "./AppIcons/apple-touch-icon.png",
       },
-      android: {
-        notification: {
-          icon: './AppIcons/apple-touch-icon.png',
-        },
-      },
-      apns: {
-        payload: {
-          aps: {
-            badge: 1,
-            sound: dynamic,
-            "interruption-level": "time-sensitive",
-            alert: {
-              title: title,
-              body: body,
-          },
-        },
-      },
-    },
-
       tokens: tokens,
   };
 

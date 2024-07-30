@@ -7,6 +7,7 @@ import { useTheme } from "next-themes";
 import { History } from "lucide-react";
 import Link from "next/link";
 import useFcmToken from "../hooks/useFcmToken";
+import { useUser } from "@/components/UserContext"; 
 
 const sendTokenToServer = async (token: string) => {
   try {
@@ -32,6 +33,7 @@ export default function Home() {
   const router = useRouter();
   const { setTheme } = useTheme();
   const { fcmToken, notificationPermissionStatus } = useFcmToken();
+  const { username } = useUser();
 
   useEffect(() => {
     if (fcmToken) {
@@ -90,18 +92,20 @@ export default function Home() {
           Create
         </Button>
       </div>
+      {username === 'Justin' && (
       <Button className="mb-10" onClick={async () => {
         await fetch('/api/send-notification', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ title: '🚨HoseJ Rally', body: '🚨JETZT VOTEN DU FISCH🚨' }),
+          body: JSON.stringify({ title: '🚨DAS IST EIN TEST🚨', body: '🐟DU FISCH🐟' }),
           cache: 'no-cache',
         });
       }}>
         sendNot
       </Button>
+      )}
     </div>
   );
 }
