@@ -41,12 +41,12 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-
+//@ts-ignore
 firebase.initializeApp(firebaseConfig) as any;
-
+//@ts-ignore
 const messaging = firebase.messaging();
 
-messaging.onBackgroundMessage((payload) => {
+messaging.onBackgroundMessage((payload:any) => {
   console.log(
     "[firebase-messaging-sw.js] Received background message ",
     payload

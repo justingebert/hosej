@@ -6,9 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
 import { History } from "lucide-react";
 import Link from "next/link";
-import useFcmToken from "../../hooks/useFcmToken";
-import { getMessaging, onMessage } from 'firebase/messaging';
-import app from "@/firebase";
+import useFcmToken from "../hooks/useFcmToken";
 
 const sendTokenToServer = async (token: string) => {
   try {
@@ -46,18 +44,6 @@ export default function Home() {
     console.log("user:", user);
     if (!user) {
       router.push("/signin");
-    }
-
-    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-      const messaging = getMessaging(app);
-      const unsubscribe = onMessage(messaging, (payload) => {
-        console.log('Foreground push notification received:', payload);
-        // Handle the received push notification while the app is in the foreground
-        // You can display a notification or update the UI based on the payload
-      });
-      return () => {
-        unsubscribe(); // Unsubscribe from the onMessage event
-      };
     }
 
   }, [router]);

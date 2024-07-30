@@ -7,6 +7,7 @@ const withSerwist = withSerwistInit({
   // use something else that works, such as "service-worker/index.ts".
   swSrc: "src/sw.ts",
   swDest: "public/firebase-messaging-sw.js",
+  swUrl: "/firebase-messaging-sw.js",
 });
 
 export default withSerwist({
