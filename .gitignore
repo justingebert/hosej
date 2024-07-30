@@ -38,6 +38,7 @@ next-env.d.ts
 .env
 
 /public/*.js
+/public/*.js.map
 
 /src/db/*.js
 /src/db/models/*.js
@@ -82,3 +83,6 @@ terraform.rc
 .terraform.lock.hcl
 
 .idea
+
+service_key.json
+certificates

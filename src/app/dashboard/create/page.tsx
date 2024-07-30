@@ -4,11 +4,14 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
+import Link from "next/link";
+import { ArrowLeft } from 'lucide-react';
 import CreateQuestion from "@/components/Question/createQuestion.client";
 import CreateRally from "@/components/Rally/createRally.client";
 import BackLink from "@/components/BackLink";
 
 const CreatePage = () => {
+
   return (
     <>
       <BackLink href={'/'} />
