@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
@@ -8,6 +8,7 @@ import { History } from "lucide-react";
 import Link from "next/link";
 import useFcmToken from "../hooks/useFcmToken";
 import { useUser } from "@/components/UserContext"; 
+import { Input } from "@/components/ui/input";
 
 const sendTokenToServer = async (token: string) => {
   try {
@@ -34,6 +35,8 @@ export default function Home() {
   const { setTheme } = useTheme();
   const { fcmToken, notificationPermissionStatus } = useFcmToken();
   const { username } = useUser();
+  const notification = useRef({ title: '', body: '' });
+  
 
   useEffect(() => {
     if (fcmToken) {
@@ -67,7 +70,7 @@ export default function Home() {
         </Button>
         </div>
       </div>
-      <div className="flex h-screen items-center justify-center">
+      <div className="flex flex-col items-center justify-center flex-grow">
         <div className="flex flex-col items-center gap-20">
           <Button
             className="p-8 font-bold text-lg"
@@ -81,8 +84,39 @@ export default function Home() {
           >
             Daily
           </Button>
+          {username === 'Justin' && (
+            <div className="flex flex-col items-center gap-4 mt-10">
+              <Input
+                type="text"
+                placeholder="Title"
+                value={notification.current.title}
+                onChange={(e) => notification.current.title = e.target.value}
+                required
+              />
+              <Input
+                type="text"
+                placeholder="Body"
+                value={notification.current.body}
+                onChange={(e) => notification.current.body = e.target.value}
+                required
+              />
+              <Button variant="destructive" onClick={async () => {
+                await fetch('/api/send-notification', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({ title: notification.current.title, body: notification.current.body }),
+                  cache: 'no-cache',
+                });
+              }}>
+                Send Notification
+              </Button>
+            </div>
+          )}
         </div>
       </div>
+      
       <div className=" flex justify-center">
         <Button
           variant={"secondary"}
@@ -92,20 +126,7 @@ export default function Home() {
           Create
         </Button>
       </div>
-      {username === 'Justin' && (
-      <Button className="mb-10" onClick={async () => {
-        await fetch('/api/send-notification', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ title: '🚨DAS IST EIN TEST🚨', body: '🐟DU FISCH🐟' }),
-          cache: 'no-cache',
-        });
-      }}>
-        sendNot
-      </Button>
-      )}
+      
     </div>
   );
 }
