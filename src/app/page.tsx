@@ -71,7 +71,7 @@ export default function Home() {
         </div>
       </div>
       <div className="flex flex-col items-center justify-center flex-grow">
-        <div className="flex flex-col items-center gap-20">
+        <div className="flex flex-col items-center gap-16">
           <Button
             className="p-8 font-bold text-lg"
             onClick={() => router.push("/dashboard/rally")}
@@ -85,7 +85,7 @@ export default function Home() {
             Daily
           </Button>
           {username === 'Justin' && (
-            <div className="flex flex-col items-center gap-4 mt-10">
+            <div className="flex flex-col items-center gap-2 ">
               <Input
                 type="text"
                 placeholder="Title"
