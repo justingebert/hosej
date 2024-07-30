@@ -30,7 +30,7 @@ export async function POST(req: Request, res: NextResponse) {
     
     //TODO add andriod/apple specific incons?
     const message = {
-      notification: {
+      data: {
         title: title,
         body: body,
       },

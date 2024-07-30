@@ -54,13 +54,9 @@ messaging.onBackgroundMessage((payload:any) => {
 
   // payload.fcmOptions?.link comes from our backend API route handle
   // payload.data.link comes from the Firebase Console where link is the 'key'
-  const link = payload.fcmOptions?.link || payload.data?.link;
-
-  const notificationTitle = payload.notification.title;
+  const notificationTitle = payload.data.title;
   const notificationOptions = {
-    body: payload.notification.body,
-    icon: "./firebase-logo.png",
-    //data: { url: link },
+    body: payload.data.body,
   };
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
