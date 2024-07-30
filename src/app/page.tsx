@@ -107,7 +107,7 @@ export default function Home() {
                   headers: {
                     'Content-Type': 'application/json',
                   },
-                  body: JSON.stringify({ title: notification.title, body: notification.body }),
+                  body: JSON.stringify({ title: title, body: body }),
                   cache: 'no-cache',
                 });
               }}>
