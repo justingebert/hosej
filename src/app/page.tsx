@@ -9,6 +9,7 @@ import Link from "next/link";
 import useFcmToken from "../hooks/useFcmToken";
 import { useUser } from "@/components/UserContext"; 
 import { Input } from "@/components/ui/input";
+import { set } from "mongoose";
 
 const sendTokenToServer = async (token: string) => {
   try {
@@ -110,6 +111,8 @@ export default function Home() {
                   body: JSON.stringify({ title: title, body: body }),
                   cache: 'no-cache',
                 });
+                setTitle('');
+                setBody('');
               }}>
                 Send Notification
               </Button>
