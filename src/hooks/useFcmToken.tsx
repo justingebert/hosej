@@ -93,9 +93,9 @@ const useFcmToken = () => {
 
     
         const n = new Notification(
-          payload.notification?.title || "New message",
+          payload.data?.title || "New message",
           {
-            body: payload.notification?.body || "This is a new message",
+            body: payload.data?.body || "This is a new message",
           }
         );
 
