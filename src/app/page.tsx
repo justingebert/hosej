@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
@@ -35,7 +35,8 @@ export default function Home() {
   const { setTheme } = useTheme();
   const { fcmToken, notificationPermissionStatus } = useFcmToken();
   const { username } = useUser();
-  const notification = useRef({ title: '', body: '' });
+  const [title, setTitle] = useState('');
+  const [body, setBody] = useState('');
   
 
   useEffect(() => {
@@ -89,15 +90,15 @@ export default function Home() {
               <Input
                 type="text"
                 placeholder="Title"
-                value={notification.current.title}
-                onChange={(e) => notification.current.title = e.target.value}
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
                 required
               />
               <Input
                 type="text"
                 placeholder="Body"
-                value={notification.current.body}
-                onChange={(e) => notification.current.body = e.target.value}
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
                 required
               />
               <Button variant="destructive" onClick={async () => {
@@ -106,7 +107,7 @@ export default function Home() {
                   headers: {
                     'Content-Type': 'application/json',
                   },
-                  body: JSON.stringify({ title: notification.current.title, body: notification.current.body }),
+                  body: JSON.stringify({ title: notification.title, body: notification.body }),
                   cache: 'no-cache',
                 });
               }}>
