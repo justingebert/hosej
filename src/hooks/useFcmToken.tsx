@@ -8,6 +8,16 @@ async function requestPermissionReturnToken() {
     console.log("This browser does not support notifications.");
     return null;
   }
+  if (Notification.permission === "default") {
+    const permission = await Notification.requestPermission();
+    if (permission === "granted") {
+      const currentToken = await fetchToken();
+      return currentToken;
+    } else {
+      console.log("Notification permission not granted.");
+      return null;
+    }
+  }
   if(Notification.permission === "granted") {
     const currentToken = await fetchToken();
     return currentToken;
@@ -19,6 +29,8 @@ async function requestPermissionReturnToken() {
       return currentToken;
     }
   }
+
+
   console.log("Notification permission not granted.");
   return null;
 }
