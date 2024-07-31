@@ -1,12 +1,17 @@
 "use client";
 
-import type { ReactNode } from "react";
-import { UserProvider } from "./UserContext";
+import { useEffect, type ReactNode } from "react";
+import { UserProvider, useUser } from "./UserContext";
 import { ThemeProvider } from "@/components/theme-provider"
+import { TokenProvider } from "./TokenProvider";
+
+
 
 export const AppWrapper = ({ children }: { children: ReactNode }) => {
+
   return (
     <UserProvider>
+      <TokenProvider>
       <ThemeProvider
             attribute="class"
             defaultTheme="light"
@@ -15,6 +20,7 @@ export const AppWrapper = ({ children }: { children: ReactNode }) => {
           > 
       {children}
       </ThemeProvider>
+      </TokenProvider>
     </UserProvider>
   );
 };
