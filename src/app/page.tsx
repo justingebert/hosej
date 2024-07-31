@@ -12,40 +12,14 @@ import { Input } from "@/components/ui/input";
 import { set } from "mongoose";
 
 
-const sendTokenToServer = async (token: string, username:string) => {
-  try {
-    const response = await fetch('/api/register-push', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ token: token, username: username }),
-    });
 
-    if (response.ok) {
-      console.log('Token sent to server successfully.');
-    } else {
-      console.error('Failed to send token to server.');
-    }
-  } catch (error) {
-    console.error('An error occurred while sending the token to the server:', error);
-  }
-};
 
 export default function Home() {
   const router = useRouter();
   const { setTheme } = useTheme();
-  const { fcmToken, notificationPermissionStatus } = useFcmToken();
   const { username } = useUser();
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
-  
-
-  useEffect(() => {
-    if (fcmToken) {
-      sendTokenToServer(fcmToken, username);
-    }
-  }, [fcmToken]);
 
   useEffect(() => {
     const user = localStorage.getItem("user");

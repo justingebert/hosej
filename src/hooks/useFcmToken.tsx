@@ -30,87 +30,75 @@ async function requestPermissionReturnToken() {
     }
   }
 
-
   console.log("Notification permission not granted.");
   return null;
 }
 
-
 const useFcmToken = () => {
   const [notificationPermissionStatus, setNotificationPermissionStatus] =
-  useState<NotificationPermission | null>(null); // notification permission status.
-  const [token, setToken] = useState<string | null>(null); 
-  const retryLoadToken = useRef(0); // retry attempts.
-  const isLoading = useRef(false); // token fetch is currently in progress.
+    useState<NotificationPermission | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const retryLoadToken = useRef(0);
+  const isLoading = useRef(false);
 
   const loadToken = async () => {
-    //Prevent multiple fetches if already fetched or in progress.
     if (isLoading.current) return;
 
-    isLoading.current = true; 
-    const token = await requestPermissionReturnToken(); 
+    isLoading.current = true;
 
-    //permission is denied
-    if (Notification.permission === "denied") {
-      setNotificationPermissionStatus("denied");
-      console.info(
-        "%cPush Notifications issue - permission denied",
-        "color: green; background: #c7c7c7; padding: 8px; font-size: 20px"
-      );
-      isLoading.current = false;
-      return;
-    }
-    if (!token) {
-      if (retryLoadToken.current >= 3) {
-        alert("Unable to load token, refresh the app");
-        console.info(
-          "%cPush Notifications issue - unable to load token after 3 retries",
-          "color: green; background: #c7c7c7; padding: 8px; font-size: 20px"
-        )
-        isLoading.current = false
-        return
+    // Ensure the service worker is registered before requesting the token
+    if ('serviceWorker' in navigator) {
+      try {
+        const registration = await navigator.serviceWorker.ready;
+        if (registration) {
+          const token = await requestPermissionReturnToken();
+          if (token) {
+            setToken(token);
+            setNotificationPermissionStatus(Notification.permission);
+          } else {
+            if (retryLoadToken.current >= 3) {
+              alert('Unable to load token, refresh the app');
+              console.info(
+                '%cPush Notifications issue - unable to load token after 3 retries',
+                'color: green; background: #c7c7c7; padding: 8px; font-size: 20px'
+              );
+              return;
+            }
+            retryLoadToken.current += 1;
+            console.error('An error occurred while retrieving token. Retrying...');
+            await loadToken();
+          }
+        }
+      } catch (error) {
+        console.error('Service worker registration failed:', error);
       }
-
-      retryLoadToken.current += 1;
-      console.error("An error occurred while retrieving token. Retrying...")
-      isLoading.current = false;
-      await loadToken();
-      return;
     }
-    setNotificationPermissionStatus(Notification.permission);
-    setToken(token);
+
     isLoading.current = false;
   };
 
   useEffect(() => {
-    if ("Notification" in window) {
+    if ('Notification' in window) {
       loadToken();
     }
   }, []);
 
   useEffect(() => {
     const setupListener = async () => {
-      if (!token) return; // Exit if no token is available.
+      if (!token) return;
 
       console.log(`onMessage registered with token ${token}`);
       const m = await messaging();
       if (!m) return;
 
-      // Register a listener for incoming FCM messages.
       const unsubscribe = onMessage(m, (payload) => {
-        if (Notification.permission !== "granted") return;
+        if (Notification.permission !== 'granted') return;
 
-        console.log("Foreground push notification received:", payload);
-        const link = payload.fcmOptions?.link || payload.data?.link;
+        console.log('Foreground push notification received:', payload);
 
-    
-        const n = new Notification(
-          payload.data?.title || "New message",
-          {
-            body: payload.data?.body || "This is a new message",
-          }
-        );
-
+        const n = new Notification(payload.data?.title || 'New message', {
+          body: payload.data?.body || 'This is a new message',
+        });
       });
 
       return unsubscribe;
@@ -124,11 +112,10 @@ const useFcmToken = () => {
       }
     });
 
-    // Cleanup the listener when the component unmounts.
     return () => unsubscribe?.();
   }, [token, toast]);
 
-  return { fcmToken:token, notificationPermissionStatus };
+  return { fcmToken: token, notificationPermissionStatus };
 };
 
 export default useFcmToken;
