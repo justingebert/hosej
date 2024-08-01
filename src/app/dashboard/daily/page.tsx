@@ -13,6 +13,7 @@ import Header from "@/components/Header";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 function QuestionsTabs({ questions, userHasVoted, setUserHasVoted }: any) {
   const searchParams = useSearchParams();
@@ -32,19 +33,20 @@ function QuestionsTabs({ questions, userHasVoted, setUserHasVoted }: any) {
         </TabsList>
       {questions.map((question: any) => (
         <TabsContent key={question._id} value={question._id}>
-          <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-      <Card className="bg-foreground">
-              <h2 className="font-bold text-center p-6 text-secondary">{question.question}</h2>
-          </Card>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="">
-        
-        <DropdownMenuItem>
-        test
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+          <Popover>
+          <PopoverTrigger className="w-full">
+          <Card className=" bg-foreground text-center">
+                <h2 className="font-bold p-6 text-secondary">{question.question}</h2>
+              </Card>
+          </PopoverTrigger>
+          <PopoverContent>
+            <div className="flex flex-col space-y-2">
+            <Button className="w-full" >🐐</Button>
+            <Button className="w-full">👍</Button>
+            <Button className="w-full">🐟</Button>
+            </div>
+            </PopoverContent>
+      </Popover>
         
         
           <div className="mt-10">
