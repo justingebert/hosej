@@ -65,6 +65,7 @@ const useFcmToken = () => {
             }
             retryLoadToken.current += 1;
             console.error('An error occurred while retrieving token. Retrying...');
+            await new Promise((resolve) => setTimeout(resolve, 1000));
             isLoading.current = false;
             await loadToken();
           }
