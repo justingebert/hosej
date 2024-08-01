@@ -60,7 +60,7 @@ export async function GET(req: Request) {
       }
     }
 
-    const notificationResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/send-notification`, {
+    const notificationResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/send-notification`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -68,6 +68,8 @@ export async function GET(req: Request) {
       body: JSON.stringify({ title: '🚨HoseJ Fragen!!🚨', body: '🚨JETZT VOTEN DU FISCH🚨' }),
       cache: 'no-cache'
     });
+
+    console.log(notificationResponse)
   
     if (!notificationResponse.ok) {
       throw new Error('Failed to send notification');
