@@ -47,7 +47,6 @@ const useFcmToken = () => {
     isLoading.current = true;
 
     // Ensure the service worker is registered before requesting the token
-    if ('serviceWorker' in navigator) {
       try {
         const registration = await navigator.serviceWorker.ready;
         if (registration) {
@@ -57,7 +56,7 @@ const useFcmToken = () => {
             setNotificationPermissionStatus(Notification.permission);
           } else {
             if (retryLoadToken.current >= 3) {
-              alert('Unable to load token, refresh the app');
+              //alert('Unable to load token, refresh the app');
               console.info(
                 '%cPush Notifications issue - unable to load token after 3 retries',
                 'color: green; background: #c7c7c7; padding: 8px; font-size: 20px'
@@ -66,22 +65,23 @@ const useFcmToken = () => {
             }
             retryLoadToken.current += 1;
             console.error('An error occurred while retrieving token. Retrying...');
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+            isLoading.current = false;
             await loadToken();
           }
         }
       } catch (error) {
         console.error('Service worker registration failed:', error);
       }
-    }
+    
 
     isLoading.current = false;
   };
 
   useEffect(() => {
-    if ('Notification' in window) {
-      loadToken();
-    }
+    loadToken();
   }, []);
+
 
   useEffect(() => {
     const setupListener = async () => {
