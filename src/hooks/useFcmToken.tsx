@@ -47,7 +47,6 @@ const useFcmToken = () => {
     isLoading.current = true;
 
     // Ensure the service worker is registered before requesting the token
-    if ('serviceWorker' in navigator) {
       try {
         const registration = await navigator.serviceWorker.ready;
         if (registration) {
@@ -72,7 +71,7 @@ const useFcmToken = () => {
       } catch (error) {
         console.error('Service worker registration failed:', error);
       }
-    }
+    
 
     isLoading.current = false;
   };
