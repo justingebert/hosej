@@ -65,6 +65,7 @@ const useFcmToken = () => {
             }
             retryLoadToken.current += 1;
             console.error('An error occurred while retrieving token. Retrying...');
+            isLoading.current = false;
             await loadToken();
           }
         }
@@ -77,10 +78,9 @@ const useFcmToken = () => {
   };
 
   useEffect(() => {
-    if ('Notification' in window) {
-      loadToken();
-    }
+    loadToken();
   }, []);
+
 
   useEffect(() => {
     const setupListener = async () => {

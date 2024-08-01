@@ -16,7 +16,7 @@ const sendTokenToServer = async (token: string, username:string) => {
       });
   
       if (response.ok) {
-        console.log('Token sent to server successfully.');
+        console.log('Token sent to server');
       } else {
         console.error('Failed to send token to server.');
       }
