@@ -10,6 +10,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BackLink from "@/components/BackLink";
 import Loader from "@/components/Loader";
 import Header from "@/components/Header";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 function QuestionsTabs({ questions, userHasVoted, setUserHasVoted }: any) {
   const searchParams = useSearchParams();
@@ -18,7 +21,7 @@ function QuestionsTabs({ questions, userHasVoted, setUserHasVoted }: any) {
   return (
     <Tabs defaultValue={defaultTab}>
       <TabsList
-        className="grid w-full"
+        className="grid w-full mb-10"
         style={{ gridTemplateColumns: `repeat(${questions.length}, minmax(0, 1fr))` }}
       >
           {questions.map((question: any, index: number) => (
@@ -29,7 +32,21 @@ function QuestionsTabs({ questions, userHasVoted, setUserHasVoted }: any) {
         </TabsList>
       {questions.map((question: any) => (
         <TabsContent key={question._id} value={question._id}>
-          <h2 className="font-bold text-center mt-10">{question.question}</h2>
+          <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+      <Card className="bg-foreground">
+              <h2 className="font-bold text-center p-6 text-secondary">{question.question}</h2>
+          </Card>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="">
+        
+        <DropdownMenuItem>
+        test
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+        
+        
           <div className="mt-10">
             {userHasVoted[question._id] ? (
               <VoteResults question={question} avaiable={true}/>
@@ -61,7 +78,6 @@ const DailyQuestionPage = () => {
       const res = await fetch(`/api/question/daily`, { cache: "no-store" });
       const data = await res.json();
 
-      console.log(username);
       if (data.questions) {
         setQuestions(data.questions);
         const votes = data.questions.reduce((acc: any, question: any) => {
