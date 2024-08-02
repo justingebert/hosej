@@ -46,9 +46,9 @@ const questionSchema = new mongoose.Schema({
     },
   ],
   rating: { 
-    good: { count:{type: Number, default: 0}, usernnames: [String]},
-    ok: {count:{type: Number, default: 0}, usernnames: [String]},
-    bad: {count:{type: Number, default: 0}, usernnames: [String]},
+    good: { count:{type: Number, default: 0}, usernames: [String]},
+    ok: {count:{type: Number, default: 0}, usernames: [String]},
+    bad: {count:{type: Number, default: 0}, usernames: [String]},
   },
   createdAt: { type: Date, default: Date.now },
   used: { type: Boolean, default: false },

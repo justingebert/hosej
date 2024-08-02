@@ -22,7 +22,6 @@ function QuestionsTabs({ questions, userHasVoted, setUserHasVoted }: any) {
   const [userRated, setUserRated] = useState<{ [key: string]: boolean }>({});
 
 
-
   const rateQuestion = async (questionId: string, username:string, rating: string) => {
     await fetch(`/api/question/${questionId}/rate`, {
       method: "POST",
@@ -88,6 +87,7 @@ const DailyQuestionPage = () => {
   const { username } = useUser();
   const [questions, setQuestions] = useState<any>([]);
   const [userHasVoted, setUserHasVoted] = useState<any>({});
+  const [userHasRated, setUserHasRated] = useState<any>({});
   const [activeTab, setActiveTab] = useState<string | undefined>();
   const router = useRouter();
 
@@ -107,6 +107,13 @@ const DailyQuestionPage = () => {
           return acc;
         }, {});
         setUserHasVoted(votes);
+
+        const ratings = data.questions.reduce((acc: any, question: any) => {
+          acc[question._id] = question.rating.good.usernames.includes(username) || question.rating.ok.usernames.includes(username) || question.rating.bad.usernames.includes(username);
+          return acc;
+        }, {});
+
+        setUserHasRated(ratings);
       }
       if (data.message) {
         alert(data.message);//TODO improve
