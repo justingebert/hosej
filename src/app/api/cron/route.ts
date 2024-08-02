@@ -69,6 +69,8 @@ export async function GET(req: Request) {
       body: JSON.stringify({ title: '🚨HoseJ Fragen!!🚨', body: '🚨JETZT VOTEN DU FISCH🚨' }),
       cache: 'no-cache'
     });
+
+    console.log(notificationResponse)
   
     if (!notificationResponse.ok) {
       throw new Error('Failed to send notification');
