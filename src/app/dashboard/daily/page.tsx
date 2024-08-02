@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import { useUser } from "@/components/UserContext";
 import VoteOptions from "@/components/Question/VotingOptions.client";
 import VoteResults from "@/components/Question/VoteResults.client";
@@ -16,8 +16,26 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 function QuestionsTabs({ questions, userHasVoted, setUserHasVoted }: any) {
+  const { username } = useUser();
   const searchParams = useSearchParams();
   const defaultTab = searchParams.get('returnTo') || (questions.length > 0 ? questions[0]._id : undefined);
+  const [userRated, setUserRated] = useState<{ [key: string]: boolean }>({});
+
+
+
+  const rateQuestion = async (questionId: string, username:string, rating: string) => {
+    await fetch(`/api/question/${questionId}/rate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username:username, rating:rating }),
+    });
+
+    setUserRated((prevState) => ({
+      ...prevState,
+      [questionId]: true,
+    }));
+  }
+
 
   return (
     <Tabs defaultValue={defaultTab}>
@@ -41,9 +59,9 @@ function QuestionsTabs({ questions, userHasVoted, setUserHasVoted }: any) {
           </PopoverTrigger>
           <PopoverContent>
             <div className="flex flex-col space-y-2">
-            <Button className="w-full" >🐐</Button>
-            <Button className="w-full">👍</Button>
-            <Button className="w-full">🐟</Button>
+            <Button className="w-full" onClick={() => {rateQuestion(question._id, username, "good")}} >🐐</Button>
+            <Button className="w-full" onClick={() => {rateQuestion(question._id, username, "ok")}} >👍</Button>
+            <Button className="w-full" onClick={() => {rateQuestion(question._id, username, "bad")}} >🐟</Button>
             </div>
             </PopoverContent>
       </Popover>
