@@ -14,6 +14,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 
 function QuestionsTabs({ questions, userHasVoted, setUserHasVoted }: any) {
   const { username } = useUser();
@@ -50,20 +51,24 @@ function QuestionsTabs({ questions, userHasVoted, setUserHasVoted }: any) {
         </TabsList>
       {questions.map((question: any) => (
         <TabsContent key={question._id} value={question._id}>
-          <Popover>
-          <PopoverTrigger className="w-full">
+          <Drawer>
+          <DrawerTrigger className="w-full">
           <Card className=" bg-foreground text-center">
                 <h2 className="font-bold p-6 text-secondary">{question.question}</h2>
               </Card>
-          </PopoverTrigger>
-          <PopoverContent>
-            <div className="flex flex-col space-y-2">
-            <Button className="w-full" onClick={() => {rateQuestion(question._id, username, "good")}} >🐐</Button>
-            <Button className="w-full" onClick={() => {rateQuestion(question._id, username, "ok")}} >👍</Button>
-            <Button className="w-full" onClick={() => {rateQuestion(question._id, username, "bad")}} >🐟</Button>
+          </DrawerTrigger>
+          <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Kann die Frage was?</DrawerTitle>
+            <DrawerDescription></DrawerDescription>
+          </DrawerHeader>
+            <div className="flex flex-row space-x-4 p-4">
+            <Button className=" text-3xl flex-1 py-8 h-full" onClick={() => {rateQuestion(question._id, username, "bad")}} >🐟</Button>
+            <Button className="text-3xl flex-1 py-8 h-full" onClick={() => {rateQuestion(question._id, username, "ok")}} >👍</Button>
+            <Button className=" text-3xl flex-1 py-8 h-full" onClick={() => {rateQuestion(question._id, username, "good")}} >🐐</Button>
             </div>
-            </PopoverContent>
-      </Popover>
+            </DrawerContent>
+      </Drawer>
         
         
           <div className="mt-10">

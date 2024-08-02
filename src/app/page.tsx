@@ -10,6 +10,7 @@ import useFcmToken from "../hooks/useFcmToken";
 import { useUser } from "@/components/UserContext"; 
 import { Input } from "@/components/ui/input";
 import { set } from "mongoose";
+import { Card } from "@/components/ui/card";
 
 
 
@@ -49,19 +50,19 @@ export default function Home() {
       </div>
       <div className="flex flex-col items-center justify-center flex-grow">
         <div className="flex flex-col items-center gap-16">
-          <Button
-            className="p-8 font-bold text-lg"
+          <Card
+            className="font-bold text-lg "
             onClick={() => router.push("/dashboard/rally")}
           >
             Rally
-          </Button>
-          <Button
-            className="p-8 font-bold text-lg"
+          </Card>
+          <Card
+            className="font-bold text-lg"
             onClick={() => router.push("/dashboard/daily")}
           >
             Daily
-          </Button>
-          {username === 'Justin' && (
+          </Card>
+          {/* {username === 'Justin' && (
             <div className="flex flex-col items-center gap-2 ">
               <Input
                 type="text"
@@ -92,10 +93,9 @@ export default function Home() {
                 Send Notification
               </Button>
             </div>
-          )}
+          )} */}
         </div>
       </div>
-      
       <div className=" flex justify-center">
         <Button
           variant={"secondary"}

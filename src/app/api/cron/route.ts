@@ -60,8 +60,8 @@ export async function GET(req: Request) {
       }
     }
 
-    console.log(`${process.env.NEXT_PUBLIC_API_URL}/api/send-notification`);
-    const notificationResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/send-notification`, {
+    console.log(`${process.env.NEXT_PUBLIC_BASE_URL}/api/send-notification`);
+    const notificationResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/send-notification`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
