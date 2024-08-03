@@ -45,7 +45,7 @@ function ChatComponent({ questionId, avaiable }:any) {
               messages.map((msg:any, index:number) => (
                   <div key={index} className={`flex mb-2 ${msg.user?.username === username ? 'justify-end' : 'justify-start'}`}>
                       <div className={`inline-block p-2 rounded-lg max-w-xs ${msg.user?.username === username ? 'bg-primary text-primary-foreground' : 'bg-secondary'}`}>
-                          <div className='font-bold text-xs pb-1'>{msg.user?.username}</div>
+                          <div className={`font-bold text-xs pb-1 ${msg.user?.username === username ? 'hidden' : ''}`}>{msg.user?.username}</div>
                           <div className='text-m'>{msg.message}</div>
                       </div>
                   </div>

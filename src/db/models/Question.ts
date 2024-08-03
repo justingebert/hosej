@@ -1,4 +1,4 @@
-import { time } from "console";
+import { count, time } from "console";
 import mongoose from "mongoose";
 
 enum QuestionType {
@@ -18,6 +18,11 @@ export interface IQuestion extends mongoose.Document {
   question: string;
   options?: any;
   answers: [{ userId: mongoose.Schema.Types.ObjectId; response: any, time: Date}];
+  rating: {
+    good: { count: number, username: string},
+    ok: { count: number, username: string},
+    bad: { count: number, username: string},
+  };
   createdAt: Date;
   used: boolean;
   active: boolean;
@@ -40,6 +45,11 @@ const questionSchema = new mongoose.Schema({
       time:     { type: Date},
     },
   ],
+  rating: { 
+    good: { count:{type: Number, default: 0}, usernames: [String]},
+    ok: {count:{type: Number, default: 0}, usernames: [String]},
+    bad: {count:{type: Number, default: 0}, usernames: [String]},
+  },
   createdAt: { type: Date, default: Date.now },
   used: { type: Boolean, default: false },
   active: { type: Boolean, default: false },
