@@ -44,7 +44,6 @@ export function CompletionChart({ completion }: { completion: number }) {
             />
             <RadialBar
               background
-              clockWise
               dataKey="value"
               cornerRadius={circleSize / 2}
               fill="hsl(var(--chart-4))"
