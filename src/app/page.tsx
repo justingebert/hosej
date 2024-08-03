@@ -108,17 +108,15 @@ export default function Home() {
             <div className="flex flex-col justify-center">
               <div className="font-bold text-2xl">Daily</div>
               <div className="text-sm text-primary/30">Vote now!</div>
-              <div className="text-lg ">Active</div> 
+              <div className="text-lg ">Active: {questions.length}</div> 
             </div>
-{/*        <div className="w-24 h-24 rounded-lg">
+            <div className="w-24 h-24 rounded-lg">
             <CompletionChart completion={completion} />
-            </div>  */}
+            </div> 
             {/* Placeholder for the chart */}
-            <Skeleton className="w-24 h-24  rounded-lg"/>
           </Card>
         </div>
       </div>
-      {/* <CompletionChart completion={completion} /> */}
       <div className="flex justify-center mb-20">
       <Button
           className="mt-8 w-full"
