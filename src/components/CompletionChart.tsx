@@ -10,7 +10,7 @@ import {
 import { ChartConfig, ChartContainer } from "./ui/chart";
 import { Card, CardContent } from "./ui/card";
 
-export function CompletionChart({ completion }) {
+export function CompletionChart({ completion }:any) {
   // Ensure both "Completion" and "Remaining" are provided
   const chartData = [
     { name: "Completion", value: completion, fill: "hsl(var(--chart-4))" },
@@ -48,7 +48,7 @@ export function CompletionChart({ completion }) {
               <RadialBar
                 dataKey="value"
                 background
-                clockWise
+                //clockWise
                 cornerRadius={10}
                 isAnimationActive={false}
               />
