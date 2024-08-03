@@ -2,7 +2,7 @@ import dbConnect from "@/lib/dbConnect";
 import Question, { IQuestion } from "@/db/models/Question";
 import user from "@/db/models/user";
 import { NextResponse } from "next/server";
-import {sendNotification} from "@/app/api/send-notification/route";
+import { sendNotification } from "@/utils/sendNotification";
 
 export const revalidate = 0;
 
