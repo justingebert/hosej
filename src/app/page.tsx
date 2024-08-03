@@ -104,7 +104,7 @@ export default function Home() {
           <Card
             className="bg-primary-foreground w-full px-6 py-4 flex items-center justify-between cursor-pointer"
             onClick={() => {
-              navigator.vibrate(200);
+              if(Boolean(window.navigator.vibrate))window.navigator.vibrate(200);
               router.push("/dashboard/daily")
             }}
           >
