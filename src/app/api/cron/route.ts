@@ -2,6 +2,7 @@ import dbConnect from "@/lib/dbConnect";
 import Question, { IQuestion } from "@/db/models/Question";
 import user from "@/db/models/user";
 import { NextResponse } from "next/server";
+import {sendNotification} from "@/app/api/send-notification/route";
 
 export const revalidate = 0;
 
@@ -60,22 +61,8 @@ export async function GET(req: Request) {
       }
     }
 
-    console.log(`${process.env.NEXT_PUBLIC_BASE_URL}/api/send-notification`);
-    const notificationResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/send-notification`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ title: '🚨HoseJ Fragen!!🚨', body: '🚨JETZT VOTEN DU FISCH🚨' }),
-      cache: 'no-cache'
-    });
-
-    console.log(notificationResponse)
+    await sendNotification('🚨HoseJ Fragen!!🚨', '🚨JETZT VOTEN DU FISCH🚨');
   
-    if (!notificationResponse.ok) {
-      throw new Error('Failed to send notification');
-    }
-
     return NextResponse.json({ questions });
   } catch (error: any) {
     console.error(error);

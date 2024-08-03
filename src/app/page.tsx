@@ -50,7 +50,6 @@ export default function Home() {
   }, [userCount]);
 
   const calculateCompletion = (questions: any, userCount: number) => {
-    console.log("questions:", questions);
     if (questions.length === 0) {
       setCompletion(0);
       return;
@@ -62,9 +61,6 @@ export default function Home() {
     questions.forEach((question: any) => {
       totalVotes += question.answers.length;
     });
-
-    console.log("totalVotes:", totalVotes);
-    console.log("totalRequiredVotes:", totalRequiredVotes);
 
     const completionPercentage = (totalVotes / totalRequiredVotes) * 100;
     setCompletion(Math.round(completionPercentage)); 
