@@ -15,24 +15,25 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
+import { Badge } from "@/components/ui/badge";
 
-function QuestionsTabs({ questions, userHasVoted, setUserHasVoted }: any) {
+function QuestionsTabs({ questions, userHasVoted, setUserHasVoted, selectedRating, setSelectedRating }: any) {
   const { username } = useUser();
   const searchParams = useSearchParams();
   const defaultTab = searchParams.get('returnTo') || (questions.length > 0 ? questions[0]._id : undefined);
   const [userRated, setUserRated] = useState<{ [key: string]: boolean }>({});
 
 
-  const rateQuestion = async (questionId: string, username:string, rating: string) => {
+  const rateQuestion = async (questionId: string, rating: string) => {
     await fetch(`/api/question/${questionId}/rate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username:username, rating:rating }),
     });
 
-    setUserRated((prevState) => ({
+    setSelectedRating((prevState: any) => ({
       ...prevState,
-      [questionId]: true,
+      [questionId]: rating,
     }));
   }
 
@@ -62,15 +63,39 @@ function QuestionsTabs({ questions, userHasVoted, setUserHasVoted }: any) {
             <DrawerTitle>Kann die Frage was?</DrawerTitle>
             <DrawerDescription></DrawerDescription>
           </DrawerHeader>
+          <div className="flex flex-row justify-center space-x-4">
+            <Badge>🐟{question.rating.bad.count}</Badge>
+            <Badge>👍{question.rating.ok.count}</Badge>
+            <Badge>🐐{question.rating.good.count}</Badge>
+          </div>
             <div className="flex flex-row space-x-4 p-4">
-            <Button className=" text-3xl flex-1 py-8 h-full" onClick={() => {rateQuestion(question._id, username, "bad")}} >🐟</Button>
-            <Button className="text-3xl flex-1 py-8 h-full" onClick={() => {rateQuestion(question._id, username, "ok")}} >👍</Button>
-            <Button className=" text-3xl flex-1 py-8 h-full" onClick={() => {rateQuestion(question._id, username, "good")}} >🐐</Button>
-            </div>
+            <Button
+                  className="text-3xl flex-1 py-8 h-full"
+                  variant={selectedRating[question._id] === "bad" ? "default" : "secondary"}
+                  onClick={() => rateQuestion(question._id, "bad")}
+                  disabled={Boolean(selectedRating[question._id])} // Disable if already rated
+                >
+                  🐟
+                </Button>
+                <Button
+                  className="text-3xl flex-1 py-8 h-full"
+                  variant={selectedRating[question._id] === "ok" ? "default" : "secondary"}
+                  onClick={() => rateQuestion(question._id, "ok")}
+                  disabled={Boolean(selectedRating[question._id])} // Disable if already rated
+                >
+                  👍
+                </Button>
+                <Button
+                  className="text-3xl flex-1 py-8 h-full"
+                  variant={selectedRating[question._id] === "good" ? "default" : "secondary"}
+                  onClick={() => rateQuestion(question._id, "good")}
+                  disabled={Boolean(selectedRating[question._id])} // Disable if already rated
+                >
+                  🐐
+                </Button>
+                </div>
             </DrawerContent>
       </Drawer>
-        
-        
           <div className="mt-10">
             {userHasVoted[question._id] ? (
               <VoteResults question={question} avaiable={true}/>
@@ -93,6 +118,7 @@ const DailyQuestionPage = () => {
   const [questions, setQuestions] = useState<any>([]);
   const [userHasVoted, setUserHasVoted] = useState<any>({});
   const [userHasRated, setUserHasRated] = useState<any>({});
+  const [selectedRating, setSelectedRating] = useState<any>({});
   const [activeTab, setActiveTab] = useState<string | undefined>();
   const router = useRouter();
 
@@ -114,11 +140,13 @@ const DailyQuestionPage = () => {
         setUserHasVoted(votes);
 
         const ratings = data.questions.reduce((acc: any, question: any) => {
-          acc[question._id] = question.rating.good.usernames.includes(username) || question.rating.ok.usernames.includes(username) || question.rating.bad.usernames.includes(username);
+          if (question.rating.good.usernames.includes(username)) acc[question._id] = "good";
+          else if (question.rating.ok.usernames.includes(username)) acc[question._id] = "ok";
+          else if (question.rating.bad.usernames.includes(username)) acc[question._id] = "bad";
           return acc;
         }, {});
 
-        setUserHasRated(ratings);
+        setSelectedRating(ratings);
       }
       if (data.message) {
         alert(data.message);//TODO improve
@@ -141,6 +169,8 @@ const DailyQuestionPage = () => {
         questions={questions}
         userHasVoted={userHasVoted}
         setUserHasVoted={setUserHasVoted}
+        selectedRating={selectedRating}
+        setSelectedRating={setSelectedRating}
       />
     </>
   );

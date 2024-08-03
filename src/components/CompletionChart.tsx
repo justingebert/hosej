@@ -3,83 +3,62 @@
 import {
   RadialBar,
   RadialBarChart,
-  PolarGrid,
-  PolarRadiusAxis,
-  Label,
+  PolarAngleAxis,
 } from "recharts";
-import { ChartConfig, ChartContainer } from "./ui/chart";
 import { Card, CardContent } from "./ui/card";
 
-export function CompletionChart({ completion }:any) {
-  // Ensure both "Completion" and "Remaining" are provided
-  const chartData = [
-    { name: "Completion", value: completion, fill: "hsl(var(--chart-4))" },
-    { name: "Remaining", value: 100 - completion, fill: "transparent" }, // Transparent fill to not show "Remaining"
+export function CompletionChart({ completion }: { completion: number }) {
+  // Data configuration with completion value
+
+  const getFillColor = () => {
+    if (completion < 33) return "red";
+    if (completion < 66) return "yellow";
+    return "green"; 
+  };
+
+  const data = [
+    { name: "Completion", value: completion, fill: getFillColor() },
   ];
 
-  const chartConfig = {
-    completion: {
-      label: "%",
-    },
-  } satisfies ChartConfig;
+  const circleSize = 100;
 
   return (
     <div>
-      <Card className="flex justify-center w-24 h-24">
-        <CardContent className="flex justify-center">
-          <ChartContainer
-            config={chartConfig}
-            className="mx-auto aspect-square max-h-[250px]"
+          <RadialBarChart
+            width={circleSize}
+            height={circleSize}
+            cx={circleSize / 2}
+            cy={circleSize / 2}
+            innerRadius={35}
+            outerRadius={50}
+            barSize={10}
+            data={data}
+            startAngle={90}
+            endAngle={-270}
           >
-            <RadialBarChart
-              data={chartData}
-              startAngle={90}
-              endAngle={-270} // Ensures that the chart fills proportionally
-              innerRadius={"70%"}
-              outerRadius={"100%"}
-              barSize={10}
+            <PolarAngleAxis
+              type="number"
+              domain={[0, 100]}
+              angleAxisId={0}
+              tick={false}
+            />
+            <RadialBar
+              background
+              dataKey="value"
+              cornerRadius={circleSize / 2}
+              fill="hsl(var(--chart-4))"
+              isAnimationActive={true}
+            />
+            <text
+              x={circleSize / 2}
+              y={circleSize / 2}
+              textAnchor="middle"
+              dominantBaseline="middle"
+              className="fill-foreground text-m font-bold"
             >
-              <PolarGrid
-                gridType="circle"
-                radialLines={false}
-                stroke="none"
-                className="first:fill-muted last:fill-background"
-              />
-              <RadialBar
-                dataKey="value"
-                background
-                //clockWise
-                cornerRadius={10}
-                isAnimationActive={false}
-              />
-              <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
-                <Label
-                  content={({ viewBox }) => {
-                    if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-                      return (
-                        <text
-                          x={viewBox.cx}
-                          y={viewBox.cy}
-                          textAnchor="middle"
-                          dominantBaseline="middle"
-                        >
-                          <tspan
-                            x={viewBox.cx}
-                            y={viewBox.cy}
-                            className="fill-foreground text-m font-bold"
-                          >
-                            {completion}%
-                          </tspan>
-                        </text>
-                      );
-                    }
-                  }}
-                />
-              </PolarRadiusAxis>
-            </RadialBarChart>
-          </ChartContainer>
-        </CardContent>
-      </Card>
+              {completion}%
+            </text>
+          </RadialBarChart>
     </div>
   );
 }

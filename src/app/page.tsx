@@ -91,7 +91,7 @@ export default function Home() {
       <div className="flex flex-col items-center justify-center flex-grow"> {/* Center the cards and button */}
         <div className="flex flex-col items-center gap-8 w-full">
           <Card
-            className="bg-primary-foreground w-full p-4 flex items-center justify-between cursor-pointer"
+            className="bg-primary-foreground w-full  px-6 py-4 flex items-center justify-between cursor-pointer"
             onClick={() => router.push("/dashboard/rally")}
           >
             <div className="flex flex-col justify-center">
@@ -102,23 +102,21 @@ export default function Home() {
             <Skeleton className="w-24 h-24  rounded-lg"/> {/* Placeholder for the chart */}
           </Card>
           <Card
-            className="bg-primary-foreground w-full p-4 flex items-center justify-between cursor-pointer"
+            className="bg-primary-foreground w-full px-6 py-4 flex items-center justify-between cursor-pointer"
             onClick={() => router.push("/dashboard/daily")}
           >
             <div className="flex flex-col justify-center">
               <div className="font-bold text-2xl">Daily</div>
               <div className="text-sm text-primary/30">Vote now!</div>
-              <div className="text-lg ">Active</div> 
+              <div className="text-lg ">Active: {questions.length}</div> 
             </div>
-{/*        <div className="w-24 h-24 rounded-lg">
+            <div className="w-24 h-24 rounded-lg">
             <CompletionChart completion={completion} />
-            </div>  */}
+            </div> 
             {/* Placeholder for the chart */}
-            <Skeleton className="w-24 h-24  rounded-lg"/>
           </Card>
         </div>
       </div>
-      {/* <CompletionChart completion={completion} /> */}
       <div className="flex justify-center mb-20">
       <Button
           className="mt-8 w-full"
