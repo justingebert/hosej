@@ -103,7 +103,10 @@ export default function Home() {
           </Card>
           <Card
             className="bg-primary-foreground w-full px-6 py-4 flex items-center justify-between cursor-pointer"
-            onClick={() => router.push("/dashboard/daily")}
+            onClick={() => {
+              router.push("/dashboard/daily")
+              navigator.vibrate(200);
+            }}
           >
             <div className="flex flex-col justify-center">
               <div className="font-bold text-2xl">Daily</div>
