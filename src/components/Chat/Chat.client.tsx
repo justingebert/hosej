@@ -39,7 +39,7 @@ function ChatComponent({ questionId, avaiable }:any) {
     };
 
     return (
-      <div className="flex flex-col h-screen">
+      <div className="flex flex-col">
       <div className="flex-grow overflow-auto p-4">
           {messages.length > 0 ? (
               messages.map((msg:any, index:number) => (
@@ -55,7 +55,7 @@ function ChatComponent({ questionId, avaiable }:any) {
           )}
       </div>
       {avaiable && (
-          <div className="sticky bottom-10 left-0 bg-background w-full">
+          <div className="sticky bottom-8 left-0 bg-background w-full">
           <div className=" flex gap-2">
               <Input
                   className="flex-grow p-2"
