@@ -15,7 +15,6 @@ function ChatComponent({ questionId, avaiable }: any) {
       const response = await fetch(`/api/question/messages/${questionId}`);
       const data = await response.json();
       setMessages(data);
-      scrollToBottom(); // Scroll to the bottom when messages are loaded
     };
 
     fetchMessages();
