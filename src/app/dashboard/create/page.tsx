@@ -10,6 +10,7 @@ import CreateQuestion from "@/components/Question/createQuestion.client";
 import CreateRally from "@/components/Rally/createRally.client";
 import BackLink from "@/components/utils/BackLink";
 
+
 const CreatePage = () => {
 
   return (

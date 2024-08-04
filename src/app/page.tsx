@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { CompletionChart } from "@/components/Charts/CompletionChart";
 import PulsatingCircle from "@/components/utils/PulsatingCircle";
 
+
 export default function Home() {
   const router = useRouter();
   const [userCount, setUserCount] = useState(0);
