@@ -28,7 +28,7 @@ export default function RootLayout({
           <ThemeColorMeta />
         </head>
         <body >
-          <div className="p-6">
+          <div className="p-6 h-[100dvh]">
           <AppWrapper>
             {children}
             </AppWrapper>

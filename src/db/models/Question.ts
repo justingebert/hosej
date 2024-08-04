@@ -30,6 +30,11 @@ export interface IQuestion extends mongoose.Document {
 }
 
 const questionSchema = new mongoose.Schema({
+  groupId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Group",
+    required: false,
+  },
   category: { type: String },
   questionType: {
     type: String,
@@ -55,6 +60,8 @@ const questionSchema = new mongoose.Schema({
   active: { type: Boolean, default: false },
   submittedBy: {type: String}
 });
+
+questionSchema.index({ groupId: 1, createdAt: -1 });
 
 const Question = mongoose.models.Question || mongoose.model<IQuestion>("Question", questionSchema);
 

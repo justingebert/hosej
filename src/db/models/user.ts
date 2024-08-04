@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { IGroup } from "./Group";
 
 const PointsEntrySchema = new mongoose.Schema({
   points: {
@@ -13,12 +14,13 @@ const PointsEntrySchema = new mongoose.Schema({
 
 export interface IUser extends mongoose.Document {
   username: string;
-  createdAt: Date;
   points: {
     points: number;
     date: Date;
   }[];
   streak: number;
+  groups: IGroup[];
+  createdAt: Date;
 }
 
 const UserSchema = new mongoose.Schema({
@@ -34,6 +36,12 @@ const UserSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  groups: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Group",
+    },
+  ],
   createdAt: {
     type: Date,
     default: Date.now,
