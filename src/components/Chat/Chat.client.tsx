@@ -55,19 +55,19 @@ function ChatComponent({ questionId, avaiable }:any) {
           )}
       </div>
       {avaiable && (
-          <div className="sticky bottom-8 left-0 bg-background w-full">
-          <div className=" flex gap-2">
-              <Input
-                  className="flex-grow p-2"
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Type a message..."
-              />
-              <Button onClick={handleSendMessage}>
-                  <Send size={20}/>
-              </Button>
+          <div className="bg-background p-4 sticky bottom-0 left-0 w-full">
+          <div className="flex gap-2">
+            <Input
+              className="flex-grow p-2"
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              placeholder="Type a message..."
+            />
+            <Button onClick={handleSendMessage}>
+              <Send size={20} />
+            </Button>
           </div>
-  </div>
+        </div>
         )}
       
   </div>
