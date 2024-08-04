@@ -21,10 +21,10 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import BackLink from "@/components/BackLink";
-import ThemeSelector from "@/components/ThemeSelector";
-import Loader from "@/components/Loader";
-import Header from "@/components/Header";
+import BackLink from "@/components/ui/BackLink";
+import ThemeSelector from "@/components/ui/ThemeSelector";
+import Loader from "@/components/ui/Loader";
+import Header from "@/components/ui/Header";
 
 type Statistics = {
   userCount: number;

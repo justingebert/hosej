@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import ChatComponent from "../Chat.client";
+import ChatComponent from "../Chat/Chat.client";
 import { Separator } from "@/components/ui/separator"
 import { motion } from 'framer-motion';
 import { Badge } from "../ui/badge";

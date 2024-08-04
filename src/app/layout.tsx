@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import { AppWrapper } from "../components/AppWrapper";
+import { AppWrapper } from "../components/Warppers/AppWrapper";
 /* import { Analytics } from "@vercel/analytics/react" */
-import { ThemeProvider } from "@/components/theme-provider"
-import { ThemeColorMeta } from "@/components/ThemeColorVieport";
+import { ThemeProvider } from "@/components/Warppers/theme-provider"
+import { ThemeColorMeta } from "@/components/Warppers/ThemeColorVieport";
 /* import { SpeedInsights } from "@vercel/speed-insights/next"
  */
 

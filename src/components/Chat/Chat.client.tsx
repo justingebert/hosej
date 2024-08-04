@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import {useUser} from './UserContext';
-import { Button } from './ui/button';
+import {useUser} from '../UserContext';
+import { Button } from '../ui/button';
 import { Send } from 'lucide-react'
 import { Input } from "@/components/ui/input"
 

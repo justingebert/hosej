@@ -5,7 +5,7 @@ import {
   RadialBarChart,
   PolarAngleAxis,
 } from "recharts";
-import { Card, CardContent } from "./ui/card";
+import { Card, CardContent } from "../ui/card";
 
 export function CompletionChart({ completion }: { completion: number }) {
   // Data configuration with completion value

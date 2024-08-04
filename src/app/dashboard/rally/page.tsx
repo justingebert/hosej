@@ -14,9 +14,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import imageCompression from 'browser-image-compression';
-import BackLink from "@/components/BackLink";
-import Loader from "@/components/Loader";
-import Header from "@/components/Header";
+import BackLink from "@/components/ui/BackLink";
+import Loader from "@/components/ui/Loader";
+import Header from "@/components/ui/Header";
 
 function RallyTabs({ rallies, userHasVoted, userHasUploaded, setUserHasVoted }: any) {
   const searchParams = useSearchParams();
