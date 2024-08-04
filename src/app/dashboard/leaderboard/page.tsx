@@ -12,8 +12,8 @@ import {
 } from "@/components/ui/table";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import BackLink from "@/components/ui/BackLink";
-import Header from "@/components/ui/Header";
+import BackLink from "@/components/utils/BackLink";
+import Header from "@/components/utils/Header";
 
 type PointsEntry = {
   points: number;
