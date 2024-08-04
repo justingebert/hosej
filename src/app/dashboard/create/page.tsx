@@ -8,7 +8,7 @@ import Link from "next/link";
 import { ArrowLeft } from 'lucide-react';
 import CreateQuestion from "@/components/Question/createQuestion.client";
 import CreateRally from "@/components/Rally/createRally.client";
-import BackLink from "@/components/ui/BackLink";
+import BackLink from "@/components/utils/BackLink";
 
 const CreatePage = () => {
 

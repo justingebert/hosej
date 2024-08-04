@@ -5,7 +5,7 @@ import user from "@/db/models/user";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft } from 'lucide-react';
-import BackLink from "@/components/ui/BackLink";
+import BackLink from "@/components/utils/BackLink";
 
 export default async function ResultsDetailPage({params }: {params: { id: string };}) {
   await dbConnect();

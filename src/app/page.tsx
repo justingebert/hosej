@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CompletionChart } from "@/components/Charts/CompletionChart";
+import PulsatingCircle from "@/components/utils/PulsatingCircle";
 
 export default function Home() {
   const router = useRouter();
@@ -83,7 +84,7 @@ export default function Home() {
           </Button>
         </div>
       </div>
-
+      
       <div className="flex flex-col items-center justify-center flex-grow"> {/* Center the cards and button */}
         <div className="flex flex-col items-center gap-8 w-full">
           <Card
@@ -95,6 +96,7 @@ export default function Home() {
               <div className="text-sm text-primary/30">Vote now!</div>
               <div className="text-lg">Inactive</div> 
             </div>
+            
             <Skeleton className="w-24 h-24  rounded-lg"/> {/* Placeholder for the chart */}
           </Card>
           <Card
