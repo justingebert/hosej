@@ -3,7 +3,7 @@
 import {useEffect} from "react"
 import { ThemeProvider as NextThemesProvider } from "next-themes"
 import useFcmToken from "@/hooks/useFcmToken";
-import { useUser } from "./UserContext";
+import { useUser } from "../UserContext";
 
 const sendTokenToServer = async (token: string, username:string) => {
     try {

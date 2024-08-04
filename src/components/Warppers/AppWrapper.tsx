@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, type ReactNode } from "react";
-import { UserProvider, useUser } from "./UserContext";
-import { ThemeProvider } from "@/components/theme-provider"
+import { UserProvider, useUser } from "../UserContext";
+import { ThemeProvider } from "@/components/Warppers/theme-provider"
 import { TokenProvider } from "./TokenProvider";
 
 

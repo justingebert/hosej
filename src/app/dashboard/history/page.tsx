@@ -5,9 +5,9 @@ import Link from "next/link";
 import { useUser } from "@/components/UserContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import BackLink from "@/components/BackLink";
-import Loader from "@/components/Loader";
-import Header from "@/components/Header";
+import BackLink from "@/components/ui/BackLink";
+import Loader from "@/components/ui/Loader";
+import Header from "@/components/ui/Header";
 
 
 //attach newly paged questions 

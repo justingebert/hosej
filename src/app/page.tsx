@@ -11,7 +11,7 @@ import { useUser } from "@/components/UserContext";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CompletionChart } from "@/components/CompletionChart";
+import { CompletionChart } from "@/components/Charts/CompletionChart";
 
 export default function Home() {
   const router = useRouter();

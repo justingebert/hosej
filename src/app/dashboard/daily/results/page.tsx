@@ -4,8 +4,8 @@ import React, { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from 'next/navigation';
 import { ClipLoader } from "react-spinners";
 import VoteResults from "@/components/Question/VoteResults.client";
-import BackLink from "@/components/BackLink";
-import Loader from "@/components/Loader";
+import BackLink from "@/components/ui/BackLink";
+import Loader from "@/components/ui/Loader";
 
 const ResultsPage = () => {
   const searchParams = useSearchParams();
