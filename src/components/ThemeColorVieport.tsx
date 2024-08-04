@@ -7,11 +7,13 @@ export const ThemeColorMeta = () => {
   const { theme } = useTheme();
 
   useEffect(() => {
-    const lightThemeColor = "#FFFFFF"; // Replace with your light mode theme color
-    const darkThemeColor = "#000000"; // Replace with your dark mode theme color
+    const getComputedStyleValue = (variableName: string) => {
+      return getComputedStyle(document.documentElement).getPropertyValue(variableName).trim();
+    };
 
-    const themeColor = theme === "dark" ? darkThemeColor : lightThemeColor;
+    const themeColor = getComputedStyleValue("--background"); // Use the background variable
     const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    const metaStatusBar = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
 
     if (metaThemeColor) {
       metaThemeColor.setAttribute("content", themeColor);
@@ -20,6 +22,16 @@ export const ThemeColorMeta = () => {
       newMeta.name = "theme-color";
       newMeta.content = themeColor;
       document.head.appendChild(newMeta);
+    }
+
+    if (metaStatusBar) {
+      const statusBarStyle = theme === "dark" ? "black-translucent" : "default"; // Use default for light, black-translucent for dark
+      metaStatusBar.setAttribute("content", statusBarStyle);
+    } else {
+      const newMetaStatusBar = document.createElement("meta");
+      newMetaStatusBar.name = "apple-mobile-web-app-status-bar-style";
+      newMetaStatusBar.content = theme === "dark" ? "black-translucent" : "default";
+      document.head.appendChild(newMetaStatusBar);
     }
   }, [theme]);
 
