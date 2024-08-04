@@ -26,8 +26,8 @@ export default function RootLayout({
           <link rel="icon" href="AppIcons/favicon.ico" />
           <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
           <meta name="apple-mobile-web-app-capable" content="yes"/>
-          <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-          {/* <ThemeColorMeta /> */}
+          <meta name="apple-mobile-web-app-status-bar-style" content="translucent"/>
+          <ThemeColorMeta />
         </head>
         <body >
           <div className="p-6">
