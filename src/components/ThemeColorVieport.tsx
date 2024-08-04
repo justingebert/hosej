@@ -25,12 +25,12 @@ export const ThemeColorMeta = () => {
     }
 
     if (metaStatusBar) {
-      const statusBarStyle = theme === "dark" ? "black-translucent" : "default"; // Use default for light, black-translucent for dark
+      const statusBarStyle = theme === "dark" ? "black-translucent" : "white"; // Use default for light, black-translucent for dark
       metaStatusBar.setAttribute("content", statusBarStyle);
     } else {
       const newMetaStatusBar = document.createElement("meta");
       newMetaStatusBar.name = "apple-mobile-web-app-status-bar-style";
-      newMetaStatusBar.content = theme === "dark" ? "black-translucent" : "default";
+      newMetaStatusBar.content = theme === "dark" ? "black-translucent" : "white";
       document.head.appendChild(newMetaStatusBar);
     }
   }, [theme]);
