@@ -1,39 +1,27 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 
 export const ThemeColorMeta = () => {
   const { theme } = useTheme();
+  const [backgroundColor, setBackgroundColor] = useState<string>("");
 
   useEffect(() => {
     const getComputedStyleValue = (variableName: string) => {
       return getComputedStyle(document.documentElement).getPropertyValue(variableName).trim();
     };
 
-    const themeColor = getComputedStyleValue("--background"); // Use the background variable
-    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
-    const metaStatusBar = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
-
-    if (metaThemeColor) {
-      metaThemeColor.setAttribute("content", themeColor);
-    } else {
-      const newMeta = document.createElement("meta");
-      newMeta.name = "theme-color";
-      newMeta.content = themeColor;
-      document.head.appendChild(newMeta);
-    }
-
-    if (metaStatusBar) {
-      const statusBarStyle = theme === "dark" ? "default" : "black"; // Use default for light, black-translucent for dark
-      metaStatusBar.setAttribute("content", statusBarStyle);
-    } else {
-      const newMetaStatusBar = document.createElement("meta");
-      newMetaStatusBar.name = "apple-mobile-web-app-status-bar-style";
-      newMetaStatusBar.content = theme === "dark" ? "default" : "black";
-      document.head.appendChild(newMetaStatusBar);
-    }
+    const newBackgroundColor = getComputedStyleValue("--background");
+    setBackgroundColor(newBackgroundColor);
+    console.log(newBackgroundColor);
   }, [theme]);
 
-  return null;
+  return (
+    <>
+          <meta name="theme-color" content={backgroundColor}/>
+          <meta name="apple-mobile-web-app-capable" content="yes"/>
+          <meta name="apple-mobile-web-app-status-bar-style" content={backgroundColor}/>
+    </>
+  );
 };
