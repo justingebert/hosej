@@ -38,7 +38,7 @@ export const ThemeColorMeta = () => {
     <>
       <meta name="theme-color" content={backgroundColor} />
       <meta name="apple-mobile-web-app-capable" content="yes" />
-      <meta name="apple-mobile-web-app-status-bar-style" content={"#FF0000"} />
+      <meta name="apple-mobile-web-app-status-bar-style" content={"black-translucent"} />
     </>
   );
 };
