@@ -25,7 +25,9 @@ export default function RootLayout({
           <link rel="manifest" href="/manifest.json" id="manifest" />
           <link rel="icon" href="AppIcons/favicon.ico" />
           <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
-          <ThemeColorMeta />
+          <meta name="apple-mobile-web-app-capable" content="yes"/>
+          <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+          {/* <ThemeColorMeta /> */}
         </head>
         <body >
           <div className="p-6">
