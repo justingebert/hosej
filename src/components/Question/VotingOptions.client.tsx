@@ -54,7 +54,7 @@ const VoteOptions = ({ question, onVote }:any) => {
           ))}
         </div>
       )}
-      <div className="flex justify-center fixed bottom-20 left-0 w-full p-2 bg-background">
+      <div className="flex justify-center realtive bottom-20 left-0 w-full p-2 bg-background">
         <Button
           onClick={() => {
             if (question.questionType === "text" ? textResponse : selectedOption) {
