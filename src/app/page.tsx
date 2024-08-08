@@ -16,6 +16,7 @@ export default function Groups() {
         .then((data) => setGroups(data));
   }, []);
 
+  
   const createGroup = async () => {
     const res = await fetch('/api/groups/create', {
       method: 'POST',
