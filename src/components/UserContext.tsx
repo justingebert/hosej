@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation';
 
 type UserContextType = {
   user: any;
+  loading: boolean;
   createUser: (username: string) => Promise<void>;
   setUserLocal: (user: any) => void;
   getAllUsers: () => Promise<any[]>;
@@ -12,6 +13,7 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider = ({ children }: any) => {
   const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
@@ -26,6 +28,8 @@ export const UserProvider = ({ children }: any) => {
       console.error('Error parsing stored user:', error);
       localStorage.removeItem('user');  // Clear out corrupted data if any
       router.push('/signin');
+    } finally {
+      setLoading(false);
     }
   }, [router]);
 
@@ -39,7 +43,6 @@ export const UserProvider = ({ children }: any) => {
         body: JSON.stringify({ username }),
       });
       const newUser = await response.json();
-      console.log('User created:', newUser);
       setUser(newUser);
       localStorage.setItem('user', JSON.stringify(newUser));
       router.push('/dashboard/daily');
@@ -70,7 +73,7 @@ export const UserProvider = ({ children }: any) => {
   };
 
   return (
-    <UserContext.Provider value={{ user, createUser, setUserLocal, getAllUsers }}>
+    <UserContext.Provider value={{ user, loading, createUser, setUserLocal, getAllUsers }}>
       {children}
     </UserContext.Provider>
   );
