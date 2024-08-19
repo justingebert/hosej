@@ -5,14 +5,13 @@ import Link from "next/link";
 import { useUser } from "@/components/UserContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import BackLink from "@/components/ui/BackLink";
 import Loader from "@/components/ui/Loader";
 import Header from "@/components/ui/Header";
 
 
 //attach newly paged questions 
 const QuestionHistoryPage = () => {
-  const { username } = useUser();
+  const { user } = useUser();
   const [questions, setQuestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [offset, setOffset] = useState(0);
@@ -33,10 +32,10 @@ const QuestionHistoryPage = () => {
   }, [offset]);
 
   useEffect(() => {
-    if (username) {
+    if (user) {
       fetchQuestions();
     }
-  }, [username, fetchQuestions]);
+  }, [user, fetchQuestions]);
 
   const handleLoadMore = () => {
     setOffset((prevOffset) => prevOffset + 50);

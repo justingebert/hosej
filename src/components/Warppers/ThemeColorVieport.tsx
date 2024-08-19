@@ -31,7 +31,6 @@ export const ThemeColorMeta = () => {
     const newBackgroundColor = getComputedStyleValue("--background");
     const hexColor = parseHSL(newBackgroundColor);
     setBackgroundColor(hexColor);
-    console.log(hexColor);
   }, [theme]);
 
   return (

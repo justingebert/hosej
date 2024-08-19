@@ -18,7 +18,7 @@ import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, Dr
 import { Badge } from "@/components/ui/badge";
 
 function QuestionsTabs({ questions, userHasVoted, setUserHasVoted, selectedRating, setSelectedRating }: any) {
-  const { username } = useUser();
+  const { user } = useUser();
   const searchParams = useSearchParams();
   const defaultTab = searchParams.get('returnTo') || (questions.length > 0 ? questions[0]._id : undefined);
   const [userRated, setUserRated] = useState<{ [key: string]: boolean }>({});
@@ -28,7 +28,7 @@ function QuestionsTabs({ questions, userHasVoted, setUserHasVoted, selectedRatin
     await fetch(`/api/question/${questionId}/rate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username:username, rating:rating }),
+      body: JSON.stringify({ username:user.username, rating:rating }),
     });
 
     setSelectedRating((prevState: any) => ({
@@ -114,7 +114,7 @@ function QuestionsTabs({ questions, userHasVoted, setUserHasVoted, selectedRatin
 
 const DailyQuestionPage = () => {
   const [loading, setLoading] = useState(true);
-  const { username } = useUser();
+  const { user } = useUser();
   const [questions, setQuestions] = useState<any>([]);
   const [userHasVoted, setUserHasVoted] = useState<any>({});
   const [userHasRated, setUserHasRated] = useState<any>({});
@@ -133,16 +133,16 @@ const DailyQuestionPage = () => {
         setQuestions(data.questions);
         const votes = data.questions.reduce((acc: any, question: any) => {
           acc[question._id] = question.answers.some(
-            (answer: any) => answer.username.username === username
+            (answer: any) => answer.username.username === user.username
           );
           return acc;
         }, {});
         setUserHasVoted(votes);
 
         const ratings = data.questions.reduce((acc: any, question: any) => {
-          if (question.rating.good.usernames.includes(username)) acc[question._id] = "good";
-          else if (question.rating.ok.usernames.includes(username)) acc[question._id] = "ok";
-          else if (question.rating.bad.usernames.includes(username)) acc[question._id] = "bad";
+          if (question.rating.good.usernames.includes(user.username)) acc[question._id] = "good";
+          else if (question.rating.ok.usernames.includes(user.username)) acc[question._id] = "ok";
+          else if (question.rating.bad.usernames.includes(user.username)) acc[question._id] = "bad";
           return acc;
         }, {});
 
@@ -154,10 +154,10 @@ const DailyQuestionPage = () => {
       setLoading(false);
     };
 
-    if (username) {
+    if (user) {
       fetchQuestions();
     }
-  }, [username, router]);
+  }, [user, router]);
 
   if (loading) return <Loader loading={true} />
   if (!questions) return <p>No Questions avaiable</p>

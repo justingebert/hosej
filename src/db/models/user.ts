@@ -13,6 +13,7 @@ const PointsEntrySchema = new mongoose.Schema({
 });
 
 export interface IUser extends mongoose.Document {
+  _id: string;
   username: string;
   points: {
     points: number;

@@ -44,7 +44,7 @@ function RallyTabs({ rallies, userHasVoted, userHasUploaded, setUserHasVoted }: 
 }
 
 function RallyTabContent({ rally, userHasVoted, userHasUploaded,setUserHasVoted }: any) {
-  const { username } = useUser();
+  const { user } = useUser();
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const router = useRouter();
@@ -58,7 +58,7 @@ function RallyTabContent({ rally, userHasVoted, userHasUploaded,setUserHasVoted 
       body: JSON.stringify({
         filename,
         contentType,
-        userid: username,
+        userid: user.username,
         rallyId: rally._id,
       }),
     });
@@ -139,7 +139,7 @@ function RallyTabContent({ rally, userHasVoted, userHasUploaded,setUserHasVoted 
       const imageUrl = `${url}/${key}`; // Construct the image URL
       const submissionResponse = await createRallySubmission(
         rally._id,
-        username,
+        user.username,
         imageUrl
       );
       console.log("Submission successful:", submissionResponse);
@@ -236,7 +236,7 @@ function RallyTabContent({ rally, userHasVoted, userHasUploaded,setUserHasVoted 
 
 const RallyPage = () => {
   const [loading, setLoading] = useState(true);
-  const { username } = useUser();
+  const { user } = useUser();
   const [rallies, setRallies] = useState<any[]>([]);
   const [userHasVoted, setUserHasVoted] = useState<any>({});
   const [userUploaded, setUserUploaded] = useState<any>({});
@@ -253,14 +253,14 @@ const RallyPage = () => {
         setRallies(data.rallies);
         const votes = data.rallies.reduce((acc: any, rally: any) => {
           acc[rally._id] = rally.submissions.some((submission: any) =>
-            submission.votes.some((vote: any) => vote.username === username)
+            submission.votes.some((vote: any) => vote.username === user.username)
           );
           return acc;
         }, {});
         setUserHasVoted(votes);
         const userHasUploaded = data.rallies.reduce((acc: any, rally: any) => {
           acc[rally._id] = rally.submissions.some((submission: any) =>
-            submission.username === username
+            submission.username === user.username
           );
           return acc;
         }, {});
@@ -272,10 +272,10 @@ const RallyPage = () => {
       setLoading(false);
     };
 
-    if (username) {
+    if (user) {
       fetchRallies();
     }
-  }, [username, router]);
+  }, [user, router]);
 
   if (loading) return <Loader loading={true} />
   if (!rallies) return <p>No Rally avaiable</p>

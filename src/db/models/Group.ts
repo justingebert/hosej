@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { IUser } from "./user"; // Import the IUser interface
 
 export interface IGroup extends mongoose.Document {
+  _id: string
   name: string;
   description: string;
   members: IUser[]; 

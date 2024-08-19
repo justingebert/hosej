@@ -2,68 +2,75 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 type UserContextType = {
-  username: string;
+  user: any;
   createUser: (username: string) => Promise<void>;
-  setUser: (username: string, userId: string) => void;
+  setUserLocal: (user: any) => void;
   getAllUsers: () => Promise<any[]>;
 };
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-export const UserProvider = ({ children }:any) => {
-  const [username, setUsername] = useState('');
-  const [userId, setUserId] = useState(''); 
+export const UserProvider = ({ children }: any) => {
+  const [user, setUser] = useState<any>(null);
   const router = useRouter();
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUsername(storedUser);
-    } else {
+    try {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      } else {
+        router.push('/signin');
+      }
+    } catch (error) {
+      console.error('Error parsing stored user:', error);
+      localStorage.removeItem('user');  // Clear out corrupted data if any
       router.push('/signin');
     }
   }, [router]);
 
   const createUser = async (username: string) => {
     try {
-      const response = await fetch("/api/users", {
-        method: "POST",
+      const response = await fetch('/api/users', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({ username }),
       });
       const newUser = await response.json();
-      console.log("User created:", newUser);
-      setUsername(username);
-      setUserId(newUser._id);
-      localStorage.setItem("user", username); 
-      //localStorage.setItem("userId", userId); 
-      router.push("/dashboard/daily");
+      console.log('User created:', newUser);
+      setUser(newUser);
+      localStorage.setItem('user', JSON.stringify(newUser));
+      router.push('/dashboard/daily');
     } catch (error) {
-      console.error("Failed to create user:", error);
+      console.error('Failed to create user:', error);
     }
   };
 
-  const setUser = async (username: string, userId:string) => {
-    setUsername(username);
-    localStorage.setItem("user", username);
-    router.push("/dashboard/daily")
+  const setUserLocal = (user: any) => {
+    try {
+      setUser(user);
+      localStorage.setItem('user', JSON.stringify(user));
+      router.push('/dashboard/daily');
+    } catch (error) {
+      console.error('Failed to set user locally:', error);
+    }
   };
 
   const getAllUsers = async () => {
     try {
-      const response = await fetch("/api/users");
+      const response = await fetch('/api/users');
       const users = await response.json();
-      console.log("Fetched users:", users);
       return users;
     } catch (error) {
-      console.error("Failed to fetch users:", error);
+      console.error('Failed to fetch users:', error);
+      return [];
     }
   };
 
   return (
-    <UserContext.Provider value={{ username, createUser, setUser, getAllUsers }}>
+    <UserContext.Provider value={{ user, createUser, setUserLocal, getAllUsers }}>
       {children}
     </UserContext.Provider>
   );

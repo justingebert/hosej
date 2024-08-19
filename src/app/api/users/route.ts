@@ -22,7 +22,6 @@ export async function POST(req: any, res: NextResponse) {
   if (!username) {
     return NextResponse.json({ message: "Username is required" });
   }
-
   try {
     const newUser = new user({ username: username });
     await newUser.save();

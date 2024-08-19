@@ -10,7 +10,6 @@ export async function GET(req: NextRequest,  { params }: { params: { questionId:
     try{
         await dbConnect();
         
-        console.log(questionId);
         const question = await Question.findById(questionId)
 
         return NextResponse.json({question: question});

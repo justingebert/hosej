@@ -1,10 +1,7 @@
-import mongoose from "mongoose";
 import dbConnect from "@/lib/dbConnect";
 import Question from "@/db/models/Question";
 import user from "@/db/models/user";
-import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft } from 'lucide-react';
 import BackLink from "@/components/ui/BackLink";
 
 export default async function ResultsDetailPage({params }: {params: { id: string };}) {

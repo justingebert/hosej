@@ -2,8 +2,8 @@
 import React, { useState, useEffect } from "react";
 import { useUser } from "../../components/UserContext";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 type User = {
   _id: string;
@@ -11,11 +11,10 @@ type User = {
 };
 
 const SignInPage = () => {
-  const { createUser, setUser, getAllUsers } = useUser();
+  const { createUser, setUserLocal, getAllUsers } = useUser();
   const [users, setUsers] = useState<User[]>([]);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [userName, setUserName] = useState("");
-  const [selectedUserName, setSelectedUserName] = useState("");
-  const [selectedUserId, setSelectedUserId] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -25,16 +24,15 @@ const SignInPage = () => {
     fetchData();
   }, []);
 
-  //TODO should be seperated into two functions
-  const handleCreateOrSelectUser = () => {;
+  const handleCreateOrSelectUser = () => {
     if (userName) {
       createUser(userName);
-    } else if (selectedUserName) {
-      setUser(selectedUserName, selectedUserId);
+    } else if (selectedUser) {
+      setUserLocal(selectedUser);
     }
   };
 
-  const buttonLabel = userName ? "Create" : userName ? "Select" : "Start";
+  const buttonLabel = userName ? "Create" : selectedUser ? "Select" : "Start";
 
   return (
     <>
@@ -45,7 +43,10 @@ const SignInPage = () => {
           id="userName"
           placeholder="new User Name"
           value={userName}
-          onChange={(e) => setUserName(e.target.value)}
+          onChange={(e) => {
+            setUserName(e.target.value);
+            setSelectedUser(null); // Clear selected user when typing a new name
+          }}
         />
       </div>
       <div className="grid grid-cols-2 gap-4 mt-20">
@@ -53,21 +54,21 @@ const SignInPage = () => {
           <Button
             key={user._id}
             onClick={() => {
-              setSelectedUserName(user.username);
-              setSelectedUserId(user._id);
+              setSelectedUser(user);
               setUserName("");
             }}
-            //className={`rounded m-2 p-2 ${selectedUserName === user.username ? 'bg-slate-300' : 'bg-slate-600'}`}
-            variant={selectedUserName === user.username ? "default" : "secondary"}
+            variant={selectedUser?._id === user._id ? "default" : "secondary"}
           >
             {user.username}
           </Button>
         ))}
       </div>
       <div className="flex justify-center m-10">
-        <Button onClick={handleCreateOrSelectUser} variant={"default"}>{buttonLabel}</Button>
+        <Button onClick={handleCreateOrSelectUser} variant={"default"}>
+          {buttonLabel}
+        </Button>
       </div>
-      </>
+    </>
   );
 };
 
