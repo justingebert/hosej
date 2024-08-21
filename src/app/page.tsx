@@ -6,8 +6,9 @@ import { useUser } from '@/components/UserContext';
 import { IGroup } from '@/db/models/Group';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Card } from '@/components/ui/card';
 
-export default  function Groups() {
+export default function Groups() {
   const {user} = useUser();
   const [groups, setGroups] = useState<IGroup[]>([]);
   const [newGroupName, setNewGroupName] = useState('');
@@ -18,7 +19,7 @@ export default  function Groups() {
       if (!user) {
         return; // Don't fetch groups until user is available
       }
-      console.log(user)
+      
       const res = await fetch('/api/groups', {
         method: 'POST',
         headers: {
@@ -65,14 +66,14 @@ export default  function Groups() {
 
   return (
     <div>
-      <ul>
+      <Card>
         {groups.map((group) => (
-          <li key={group._id}>
+          <div key={group._id} onClick={() => {router.push(`${group._id}/dashboard`)}}>
             <h2>{group.name}</h2>
             <p>Join Link: <a href={generateJoinLink(group._id)}>{generateJoinLink(group._id)}</a></p>
-          </li>
+          </div>
         ))}
-      </ul>
+      </Card>
       <Input
         type="text"
         placeholder="Group Name"

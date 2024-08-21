@@ -4,28 +4,23 @@ import React, { useState, useEffect, use } from "react";
 import { useUser } from "@/components/UserContext";
 import VoteOptions from "@/components/Question/VotingOptions.client";
 import VoteResults from "@/components/Question/VoteResults.client";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useSearchParams } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import BackLink from "@/components/ui/BackLink";
 import Loader from "@/components/ui/Loader";
 import Header from "@/components/ui/Header";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { Badge } from "@/components/ui/badge";
 
-function QuestionsTabs({ questions, userHasVoted, setUserHasVoted, selectedRating, setSelectedRating }: any) {
+function QuestionsTabs({ groupId, questions, userHasVoted, setUserHasVoted, selectedRating, setSelectedRating }: any) {
   const { user } = useUser();
   const searchParams = useSearchParams();
   const defaultTab = searchParams.get('returnTo') || (questions.length > 0 ? questions[0]._id : undefined);
-  const [userRated, setUserRated] = useState<{ [key: string]: boolean }>({});
-
 
   const rateQuestion = async (questionId: string, rating: string) => {
-    await fetch(`/api/question/${questionId}/rate`, {
+    await fetch(`/api/${groupId}/question/${questionId}/rate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username:user.username, rating:rating }),
@@ -117,16 +112,15 @@ const DailyQuestionPage = () => {
   const { user } = useUser();
   const [questions, setQuestions] = useState<any>([]);
   const [userHasVoted, setUserHasVoted] = useState<any>({});
-  const [userHasRated, setUserHasRated] = useState<any>({});
   const [selectedRating, setSelectedRating] = useState<any>({});
-  const [activeTab, setActiveTab] = useState<string | undefined>();
   const router = useRouter();
+  const { groupId } = useParams<{ groupId: string }>();
 
   useEffect(() => {
     const fetchQuestions = async () => {
       setLoading(true);
       router.refresh();
-      const res = await fetch(`/api/question/daily`, { cache: "no-store" });
+      const res = await fetch(`/api/${groupId}/question/daily`, { cache: "no-store" });
       const data = await res.json();
 
       if (data.questions) {
@@ -157,15 +151,16 @@ const DailyQuestionPage = () => {
     if (user) {
       fetchQuestions();
     }
-  }, [user, router]);
+  }, [user, router, groupId]);
 
   if (loading) return <Loader loading={true} />
   if (!questions) return <p>No Questions avaiable</p>
 
   return (
     <>
-      <Header href="/" title="Daily Questions" />
+      <Header href={`/${groupId}/`} title="Daily Questions" />
       <QuestionsTabs
+        groupId={groupId}
         questions={questions}
         userHasVoted={userHasVoted}
         setUserHasVoted={setUserHasVoted}

@@ -15,7 +15,7 @@ export async function POST(req: NextRequest){
 
         await dbConnect();
 
-        const question = new Question({category: data.category, questionType: data.questionType, question:data.question, options: data.options, submittedBy: data.submittedBy });
+        const question = new Question({groupId: data.groupId, category: data.category, questionType: data.questionType, question:data.question, options: data.options, submittedBy: data.submittedBy });
         await question.save();
         if(!question){
             return NextResponse.json({ message: "No question found" });

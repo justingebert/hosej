@@ -10,15 +10,18 @@ import {
   AlertDialogFooter,
 } from "@/components/ui/alert-dialog";
 import { useUser } from "@/components/UserContext";
+import { useParams } from "next/navigation";
+import { group } from "console";
 
 const CreateRally = () => {
-  const {username} = useUser()
+  const {user} = useUser()
   const [task, setTask] = useState("");
   const [lengthInDays, setLengthInDays] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<String>("");
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const { groupId } = useParams<{ groupId: string }>();
 
   const handleSubmit = async (e:any) => {
     e.preventDefault();
@@ -26,13 +29,14 @@ const CreateRally = () => {
     setError('');
 
     const rallyData = {
+      groupId: groupId,
       task: task,
       lengthInDays: Number(lengthInDays),
-      submittedBy: username 
+      submittedBy: user.username
     };
 
     try {
-      const response = await fetch("/api/rally", {
+      const response = await fetch(`/api/${groupId}/rally`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

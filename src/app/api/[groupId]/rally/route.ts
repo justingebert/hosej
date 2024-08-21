@@ -82,10 +82,11 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     await dbConnect();
-    const { task, lengthInDays, submittedBy } = await req.json();
+    const { groupId, task, lengthInDays, submittedBy } = await req.json();
 
     //TODO this is different - garbage 
     const newRally = new Rally({
+      groupId,
       task,
       lengthInDays,
       submittedBy,

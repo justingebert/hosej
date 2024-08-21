@@ -1,27 +1,23 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { useTheme } from "next-themes";
 import { History } from "lucide-react";
 import Link from "next/link";
-import useFcmToken from "@/hooks/useFcmToken";
-import { useUser } from "@/components/UserContext"; 
-import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CompletionChart } from "@/components/Charts/CompletionChart";
 
-export default function Home() {
+export default function Dashboard() {
   const router = useRouter();
   const [userCount, setUserCount] = useState(0);
   const [questions, setQuestions] = useState([]);
   const [completion, setCompletion] = useState(0);
+  const { groupId } = useParams<{ groupId: string }>();
 
   useEffect(() => {
     const user = localStorage.getItem("user");
-    console.log("user:", user);
     if (!user) {
       router.push("/signin");
     }
@@ -29,25 +25,25 @@ export default function Home() {
 
   useEffect(() => {
     const fetchUserCount = async () => {
-      const response = await fetch("/api/users/count");
+      const response = await fetch(`/api/${groupId}/user/count`);
       const data = await response.json();
       setUserCount(data);
     };
     fetchUserCount();
-  }, []);
+  }, [groupId]);
 
 
   useEffect(() => {
     if (userCount > 0) {
       const fetchQuestions = async () => {
-        const response = await fetch("/api/question/daily");
+        const response = await fetch(`/api/${groupId}/question/daily`);
         const data = await response.json();
         setQuestions(data.questions);
         calculateCompletion(data.questions, userCount); 
       };
       fetchQuestions();
     }
-  }, [userCount]);
+  }, [groupId, userCount]);
 
   const calculateCompletion = (questions: any, userCount: number) => {
     if (questions.length === 0) {
@@ -70,15 +66,15 @@ export default function Home() {
     <div className="flex flex-col justify-between h-[100dvh]"> 
       <div className="flex justify-between items-center mt-4 w-full">
         <div>
-          <Button variant="outline" size="icon" onClick={() => { router.push("/dashboard/history") }}>
+          <Button variant="outline" size="icon" onClick={() => { router.push(`/${groupId}/history`)}}>
             <History />
           </Button>
         </div>
-        <Link href="/dashboard/stats">
+        <Link href={`/${groupId}/stats`}>
           <h1 className="text-4xl font-bold">HoseJ</h1>
         </Link>
         <div>
-          <Button variant="outline" size="icon" onClick={() => { router.push("/dashboard/leaderboard") }}>
+          <Button variant="outline" size="icon" onClick={() => { router.push(`/${groupId}/leaderboard`)}}>
             👖
           </Button>
         </div>
@@ -88,7 +84,7 @@ export default function Home() {
         <div className="flex flex-col items-center gap-8 w-full">
           <Card
             className="bg-primary-foreground w-full  px-6 py-4 flex items-center justify-between cursor-pointer"
-            onClick={() => router.push("/dashboard/rally")}
+            onClick={() => router.push(`/${groupId}/rally`)}
           >
             <div className="flex flex-col justify-center">
               <div className="font-bold text-2xl">Rally</div>
@@ -99,7 +95,7 @@ export default function Home() {
           </Card>
           <Card
             className="bg-primary-foreground w-full px-6 py-4 flex items-center justify-between cursor-pointer"
-            onClick={() => router.push("/dashboard/daily")}
+            onClick={() => router.push(`/${groupId}/daily`)}
           >
             <div className="flex flex-col justify-center">
               <div className="font-bold text-2xl">Daily</div>
@@ -116,7 +112,7 @@ export default function Home() {
       <div className="flex justify-center mb-20">
       <Button
           className="mt-8 w-full"
-          onClick={() => router.push("/dashboard/create")}
+          onClick={() => router.push(`/${groupId}/create`)}
         >
           Create
         </Button>

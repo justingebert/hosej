@@ -6,27 +6,6 @@ import { NextResponse } from 'next/server'
 //TODO questions left parameters
 export const revalidate = 0
 
-//get active daily questions
-async function getDailyQuestion() {
-  try {
-    await dbConnect();
-
-    let questions = await Question.find({
-      category: "Daily",
-      used: true,
-      active: true,
-    });
-    if (!questions) {
-      return [];
-    }
-
-    return questions;
-  } catch (error) {
-    console.error(error);
-    return undefined;
-  }
-}
-
 //populate questions
 async function populateAndSaveQuestions(questions:any) {
     const populatedQuestions = await Promise.all(questions.map(async (question:any) => {
@@ -51,15 +30,22 @@ async function populateAndSaveQuestions(questions:any) {
 }
 
 //return active daily questions
-export async function GET(req: Request){
+export async function GET(req: Request, { params }: { params: { groupId: string } }){
     try{
         await dbConnect();
 
-        const questions = await getDailyQuestion();
+        const { groupId } = params;
+
+        const questions = await Question.find({
+          groupId: groupId,
+          category: "Daily",
+          used: true,
+          active: true,
+        });
         if (!questions) {
             return NextResponse.json({ message: "No questions available" });
         }
-        
+
         const updatedQuestions = await populateAndSaveQuestions(questions);
         
         return NextResponse.json({ questions: updatedQuestions });
