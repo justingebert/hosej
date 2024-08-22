@@ -4,25 +4,25 @@ import { Button } from '../ui/button';
 import { Send } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 
-function ChatComponent({ questionId, avaiable }: any) {
+function ChatComponent({ question, avaiable }: any) {
   const [messages, setMessages] = useState<any>([]);
   const [newMessage, setNewMessage] = useState('');
-  const { username } = useUser();
+  const { user } = useUser();
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchMessages = async () => {
-      const response = await fetch(`/api/question/messages/${questionId}`);
+      const response = await fetch(`/api/${question.groupId}/question/messages/${question._id}`);
       const data = await response.json();
       setMessages(data);
     };
 
     fetchMessages();
-  }, [questionId]);
+  }, [question]);
 
   const handleSendMessage = async () => {
-    const messageData = { questionId, message: newMessage, username: username };
-    const response = await fetch('/api/question/messages', {
+    const messageData = { questionId:question._id, message: newMessage, username: user.username };
+    const response = await fetch(`/api/${question.groupId}/question/messages`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -50,9 +50,9 @@ function ChatComponent({ questionId, avaiable }: any) {
         {messages.length > 0 ? (
           <>
             {messages.map((msg: any, index: number) => (
-              <div key={index} className={`flex mb-2 ${msg.user?.username === username ? 'justify-end' : 'justify-start'}`}>
-                <div className={`inline-block p-2 rounded-lg max-w-xs ${msg.user?.username === username ? 'bg-primary text-primary-foreground' : 'bg-secondary'}`}>
-                  <div className={`font-bold text-xs pb-1 ${msg.user?.username === username ? 'hidden' : ''}`}>
+              <div key={index} className={`flex mb-2 ${msg.user?.username === user.username ? 'justify-end' : 'justify-start'}`}>
+                <div className={`inline-block p-2 rounded-lg max-w-xs ${msg.user?.username === user.username ? 'bg-primary text-primary-foreground' : 'bg-secondary'}`}>
+                  <div className={`font-bold text-xs pb-1 ${msg.user?.username === user.username ? 'hidden' : ''}`}>
                     {msg.user?.username}
                   </div>
                   <div className='text-m'>{msg.message}</div>

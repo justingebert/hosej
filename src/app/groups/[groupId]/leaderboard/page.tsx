@@ -4,16 +4,13 @@ import React, { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-import BackLink from "@/components/ui/BackLink";
 import Header from "@/components/ui/Header";
+import { useParams } from "next/navigation";
 
 type PointsEntry = {
   points: number;
@@ -27,8 +24,8 @@ type User = {
   streak: number;
 };
 
-const fetchUsers = async () => {
-  const response = await fetch('/api/users');
+const fetchUsers = async (groupId:string) => {
+  const response = await fetch(`/api/${groupId}/users`);
   if (!response.ok) {
     throw new Error('Failed to fetch users');
   }
@@ -40,24 +37,25 @@ const getCurrentPoints = (points: PointsEntry[]) => points.length > 0 ? points[p
 const LeaderboardPage = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const { groupId } = useParams<{ groupId: string }>();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const users = await fetchUsers();
+        const users = await fetchUsers(groupId);
         setUsers(users);
       } catch (error: any) {
         setError(error.message);
       }
     };
     fetchData();
-  }, []);
+  }, [groupId]);
 
   const sortedUsers = users.sort((a, b) => getCurrentPoints(b.points) - getCurrentPoints(a.points));
 
   return (
     <>
-      <Header href="/" title="Leaderboard" />
+      <Header href={`/groups/${groupId}/dashboard`} title="Leaderboard" />
       <Table>
         <TableHeader>
           <TableRow>

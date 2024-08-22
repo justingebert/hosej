@@ -20,8 +20,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import BackLink from "@/components/ui/BackLink";
+import { useParams, useRouter } from "next/navigation";
 import ThemeSelector from "@/components/ui/ThemeSelector";
 import Loader from "@/components/ui/Loader";
 import Header from "@/components/ui/Header";
@@ -35,8 +34,8 @@ type Statistics = {
   RalliesLeftCount: number;
 };
 
-const fetchStatistics = async (): Promise<Statistics> => {
-  const response = await fetch('/api/stats');
+const fetchStatistics = async (groupId:string): Promise<Statistics> => {
+  const response = await fetch(`/api/${groupId}/stats`);
   if (!response.ok) {
     throw new Error('Failed to fetch statistics');
   }
@@ -48,12 +47,13 @@ const StatsPage = () => {
   const [stats, setStats] = useState<Statistics | null>(null);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const { groupId } = useParams<{ groupId: string }>();
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const statsData = await fetchStatistics();
+        const statsData = await fetchStatistics(groupId);
         setStats(statsData);
       } catch (error: any) {
         setError(error.message);
@@ -102,10 +102,8 @@ const StatsPage = () => {
   } satisfies ChartConfig;
 
   return (
-    <div >
-      <Header href="/" rightComponent={<ThemeSelector />} />
-
-
+    <div>
+      <Header href={`/groups/${groupId}/dashboard`} rightComponent={<ThemeSelector />} />
       <Card className="flex flex-col mb-4 w-full">
         <CardHeader className="items-center">
           <CardTitle>Questions</CardTitle>
@@ -171,7 +169,7 @@ const StatsPage = () => {
           </div>
         </CardContent>
         <CardFooter className="flex justify-center z-10">
-            <Button variant="outline" onClick={() => router.push("/dashboard/create")}>Create</Button>
+            <Button variant="outline" onClick={() => router.push(`/groups/${groupId}/dashboard/create`)}>Create</Button>
         </CardFooter>
       </Card>
 
@@ -241,7 +239,7 @@ const StatsPage = () => {
           </div>
         </CardContent>
         <CardFooter className="flex justify-center z-10">
-            <Button variant="outline" onClick={() => router.push("/dashboard/create")} >Create</Button>
+            <Button variant="outline" onClick={() => router.push(`/groups/${groupId}/dashboard/create`)} >Create</Button>
         </CardFooter>
       </Card>
 

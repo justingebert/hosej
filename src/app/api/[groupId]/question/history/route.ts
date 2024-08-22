@@ -3,7 +3,7 @@ import Question from "@/db/models/Question";
 import { NextResponse, type NextRequest } from "next/server";
 
 export const revalidate = 0;
-export async function GET(req: NextRequest) {
+export async function GET(req: NextRequest, { params }: { params: { groupId: string } }) {
   try {
     await dbConnect();
 
@@ -12,6 +12,7 @@ export async function GET(req: NextRequest) {
     const offset = searchParams.get("offset") as string;
 
     const questions = await Question.find({
+      groupId: params.groupId,
       used: true,
       active: false,
       category: "Daily",

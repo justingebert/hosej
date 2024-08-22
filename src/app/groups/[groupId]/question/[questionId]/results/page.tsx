@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { ClipLoader } from "react-spinners";
 import VoteResults from "@/components/Question/VoteResults.client";
 import BackLink from "@/components/ui/BackLink";
@@ -12,11 +12,13 @@ const ResultsPage = () => {
   const questionId = searchParams.get('questionid');
   const [question, setQuestion] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const { groupId } = useParams<{ groupId: string }>();
+
 
   useEffect(() => {
     const fetchQuestion = async () => {
       setLoading(true);
-      const res = await fetch(`/api/question/${questionId}`);
+      const res = await fetch(`/api/${groupId}/question/${questionId}`);
       const data = await res.json();
       setQuestion(data.question);
       setLoading(false);
@@ -25,7 +27,7 @@ const ResultsPage = () => {
     if (questionId) {
       fetchQuestion();
     }
-  }, [questionId]);
+  }, [groupId, questionId]);
 
   if (loading) return <Loader loading={true} />
   if (!question) return <p>No Question avaiable</p>

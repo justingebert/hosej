@@ -14,7 +14,7 @@ export async function GET(req: Request, { params }: { params: { groupId: string 
     }
     const count = group.members.length;
     
-    return NextResponse.json({ count });
+    return NextResponse.json(count);
   } catch (error) {
     console.error('Failed to fetch user count:', error);
     return NextResponse.json({ error: 'Failed to fetch user count' }, { status: 500 });

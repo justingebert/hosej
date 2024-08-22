@@ -68,7 +68,7 @@ export default function Groups() {
     <div>
       <Card>
         {groups.map((group) => (
-          <div key={group._id} onClick={() => {router.push(`${group._id}/dashboard`)}}>
+          <div key={group._id} onClick={() => {router.push(`/groups/${group._id}/dashboard`)}}>
             <h2>{group.name}</h2>
             <p>Join Link: <a href={generateJoinLink(group._id)}>{generateJoinLink(group._id)}</a></p>
           </div>

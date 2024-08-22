@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Loader from "@/components/ui/Loader";
 import Header from "@/components/ui/Header";
+import { useParams } from "next/navigation";
 
 
 //attach newly paged questions 
@@ -16,10 +17,11 @@ const QuestionHistoryPage = () => {
   const [loading, setLoading] = useState(true);
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
+  const { groupId } = useParams<{ groupId: string }>();
 
   const fetchQuestions = useCallback(async () => {
     setLoading(true);
-    const res = await fetch(`/api/question/history?limit=50&offset=${offset}`);
+    const res = await fetch(`/api/${groupId}/question/history?limit=50&offset=${offset}`);
     const data = await res.json();
     setQuestions((prevQuestions) => {
       const combinedQuestions = [...prevQuestions, ...data.questions];
@@ -29,7 +31,7 @@ const QuestionHistoryPage = () => {
     });
     setHasMore(data.questions.length > 0);
     setLoading(false);
-  }, [offset]);
+  }, [groupId, offset]);
 
   useEffect(() => {
     if (user) {
@@ -46,7 +48,7 @@ const QuestionHistoryPage = () => {
 
   return (
     <>
-      <Header href="/" title="Question Hisotry" />
+      <Header href={`/groups/${groupId}`} title="Question Hisotry" />
       <div>
         {questions && questions.map((question) => (
             <Card key={question._id} className="mb-4">
@@ -54,7 +56,7 @@ const QuestionHistoryPage = () => {
                 <CardTitle>{question.question}</CardTitle>
               </CardHeader>
               <CardContent>
-                <Link href={`/dashboard/daily/results?questionid=${question._id}`}>
+                <Link href={`/groups/${groupId}/question/${question._id}/results`}>
                   <Button>View Results</Button>
                 </Link>
               </CardContent>

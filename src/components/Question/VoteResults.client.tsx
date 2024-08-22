@@ -15,7 +15,7 @@ const VoteResults = ({ question, avaiable }: any) => {
   useEffect(() => {
     const fetchResults = async () => {
       const res = await fetch(
-        `/api/question/results?questionId=${question._id}`,
+        `/api/${question.groupId}/question/results?questionId=${question._id}`,
         { cache: "no-store" }
       );
       const data = await res.json();
@@ -55,7 +55,7 @@ const VoteResults = ({ question, avaiable }: any) => {
         ))}
       </div>
       <Separator />
-      <ChatComponent questionId={question._id} avaiable={avaiable} />
+      <ChatComponent question={question} avaiable={avaiable} />
     </div>
   );
 };

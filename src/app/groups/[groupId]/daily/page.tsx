@@ -158,7 +158,7 @@ const DailyQuestionPage = () => {
 
   return (
     <>
-      <Header href={`/${groupId}/`} title="Daily Questions" />
+      <Header href={`/groups/${groupId}/dashboard`} title="Daily Questions" />
       <QuestionsTabs
         groupId={groupId}
         questions={questions}

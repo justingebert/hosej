@@ -14,7 +14,7 @@ const CreatePage = ({ params }: { params: { groupId: string } }) => {
   
   return (
     <>
-      <BackLink href={`/${groupId}/dashboard`} />
+      <BackLink href={`/groups/${groupId}/dashboard`} />
       <div className="mt-7">
       <Tabs defaultValue="create-question" className="w-full">
 

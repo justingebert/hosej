@@ -25,12 +25,12 @@ export default function Dashboard() {
 
   useEffect(() => {
     const fetchUserCount = async () => {
-      const response = await fetch(`/api/${groupId}/user/count`);
+      const response = await fetch(`/api/${groupId}/users/count`);
       const data = await response.json();
       setUserCount(data);
     };
     fetchUserCount();
-  }, [groupId]);
+  }, [groupId, userCount]);
 
 
   useEffect(() => {
@@ -39,6 +39,7 @@ export default function Dashboard() {
         const response = await fetch(`/api/${groupId}/question/daily`);
         const data = await response.json();
         setQuestions(data.questions);
+        console.log("test")
         calculateCompletion(data.questions, userCount); 
       };
       fetchQuestions();
@@ -59,6 +60,7 @@ export default function Dashboard() {
     });
 
     const completionPercentage = (totalVotes / totalRequiredVotes) * 100;
+    console.log("completionPercentage", completionPercentage);
     setCompletion(Math.round(completionPercentage)); 
   };
 
@@ -66,15 +68,15 @@ export default function Dashboard() {
     <div className="flex flex-col justify-between h-[100dvh]"> 
       <div className="flex justify-between items-center mt-4 w-full">
         <div>
-          <Button variant="outline" size="icon" onClick={() => { router.push(`/${groupId}/history`)}}>
+          <Button variant="outline" size="icon" onClick={() => { router.push(`/groups/${groupId}/history`)}}>
             <History />
           </Button>
         </div>
-        <Link href={`/${groupId}/stats`}>
+        <Link href={`/groups/${groupId}/stats`}>
           <h1 className="text-4xl font-bold">HoseJ</h1>
         </Link>
         <div>
-          <Button variant="outline" size="icon" onClick={() => { router.push(`/${groupId}/leaderboard`)}}>
+          <Button variant="outline" size="icon" onClick={() => { router.push(`/groups/${groupId}/leaderboard`)}}>
             👖
           </Button>
         </div>
@@ -84,7 +86,7 @@ export default function Dashboard() {
         <div className="flex flex-col items-center gap-8 w-full">
           <Card
             className="bg-primary-foreground w-full  px-6 py-4 flex items-center justify-between cursor-pointer"
-            onClick={() => router.push(`/${groupId}/rally`)}
+            onClick={() => router.push(`/groups/${groupId}/rally`)}
           >
             <div className="flex flex-col justify-center">
               <div className="font-bold text-2xl">Rally</div>
@@ -95,7 +97,7 @@ export default function Dashboard() {
           </Card>
           <Card
             className="bg-primary-foreground w-full px-6 py-4 flex items-center justify-between cursor-pointer"
-            onClick={() => router.push(`/${groupId}/daily`)}
+            onClick={() => router.push(`/groups/${groupId}/daily`)}
           >
             <div className="flex flex-col justify-center">
               <div className="font-bold text-2xl">Daily</div>
@@ -112,7 +114,7 @@ export default function Dashboard() {
       <div className="flex justify-center mb-20">
       <Button
           className="mt-8 w-full"
-          onClick={() => router.push(`/${groupId}/create`)}
+          onClick={() => router.push(`/groups/${groupId}/create`)}
         >
           Create
         </Button>
