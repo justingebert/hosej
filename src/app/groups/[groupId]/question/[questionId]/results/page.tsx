@@ -8,11 +8,9 @@ import BackLink from "@/components/ui/BackLink";
 import Loader from "@/components/ui/Loader";
 
 const ResultsPage = () => {
-  const searchParams = useSearchParams();
-  const questionId = searchParams.get('questionid');
   const [question, setQuestion] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const { groupId } = useParams<{ groupId: string }>();
+  const { groupId, questionId} = useParams<{ groupId: string, questionId:string }>();
 
 
   useEffect(() => {
@@ -20,7 +18,7 @@ const ResultsPage = () => {
       setLoading(true);
       const res = await fetch(`/api/${groupId}/question/${questionId}`);
       const data = await res.json();
-      setQuestion(data.question);
+      setQuestion(data);
       setLoading(false);
     };
 
@@ -34,7 +32,7 @@ const ResultsPage = () => {
 
   return (
     <>
-      <BackLink href={"/dashboard/history"} />
+      <BackLink href={`/groups/${groupId}/history`} />
       {question && (
         <div>
           <h1 className="text-xl font-bold text-center mb-10 mt-10">

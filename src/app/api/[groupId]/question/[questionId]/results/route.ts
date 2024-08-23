@@ -12,7 +12,7 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
     const { groupId, questionId } = params;
 
     // Find the question by ID
-    const question = await Question.findById(questionId);
+    const question = await Question.findOne({ groupId, _id: questionId });
     if (!question) {
       return NextResponse.json({ message: "Question not found" }, { status: 404 });
     }

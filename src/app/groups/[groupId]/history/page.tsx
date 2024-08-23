@@ -48,7 +48,7 @@ const QuestionHistoryPage = () => {
 
   return (
     <>
-      <Header href={`/groups/${groupId}`} title="Question Hisotry" />
+      <Header href={`/groups/${groupId}/dashboard`} title="Question Hisotry" />
       <div>
         {questions && questions.map((question) => (
             <Card key={question._id} className="mb-4">

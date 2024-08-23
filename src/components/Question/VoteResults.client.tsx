@@ -15,9 +15,7 @@ const VoteResults = ({ question, avaiable }: any) => {
   useEffect(() => {
     const fetchResults = async () => {
       const res = await fetch(
-        `/api/${question.groupId}/question/results?questionId=${question._id}`,
-        { cache: "no-store" }
-      );
+        `/api/${question.groupId}/question/${question._id}/results/`);
       const data = await res.json();
       setResults(data.results);
       setNumOfVotes(`${data.totalVotes} of ${data.totalUsers} voted`);
@@ -34,7 +32,7 @@ const VoteResults = ({ question, avaiable }: any) => {
       </div>
       <div className="mb-10">
         {results.map((result: any, index) => (
-          <Link key={index} href={`/dashboard/daily/resultsdetailed/${question._id}?returnTo=${question._id}`}>
+          <Link key={index} href={`/groups/${question.groupId}/question/${question._id}/resultsdetailed/`}>
             <div className="bg-secondary p-1 my-2 rounded-md relative">
               <motion.div
                 className="bg-secondarydark h-10 rounded"

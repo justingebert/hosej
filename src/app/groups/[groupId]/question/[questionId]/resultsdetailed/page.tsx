@@ -2,11 +2,11 @@ import dbConnect from "@/lib/dbConnect";
 import Question from "@/db/models/Question";
 import user from "@/db/models/user";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import BackLink from "@/components/ui/BackLink";
+import Header from "@/components/ui/Header";
 
-export default async function ResultsDetailPage({params }: {params: { id: string };}) {
+export default async function ResultsDetailPage({params }: {params: { groupId: string, questionId:string };}) {
   await dbConnect();
-  const questionId = params.id;
+  const { questionId, groupId } = params;
 
   console.log(questionId);
 
@@ -33,7 +33,7 @@ const sortedGroupedResponses = Object.fromEntries(entries);
 
   return (
     <>
-      <BackLink href={`/dashboard/daily?returnTo=${params.id}`} />
+      <Header href={`/groups/${groupId}/daily`}/>
       <div className="grid grid-cols-1 gap-5 mb-7">
         {Object.entries(sortedGroupedResponses).map(
           ([response, usernames]: any, index) => (
