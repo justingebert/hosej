@@ -3,11 +3,17 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { History } from "lucide-react";
+import { History, Ellipsis, BarChart, Menu } from 'lucide-react';
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CompletionChart } from "@/components/Charts/CompletionChart";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -68,17 +74,39 @@ export default function Dashboard() {
     <div className="flex flex-col justify-between h-[100dvh]"> 
       <div className="flex justify-between items-center mt-4 w-full">
         <div>
-          <Button variant="outline" size="icon" onClick={() => { router.push(`/groups/${groupId}/history`)}}>
-            <History />
+          <Button variant="outline" size="icon" onClick={() => { router.push(`/`)}}>
+            <Menu />
           </Button>
         </div>
         <Link href={`/groups/${groupId}/stats`}>
           <h1 className="text-4xl font-bold">HoseJ</h1>
         </Link>
         <div>
-          <Button variant="outline" size="icon" onClick={() => { router.push(`/groups/${groupId}/leaderboard`)}}>
+        <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="icon" className="no-zoom">
+          <Ellipsis className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+          <Ellipsis className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="" align="center">
+        <DropdownMenuItem onClick={() => { router.push(`/groups/${groupId}/history`)}}>
+          <History className="mr-2 h-4 w-4"/> History
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => { router.push(`/groups/${groupId}/leaderboard`)}}>
+          <span className="mr-2 h-4 w-4">👖</span>
+          Leaderboard
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => { router.push(`/groups/${groupId}/stats`)}}>
+          <BarChart className="mr-2 h-4 w-4"/>
+            Statistics
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+
+          {/* <Button variant="outline" size="icon" onClick={() => { router.push(`/groups/${groupId}/leaderboard`)}}>
             👖
-          </Button>
+          </Button> */}
         </div>
       </div>
 
