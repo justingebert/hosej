@@ -22,7 +22,6 @@ export async function POST(request: Request) {
       Expires: 600, // Seconds before the presigned post expires. 3600 by default.
     })
 
-    console.log({ url, fields })
     return Response.json({ url, fields })
   } catch (error:any) {
     console.error('Error creating presigned URL:', error)

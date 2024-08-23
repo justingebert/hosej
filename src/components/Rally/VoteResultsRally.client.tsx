@@ -8,19 +8,19 @@ import { Button } from "../ui/button";
 
 
 
-const RallyResults = ({ rallyId }: any) => {
+const RallyResults = ({ rally }: any) => {
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchSubmissions = async () => {
-      const response = await fetch(`/api/rally/submissions/${rallyId}`);
+      const response = await fetch(`/api/${rally.groupId}/rally/submissions/${rally._id}`);
       const data = await response.json();
       setSubmissions(data.submissions);
     };
     fetchSubmissions();
-  }, [rallyId]);
+  }, [rally]);
 
   const openModal = (imageUrl: string) => {
     setSelectedImage(imageUrl);

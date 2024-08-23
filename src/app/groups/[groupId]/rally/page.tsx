@@ -50,7 +50,7 @@ function RallyTabContent({ rally, userHasVoted, userHasUploaded,setUserHasVoted 
   const router = useRouter();
 
   const getPresignedUrl = async (filename: string, contentType: string) => {
-    const response = await fetch("/api/rally/uploadimage", {
+    const response = await fetch(`/api/${rally.groupId}/rally/uploadimage`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -92,8 +92,8 @@ function RallyTabContent({ rally, userHasVoted, userHasUploaded,setUserHasVoted 
     return fields.key; // Return the key to construct the image URL
   };
 
-  const createRallySubmission = async (rallyId: string, userId: string, imageUrl: string) => {
-    const response = await fetch("/api/rally/submissions", {
+  const createRallySubmission = async (rallyId: string, groupId:string, userId: string, imageUrl: string) => {
+    const response = await fetch(`/api/${groupId}/rally/submissions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -131,14 +131,13 @@ function RallyTabContent({ rally, userHasVoted, userHasUploaded,setUserHasVoted 
         useWebWorker: true,
       };
       const compressedFile = await imageCompression(file, options);
-      console.log(`Original file size: ${file.size / 1024 / 1024} MB`);
-      console.log(`Compressed file size: ${compressedFile.size / 1024 / 1024} MB`);
 
       const { url, fields } = await getPresignedUrl(compressedFile.name, compressedFile.type);
       const key = await uploadToS3(url, fields, compressedFile);
       const imageUrl = `${url}/${key}`; // Construct the image URL
       const submissionResponse = await createRallySubmission(
         rally._id,
+        rally.groupId,
         user.username,
         imageUrl
       );
@@ -223,11 +222,11 @@ function RallyTabContent({ rally, userHasVoted, userHasUploaded,setUserHasVoted 
       {rally.votingOpen &&
         (userHasVoted[rally._id] ? (
           <div className="mt-5">
-            <RallyResults rallyId={rally._id} />
+            <RallyResults rally={rally} />
           </div>
         ) : (
           <div className="mt-10">
-            <RallyVoteCarousel rallyId={rally._id} onVote={handleVote} />
+            <RallyVoteCarousel rally={rally} onVote={handleVote} />
           </div>
         ))}
     </>
@@ -276,14 +275,14 @@ const RallyPage = () => {
     if (user) {
       fetchRallies();
     }
-  }, [user, router]);
+  }, [user, router, groupId]);
 
   if (loading) return <Loader loading={true} />
   if (!rallies) return <p>No Rally avaiable</p>
 
   return (
     <>
-      <Header href="/" title="Rallies" />
+      <Header href={`/groups/${groupId}/dashboard`} title="Rallies" />
       <RallyTabs
             rallies={rallies}
             userHasVoted={userHasVoted}
