@@ -1,7 +1,8 @@
 import dbConnect from "@/lib/dbConnect";
 import Rally from "@/db/models/rally";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import user from "@/db/models/user";
+import { sendNotification } from "@/utils/sendNotification";
 
 const MAX_RALLIES = 2;
 const POINTS = 3;
@@ -9,13 +10,14 @@ const POINTS = 3;
 export const revalidate = 0;
 
 //get current rally and set state
-export async function GET(req: Request) {
+export async function GET(req: NextRequest, { params }: { params: { groupId: string } }) {
   try {
     await dbConnect();
+    const { groupId } = params;
     const currentTime = new Date();
 
     // Find all active rallies
-    const rallies = await Rally.find({ active: true }).limit(MAX_RALLIES);
+    const rallies = await Rally.find({ groupId:groupId, active: true }).limit(MAX_RALLIES);
 
     if (rallies.length === 0) {
       return NextResponse.json({ message: "No active rallies", rallies: [] });
@@ -27,18 +29,7 @@ export async function GET(req: Request) {
         rally.endTime = new Date(currentTime.getTime() + 24 * 60 * 60 * 1000); // Set end time for voting period
         await rally.save();
 
-        const notificationResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/send-notification`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ title: '🚨HoseJ Rally !!🚨', body: '🚨JETZT VOTEN DU FISCH🚨' }),
-          cache: 'no-cache'
-        });
-      
-        if (!notificationResponse.ok) {
-          throw new Error('Failed to send notification');
-        }
+        //await sendNotification('📷HoseJ Rally!!📷', '📷JETZT VOTEN DU FISCH📷');
       }
 
       if (rally.votingOpen && currentTime >= new Date(rally.endTime)) {
@@ -48,25 +39,14 @@ export async function GET(req: Request) {
         await rally.save();
 
         // Start a new rally
-        const newRally = await Rally.findOne({ active: false, used: false });
+        const newRally = await Rally.findOne({ groupId: groupId, active: false, used: false });
         if (newRally) {
           newRally.active = true;
           newRally.startTime = currentTime;
           newRally.endTime = new Date(currentTime.getTime() + newRally.lengthInDays * 24 * 60 * 60 * 1000); // Set end time based on lengthInDays
           await newRally.save();
-
-          const notificationResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/send-notification`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ title: '🚨HoseJ Rally!!🚨', body: '🚨NEUE RALLY HAT BEGONNEN DU FISCH🚨' }),
-            cache: 'no-cache'
-          });
-        
-          if (!notificationResponse.ok) {
-            throw new Error('Failed to send notification');
-          }
+          
+          //await sendNotification('📷HoseJ Rally!!📷', '📷NEUE RALLY HAT BEGONNEN DU FISCH📷');
         }
       }
     }

@@ -5,7 +5,7 @@ import { IRally } from "@/db/models/rally";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/components/UserContext";
 import RallyVoteCarousel from "@/components/Rally/VotingOptionsRally.client";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import RallyResults from "@/components/Rally/VoteResultsRally.client";
 import {
   Card,
@@ -241,12 +241,13 @@ const RallyPage = () => {
   const [userHasVoted, setUserHasVoted] = useState<any>({});
   const [userUploaded, setUserUploaded] = useState<any>({});
   const router = useRouter();
+  const { groupId } = useParams<{ groupId: string }>();
 
   useEffect(() => {
     const fetchRallies = async () => {
       setLoading(true);
       router.refresh();
-      const res = await fetch("/api/rally", { cache: "no-store" });
+      const res = await fetch(`/api/${groupId}/rally`);
       const data = await res.json();
 
       if (data.rallies) {
