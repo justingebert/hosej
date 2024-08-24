@@ -45,7 +45,7 @@ export const UserProvider = ({ children }: any) => {
       const newUser = await response.json();
       setUser(newUser);
       localStorage.setItem('user', JSON.stringify(newUser));
-      router.push('/dashboard/daily');
+      router.push('/');
     } catch (error) {
       console.error('Failed to create user:', error);
     }
@@ -55,7 +55,7 @@ export const UserProvider = ({ children }: any) => {
     try {
       setUser(user);
       localStorage.setItem('user', JSON.stringify(user));
-      router.push('/dashboard/daily');
+      router.push('/');
     } catch (error) {
       console.error('Failed to set user locally:', error);
     }

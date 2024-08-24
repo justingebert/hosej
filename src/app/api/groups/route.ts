@@ -8,7 +8,6 @@ export async function POST (req: NextRequest) {
   try {
     await dbConnect();
     const { user } = await req.json();
-    console.log("curUser", user)
 
     const groups = await Group.find({ members: user._id});
     return NextResponse.json(groups, { status: 200 });

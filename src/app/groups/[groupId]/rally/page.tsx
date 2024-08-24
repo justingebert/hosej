@@ -14,11 +14,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import imageCompression from 'browser-image-compression';
-import BackLink from "@/components/ui/BackLink";
 import Loader from "@/components/ui/Loader";
 import Header from "@/components/ui/Header";
 
-function RallyTabs({ rallies, userHasVoted, userHasUploaded, setUserHasVoted }: any) {
+function RallyTabs({ rallies, userHasVoted, userHasUploaded, setUserHasVoted, setUserHasUploaded }: any) {
   const searchParams = useSearchParams();
   const defaultTab = searchParams.get('returnTo') || (rallies.length > 0 ? rallies[0]._id : undefined);
 
@@ -36,14 +35,14 @@ function RallyTabs({ rallies, userHasVoted, userHasUploaded, setUserHasVoted }: 
         </TabsList>
       {rallies.map((rally: any) => (
         <TabsContent key={rally._id} value={rally._id}>
-          <RallyTabContent rally={rally} userHasVoted={userHasVoted} userHasUploaded={userHasUploaded} setUserHasVoted={setUserHasVoted} />
+          <RallyTabContent rally={rally} userHasVoted={userHasVoted} userHasUploaded={userHasUploaded} setUserHasVoted={setUserHasVoted}  setUserHasUploaded={setUserHasUploaded} />
         </TabsContent>
       ))}
     </Tabs>
   );
 }
 
-function RallyTabContent({ rally, userHasVoted, userHasUploaded,setUserHasVoted }: any) {
+function RallyTabContent({ rally, userHasVoted, userHasUploaded,setUserHasVoted, setUserHasUploaded }: any) {
   const { user } = useUser();
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -144,12 +143,12 @@ function RallyTabContent({ rally, userHasVoted, userHasUploaded,setUserHasVoted 
       console.log("Submission successful:", submissionResponse);
       alert("Upload and submission successful!"); //TODO improve
       setUserHasVoted((prev: any) => ({ ...prev, [rally._id]: true }));
+      setUserHasUploaded((prev: any) => ({ ...prev, [rally._id]: true }));
     } catch (error: any) {
       console.error(error);
       alert(error.message);
     } finally {
       setUploading(false);
-      router.refresh();
     }
   };
 
@@ -288,6 +287,7 @@ const RallyPage = () => {
             userHasVoted={userHasVoted}
             userHasUploaded={userUploaded}
             setUserHasVoted={setUserHasVoted}
+            setUserHasUploaded={setUserUploaded}
           />
     </>
   );
