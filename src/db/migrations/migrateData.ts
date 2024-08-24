@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import user from './models/user'; // Adjust the path to your user model
+import user from '../models/user'; // Adjust the path to your user model
 import * as dotenv from 'dotenv';
 dotenv.config({path : '../../.env.local'});
 
