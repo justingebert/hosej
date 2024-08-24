@@ -1,16 +1,17 @@
 import dbConnect from "@/lib/dbConnect";
 import Rally from "@/db/models/rally";
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 const POINTS = 1;
 
 //vote on a submission
-export async function POST(req: Request){
+export async function POST(req: NextRequest, { params }: { params: { groupId: string } }){
     try{
         await dbConnect();
+        const { groupId } = params;
         const { rallyId, submissionId, userThatVoted } = await req.json()
 
-        const rally = await Rally.findById(rallyId);
+        const rally = await Rally.findOne({groupId: groupId, _id: rallyId});
         if (!rally) {
             return NextResponse.json({ message: 'Rally not found' });
         }

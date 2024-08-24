@@ -90,7 +90,7 @@ const RallyVoteCarousel = ({ rally, onVote }: any) => {
       body: JSON.stringify({
         rallyId: rally._id,
         submissionId: selectedSubmission,
-        userThatVoted: user.user,
+        userThatVoted: user.username,
       }),
     });
 
