@@ -2,7 +2,7 @@ import { getToken } from 'next-auth/jwt';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function middleware(req: NextRequest) {
-  const publicRoutes = ['/api/users/migrate', '/api/users/create'];
+  const publicRoutes = ['/api/users/migrate', '/api/users/create', '/api/auth/session', '/api/auth/providers'];
 
   if (publicRoutes.includes(req.nextUrl.pathname)) {
     return NextResponse.next();
