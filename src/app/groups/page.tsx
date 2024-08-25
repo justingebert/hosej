@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/drawer";
 import { IGroup } from "@/db/models/Group";
 import { Copy } from "lucide-react";
-import { useUser } from "@/components/UserContext";
+import { useSession, signIn } from "next-auth/react";
 
 export function CreateGroupDrawer({ onCreate }: { onCreate: (groupName: string) => void }) {
   const [groupName, setGroupName] = useState("");
@@ -67,18 +67,19 @@ export function CreateGroupDrawer({ onCreate }: { onCreate: (groupName: string) 
 }
 
 export default function Groups() {
-  const { user } = useUser();
+  const { data: session, status } = useSession();
   const [groups, setGroups] = useState<IGroup[]>([]);
   const router = useRouter();
 
   useEffect(() => {
     const fetchGroups = async () => {
-      if (!user) return; // Don't fetch groups until user is available
+      if (status === "loading") return; // Do nothing while loading
+      if (!session) signIn();
 
       const res = await fetch('/api/groups', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user }),
+        body: JSON.stringify({ user: session.user }),
       });
 
       if (res.ok) {
@@ -90,13 +91,13 @@ export default function Groups() {
     };
 
     fetchGroups();
-  }, [user]);
+  }, [session]);
 
   const createGroup = async (groupName: string) => {
     const res = await fetch('/api/groups/create', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: groupName, user }),
+      body: JSON.stringify({ name: groupName, user: session.user }),
     });
 
     if (res.ok) {
