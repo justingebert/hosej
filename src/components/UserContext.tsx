@@ -1,12 +1,14 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { v4 as uuidv4 } from 'uuid';
 
 type UserContextType = {
   user: any;
   loading: boolean;
-  createUser: (username: string) => Promise<void>;
+  createUserByDeviceId: (userName: string) => Promise<void>;
+  migrateUser: () =>  Promise<void>;
   setUserLocal: (user: any) => void;
-  getAllUsers: () => Promise<any[]>;
+  logout: () => void;
 };
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -17,63 +19,121 @@ export const UserProvider = ({ children }: any) => {
   const router = useRouter();
 
   useEffect(() => {
-    try {
+    const storedDeviceId = localStorage.getItem('deviceId');
+
+    if (storedDeviceId) {
+      fetchUserByDeviceId(storedDeviceId);
+    } else {
       const storedUser = localStorage.getItem('user');
       if (storedUser) {
-        setUser(JSON.parse(storedUser));
+        migrateUser(storedUser);
       } else {
-        router.push('/signin');
+        router.push('/');  // Redirect to home page if no deviceId or user is found
       }
-    } catch (error) {
-      console.error('Error parsing stored user:', error);
-      localStorage.removeItem('user');  // Clear out corrupted data if any
-      router.push('/signin');
-    } finally {
-      setLoading(false);
     }
   }, [router]);
 
-  const createUser = async (username: string) => {
+  const fetchUserByDeviceId = async (deviceId: string) => {
     try {
-      const response = await fetch('/api/users', {
+      const response = await fetch('/api/users/device', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username }),
+        body: JSON.stringify({ deviceId }),
       });
-      const newUser = await response.json();
-      setUser(newUser);
-      localStorage.setItem('user', JSON.stringify(newUser));
-      router.push('/');
+
+      if (response.ok) {
+        const user = await response.json();
+        setUser(user);
+        localStorage.setItem('user', JSON.stringify(user));
+        router.push('/groups');  // Redirect to groups if user is found
+      } else {
+        localStorage.removeItem('deviceId'); // Clear invalid deviceId
+        router.push('/');  // Redirect to home page if no user is found
+      }
     } catch (error) {
-      console.error('Failed to create user:', error);
+      console.error('Failed to fetch user by device ID:', error);
+      router.push('/');  // Redirect to home page on error
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createUserByDeviceId = async (userName: string) => {
+    const deviceId = uuidv4();
+
+    try {
+      const response = await fetch('/api/users/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ deviceId, userName }),
+      });
+
+      if (response.ok) {
+        const newUser = await response.json();
+
+        // Store the deviceId and user in localStorage
+        localStorage.setItem('deviceId', deviceId);
+        localStorage.setItem('user', JSON.stringify(newUser));
+
+        setUser(newUser);
+        router.push('/groups');  // Redirect to groups after user creation
+      } else {
+        console.error('Failed to create user:', await response.text());
+      }
+    } catch (error) {
+      console.error('Error creating user:', error);
+    }
+  };
+
+  const migrateUser = async (storedUser: string) => {
+    try {
+      const deviceId = uuidv4();
+
+      const response = await fetch('/api/users/migrate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username: storedUser, deviceId }),
+      });
+
+      if (response.ok) {
+        const updatedUser = await response.json();
+        setUser(updatedUser);
+
+        // Store the new deviceId and updated user in localStorage
+        localStorage.setItem('deviceId', deviceId);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+
+        router.push('/groups');  // Redirect to groups page after migration
+      } else {
+        console.error('Failed to migrate user:', await response.text());
+        router.push('/');  // Redirect to home page if migration fails
+      }
+    } catch (error) {
+      console.error('Error migrating user:', error);
+      router.push('/');  // Redirect to home page on error
     }
   };
 
   const setUserLocal = (user: any) => {
-    try {
-      setUser(user);
-      localStorage.setItem('user', JSON.stringify(user));
-      router.push('/');
-    } catch (error) {
-      console.error('Failed to set user locally:', error);
-    }
+    setUser(user);
+    localStorage.setItem('user', JSON.stringify(user));
   };
 
-  const getAllUsers = async () => {
-    try {
-      const response = await fetch('/api/users');
-      const users = await response.json();
-      return users;
-    } catch (error) {
-      console.error('Failed to fetch users:', error);
-      return [];
-    }
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem('user');
+    localStorage.removeItem('deviceId');
+    router.push('/');  // Redirect to home page on logout
   };
 
   return (
-    <UserContext.Provider value={{ user, loading, createUser, setUserLocal, getAllUsers }}>
+    <UserContext.Provider value={{ user, loading, createUserByDeviceId, migrateUser, setUserLocal, logout }}>
       {children}
     </UserContext.Provider>
   );

@@ -74,7 +74,7 @@ export default function Dashboard() {
     <div className="flex flex-col justify-between h-[100dvh]"> 
       <div className="flex justify-between items-center mt-4 w-full">
         <div>
-          <Button variant="outline" size="icon" onClick={() => { router.push(`/`)}}>
+          <Button variant="outline" size="icon" onClick={() => { router.push(`/groups`)}}>
             <Menu />
           </Button>
         </div>

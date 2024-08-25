@@ -25,6 +25,21 @@ export interface IUser extends mongoose.Document {
 }
 
 const UserSchema = new mongoose.Schema({
+  deviceId: {
+    type: String,
+    unique: true,
+    sparse: true,  // Allows this field to be optional
+  },
+  googleId: {
+    type: String,
+    unique: true,
+    sparse: true,  // Allows this field to be optional
+  },
+  email: {
+    type: String,
+    unique: true,
+    sparse: true,  // Allows this field to be optional
+  },
   username: {
     type: String,
     required: true,
