@@ -2,7 +2,7 @@
 import dbConnect from "@/lib/dbConnect";
 import ChatMessage from "@/db/models/chatmessage";
 import { NextResponse, type NextRequest } from 'next/server'
-import user from "@/db/models/user";
+import User from "@/db/models/user";
 
 export async function POST(req: NextRequest){
     try {
@@ -11,7 +11,7 @@ export async function POST(req: NextRequest){
       const data = await req.json();
       const { questionId, username, message } = data;
 
-      const sendingUser = await user.findOne({ username: username });
+      const sendingUser = await User.findOne({ username: username });
       const newMessage = new ChatMessage({
         question: questionId,
         user: sendingUser._id,

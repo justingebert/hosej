@@ -1,6 +1,6 @@
 import dbConnect from "@/lib/dbConnect";
 import Question from "@/db/models/Question";
-import user from "@/db/models/user";
+import User from "@/db/models/user";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Header from "@/components/ui/Header";
 
@@ -10,7 +10,7 @@ export default async function ResultsDetailPage({params }: {params: { groupId: s
 
   console.log(questionId);
 
-  await user.find({}); //TODO find better solution to avoid missing schema error
+  await User.find({}); //TODO find better solution to avoid missing schema error
   const question = await Question.findById(questionId).populate(
     "answers.username"
   );

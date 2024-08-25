@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Group from '@/db/models/Group';
-import user from '@/db/models/user';
+import User from '@/db/models/user';
 
 
 export async function POST (req: NextRequest) {

@@ -1,6 +1,6 @@
 import dbConnect from "@/lib/dbConnect";
 import Question, { IQuestion } from "@/db/models/Question";
-import user from "@/db/models/user";
+import User from "@/db/models/user";
 import { NextResponse } from "next/server";
 import { sendNotification } from "@/utils/sendNotification";
 
@@ -51,7 +51,7 @@ export async function GET(req: Request) {
     //populate questions
     for (const question of questions) {
       if (question.questionType.startsWith("users-")) {
-        const users = await user.find({});
+        const users = await User.find({});
         question.options = await users.map((u) => u.username);
         await question.save();
       }

@@ -96,6 +96,6 @@ UserSchema.methods.addPoints = async function (points: number) {
   await this.save();
 };
 
-const user = mongoose.models.user || mongoose.model<IUser>("user", UserSchema);
+const User = mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
 
-export default user;
+export default User;

@@ -1,5 +1,5 @@
 import dbConnect from "@/lib/dbConnect";
-import user from "@/db/models/user";
+import User from "@/db/models/user";
 import Question from '@/db/models/Question';
 import ChatMessage from '@/db/models/chatmessage';
 import Rally from '@/db/models/rally';
@@ -11,7 +11,7 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
   await dbConnect();
   const { groupId } = params;
 
-  const userCount = await user.countDocuments({groups: groupId});
+  const userCount = await User.countDocuments({groups: groupId});
   const questionsUsedCount = await Question.countDocuments({groupId: groupId, used: true});
   const questionsLeftCount = await Question.countDocuments({ groupId: groupId, used: false });
   const messagesCount = await ChatMessage.countDocuments({});

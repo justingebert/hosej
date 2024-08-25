@@ -6,7 +6,7 @@ type UserContextType = {
   user: any;
   loading: boolean;
   createUserByDeviceId: (userName: string) => Promise<void>;
-  migrateUser: () =>  Promise<void>;
+  migrateUser: (storedUser: string) =>  Promise<void>;
   setUserLocal: (user: any) => void;
   logout: () => void;
 };

@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import Question from "./models/Question";
-import user from "./models/user";
+import User from "./models/user";
 import Rally from "./models/rally";
 require('dotenv').config({ path: '../../.env.local' });
 

@@ -1,24 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
-import user from '@/db/models/user';
+import User from '@/db/models/user';
 
 export async function middleware(req: NextRequest) {
-  const deviceId = req.cookies.get('deviceId') || req.headers.get('x-device-id');
+  try {
+    const deviceId = req.cookies.get('deviceId') || req.headers.get('x-device-id');
 
-  if (deviceId) {
-    await dbConnect();
-    const user = await user.findOne({ deviceId });
+    if (deviceId) {
+      await dbConnect();
+      const curUser = await User.findOne({ deviceId });
 
-    if (user) {
-      // If authenticated, continue to the requested page
-      req.nextUrl.pathname = `/auth/callback`; // Adjust as necessary
-      return NextResponse.next();
+      if (curUser) {
+        // If authenticated, continue to the requested page
+        return NextResponse.next();
+      }
     }
-  }
 
-  // If not authenticated, redirect to sign-in page
-  const loginUrl = new URL('/auth/signin', req.url);
-  return NextResponse.redirect(loginUrl);
+    // If not authenticated, redirect to sign-in page
+    const loginUrl = new URL('/', req.url);
+    return NextResponse.redirect(loginUrl);
+  } catch (error) {
+    console.error('Middleware error:', error);
+    return NextResponse.redirect(new URL('/', req.url));
+  }
 }
 
 export const config = {

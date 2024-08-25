@@ -1,6 +1,6 @@
 import Rally from "@/db/models/rally";
 import dbConnect from "@/lib/dbConnect";
-import user from "@/db/models/user";
+import User from "@/db/models/user";
 
 const POINTS = 2
 
@@ -10,7 +10,7 @@ export async function POST(request: Request) {
     const { rallyId, userId, imageUrl } = await request.json();
     await dbConnect();
 
-    const sendUser = await user.findOne({ username: userId });
+    const sendUser = await User.findOne({ username: userId });
 
     const newSubmission = {
       userId: sendUser._id,

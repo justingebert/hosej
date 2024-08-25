@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import dbConnect from "@/lib/dbConnect";
-import user from "@/db/models/user";
+import User from "@/db/models/user";
 
 export const revalidate = 0
 
@@ -9,7 +9,7 @@ export async function GET(req: NextRequest,  { params }: { params: { userId: str
     const userId = params.userId;
     try{
         await dbConnect();
-        const ret = await user.findById({userId});
+        const ret = await User.findById({userId});
         return NextResponse.json({user: ret});
     }
     catch (error) {

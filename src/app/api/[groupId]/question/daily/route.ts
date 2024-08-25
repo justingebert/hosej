@@ -1,6 +1,6 @@
 import dbConnect from "@/lib/dbConnect";
 import Question from "@/db/models/Question";
-import user from "@/db/models/user";
+import User from "@/db/models/user";
 import { NextResponse } from 'next/server'
 
 //TODO questions left parameters
@@ -15,7 +15,7 @@ async function populateAndSaveQuestions(questions:any) {
         });
 
         if (populatedQuestion.questionType.startsWith("users-")) {
-            const users = await user.find({});
+            const users = await User.find({});
             populatedQuestion.options = users.map(user => user.username);
         } else if (populatedQuestion.questionType.startsWith("rating")) {
             populatedQuestion.options = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];

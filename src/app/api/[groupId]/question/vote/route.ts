@@ -1,7 +1,7 @@
 import dbConnect from "@/lib/dbConnect";
 import Question from "@/db/models/Question";
 import { NextResponse } from 'next/server'
-import user from "@/db/models/user";
+import User from "@/db/models/user";
 
 const POINTS = 1;
 
@@ -20,7 +20,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "Question not found" });
     }
 
-    const votingUser = await user.findOne({ username: userThatVoted });
+    const votingUser = await User.findOne({ username: userThatVoted });
     const hasVoted = question.answers.some((answer: any) =>
       answer.username.equals(votingUser._id)
     );

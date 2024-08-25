@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
-import user from '@/db/models/user';
+import User from '@/db/models/user';
 import Group from '@/db/models/Group';
 
 export async function GET(req: Request, { params }: { params: { groupId: string } }) {
