@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-//import { signIn } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { v4 as uuidv4 } from "uuid";
@@ -10,20 +10,52 @@ import { useUser } from "@/components/UserContext";
 
 export default function Home() {
   const router = useRouter();
-  const { createUserByDeviceId } = useUser();
+  const { createUserByDeviceId, migrateUser  } = useUser();
   const [userName, setUserName] = useState("");
+
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    console.log("storedUser", storedUser)
+    if (storedUser) {
+      migrateUser(storedUser).then(() => {
+        console.log('User migrated successfully');
+        localStorage.removeItem('user'); // Clean up old user data
+      }).catch(error => {
+        console.error('Error migrating user:', error);
+      });
+    }
+  }, [migrateUser]);
 
   const handleGoogleSignIn = () => {
     alert("coming soon!")
     // Store the username locally before starting Google OAuth
-    //localStorage.setItem("userName", userName);
-
-    //signIn("google", { callbackUrl: "/" }); // Adjust callback URL as needed
+    localStorage.setItem("userName", userName);
+    signIn("google", { callbackUrl: "/" }); // Adjust callback URL as needed
   };
 
   const handleStartWithoutAccount = async () => {
-    if (userName) {
-      await createUserByDeviceId(userName);
+    try {
+      let deviceId = localStorage.getItem("deviceId");
+      if (!deviceId) {
+        deviceId = uuidv4(); // Generate a new deviceId if not present
+        localStorage.setItem("deviceId", deviceId);
+        await createUserByDeviceId(userName); // Create a new user if not already done
+      }
+
+      const result = await signIn('credentials', {
+        redirect: false,
+        deviceId: deviceId, // Pass the deviceId here
+      });
+
+      if (result?.ok) {
+        console.log('Device ID authentication successful');
+        router.push('/groups'); // Redirect to groups after successful sign-in
+      } else {
+        console.error('Device ID authentication failed:', result?.error);
+      }
+    } catch (error) {
+      console.error('Error during device ID authentication:', error);
     }
   };
 

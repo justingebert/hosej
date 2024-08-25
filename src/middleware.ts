@@ -1,28 +1,23 @@
+import { getToken } from 'next-auth/jwt';
 import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/dbConnect';
-import User from '@/db/models/user';
 
 export async function middleware(req: NextRequest) {
-  try {
-    const deviceId = req.cookies.get('deviceId') || req.headers.get('x-device-id');
+  const publicRoutes = ['/api/users/migrate', '/api/users/create'];
 
-    if (deviceId) {
-      await dbConnect();
-      const curUser = await User.findOne({ deviceId });
-
-      if (curUser) {
-        // If authenticated, continue to the requested page
-        return NextResponse.next();
-      }
-    }
-
-    // If not authenticated, redirect to sign-in page
-    const loginUrl = new URL('/', req.url);
-    return NextResponse.redirect(loginUrl);
-  } catch (error) {
-    console.error('Middleware error:', error);
-    return NextResponse.redirect(new URL('/', req.url));
+  if (publicRoutes.includes(req.nextUrl.pathname)) {
+    return NextResponse.next();
   }
+  // Step 1: Check if the user is authenticated via NextAuth (Google, etc.)
+  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+
+  if (token) {
+    // User is authenticated via NextAuth, allow through
+    return NextResponse.next();
+  }
+
+  // Step 3: If neither authentication method is valid, redirect to the sign-in page
+  const loginUrl = new URL('/', req.url);
+  return NextResponse.redirect(loginUrl);
 }
 
 export const config = {

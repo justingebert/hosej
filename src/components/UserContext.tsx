@@ -18,7 +18,7 @@ export const UserProvider = ({ children }: any) => {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  useEffect(() => {
+/*   useEffect(() => {
     const storedDeviceId = localStorage.getItem('deviceId');
 
     if (storedDeviceId) {
@@ -32,7 +32,7 @@ export const UserProvider = ({ children }: any) => {
       }
     }
   }, [router]);
-
+ */
   const fetchUserByDeviceId = async (deviceId: string) => {
     try {
       const response = await fetch('/api/users/device', {
@@ -64,6 +64,7 @@ export const UserProvider = ({ children }: any) => {
     const deviceId = uuidv4();
 
     try {
+      console.log(deviceId, userName);
       const response = await fetch('/api/users/create', {
         method: 'POST',
         headers: {
@@ -107,7 +108,7 @@ export const UserProvider = ({ children }: any) => {
 
         // Store the new deviceId and updated user in localStorage
         localStorage.setItem('deviceId', deviceId);
-        localStorage.setItem('user', JSON.stringify(updatedUser));
+        //localStorage.setItem('user', JSON.stringify(updatedUser));
 
         router.push('/groups');  // Redirect to groups page after migration
       } else {
