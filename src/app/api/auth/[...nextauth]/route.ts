@@ -4,7 +4,8 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/db/models/user';
 
-export default NextAuth({
+export const authOptions = 
+{
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -22,8 +23,8 @@ export default NextAuth({
         if (!deviceId) {
           throw new Error('No device ID provided');
         }
-
-        const user = await User.findOne({ deviceId });
+        console.log(deviceId)
+        const user = await User.findOne({ deviceId: deviceId });
         if (user) {
           return user;
         } else {
@@ -56,8 +57,19 @@ export default NextAuth({
     },
     async session({ session, token }) {
       session.userId = token.userId;
+      await dbConnect();
+      const user = await User.findById(token.userId);
+      
+      session.user = user; // Include the full user object in the session
       return session;
     },
   },
+  pages: {
+    signIn: '/',
+  },
   secret: process.env.NEXTAUTH_SECRET,
-});
+}
+
+export const handler = NextAuth(authOptions);
+
+export { handler as GET, handler as POST };

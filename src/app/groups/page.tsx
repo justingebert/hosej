@@ -88,6 +88,7 @@ export default function Groups() {
       } else {
         console.error('Failed to fetch groups');
       }
+      console.log("User", session.user)
     };
 
     fetchGroups();

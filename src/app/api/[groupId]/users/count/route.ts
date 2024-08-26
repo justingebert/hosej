@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
-import User from '@/db/models/user';
 import Group from '@/db/models/Group';
+import User from '@/db/models/user';
 
 export async function GET(req: Request, { params }: { params: { groupId: string } }) {
   try {
     await dbConnect();
-    
+
     const { groupId } = params;
+    const test = User.find({ groups: params.groupId })
     const group = await Group.findById(groupId)
     if (!group) {
       return NextResponse.json({ error: 'Group not found' }, { status: 404 });

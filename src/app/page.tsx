@@ -27,11 +27,34 @@ export default function Home() {
     }
   }, [migrateUser]);
 
+  useEffect(() => {
+    const deviceId = localStorage.getItem("deviceId");
+    if (deviceId) {
+      signIn('credentials', {
+        redirect: false,
+        deviceId: deviceId,
+      }).then(result => {
+        if (result?.ok) {
+          console.log('Device ID authentication successful');
+          router.push('/groups');
+        } else {
+          console.error('Device ID authentication failed:', result?.error);
+          console.log(result);  // Log the full result object for more context
+        }
+      }).catch(error => {
+        console.error('Error during device ID authentication:', error);
+      });
+    } else {
+      console.warn('No device ID found in localStorage');
+    }
+  }, [router]);
+
+  
   const handleGoogleSignIn = () => {
     alert("coming soon!")
     // Store the username locally before starting Google OAuth
-    localStorage.setItem("userName", userName);
-    signIn("google", { callbackUrl: "/" }); // Adjust callback URL as needed
+    //localStorage.setItem("userName", userName);
+    //signIn("google", { callbackUrl: "/" }); // Adjust callback URL as needed
   };
 
   const handleStartWithoutAccount = async () => {

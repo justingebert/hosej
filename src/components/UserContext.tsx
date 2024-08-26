@@ -18,21 +18,7 @@ export const UserProvider = ({ children }: any) => {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-/*   useEffect(() => {
-    const storedDeviceId = localStorage.getItem('deviceId');
 
-    if (storedDeviceId) {
-      fetchUserByDeviceId(storedDeviceId);
-    } else {
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        migrateUser(storedUser);
-      } else {
-        router.push('/');  // Redirect to home page if no deviceId or user is found
-      }
-    }
-  }, [router]);
- */
   const fetchUserByDeviceId = async (deviceId: string) => {
     try {
       const response = await fetch('/api/users/device', {

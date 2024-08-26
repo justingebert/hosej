@@ -2,24 +2,45 @@ import { getToken } from 'next-auth/jwt';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function middleware(req: NextRequest) {
-  const publicRoutes = ['/api/users/migrate', '/api/users/create', '/api/auth/session', '/api/auth/providers'];
+  const { pathname } = req.nextUrl;
+  
+  // Define public routes
+  const publicRoutes = [
+    '/api/users/migrate', 
+    '/api/users/create', 
+    '/api/auth/session', 
+    '/api/auth/providers', 
+    '/api/auth/csrf', 
+    '/api/auth/signin',
+    '/api/auth/callback',
+    '/',
+  ];
 
-  if (publicRoutes.includes(req.nextUrl.pathname)) {
+  // Log the request URL and token status
+  //console.log(`Requesting: ${pathname}`);
+  
+  if (publicRoutes.includes(pathname)) {
+    //console.log('Public route, allowing access.');
     return NextResponse.next();
   }
-  // Step 1: Check if the user is authenticated via NextAuth (Google, etc.)
+
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+  //console.log(`Token retrieved: ${token ? 'Valid' : 'Invalid or Missing'}`);
 
   if (token) {
-    // User is authenticated via NextAuth, allow through
+    //console.log('Token is valid, allowing access.');
     return NextResponse.next();
   }
 
-  // Step 3: If neither authentication method is valid, redirect to the sign-in page
+  if (req.nextUrl.pathname.startsWith('/api/auth/callback/credentials')) {
+    return NextResponse.next();
+  }
+
+  //console.log('No valid token, redirecting to login.');
   const loginUrl = new URL('/', req.url);
   return NextResponse.redirect(loginUrl);
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/api/:path*'], // Paths to apply middleware
+  matcher: ['/dashboard/:path*', '/api/:path*'],
 };

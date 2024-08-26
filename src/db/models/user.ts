@@ -14,6 +14,9 @@ const PointsEntrySchema = new mongoose.Schema({
 
 export interface IUser extends mongoose.Document {
   _id: string;
+  deviceId: string;
+  googleId: string;
+  email: string;
   username: string;
   points: {
     points: number;

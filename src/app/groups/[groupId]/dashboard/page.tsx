@@ -23,13 +23,6 @@ export default function Dashboard() {
   const { groupId } = useParams<{ groupId: string }>();
 
   useEffect(() => {
-    const user = localStorage.getItem("user");
-    if (!user) {
-      router.push("/signin");
-    }
-  }, [router]);
-
-  useEffect(() => {
     const fetchUserCount = async () => {
       const response = await fetch(`/api/${groupId}/users/count`);
       const data = await response.json();
@@ -45,7 +38,6 @@ export default function Dashboard() {
         const response = await fetch(`/api/${groupId}/question/daily`);
         const data = await response.json();
         setQuestions(data.questions);
-        console.log("test")
         calculateCompletion(data.questions, userCount); 
       };
       fetchQuestions();
