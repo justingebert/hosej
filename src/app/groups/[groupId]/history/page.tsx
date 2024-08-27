@@ -2,17 +2,17 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { useUser } from "@/components/UserContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Loader from "@/components/ui/Loader";
 import Header from "@/components/ui/Header";
 import { useParams } from "next/navigation";
+import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 
 
 //attach newly paged questions 
 const QuestionHistoryPage = () => {
-  const { user } = useUser();
+  const { session, status, user } = useAuthRedirect();
   const [questions, setQuestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [offset, setOffset] = useState(0);

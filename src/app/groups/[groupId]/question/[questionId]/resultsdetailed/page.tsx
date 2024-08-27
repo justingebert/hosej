@@ -1,16 +1,13 @@
 import dbConnect from "@/lib/dbConnect";
 import Question from "@/db/models/Question";
-import User from "@/db/models/user";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Header from "@/components/ui/Header";
 
+
 export default async function ResultsDetailPage({params }: {params: { groupId: string, questionId:string };}) {
-  await dbConnect();
   const { questionId, groupId } = params;
+  await dbConnect();
 
-  console.log(questionId);
-
-  await User.find({}); //TODO find better solution to avoid missing schema error
   const question = await Question.findById(questionId).populate(
     "answers.username"
   );
@@ -23,13 +20,14 @@ export default async function ResultsDetailPage({params }: {params: { groupId: s
     }
     groupedResponses[response].push(answer.username.username);
   });
+  // Convert the object to an array of entries
+  const entries = Object.entries(groupedResponses);
+  // Sort the array based on the length of the arrays of usernames
+  entries.sort((a:any, b:any) => b[1].length - a[1].length);
+  // Convert the sorted array back to an object
+  const sortedGroupedResponses = Object.fromEntries(entries);
 
-// Convert the object to an array of entries
-const entries = Object.entries(groupedResponses);
-// Sort the array based on the length of the arrays of usernames
-entries.sort((a:any, b:any) => b[1].length - a[1].length);
-// Convert the sorted array back to an object
-const sortedGroupedResponses = Object.fromEntries(entries);
+
 
   return (
     <>

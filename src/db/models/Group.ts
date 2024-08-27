@@ -10,8 +10,8 @@ export interface IGroup extends mongoose.Document {
 }
 const groupSchema = new mongoose.Schema({
     name: { type: String, required: true },
-    admin: { type: mongoose.Schema.Types.ObjectId, ref: "user", required: true },
-    members: [{ type: mongoose.Schema.Types.ObjectId, ref: "user", required: true }],
+    admin: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    members: [{ type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }],
     questionCount: { type: Number, default: 2 },
     rallyCount: { type: Number, default: 1 },
     createdAt: { type: Date, default: Date.now },

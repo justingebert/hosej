@@ -16,8 +16,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import imageCompression from 'browser-image-compression';
 import Loader from "@/components/ui/Loader";
 import Header from "@/components/ui/Header";
+import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 
-function RallyTabs({ rallies, userHasVoted, userHasUploaded, setUserHasVoted, setUserHasUploaded }: any) {
+function RallyTabs({ user, rallies, userHasVoted, userHasUploaded, setUserHasVoted, setUserHasUploaded }: any) {
   const searchParams = useSearchParams();
   const defaultTab = searchParams.get('returnTo') || (rallies.length > 0 ? rallies[0]._id : undefined);
 
@@ -35,15 +36,14 @@ function RallyTabs({ rallies, userHasVoted, userHasUploaded, setUserHasVoted, se
         </TabsList>
       {rallies.map((rally: any) => (
         <TabsContent key={rally._id} value={rally._id}>
-          <RallyTabContent rally={rally} userHasVoted={userHasVoted} userHasUploaded={userHasUploaded} setUserHasVoted={setUserHasVoted}  setUserHasUploaded={setUserHasUploaded} />
+          <RallyTabContent user={user} rally={rally} userHasVoted={userHasVoted} userHasUploaded={userHasUploaded} setUserHasVoted={setUserHasVoted}  setUserHasUploaded={setUserHasUploaded} />
         </TabsContent>
       ))}
     </Tabs>
   );
 }
 
-function RallyTabContent({ rally, userHasVoted, userHasUploaded,setUserHasVoted, setUserHasUploaded }: any) {
-  const { user } = useUser();
+function RallyTabContent({ user, rally, userHasVoted, userHasUploaded,setUserHasVoted, setUserHasUploaded }: any) {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const router = useRouter();
@@ -221,11 +221,11 @@ function RallyTabContent({ rally, userHasVoted, userHasUploaded,setUserHasVoted,
       {rally.votingOpen &&
         (userHasVoted[rally._id] ? (
           <div className="mt-5">
-            <RallyResults rally={rally} />
+            <RallyResults user={user} rally={rally} />
           </div>
         ) : (
           <div className="mt-10">
-            <RallyVoteCarousel rally={rally} onVote={handleVote} />
+            <RallyVoteCarousel user={user} rally={rally} onVote={handleVote} />
           </div>
         ))}
     </>
@@ -234,7 +234,7 @@ function RallyTabContent({ rally, userHasVoted, userHasUploaded,setUserHasVoted,
 
 const RallyPage = () => {
   const [loading, setLoading] = useState(true);
-  const { user } = useUser();
+  const { session, status, user } = useAuthRedirect();
   const [rallies, setRallies] = useState<any[]>([]);
   const [userHasVoted, setUserHasVoted] = useState<any>({});
   const [userUploaded, setUserUploaded] = useState<any>({});
@@ -283,6 +283,7 @@ const RallyPage = () => {
     <>
       <Header href={`/groups/${groupId}/dashboard`} title="Rallies" />
       <RallyTabs
+            user={user}
             rallies={rallies}
             userHasVoted={userHasVoted}
             userHasUploaded={userUploaded}

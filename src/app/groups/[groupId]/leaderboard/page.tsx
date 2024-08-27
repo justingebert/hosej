@@ -11,18 +11,14 @@ import {
 } from "@/components/ui/table";
 import Header from "@/components/ui/Header";
 import { useParams } from "next/navigation";
+import { IUser } from "@/db/models/user";
+import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 
 type PointsEntry = {
   points: number;
   date: Date;
 };
 
-type User = {
-  _id: string;
-  username: string;
-  points: PointsEntry[];
-  streak: number;
-};
 
 const fetchUsers = async (groupId:string) => {
   const response = await fetch(`/api/${groupId}/users`);
@@ -34,8 +30,9 @@ const fetchUsers = async (groupId:string) => {
 
 const getCurrentPoints = (points: PointsEntry[]) => points.length > 0 ? points[points.length - 1].points : 0;
 
-const LeaderboardPage = () => {
-  const [users, setUsers] = useState<User[]>([]);
+const LeaderboardPage =  () => {
+  const { session, status, user } = useAuthRedirect();
+  const [users, setUsers] = useState<IUser[]>([]);
   const [error, setError] = useState<string | null>(null);
   const { groupId } = useParams<{ groupId: string }>();
 

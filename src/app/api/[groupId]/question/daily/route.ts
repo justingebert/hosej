@@ -1,6 +1,5 @@
 import dbConnect from "@/lib/dbConnect";
 import Question from "@/db/models/Question";
-import User from "@/db/models/user";
 import { NextResponse } from 'next/server'
 
 //TODO questions left parameters

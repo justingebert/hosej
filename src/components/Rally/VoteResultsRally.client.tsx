@@ -6,8 +6,6 @@ import Modal from 'react-modal';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "../ui/button";
 
-
-
 const RallyResults = ({ rally }: any) => {
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [modalIsOpen, setModalIsOpen] = useState(false);

@@ -45,7 +45,7 @@ const questionSchema = new mongoose.Schema({
   options: { type: mongoose.Schema.Types.Mixed, required: false },
   answers: [
     {
-      username: { type: mongoose.Schema.Types.ObjectId, ref: "user", required: true},
+      username: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true},
       response: { type: mongoose.Schema.Types.Mixed, required: true},
       time:     { type: Date},
     },

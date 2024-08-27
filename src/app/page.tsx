@@ -16,7 +16,6 @@ export default function Home() {
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
-    console.log("storedUser", storedUser)
     if (storedUser) {
       migrateUser(storedUser).then(() => {
         console.log('User migrated successfully');

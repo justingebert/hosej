@@ -16,8 +16,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Modal from 'react-modal';
 
-const RallyVoteCarousel = ({ rally, onVote }: any) => {
-  const { user } = useUser();
+const RallyVoteCarousel = ({ user, rally, onVote }: any) => {
   const [selectedSubmission, setSelectedSubmission] = useState<string | null>(null);
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [api, setApi] = useState<CarouselApi | null>(null);

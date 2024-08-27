@@ -24,7 +24,7 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
     }, {});
 
     // Get the total number of users
-    const totalUsers = await User.countDocuments();
+    const totalUsers = await User.countDocuments({groups: groupId});
     const totalVotes = question.answers.length;
 
     // Calculate the results with percentages
