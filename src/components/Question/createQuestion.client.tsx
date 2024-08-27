@@ -20,13 +20,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { useUser } from "@/components/UserContext";
 import { useParams } from "next/navigation";
+import { useAuthRedirect } from "@/hooks/useAuthRedirect";
+import { IUser } from "@/db/models/user";
 
 
 
 const CreateQuestion = () => {
-  const {user} = useUser()
+  const { session, status, user } = useAuthRedirect();
   const [question, setQuestion] = useState("");
   const [questionType, setQuestionType] = useState("");
   const [options, setOptions] = useState([""]);

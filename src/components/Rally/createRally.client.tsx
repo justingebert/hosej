@@ -12,9 +12,12 @@ import {
 import { useUser } from "@/components/UserContext";
 import { useParams } from "next/navigation";
 import { group } from "console";
+import { useAuthRedirect } from "@/hooks/useAuthRedirect";
+import { IUser } from "@/db/models/user";
 
 const CreateRally = () => {
-  const {user} = useUser()
+  const { session, status } = useAuthRedirect();
+  const user = session!.user as IUser;
   const [task, setTask] = useState("");
   const [lengthInDays, setLengthInDays] = useState("");
   const [loading, setLoading] = useState(false);

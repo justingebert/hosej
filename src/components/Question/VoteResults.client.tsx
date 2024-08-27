@@ -7,7 +7,7 @@ import { Separator } from "@/components/ui/separator"
 import { motion } from 'framer-motion';
 import { Badge } from "../ui/badge";
 
-const VoteResults = ({ question, avaiable }: any) => {
+const VoteResults = ({ user, question, avaiable }: any) => {
   const [animationTriggered, setAnimationTriggered] = useState(false);
   const [results, setResults] = useState([]);
   const [numOfVotes, setNumOfVotes] = useState('');
@@ -53,7 +53,7 @@ const VoteResults = ({ question, avaiable }: any) => {
         ))}
       </div>
       <Separator />
-      <ChatComponent question={question} avaiable={avaiable} />
+      <ChatComponent user={user} question={question} avaiable={avaiable} />
     </div>
   );
 };

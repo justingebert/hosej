@@ -12,7 +12,7 @@ export async function GET(req: NextRequest,  { params }: { params: { questionId:
         await dbConnect();
         const Users = await User.find(); 
         //TODO only works if user is loaded idk why
-        const messages = await ChatMessage.find({ question: questionId }).populate('user', 'username').sort({ createdAt: 1 });;
+        const messages = await ChatMessage.find({ question: questionId }).populate('User', 'username').sort({ createdAt: 1 });;
         if(!messages){
             return NextResponse.json({ message: "No messages found" });
         }

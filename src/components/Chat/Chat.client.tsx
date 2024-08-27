@@ -4,10 +4,9 @@ import { Button } from '../ui/button';
 import { Send } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 
-function ChatComponent({ question, avaiable }: any) {
+function ChatComponent({ user, question, avaiable }: any) {
   const [messages, setMessages] = useState<any>([]);
   const [newMessage, setNewMessage] = useState('');
-  const { user } = useUser();
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
 
   useEffect(() => {

@@ -12,7 +12,7 @@ const groupSchema = new mongoose.Schema({
     name: { type: String, required: true },
     admin: { type: mongoose.Schema.Types.ObjectId, ref: "user", required: true },
     members: [{ type: mongoose.Schema.Types.ObjectId, ref: "user", required: true }],
-    questionCount: { type: Number, default: 1 },
+    questionCount: { type: Number, default: 2 },
     rallyCount: { type: Number, default: 1 },
     createdAt: { type: Date, default: Date.now },
 });

@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, use } from "react";
-import { useUser } from "@/components/UserContext";
 import VoteOptions from "@/components/Question/VotingOptions.client";
 import VoteResults from "@/components/Question/VoteResults.client";
 import { useParams, useRouter } from "next/navigation";
@@ -13,9 +12,11 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { Badge } from "@/components/ui/badge";
+import { useAuthRedirect } from "@/hooks/useAuthRedirect";
+import { IUser } from "@/db/models/user";
 
-function QuestionsTabs({ groupId, questions, userHasVoted, setUserHasVoted, selectedRating, setSelectedRating }: any) {
-  const { user } = useUser();
+function QuestionsTabs({ user, groupId, questions, userHasVoted, setUserHasVoted, selectedRating, setSelectedRating }: any) {
+
   const searchParams = useSearchParams();
   const defaultTab = searchParams.get('returnTo') || (questions.length > 0 ? questions[0]._id : undefined);
 
@@ -93,7 +94,7 @@ function QuestionsTabs({ groupId, questions, userHasVoted, setUserHasVoted, sele
       </Drawer>
           <div className="mt-10">
             {userHasVoted[question._id] ? (
-              <VoteResults question={question} avaiable={true}/>
+              <VoteResults user={user} question={question} avaiable={true}/>
             ) : (
               <VoteOptions
                 question={question}
@@ -109,7 +110,7 @@ function QuestionsTabs({ groupId, questions, userHasVoted, setUserHasVoted, sele
 
 const DailyQuestionPage = () => {
   const [loading, setLoading] = useState(true);
-  const { user } = useUser();
+  const { session, status, user } = useAuthRedirect();
   const [questions, setQuestions] = useState<any>([]);
   const [userHasVoted, setUserHasVoted] = useState<any>({});
   const [selectedRating, setSelectedRating] = useState<any>({});
@@ -118,6 +119,7 @@ const DailyQuestionPage = () => {
 
   useEffect(() => {
     const fetchQuestions = async () => {
+      if (!session?.user) return; 
       setLoading(true);
       router.refresh();
       const res = await fetch(`/api/${groupId}/question/daily`, { cache: "no-store" });
@@ -127,7 +129,7 @@ const DailyQuestionPage = () => {
         setQuestions(data.questions);
         const votes = data.questions.reduce((acc: any, question: any) => {
           acc[question._id] = question.answers.some(
-            (answer: any) => answer.username.username === user.username
+            (answer: any) => answer.username === user._id
           );
           return acc;
         }, {});
@@ -151,7 +153,7 @@ const DailyQuestionPage = () => {
     if (user) {
       fetchQuestions();
     }
-  }, [user, router, groupId]);
+  }, [session, router, groupId]);
 
   if (loading) return <Loader loading={true} />
   if (!questions) return <p>No Questions avaiable</p>
@@ -160,6 +162,7 @@ const DailyQuestionPage = () => {
     <>
       <Header href={`/groups/${groupId}/dashboard`} title="Daily Questions" />
       <QuestionsTabs
+        user={user}
         groupId={groupId}
         questions={questions}
         userHasVoted={userHasVoted}
