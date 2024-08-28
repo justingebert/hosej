@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Settings, CircleHelp } from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -119,6 +120,20 @@ export default function GroupsPage() {
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-between items-center mt-4 w-full">
+        <div>
+          <Button variant="outline" size="icon" onClick={() => { router.push(`/help`)}}>
+            <CircleHelp/>
+          </Button>
+        </div>
+          <h1 className="text-4xl font-bold">HoseJ</h1>
+        <div>
+          <Button variant="outline" size="icon" onClick={() => { router.push(`/settings`)}}>
+            <Settings/>
+          </Button> 
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
         {groups.map((group) => (
           <Card
