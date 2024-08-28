@@ -11,7 +11,7 @@ export function CompletionChart({ completion }: { completion: number }) {
 
   const getFillColor = () => {
     if (completion < 33) return "red";
-    if (completion < 66) return "yellow";
+    if (completion < 66) return "orange";
     return "green"; 
   };
 
