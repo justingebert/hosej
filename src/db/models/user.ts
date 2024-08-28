@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { IGroup } from "./Group";
+import { totalmem } from "os";
 
 const PointsEntrySchema = new mongoose.Schema({
   points: {
@@ -50,6 +51,10 @@ const UserSchema = new mongoose.Schema({
   points: {
     type: [PointsEntrySchema],
     default: [{ points: 0, date: Date.now }],
+  },
+  totalPoints: {
+    type: Number,
+    default: 0,
   },
   streak: {
     type: Number,

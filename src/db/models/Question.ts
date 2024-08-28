@@ -58,7 +58,8 @@ const questionSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   used: { type: Boolean, default: false },
   active: { type: Boolean, default: false },
-  submittedBy: {type: String}
+  submittedBy: {type: String},
+  chat: { type: mongoose.Schema.Types.ObjectId, ref: "Chat" },
 });
 
 questionSchema.index({ groupId: 1, createdAt: -1 });

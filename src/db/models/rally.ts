@@ -53,6 +53,7 @@ const rallySchema = new mongoose.Schema({
   active: { type: Boolean, default: false },
   lengthInDays: { type: Number, required: true },
   submittedBy: { type: String, required: true },
+  chat: { type: mongoose.Schema.Types.ObjectId, ref: "Chat" },
   createdAt: { type: Date, default: Date.now },
 });
 
