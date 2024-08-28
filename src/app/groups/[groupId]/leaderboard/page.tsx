@@ -14,23 +14,16 @@ import { useParams } from "next/navigation";
 import { IUser } from "@/db/models/user";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 
-type PointsEntry = {
-  points: number;
-  date: Date;
-};
 
-
-const fetchUsers = async (groupId:string) => {
+const fetchUsers = async (groupId: string) => {
   const response = await fetch(`/api/${groupId}/users`);
   if (!response.ok) {
-    throw new Error('Failed to fetch users');
+    throw new Error("Failed to fetch users");
   }
   return response.json();
 };
 
-const getCurrentPoints = (points: PointsEntry[]) => points.length > 0 ? points[points.length - 1].points : 0;
-
-const LeaderboardPage =  () => {
+const LeaderboardPage = () => {
   const { session, status, user } = useAuthRedirect();
   const [users, setUsers] = useState<IUser[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -48,7 +41,7 @@ const LeaderboardPage =  () => {
     fetchData();
   }, [groupId]);
 
-  const sortedUsers = users.sort((a, b) => getCurrentPoints(b.points) - getCurrentPoints(a.points));
+  const sortedUsers = users.sort((a, b) => b.totalPoints - a.totalPoints);
 
   return (
     <>
@@ -65,9 +58,9 @@ const LeaderboardPage =  () => {
           {sortedUsers.map((user) => (
             <TableRow key={user._id}>
               <TableCell className="font-medium">{user.username}</TableCell>
-              <TableCell className="text-right">{getCurrentPoints(user.points)}</TableCell>
+              <TableCell className="text-right">{user.totalPoints}</TableCell>
               <TableCell className="text-right font-medium">
-                {user.streak} <span role="img" aria-label="pants">👖</span>
+                {user.streak} <span role="img" aria-label="streak">👖</span>
               </TableCell>
             </TableRow>
           ))}

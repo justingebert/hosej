@@ -1,15 +1,15 @@
 import mongoose from "mongoose";
-
-export interface IPoints extends mongoose.Document {
-  user: mongoose.Schema.Types.ObjectId;
+export interface IPoints extends Document {
+  user: string;
   points: number;
   date: Date;
 }
 
+// Define the PointsEntry schema
 const PointsSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: "User",
     required: true,
   },
   points: {
@@ -19,12 +19,15 @@ const PointsSchema = new mongoose.Schema({
   date: {
     type: Date,
     default: Date.now,
+    required: true,
   },
 });
 
-// Create an index on the user field
-PointsSchema.index({ user: 1 });
+// Create a compound index on user and date to optimize query performance
+PointsSchema.index({ user: 1, date: -1 });
 
-const Points = mongoose.models.Points || mongoose.model<IPoints>('Points', PointsSchema);
+// Create and export the PointsEntry model
+const PointsEntry = mongoose.models.Points || mongoose.model<IPoints>("Points", PointsSchema);
 
-export default Points;
+
+export default PointsEntry;

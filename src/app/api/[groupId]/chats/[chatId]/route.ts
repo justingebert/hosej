@@ -5,7 +5,6 @@ import Chat from "@/db/models/Chat";
 export async function GET(req: NextRequest, { params }: { params: { groupId:string, chatId: string } }) {
   const { groupId, chatId } = params;
 
-  console.log('chatId:', chatId);
   await dbConnect();
 
   try {

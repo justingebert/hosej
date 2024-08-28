@@ -70,9 +70,7 @@ export default function Dashboard() {
             <Menu />
           </Button>
         </div>
-        <Link href={`/groups/${groupId}/stats`}>
           <h1 className="text-4xl font-bold">HoseJ</h1>
-        </Link>
         <div>
         <DropdownMenu>
       <DropdownMenuTrigger asChild>

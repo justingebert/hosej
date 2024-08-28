@@ -6,8 +6,10 @@ import { ClipLoader } from "react-spinners";
 import VoteResults from "@/components/Question/VoteResults.client";
 import BackLink from "@/components/ui/BackLink";
 import Loader from "@/components/ui/Loader";
+import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 
 const ResultsPage = () => {
+  const { session, status, user } = useAuthRedirect();
   const [question, setQuestion] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const { groupId, questionId} = useParams<{ groupId: string, questionId:string }>();
@@ -50,7 +52,7 @@ const ResultsPage = () => {
                 </div>
               ))}
           </div>
-          <VoteResults question={question} available={false} className="mt-2" />
+          <VoteResults user={user} question={question} available={false} className="mt-2" />
         </div>
       )}
     </>
