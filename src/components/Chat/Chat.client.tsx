@@ -13,13 +13,12 @@ function ChatComponent({ user, entity, available }: any) {
       if (entity.chat) {
         const response = await fetch(`/api/${entity.groupId}/chats/${entity.chat}`);
         const data = await response.json();
-        
         setMessages(data.messages);
       }
     };
 
     fetchMessages();
-  }, [entity.chatId, entity.groupId]);
+  }, [entity.chat, entity.groupId]); 
 
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return; // Prevent sending empty messages
@@ -35,7 +34,15 @@ function ChatComponent({ user, entity, available }: any) {
 
     if (response.ok) {
       const newMsg = await response.json();
-      setMessages([...messages, newMsg]);
+      // Add the current user's info to the message immediately
+      const completeMessage = {
+        ...newMsg,
+        user: {
+          _id: user._id,
+          username: user.username,
+        },
+      };
+      setMessages([...messages, completeMessage]);
       setNewMessage('');
       scrollToBottom(); // Scroll to the bottom after sending a message
     }
