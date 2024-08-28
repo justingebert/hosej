@@ -17,7 +17,22 @@ const messageSchema = new mongoose.Schema({
 });
 
 const chatSchema = new mongoose.Schema({
+    group: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Group',
+        required: true
+    },
     messages: [messageSchema], // Array of messages
+    entity: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        refPath: 'entityModel'
+    },
+    entityModel: {
+        type: String,
+        required: true,
+        enum: ['Question', 'Rally'] //other entities that the chat can be attached to
+    },
     createdAt: {
         type: Date,
         default: Date.now

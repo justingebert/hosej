@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { History, Ellipsis, BarChart, Menu } from 'lucide-react';
+import { History, Ellipsis, BarChartBig, Menu } from 'lucide-react';
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -82,17 +82,17 @@ export default function Dashboard() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="" align="center">
-        <DropdownMenuItem onClick={() => { router.push(`/groups/${groupId}/history`)}}>
-          <History className="mr-2 h-4 w-4"/> History
-        </DropdownMenuItem>
         <DropdownMenuItem onClick={() => { router.push(`/groups/${groupId}/leaderboard`)}}>
-          <span className="mr-2 h-4 w-4">👖</span>
-          Leaderboard
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => { router.push(`/groups/${groupId}/stats`)}}>
-          <BarChart className="mr-2 h-4 w-4"/>
-            Statistics
-        </DropdownMenuItem>
+            <span className="mr-2 h-4 w-4">👖</span>
+            Leaderboard
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => { router.push(`/groups/${groupId}/history`)}}>
+            <History className="mr-2 h-4 w-4"/> History
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => { router.push(`/groups/${groupId}/stats`)}}>
+            <BarChartBig className="mr-2 h-4 w-4"/>
+              Statistics
+          </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
 

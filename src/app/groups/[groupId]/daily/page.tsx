@@ -94,9 +94,10 @@ function QuestionsTabs({ user, groupId, questions, userHasVoted, setUserHasVoted
       </Drawer>
           <div className="mt-10">
             {userHasVoted[question._id] ? (
-              <VoteResults user={user} question={question} avaiable={true}/>
+              <VoteResults user={user} question={question} available={true}/>
             ) : (
               <VoteOptions
+                user={user}
                 question={question}
                 onVote={() => setUserHasVoted({ ...userHasVoted, [question._id]: true })}
               />
@@ -153,7 +154,7 @@ const DailyQuestionPage = () => {
     if (user) {
       fetchQuestions();
     }
-  }, [session, router, groupId]);
+  }, [session, router, groupId, user]);
 
   if (loading) return <Loader loading={true} />
   if (!questions) return <p>No Questions avaiable</p>

@@ -7,7 +7,7 @@ import { Separator } from "@/components/ui/separator"
 import { motion } from 'framer-motion';
 import { Badge } from "../ui/badge";
 
-const VoteResults = ({ user, question, avaiable }: any) => {
+const VoteResults = ({ user, question, available }: any) => {
   const [animationTriggered, setAnimationTriggered] = useState(false);
   const [results, setResults] = useState([]);
   const [numOfVotes, setNumOfVotes] = useState('');
@@ -33,9 +33,9 @@ const VoteResults = ({ user, question, avaiable }: any) => {
       <div className="mb-10">
         {results.map((result: any, index) => (
           <Link key={index} href={`/groups/${question.groupId}/question/${question._id}/resultsdetailed/`}>
-            <div className="bg-secondary p-1 my-2 rounded-md relative">
+            <div className="bg-secondary my-2 rounded-md relative">
               <motion.div
-                className="bg-secondarydark h-10 rounded"
+                className="bg-secondarydark h-12 rounded "
                 initial={{ width: 0 }}
                 animate={{ width: animationTriggered ? `${result.percentage}%` : '0%' }}
                 transition={{ duration: 1, ease: 'easeInOut' }}
@@ -53,7 +53,7 @@ const VoteResults = ({ user, question, avaiable }: any) => {
         ))}
       </div>
       <Separator />
-      <ChatComponent user={user} question={question} avaiable={avaiable} />
+      <ChatComponent user={user} entity={question} available={available} />
     </div>
   );
 };
