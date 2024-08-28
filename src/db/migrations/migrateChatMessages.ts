@@ -1,19 +1,22 @@
 import mongoose from "mongoose";
-import ChatMessage from "./models/ChatMessage";  // Path to your old ChatMessage model
-import Chat from "./models/Chat";  // Path to your new Chat model
-import Question from "./models/Question";  // Path to your Question model
+import ChatMessage from "../models/chatmessage";
+import Chat from "../models/Chat";
+import Question from "../models/Question";
 
 async function migrateChatMessages() {
     try {
-        await mongoose.connect('mongodb://localhost:27017/yourdatabase'); // Update with your MongoDB URI
+        await mongoose.connect('mongodb://localhost:27017/hosej'); // Update with your MongoDB URI
 
-        // Fetch all unique questions from the old ChatMessage collection
+        // Fetch all ChatMessage documents
         const chatMessages = await ChatMessage.find({});
+        
+        // Group messages by questionId
         const messagesGroupedByQuestion = chatMessages.reduce((acc, message) => {
-            if (!acc[message.question]) {
-                acc[message.question] = [];
+            const questionIdStr = message.question.toString(); // Convert ObjectId to string
+            if (!acc[questionIdStr]) {
+                acc[questionIdStr] = [];
             }
-            acc[message.question].push({
+            acc[questionIdStr].push({
                 user: message.user,
                 message: message.message,
                 createdAt: message.createdAt,
@@ -21,20 +24,34 @@ async function migrateChatMessages() {
             return acc;
         }, {});
 
-        // Create new Chat documents and update Questions
-        for (const questionId in messagesGroupedByQuestion) {
-            if (Object.hasOwn(messagesGroupedByQuestion, questionId)) {
-                const messages = messagesGroupedByQuestion[questionId];
+        // Process each group
+        for (const questionIdStr in messagesGroupedByQuestion) {
+            if (Object.prototype.hasOwnProperty.call(messagesGroupedByQuestion, questionIdStr)) {
+                const messages = messagesGroupedByQuestion[questionIdStr];
+
+                // Fetch the question associated with this group
+                const question = await Question.findById(questionIdStr);
+                if (!question) {
+                    console.warn(`Question not found for id: ${questionIdStr}`);
+                    continue; // Skip this iteration if the question doesn't exist
+                }
 
                 // Create a new Chat document with the grouped messages
                 const newChat = new Chat({
+                    group: question.groupId,
+                    entity: question._id,
+                    entityModel: 'Question',
                     messages: messages,
                     createdAt: messages[0]?.createdAt, // Use the first message's creation date
                 });
+
                 await newChat.save();
 
-                // Update the corresponding Question with the new chatId
-                await Question.findByIdAndUpdate(questionId, { chatId: newChat._id });
+                // Update the Question with the new chatId
+                question.chat = newChat._id;
+                await question.save();
+
+                console.log(`Updated question ${questionIdStr} with chatId ${newChat._id}`);
             }
         }
 
