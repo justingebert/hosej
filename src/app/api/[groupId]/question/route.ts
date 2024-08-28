@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
       { message: "Created Question", question: newQuestion },
       { status: 201 }
     );
-  } catch (error) {
+  } catch (error:any) {
     console.error("Error creating question:", error);
     return NextResponse.json(
       { message: "Internal server error", error: error.message },

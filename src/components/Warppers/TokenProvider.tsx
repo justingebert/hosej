@@ -4,6 +4,7 @@ import {useEffect} from "react"
 import { ThemeProvider as NextThemesProvider } from "next-themes"
 import useFcmToken from "@/hooks/useFcmToken";
 import { useUser } from "../UserContext";
+import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 
 const sendTokenToServer = async (token: string, username:string) => {
     try {
@@ -27,13 +28,14 @@ const sendTokenToServer = async (token: string, username:string) => {
 
 export function TokenProvider({ children, ...props }:any) {
     const { fcmToken, notificationPermissionStatus } = useFcmToken();
-    const { username } = useUser();
+    const { session, status, user } = useAuthRedirect();
 
     useEffect(() => {
+      if(status === "loading") return;
       if (fcmToken) {
-        sendTokenToServer(fcmToken, username);
+        sendTokenToServer(fcmToken, user.username);
       }
-    }, [fcmToken]);
+    }, [fcmToken, user]);
 
   return <>{children}</>
 }

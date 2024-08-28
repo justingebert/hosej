@@ -61,7 +61,7 @@ const StatsPage = () => {
       setLoading(false);
     };
     fetchData();
-  }, []);
+  }, [groupId]);
 
   if (error) {
     return <p className="text-red-500">{error}</p>;

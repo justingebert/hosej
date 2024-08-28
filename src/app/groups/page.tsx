@@ -89,11 +89,10 @@ export default function GroupsPage() {
       } else {
         console.error('Failed to fetch groups');
       }
-      console.log("User", user)
     };
 
     fetchGroups();
-  }, [session]);
+  }, [session, status]);
 
   const createGroup = async (groupName: string) => {
     const res = await fetch('/api/groups/create', {

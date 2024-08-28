@@ -1,12 +1,17 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 
-// Create a context to store the session data
-const SessionContext = createContext(null);
+// Define the interface for session data
+interface SessionData {
+  session: any;
+  status: string;
+}
 
-export function SessionProvider({ children }:any) {
+const SessionContext = createContext<SessionData | null>(null);
+
+export function SessionProvider({ children }: any) {
   const { data: session, status } = useSession();
-  const [sessionData, setSessionData] = useState({
+  const [sessionData, setSessionData] = useState<SessionData>({
     session: null,
     status: 'loading',
   });

@@ -33,7 +33,7 @@ export const authOptions =
     }),
   ],
   callbacks: {
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account }:any) {
       if (account?.provider === 'google') {
         await dbConnect();
         const existingUser = await User.findOne({ googleId: account.providerAccountId });
@@ -54,7 +54,7 @@ export const authOptions =
       }
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token }:any) {
       session.userId = token.userId;
       await dbConnect();
       const user = await User.findById(token.userId);
