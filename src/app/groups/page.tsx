@@ -25,7 +25,6 @@ import {
 } from "@/components/ui/drawer";
 import { IGroup } from "@/db/models/Group";
 import { Copy } from "lucide-react";
-import { signIn } from "next-auth/react";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 
 function CreateGroupDrawer({ onCreate }: { onCreate: (groupName: string) => void }) {
