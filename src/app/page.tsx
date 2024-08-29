@@ -97,7 +97,7 @@ export default function Home() {
         />
 
         <div className="space-y-4 w-full max-w-sm">
-          <Button onClick={handleGoogleSignIn} className="w-full" disabled={!userName}>
+          <Button onClick={handleGoogleSignIn} className="w-full" disabled={true}>
             Continue with Google
           </Button>
           <Button

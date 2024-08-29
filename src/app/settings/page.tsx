@@ -18,6 +18,14 @@ export default function SettingsPage(){
 
     if (status === "loading" || !user ) return <Loader loading={true}/>;
 
+
+    const handleGoogleSignIn = () => {
+        alert("coming soon!")
+        // Store the username locally before starting Google OAuth
+        //localStorage.setItem("userName", userName);
+        //signIn("google", { callbackUrl: "/" }); // Adjust callback URL as needed
+      };
+
     const handleLogout = async () => {
         localStorage.removeItem("deviceId");
         await signOut();
@@ -30,6 +38,9 @@ export default function SettingsPage(){
         <Image src={settings} alt="cat" className="rounded-lg" />
         <div>User ID: {user._id}</div>
         <div className="flex justify-center mt-10">
+        <Button onClick={handleGoogleSignIn} className="w-full" disabled={true} >
+            Connect with Google
+          </Button>
             <Button onClick={handleLogout}>
                 Logout
             </Button>
