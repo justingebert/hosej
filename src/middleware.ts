@@ -14,6 +14,8 @@ export async function middleware(req: NextRequest) {
     '/api/auth/signin',
     '/api/auth/callback',
     'api/auth/callback/credentials',
+    "/deviceauth",
+    "/mainifest.json",
     '/',
   ];
 
