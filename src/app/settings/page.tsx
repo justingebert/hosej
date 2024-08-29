@@ -37,10 +37,10 @@ export default function SettingsPage(){
         <Header href={`/groups/`} title="Settings" rightComponent={<ThemeSelector />}/>
         <Image src={settings} alt="cat" className="rounded-lg" />
         <div>User ID: {user._id}</div>
-        <div className="flex justify-center mt-10">
-        <Button onClick={handleGoogleSignIn} className="w-full" disabled={true} >
+        <div className="flex flex-col justify-center mt-10 gap-5">
+            <Button onClick={handleGoogleSignIn} className="w-full" disabled={true} >
             Connect with Google
-          </Button>
+            </Button>
             <Button onClick={handleLogout}>
                 Logout
             </Button>

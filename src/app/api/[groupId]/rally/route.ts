@@ -35,7 +35,7 @@ export async function GET(
         rally.endTime = new Date(currentTime.getTime() + 24 * 60 * 60 * 1000); // Set end time for voting period
         await rally.save();
 
-        //await sendNotification('📷HoseJ Rally!!📷', '📷JETZT VOTEN DU FISCH📷');
+        await sendNotification('📷HoseJ Rally!!📷', '📷JETZT VOTEN DU FISCH📷');
       }
 
       if (rally.votingOpen && currentTime >= new Date(rally.endTime)) {
@@ -58,7 +58,7 @@ export async function GET(
           ); // Set end time based on lengthInDays
           await newRally.save();
 
-          //await sendNotification('📷HoseJ Rally!!📷', '📷NEUE RALLY HAT BEGONNEN DU FISCH📷');
+          await sendNotification('📷HoseJ Rally!!📷', '📷NEUE RALLY HAT BEGONNEN DU FISCH📷');
         }
       }
     }

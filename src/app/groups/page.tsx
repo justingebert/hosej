@@ -31,16 +31,17 @@ function CreateGroupDrawer({ onCreate }: { onCreate: (groupName: string) => void
   const [groupName, setGroupName] = useState("");
 
   const handleCreate = () => {
-    if (groupName.trim() === "") return;
-    onCreate(groupName);
-    setGroupName("");
+    //if (groupName.trim() === "") return;
+    alert("GANZ RUHIG KOMMT NOCH");
+    /* onCreate(groupName);
+    setGroupName(""); */
   };
 
   return (
     <Drawer>
       <DrawerTrigger asChild>
         <div className="flex justify-center">
-          <Button>Create Group</Button>
+          <Button disabled={true}>Create Group</Button>
         </div>
       </DrawerTrigger>
       <DrawerContent>
@@ -58,7 +59,7 @@ function CreateGroupDrawer({ onCreate }: { onCreate: (groupName: string) => void
           </div>
           <DrawerFooter>
             <DrawerClose asChild>
-              <Button onClick={handleCreate}>Create</Button>
+              <Button onClick={handleCreate} disabled={!groupName}>Create</Button>
             </DrawerClose>
           </DrawerFooter>
         </div>
