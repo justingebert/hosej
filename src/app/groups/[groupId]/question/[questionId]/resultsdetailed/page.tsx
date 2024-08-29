@@ -10,7 +10,7 @@ export default async function ResultsDetailPage({ params }: { params: { groupId:
   console.log("Connecting to the database...");
   await dbConnect();
 
-  const user = await User.findOne();
+  //const user = await User.findOne();
   const question = await Question.findById(questionId).populate(
     {
       path: 'answers.username',

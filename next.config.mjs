@@ -20,6 +20,4 @@ export default withSerwist({
     images: {
         domains: ['hosej-rally-bucket.s3.eu-central-1.amazonaws.com'],
     },
-    reactStrictMode: true,
-    productionBrowserSourceMaps: true,
 });
