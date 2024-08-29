@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { v4 as uuidv4 } from "uuid";
 import { useUser } from "@/components/UserContext";
+import Link from "next/link";
 
 export default function Home() {
   const router = useRouter();
@@ -84,7 +85,9 @@ export default function Home() {
   return (
     <div className="flex flex-col justify-between min-h-screen ">
       <header className="text-center p-6">
-        <h1 className="text-4xl font-bold">HoseJ</h1>
+        <Link href={"/deviceauth"}>
+          <h1 className="text-4xl font-bold" >HoseJ</h1>
+        </Link>
       </header>
 
       <main className="flex flex-col items-center justify-center flex-grow space-y-6">

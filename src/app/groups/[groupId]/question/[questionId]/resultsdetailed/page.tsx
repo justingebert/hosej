@@ -4,9 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Header from "@/components/ui/Header";
 import User from "@/db/models/user";
 
-
-export default async function ResultsDetailPage({params }: {params: { groupId: string, questionId:string };}) {
+export default async function ResultsDetailPage({ params }: { params: { groupId: string, questionId: string }; }) {
   const { questionId, groupId } = params;
+
+  console.log("Connecting to the database...");
   await dbConnect();
 
   const user = await User.findOne();
@@ -25,18 +26,16 @@ export default async function ResultsDetailPage({params }: {params: { groupId: s
     }
     groupedResponses[response].push(answer.username.username);
   });
-  // Convert the object to an array of entries
+
+  console.log("Sorting responses...");
   const entries = Object.entries(groupedResponses);
-  // Sort the array based on the length of the arrays of usernames
-  entries.sort((a:any, b:any) => b[1].length - a[1].length);
-  // Convert the sorted array back to an object
+  entries.sort((a: any, b: any) => b[1].length - a[1].length);
   const sortedGroupedResponses = Object.fromEntries(entries);
 
-
-
+  console.log("Rendering page with sorted responses...");
   return (
     <>
-      <Header href={`/groups/${groupId}/daily`}/>
+      <Header href={`/groups/${groupId}/daily`} />
       <div className="grid grid-cols-1 gap-5 mb-7">
         {Object.entries(sortedGroupedResponses).map(
           ([response, usernames]: any, index) => (
