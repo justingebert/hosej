@@ -13,6 +13,7 @@ export async function middleware(req: NextRequest) {
     '/api/auth/csrf', 
     '/api/auth/signin',
     '/api/auth/callback',
+    'api/auth/callback/credentials',
     '/',
   ];
 

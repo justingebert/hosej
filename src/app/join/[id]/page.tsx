@@ -2,17 +2,19 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useUser } from '@/components/UserContext';
 import { Button } from '@/components/ui/button';
+import { useAuthRedirect } from '@/hooks/useAuthRedirect';
+import Loader from '@/components/ui/Loader';
+
 
 export default function JoinGroup({ params }: { params: { id: string }; }) {
-  const { user, loading } = useUser();
+  const { session, status, user } = useAuthRedirect();
   const router = useRouter();
   const [group, setGroup] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (loading) return; // Don't run the effect until user loading is complete
+    if (status === "loading") return; // Don't run the effect until user loading is complete
 
     const groupId = params.id;
     if (!user || !groupId) {
@@ -46,10 +48,10 @@ export default function JoinGroup({ params }: { params: { id: string }; }) {
     };
 
     joinGroup();
-  }, [loading, user, params.id]);
+  }, [session, status, user, params.id]);
 
-  if (loading) {
-    return <div>Loading user data...</div>;
+  if (status === 'loading') {
+    return <Loader loading={true} />;
   }
 
   if (error) {
