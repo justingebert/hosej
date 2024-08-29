@@ -64,9 +64,9 @@ export default function JoinGroup({ params }: { params: { id: string }; }) {
   }
 
   return (
-    <div>
+    <div className='flex justify-center'>
       <h2>Successfully joined {group.name}</h2>
-      <Button onClick={() => router.push('/')}>Go to Groups</Button>
+      <Button onClick={() => router.push('/groups')}>Go to Groups</Button>
     </div>
   );
 }

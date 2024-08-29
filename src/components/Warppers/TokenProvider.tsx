@@ -2,7 +2,6 @@
 
 import { useEffect } from "react"
 import useFcmToken from "@/hooks/useFcmToken";
-import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { useSession } from "next-auth/react";
 
 const sendTokenToServer = async (token: string, username: string) => {
@@ -30,9 +29,9 @@ export function TokenProvider({ children, ...props }: any) {
   const { data: session, status } = useSession();
 
   useEffect(() => {
-    if (status === "authenticated" && fcmToken && session.user?.username) {
+    if (status === "authenticated" && fcmToken && (session.user as any).username) {
       console.log('Sending token to server...');
-      sendTokenToServer(fcmToken, session.user.username);
+      sendTokenToServer(fcmToken, (session.user as any).username);
     }
   }, [fcmToken, session, status]);
 
