@@ -30,6 +30,11 @@ export interface IQuestion extends mongoose.Document {
 }
 
 const questionSchema = new mongoose.Schema({
+  groupId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Group",
+    required: false,
+  },
   category: { type: String },
   questionType: {
     type: String,
@@ -40,7 +45,7 @@ const questionSchema = new mongoose.Schema({
   options: { type: mongoose.Schema.Types.Mixed, required: false },
   answers: [
     {
-      username: { type: mongoose.Schema.Types.ObjectId, ref: "user", required: true},
+      username: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true},
       response: { type: mongoose.Schema.Types.Mixed, required: true},
       time:     { type: Date},
     },
@@ -53,8 +58,11 @@ const questionSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   used: { type: Boolean, default: false },
   active: { type: Boolean, default: false },
-  submittedBy: {type: String}
+  submittedBy: {type: String},
+  chat: { type: mongoose.Schema.Types.ObjectId, ref: "Chat" },
 });
+
+questionSchema.index({ groupId: 1, createdAt: -1 });
 
 const Question = mongoose.models.Question || mongoose.model<IQuestion>("Question", questionSchema);
 

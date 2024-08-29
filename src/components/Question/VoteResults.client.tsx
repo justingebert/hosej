@@ -7,7 +7,7 @@ import { Separator } from "@/components/ui/separator"
 import { motion } from 'framer-motion';
 import { Badge } from "../ui/badge";
 
-const VoteResults = ({ question, avaiable }: any) => {
+const VoteResults = ({ user, question, available }: any) => {
   const [animationTriggered, setAnimationTriggered] = useState(false);
   const [results, setResults] = useState([]);
   const [numOfVotes, setNumOfVotes] = useState('');
@@ -15,9 +15,7 @@ const VoteResults = ({ question, avaiable }: any) => {
   useEffect(() => {
     const fetchResults = async () => {
       const res = await fetch(
-        `/api/question/results?questionId=${question._id}`,
-        { cache: "no-store" }
-      );
+        `/api/${question.groupId}/question/${question._id}/results/`);
       const data = await res.json();
       setResults(data.results);
       setNumOfVotes(`${data.totalVotes} of ${data.totalUsers} voted`);
@@ -34,10 +32,10 @@ const VoteResults = ({ question, avaiable }: any) => {
       </div>
       <div className="mb-10">
         {results.map((result: any, index) => (
-          <Link key={index} href={`/dashboard/daily/resultsdetailed/${question._id}?returnTo=${question._id}`}>
-            <div className="bg-secondary p-1 my-2 rounded-md relative">
+          <Link key={index} href={`/groups/${question.groupId}/question/${question._id}/resultsdetailed/`}>
+            <div className="bg-secondary my-2 rounded-md relative">
               <motion.div
-                className="bg-secondarydark h-10 rounded"
+                className="bg-secondarydark h-12 rounded "
                 initial={{ width: 0 }}
                 animate={{ width: animationTriggered ? `${result.percentage}%` : '0%' }}
                 transition={{ duration: 1, ease: 'easeInOut' }}
@@ -55,7 +53,7 @@ const VoteResults = ({ question, avaiable }: any) => {
         ))}
       </div>
       <Separator />
-      <ChatComponent questionId={question._id} avaiable={avaiable} />
+      <ChatComponent user={user} entity={question} available={available} />
     </div>
   );
 };

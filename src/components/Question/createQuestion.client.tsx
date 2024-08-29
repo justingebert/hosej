@@ -20,12 +20,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { useUser } from "@/components/UserContext";
+import { useParams } from "next/navigation";
+import { useAuthRedirect } from "@/hooks/useAuthRedirect";
+import { IUser } from "@/db/models/user";
 
 
 
 const CreateQuestion = () => {
-  const {username} = useUser()
+  const { session, status, user } = useAuthRedirect();
   const [question, setQuestion] = useState("");
   const [questionType, setQuestionType] = useState("");
   const [options, setOptions] = useState([""]);
@@ -33,6 +35,7 @@ const CreateQuestion = () => {
   const [error, setError] = useState<String>("");
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const { groupId } = useParams<{ groupId: string }>();
 
   const handleAddOption = () => {
     setOptions([...options, ""]);
@@ -61,15 +64,16 @@ const CreateQuestion = () => {
     }
 
     const questionData = {
+      groupId: groupId,
       category: "Daily",
       questionType: questionType,
       question: question,
       options: questionType.startsWith("custom") ? options : undefined,
-      submittedBy: username
+      submittedBy: user.username
     };
 
     try {
-      const response = await fetch("/api/question/", {
+      const response = await fetch(`/api/${groupId}/question/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

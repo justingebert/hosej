@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import user from "./user";
+import User from "./user";
 
 const FcmSchema = new mongoose.Schema({
   token: {
@@ -8,7 +8,7 @@ const FcmSchema = new mongoose.Schema({
   },
   username: {
     type: String,
-    ref: user,
+    ref: User,
   },
   createdAt: {
     type: Date,

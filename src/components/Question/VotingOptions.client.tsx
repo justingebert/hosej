@@ -5,15 +5,14 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea"
 
-const VoteOptions = ({ question, onVote }:any) => {
-  const { username } = useUser();
+const VoteOptions = ({ user, question, onVote }:any) => {
   const [selectedOption, setSelectedOption] = useState(null);
   const [textResponse, setTextResponse] = useState("");
 
   const submitVote = async () => {
     const response = question.questionType === "text" ? textResponse : selectedOption;
 
-    await fetch(`/api/question/vote`, {
+    await fetch(`/api/${question.groupId}/question/vote`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -21,7 +20,7 @@ const VoteOptions = ({ question, onVote }:any) => {
       body: JSON.stringify({
         questionId: question._id,
         response: response,
-        userThatVoted: username,
+        userThatVoted: user.username,
       }),
     });
     onVote(); // Callback to update state in the parent component

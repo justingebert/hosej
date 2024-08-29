@@ -5,14 +5,13 @@ import {
   RadialBarChart,
   PolarAngleAxis,
 } from "recharts";
-import { Card, CardContent } from "../ui/card";
 
 export function CompletionChart({ completion }: { completion: number }) {
   // Data configuration with completion value
 
   const getFillColor = () => {
     if (completion < 33) return "red";
-    if (completion < 66) return "yellow";
+    if (completion < 66) return "orange";
     return "green"; 
   };
 

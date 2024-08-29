@@ -14,6 +14,7 @@ export interface IPictureSubmission {
 }
 
 export interface IRally extends mongoose.Document {
+  groupId: mongoose.Schema.Types.ObjectId;
   task: string;
   submissions: IPictureSubmission[];
   startTime: Date;
@@ -38,6 +39,11 @@ const pictureSubmissionSchema = new mongoose.Schema({
 });
 
 const rallySchema = new mongoose.Schema({
+  groupId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Group",
+    required: true,
+  },
   task: { type: String, required: true },
   submissions: [pictureSubmissionSchema],
   startTime: { type: Date, required: false },
@@ -47,8 +53,11 @@ const rallySchema = new mongoose.Schema({
   active: { type: Boolean, default: false },
   lengthInDays: { type: Number, required: true },
   submittedBy: { type: String, required: true },
+  chat: { type: mongoose.Schema.Types.ObjectId, ref: "Chat" },
   createdAt: { type: Date, default: Date.now },
 });
+
+rallySchema.index({ groupId: 1, createdAt: -1 })
 
 const Rally = mongoose.models.Rally || mongoose.model<IRally>("Rally", rallySchema);
 

@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server'
 import dbConnect from "@/lib/dbConnect";
-import user from "@/db/models/user";
+import User from "@/db/models/user";
 
 export const revalidate = 0
 
 //get all users
 export async function GET(req: Request, res: NextResponse) {
   await dbConnect();
-  const users = await user.find({});
+  const users = await User.find({});
 
   return NextResponse.json(users);
 }
@@ -22,9 +22,8 @@ export async function POST(req: any, res: NextResponse) {
   if (!username) {
     return NextResponse.json({ message: "Username is required" });
   }
-
   try {
-    const newUser = new user({ username: username });
+    const newUser = new User({ username: username });
     await newUser.save();
     return NextResponse.json(newUser);
   } catch (error) {

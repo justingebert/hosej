@@ -16,8 +16,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Modal from 'react-modal';
 
-const RallyVoteCarousel = ({ rallyId, onVote }: any) => {
-  const { username } = useUser();
+const RallyVoteCarousel = ({ user, rally, onVote }: any) => {
   const [selectedSubmission, setSelectedSubmission] = useState<string | null>(null);
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [api, setApi] = useState<CarouselApi | null>(null);
@@ -30,7 +29,7 @@ const RallyVoteCarousel = ({ rallyId, onVote }: any) => {
 
   useEffect(() => {
     const fetchSubmissions = async () => {
-      const response = await fetch(`/api/rally/submissions/${rallyId}`);
+      const response = await fetch(`/api/${rally.groupId}/rally/submissions/${rally._id}`);
       const data = await response.json();
       setSubmissions(data.submissions);
       if (data.submissions.length > 0) {
@@ -39,13 +38,13 @@ const RallyVoteCarousel = ({ rallyId, onVote }: any) => {
 
       // Check if the user has already voted
       const userHasVoted = data.submissions.some((submission:any) =>
-        submission.votes.some((vote:any) => vote.username === username)
+        submission.votes.some((vote:any) => vote.username === user.username)
       );
       setHasVoted(userHasVoted);
     };
 
     fetchSubmissions();
-  }, [rallyId, username]);
+  }, [rally, user]);
 
   useEffect(() => {
     if (!api || submissions.length === 0) return;
@@ -82,15 +81,15 @@ const RallyVoteCarousel = ({ rallyId, onVote }: any) => {
       return;
     }
 
-    await fetch(`/api/rally/submissions/vote`, {
+    await fetch(`/api/${rally.groupId}/rally/submissions/vote`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        rallyId: rallyId,
+        rallyId: rally._id,
         submissionId: selectedSubmission,
-        userThatVoted: username,
+        userThatVoted: user.username,
       }),
     });
 

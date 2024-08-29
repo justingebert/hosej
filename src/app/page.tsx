@@ -1,127 +1,130 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { useTheme } from "next-themes";
-import { History } from "lucide-react";
-import Link from "next/link";
-import useFcmToken from "../hooks/useFcmToken";
-import { useUser } from "@/components/UserContext"; 
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { CompletionChart } from "@/components/Charts/CompletionChart";
+import { v4 as uuidv4 } from "uuid";
+import { useUser } from "@/components/UserContext";
 
 export default function Home() {
   const router = useRouter();
-  const [userCount, setUserCount] = useState(0);
-  const [questions, setQuestions] = useState([]);
-  const [completion, setCompletion] = useState(0);
+  const { createUserByDeviceId, migrateUser  } = useUser();
+  const [userName, setUserName] = useState("");
+
 
   useEffect(() => {
-    const user = localStorage.getItem("user");
-    console.log("user:", user);
-    if (!user) {
-      router.push("/signin");
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      migrateUser(storedUser).then(() => {
+        console.log('User migrated successfully');
+        localStorage.removeItem('user'); // Clean up old user data
+      }).catch(error => {
+        console.error('Error migrating user:', error);
+      });
+    }
+  }, [migrateUser]);
+
+  useEffect(() => {
+    const deviceId = localStorage.getItem("deviceId");
+    if (deviceId) {
+      signIn('credentials', {
+        redirect: false,
+        deviceId: deviceId,
+      }).then(result => {
+        if (result?.ok) {
+          console.log('Device ID authentication successful');
+          router.push('/groups');
+        } else {
+          console.error('Device ID authentication failed:', result?.error);
+          console.log(result);  // Log the full result object for more context
+        }
+      }).catch(error => {
+        console.error('Error during device ID authentication:', error);
+      });
+    } else {
+      console.warn('No device ID found in localStorage');
     }
   }, [router]);
 
-  useEffect(() => {
-    const fetchUserCount = async () => {
-      const response = await fetch("/api/users/count");
-      const data = await response.json();
-      setUserCount(data);
-    };
-    fetchUserCount();
-  }, []);
+  
+  const handleGoogleSignIn = () => {
+    alert("coming soon!")
+    // Store the username locally before starting Google OAuth
+    //localStorage.setItem("userName", userName);
+    //signIn("google", { callbackUrl: "/" }); // Adjust callback URL as needed
+  };
 
+  const handleStartWithoutAccount = async () => {
+    try {
+      let deviceId = localStorage.getItem("deviceId");
+      if (!deviceId) {
+        deviceId = uuidv4(); // Generate a new deviceId if not present
+        localStorage.setItem("deviceId", deviceId);
+        await createUserByDeviceId(userName); // Create a new user if not already done
+      }
 
-  useEffect(() => {
-    if (userCount > 0) {
-      const fetchQuestions = async () => {
-        const response = await fetch("/api/question/daily");
-        const data = await response.json();
-        setQuestions(data.questions);
-        calculateCompletion(data.questions, userCount); 
-      };
-      fetchQuestions();
+      const result = await signIn('credentials', {
+        redirect: false,
+        deviceId: deviceId, // Pass the deviceId here
+      });
+
+      if (result?.ok) {
+        console.log('Device ID authentication successful');
+        router.push('/groups'); // Redirect to groups after successful sign-in
+      } else {
+        console.error('Device ID authentication failed:', result?.error);
+      }
+    } catch (error) {
+      console.error('Error during device ID authentication:', error);
     }
-  }, [userCount]);
-
-  const calculateCompletion = (questions: any, userCount: number) => {
-    if (questions.length === 0) {
-      setCompletion(0);
-      return;
-    }
-    
-    let totalVotes = 0;
-    let totalRequiredVotes = questions.length * userCount;
-
-    questions.forEach((question: any) => {
-      totalVotes += question.answers.length;
-    });
-
-    const completionPercentage = (totalVotes / totalRequiredVotes) * 100;
-    setCompletion(Math.round(completionPercentage)); 
   };
 
   return (
-    <div className="flex flex-col justify-between h-[100dvh]"> 
-      <div className="flex justify-between items-center mt-4 w-full">
-        <div>
-          <Button variant="outline" size="icon" onClick={() => { router.push("/dashboard/history") }}>
-            <History />
-          </Button>
-        </div>
-        <Link href="/dashboard/stats">
-          <h1 className="text-4xl font-bold">HoseJ</h1>
-        </Link>
-        <div>
-          <Button variant="outline" size="icon" onClick={() => { router.push("/dashboard/leaderboard") }}>
-            👖
-          </Button>
-        </div>
-      </div>
+    <div className="flex flex-col justify-between min-h-screen ">
+      <header className="text-center p-6">
+        <h1 className="text-4xl font-bold">HoseJ</h1>
+      </header>
 
-      <div className="flex flex-col items-center justify-center flex-grow"> {/* Center the cards and button */}
-        <div className="flex flex-col items-center gap-8 w-full">
-          <Card
-            className="bg-primary-foreground w-full  px-6 py-4 flex items-center justify-between cursor-pointer"
-            onClick={() => router.push("/dashboard/rally")}
+      <main className="flex flex-col items-center justify-center flex-grow space-y-6">
+      <Input
+          type="text"
+          placeholder="What's your name?"
+          value={userName}
+          onChange={(e) => setUserName(e.target.value)}
+          className="w-full max-w-sm text-center"
+        />
+
+        <div className="space-y-4 w-full max-w-sm">
+          <Button onClick={handleGoogleSignIn} className="w-full" disabled={true}>
+            Continue with Google
+          </Button>
+          <Button
+            onClick={handleStartWithoutAccount}
+            variant="outline"
+            className="w-full"
+            disabled={!userName}
           >
-            <div className="flex flex-col justify-center">
-              <div className="font-bold text-2xl">Rally</div>
-              <div className="text-sm text-primary/30">Vote now!</div>
-              <div className="text-lg">Inactive</div> 
-            </div>
-            <Skeleton className="w-24 h-24  rounded-lg"/> {/* Placeholder for the chart */}
-          </Card>
-          <Card
-            className="bg-primary-foreground w-full px-6 py-4 flex items-center justify-between cursor-pointer"
-            onClick={() => router.push("/dashboard/daily")}
-          >
-            <div className="flex flex-col justify-center">
-              <div className="font-bold text-2xl">Daily</div>
-              <div className="text-sm text-primary/30">Vote now!</div>
-              <div className="text-lg ">Active: {questions.length}</div> 
-            </div>
-            <div className="w-24 h-24 rounded-lg">
-            <CompletionChart completion={completion} />
-            </div> 
-            {/* Placeholder for the chart */}
-          </Card>
+            Start without Account
+          </Button>
         </div>
-      </div>
-      <div className="flex justify-center mb-20">
-      <Button
-          className="mt-8 w-full"
-          onClick={() => router.push("/dashboard/create")}
-        >
-          Create
-        </Button>
-      </div>
+      </main>
+
+      {/* Footer Section with Legal Notice */}
+      <footer className="text-center p-4 ">
+        <p className="text-sm text-muted">
+          By continuing, you agree to our{" "}
+          <a href="/terms" className="underline">
+            Terms of Service
+          </a>{" "}
+          and{" "}
+          <a href="/privacy" className="underline">
+            Privacy Policy
+          </a>
+          .
+        </p>
+      </footer>
     </div>
   );
 }
-
