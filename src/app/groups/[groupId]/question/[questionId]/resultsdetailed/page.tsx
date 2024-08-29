@@ -2,14 +2,19 @@ import dbConnect from "@/lib/dbConnect";
 import Question from "@/db/models/Question";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Header from "@/components/ui/Header";
+import User from "@/db/models/user";
 
 
 export default async function ResultsDetailPage({params }: {params: { groupId: string, questionId:string };}) {
   const { questionId, groupId } = params;
   await dbConnect();
 
+  const user = await User.findOne();
   const question = await Question.findById(questionId).populate(
-    "answers.username"
+    {
+      path: 'answers.username',
+      model: 'User',  
+    }
   );
 
   const groupedResponses: any = {};

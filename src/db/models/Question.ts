@@ -1,4 +1,3 @@
-import { count, time } from "console";
 import mongoose from "mongoose";
 
 enum QuestionType {
