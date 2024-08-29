@@ -103,7 +103,7 @@ const StatsPage = () => {
 
   return (
     <div>
-      <Header/>
+      <Header  href={`/groups/${groupId}/dashboard`}/>
       <Card className="flex flex-col mb-4 w-full">
         <CardHeader className="items-center">
           <CardTitle>Questions</CardTitle>
