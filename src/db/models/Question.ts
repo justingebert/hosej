@@ -41,7 +41,11 @@ const questionSchema = new mongoose.Schema({
     enum: Object.values(QuestionType),
   },
   question: { type: String, required: true },
-  options: { type: mongoose.Schema.Types.Mixed, required: false },
+  image: { type: String, required: false },
+  options: [{ 
+    text: { type: String, required: false },
+    image: { type: String, required: false },
+  }],
   answers: [
     {
       username: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true},
