@@ -79,6 +79,7 @@ const CreateRally = () => {
       <div className="mt-5">
         <Input
           type="number"
+          pattern="\d*"
           placeholder="Enter length in days"
           value={lengthInDays}
           onChange={(e) => setLengthInDays(e.target.value)}
