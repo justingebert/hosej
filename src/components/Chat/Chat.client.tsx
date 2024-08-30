@@ -89,9 +89,6 @@ function ChatComponent({ user, entity, available }: any) {
         <div className="bg-background p-4 sticky bottom-0 left-0 w-full">
           <div className="flex gap-2">
             <Input
-              style={{
-                fontSize: '16px', 
-              }}
               className="flex-grow p-2"
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
