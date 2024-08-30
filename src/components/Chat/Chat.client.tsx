@@ -92,7 +92,6 @@ function ChatComponent({ user, entity, available }: any) {
               className="flex-grow p-2"
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
-              placeholder="Type a message..."
             />
             <Button onClick={handleSendMessage}>
               <Send size={20} />
