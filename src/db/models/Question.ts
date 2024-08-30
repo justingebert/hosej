@@ -61,7 +61,7 @@ const questionSchema = new mongoose.Schema({
   chat: { type: mongoose.Schema.Types.ObjectId, ref: "Chat" },
 });
 
-questionSchema.index({ groupId: 1, createdAt: -1 });
+questionSchema.index({ groupId: 1 });
 
 const Question = mongoose.models.Question || mongoose.model<IQuestion>("Question", questionSchema);
 
