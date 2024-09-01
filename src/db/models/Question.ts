@@ -42,10 +42,7 @@ const questionSchema = new mongoose.Schema({
   },
   question: { type: String, required: true },
   image: { type: String, required: false },
-  options: [{ 
-    text: { type: String, required: false },
-    image: { type: String, required: false },
-  }],
+  options: { type: mongoose.Schema.Types.Mixed, required: false },
   answers: [
     {
       username: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true},

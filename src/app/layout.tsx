@@ -4,6 +4,7 @@ import { AppWrapper } from "../components/Warppers/AppWrapper";
 /* import { Analytics } from "@vercel/analytics/react" */
 import { ThemeProvider } from "@/components/Warppers/theme-provider"
 import { ThemeColorMeta } from "@/components/Warppers/ThemeColorVieport";
+import { Toaster } from "@/components/ui/toaster";
 /* import { SpeedInsights } from "@vercel/speed-insights/next"
  */
 
@@ -35,6 +36,7 @@ export default function RootLayout({
           {/* <Analytics /> */}
          {/*  <SpeedInsights /> */}
          </div>
+         <Toaster /> 
         </body>
     </html>
     

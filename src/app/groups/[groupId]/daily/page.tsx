@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { Badge } from "@/components/ui/badge";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
-import { IUser } from "@/db/models/user";
+import Image from "next/image";
 
 function QuestionsTabs({ user, groupId, questions, userHasVoted, setUserHasVoted, selectedRating, setSelectedRating }: any) {
 
@@ -92,6 +92,13 @@ function QuestionsTabs({ user, groupId, questions, userHasVoted, setUserHasVoted
                 </div>
             </DrawerContent>
       </Drawer>
+      <Image
+         src={question.image}
+        alt={`${question.question}`}
+         className="object-cover w-full h-full cursor-pointer"
+         width={300}
+         height={300}
+      />
           <div className="mt-10">
             {userHasVoted[question._id] ? (
               <VoteResults user={user} question={question} available={true}/>

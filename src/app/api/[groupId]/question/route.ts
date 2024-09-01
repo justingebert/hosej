@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     const data = await req.json();
 
     // Check if required fields are present
-    const { groupId, category, questionType, question, submittedBy } = data;
+    const { groupId, category, questionType, question, submittedBy, image } = data;
     if (!groupId || !category || !questionType || !question || !submittedBy) {
       return NextResponse.json(
         { message: "Missing required fields" },
@@ -41,6 +41,7 @@ export async function POST(req: NextRequest) {
       category,
       questionType,
       question,
+      image,
       options,
       submittedBy,
     });
@@ -70,7 +71,7 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { message: "Created Question", question: newQuestion },
+      { newQuestion },
       { status: 201 }
     );
   } catch (error:any) {
