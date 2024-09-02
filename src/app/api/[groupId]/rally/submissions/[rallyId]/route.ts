@@ -32,6 +32,7 @@ export async function GET(req: Request, { params }: { params: { rallyId: string 
                 const command = new GetObjectCommand({
                     Bucket: process.env.AWS_BUCKET_NAME,
                     Key: s3Key, 
+                    ResponseCacheControl: 'max-age=86400, public',
                 });
 
                 let url;

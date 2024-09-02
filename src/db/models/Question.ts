@@ -7,8 +7,9 @@ enum QuestionType {
   CustomSelectMultiple = "custom-select-multiple",
   Text = "text", 
   Rating = "rating",
-  MatchPairs = "match-pairs",
-  Sequence = "sequence",
+  ImageSelectOne = "image-select-one",
+  //MatchPairs = "match-pairs",
+  //Sequence = "sequence",
 }
 
 export interface IQuestion extends mongoose.Document {
@@ -41,6 +42,7 @@ const questionSchema = new mongoose.Schema({
     enum: Object.values(QuestionType),
   },
   question: { type: String, required: true },
+  image: { type: String, required: false },
   options: { type: mongoose.Schema.Types.Mixed, required: false },
   answers: [
     {

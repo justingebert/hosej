@@ -88,6 +88,7 @@ export async function POST(req: Request) {
 
     // Create the associated chat
     const newChat = new Chat({
+      group: groupId,
       entity: newRally._id,
       entityModel: "Question", // Specify the entity model as 'Question'
       messages: [], // Initialize with no messages

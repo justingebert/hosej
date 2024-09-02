@@ -1,19 +1,12 @@
 "use client";
+
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-} from "@/components/ui/alert-dialog";
-import { useUser } from "@/components/UserContext";
 import { useParams } from "next/navigation";
-import { group } from "console";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { IUser } from "@/db/models/user";
+import { useToast } from "@/hooks/use-toast"; 
 
 const CreateRally = () => {
   const { session, status } = useAuthRedirect();
@@ -21,21 +14,18 @@ const CreateRally = () => {
   const [task, setTask] = useState("");
   const [lengthInDays, setLengthInDays] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<String>("");
-  const [isAlertOpen, setIsAlertOpen] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
   const { groupId } = useParams<{ groupId: string }>();
+  const { toast } = useToast(); // Initialize the toast
 
-  const handleSubmit = async (e:any) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
 
     const rallyData = {
       groupId: groupId,
       task: task,
       lengthInDays: Number(lengthInDays),
-      submittedBy: user.username
+      submittedBy: user.username,
     };
 
     try {
@@ -48,21 +38,20 @@ const CreateRally = () => {
       });
 
       if (!response.ok) throw new Error("Failed to create rally");
-      setAlertMessage("Rally created successfully!");
-      setIsAlertOpen(true);
+      
+      toast({title: "Rally created successfully!",});
+
       setTask("");
       setLengthInDays("");
-    } catch (err:any) {
-      setError(err.message);
-      setAlertMessage("Failed to create rally");
-      setIsAlertOpen(true);
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: err.message,
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
-  };
-
-  const closeAlert = () => {
-    setIsAlertOpen(false);
   };
 
   return (
@@ -91,18 +80,6 @@ const CreateRally = () => {
           {loading ? "Creating..." : "Create Rally"}
         </Button>
       </div>
-      {isAlertOpen && (
-        <AlertDialog open={isAlertOpen} >
-          <AlertDialogContent className="rounded-lg w-3/4" >
-            <AlertDialogDescription>
-              {alertMessage}
-            </AlertDialogDescription>
-            <AlertDialogFooter>
-              <AlertDialogAction onClick={closeAlert}>OK</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      )}
     </div>
   );
 };

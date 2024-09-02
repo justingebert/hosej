@@ -26,6 +26,7 @@ import {
 import { IGroup } from "@/db/models/Group";
 import { Copy } from "lucide-react";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
+import { motion } from 'framer-motion';
 
 function CreateGroupDrawer({ onCreate }: { onCreate: (groupName: string) => void }) {
   const [groupName, setGroupName] = useState("");
@@ -116,6 +117,35 @@ export default function GroupsPage() {
       console.error("Failed to copy: ", err);
     });
   };
+
+
+  if (status === "loading") {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <motion.h1
+          className="text-4xl font-bold text-center relative"
+          style={{
+            backgroundImage: "linear-gradient(90deg, var(--shine-color) 0%, var(--shine-highlight) 50%, var(--shine-color) 100%)",
+            backgroundSize: "200% 100%",
+            backgroundClip: "text",
+            WebkitBackgroundClip: "text",
+            color: "transparent",
+          }}
+          animate={{
+            backgroundPosition: ["-100% 0", "100% 0"],
+          }}
+          transition={{
+            duration: 1.5,
+            ease: "easeInOut",
+            repeat: Infinity,
+          }}
+        >
+          HoseJ
+        </motion.h1>
+      </div>
+    );
+  }
+  
 
   return (
     <div className="space-y-6">
