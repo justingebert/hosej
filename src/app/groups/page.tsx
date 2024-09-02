@@ -121,11 +121,11 @@ export default function GroupsPage() {
 
   if (status === "loading") {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-900">
+      <div className="flex items-center justify-center min-h-screen">
         <motion.h1
           className="text-4xl font-bold text-center relative"
           style={{
-            backgroundImage: "linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%)",
+            backgroundImage: "linear-gradient(90deg, var(--shine-color) 0%, var(--shine-highlight) 50%, var(--shine-color) 100%)",
             backgroundSize: "200% 100%",
             backgroundClip: "text",
             WebkitBackgroundClip: "text",

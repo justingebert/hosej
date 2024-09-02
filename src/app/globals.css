@@ -42,6 +42,9 @@
       --chart-3: 240 1% 58%;
       --chart-4: 240 1% 42%;
       --chart-5: 240 2% 26%;
+
+      --shine-color: rgba(0, 0, 0, 0); /* Default shine color for light mode */
+      --shine-highlight: rgba(40, 40, 40, 0.4); /* Shine highlight for light mode */
     }
 
     .dark {
@@ -81,6 +84,9 @@
       --chart-3: 240 1% 58%;
       --chart-4: 240 1% 42%;
       --chart-5: 240 2% 26%;
+
+      --shine-color: rgba(255, 255, 255, .4);
+      --shine-highlight: rgba(255, 255, 255, 1);
     }
   }
 
