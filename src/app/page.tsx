@@ -8,19 +8,20 @@ import { Input } from "@/components/ui/input";
 import { v4 as uuidv4 } from "uuid";
 import { useUser } from "@/components/UserContext";
 import Link from "next/link";
+import { motion } from 'framer-motion';
 
 export default function Home() {
   const router = useRouter();
-  const { createUserByDeviceId, migrateUser  } = useUser();
+  const { createUserByDeviceId, migrateUser } = useUser();
   const [userName, setUserName] = useState("");
-
+  const [loading, setLoading] = useState(true); // Add a loading state
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       migrateUser(storedUser).then(() => {
         console.log('User migrated successfully');
-        localStorage.removeItem('user'); // Clean up old user data
+        localStorage.removeItem('user');
       }).catch(error => {
         console.error('Error migrating user:', error);
       });
@@ -40,61 +41,88 @@ export default function Home() {
         } else {
           console.error('Device ID authentication failed:', result?.error);
           console.log(result);  // Log the full result object for more context
+          setLoading(false); // Stop loading if authentication fails
         }
       }).catch(error => {
         console.error('Error during device ID authentication:', error);
+        setLoading(false); // Stop loading on error
       });
     } else {
       console.warn('No device ID found in localStorage');
+      setLoading(false); // Stop loading if no device ID found
     }
   }, [router]);
 
-  
   const handleGoogleSignIn = () => {
-    alert("coming soon!")
-    // Store the username locally before starting Google OAuth
-    //localStorage.setItem("userName", userName);
-    //signIn("google", { callbackUrl: "/" }); // Adjust callback URL as needed
+    alert("coming soon!");
   };
 
   const handleStartWithoutAccount = async () => {
     try {
       let deviceId = localStorage.getItem("deviceId");
       if (!deviceId) {
-        deviceId = uuidv4(); // Generate a new deviceId if not present
+        deviceId = uuidv4();
         localStorage.setItem("deviceId", deviceId);
-        await createUserByDeviceId(userName); // Create a new user if not already done
+        await createUserByDeviceId(userName);
       }
 
       const result = await signIn('credentials', {
         redirect: false,
-        deviceId: deviceId, // Pass the deviceId here
+        deviceId: deviceId,
       });
 
       if (result?.ok) {
         console.log('Device ID authentication successful');
-        router.push('/groups'); // Redirect to groups after successful sign-in
+        router.push('/groups');
       } else {
         console.error('Device ID authentication failed:', result?.error);
+        setLoading(false);
       }
     } catch (error) {
       console.error('Error during device ID authentication:', error);
+      setLoading(false);
     }
   };
+
+  // Render the loading state if the app is still authenticating
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <motion.h1
+          className="text-4xl font-bold text-center relative"
+          style={{
+            backgroundImage: "linear-gradient(90deg, var(--shine-color) 0%, var(--shine-highlight) 50%, var(--shine-color) 100%)",
+            backgroundSize: "200% 100%",
+            backgroundClip: "text",
+            WebkitBackgroundClip: "text",
+            color: "transparent",
+          }}
+          animate={{
+            backgroundPosition: ["-100% 0", "100% 0"],
+          }}
+          transition={{
+            duration: 1.5,
+            ease: "easeInOut",
+            repeat: Infinity,
+          }}
+        >
+          HoseJ
+        </motion.h1>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col justify-between min-h-screen ">
       <header className="text-center p-6">
         <Link href={"/deviceauth"}>
-          <h1 className="text-4xl font-bold" >HoseJ</h1>
+          <h1 className="text-4xl font-bold">HoseJ</h1>
         </Link>
       </header>
 
       <main className="flex flex-col items-center justify-center flex-grow space-y-6">
-      <Input
-          style={{
-            fontSize: '16px', 
-          }}
+        <Input
+          style={{ fontSize: '16px' }}
           type="text"
           placeholder="What's your name?"
           value={userName}
@@ -117,8 +145,7 @@ export default function Home() {
         </div>
       </main>
 
-      {/* Footer Section with Legal Notice */}
-      <footer className="text-center p-4 ">
+      <footer className="text-center p-4">
         <p className="text-sm text-muted">
           By continuing, you agree to our{" "}
           <a href="/terms" className="underline">
