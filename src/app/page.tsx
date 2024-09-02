@@ -92,6 +92,9 @@ export default function Home() {
 
       <main className="flex flex-col items-center justify-center flex-grow space-y-6">
       <Input
+          style={{
+            fontSize: '16px', 
+          }}
           type="text"
           placeholder="What's your name?"
           value={userName}
