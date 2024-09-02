@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, Suspense } from "react";
-import { useParams, useSearchParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { ClipLoader } from "react-spinners";
 import VoteResults from "@/components/Question/VoteResults.client";
 import BackLink from "@/components/ui/BackLink";
@@ -13,8 +13,7 @@ const ResultsPage = () => {
   const { session, status, user } = useAuthRedirect();
   const [question, setQuestion] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const { groupId, questionId} = useParams<{ groupId: string, questionId:string }>();
-
+  const { groupId, questionId } = useParams<{ groupId: string, questionId: string }>();
 
   useEffect(() => {
     const fetchQuestion = async () => {
@@ -30,8 +29,8 @@ const ResultsPage = () => {
     }
   }, [groupId, questionId]);
 
-  if (loading) return <Loader loading={true} />
-  if (!question) return <p>No Question avaiable</p>
+  if (loading) return <Loader loading={true} />;
+  if (!question) return <p>No Question available</p>;
 
   return (
     <>
@@ -42,20 +41,37 @@ const ResultsPage = () => {
             {question.question}
           </h1>
           {question.imageUrl &&
-          <Image
-            src={question.imageUrl}
+            <Image
+              src={question.imageUrl}
               alt={`${question.question}`}
-            className="object-cover w-full h-full cursor-pointer rounded-lg mt-4"
-            width={300}
-            height={300}
-          />}
+              className="object-cover w-full h-full cursor-pointer rounded-lg mt-4"
+              width={300}
+              height={300}
+            />}
           <div className="flex flex-col items-center mb-10">
-            {question.questionType !== "text" &&
+            {question.questionType.startsWith("image") &&
               question.options &&
               question.options.map((option: any, index: number) => (
                 <div
                   key={index}
-                  className="p-4 m-2 bg-primary text-primary-foreground rounded-lg w-full max-w-md "
+                  className="p-4 m-2 bg-primary text-primary-foreground rounded-lg w-full max-w-md"
+                >
+                  <Image
+                    src={option}
+                    alt={`Option ${index + 1}`}
+                    className="object-cover w-full h-full rounded-lg"
+                    width={300}
+                    height={300}
+                    priority={index === 0}
+                  />
+                </div>
+              ))}
+            {!question.questionType.startsWith("image") &&
+              question.options &&
+              question.options.map((option: any, index: number) => (
+                <div
+                  key={index}
+                  className="p-4 m-2 bg-primary text-primary-foreground rounded-lg w-full max-w-md"
                 >
                   {option}
                 </div>

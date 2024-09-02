@@ -43,6 +43,35 @@ export async function GET(req: NextRequest,  { params }: { params: { groupId: st
                 throw new Error(`Failed to generate pre-signed URL: ${s3Error.message}`);
             }
         }
+        if (question.questionType.startsWith("image")) {
+            const optionUrls = await Promise.all(
+                question.options.map(async (option: string) => {
+                    if (option === "") throw new Error("Option is empty");
+
+                    const urlObject = new URL(option);
+                    let s3Key = urlObject.pathname;
+                    if (s3Key.startsWith('/')) {
+                        s3Key = s3Key.substring(2); // Remove leading '/'
+                    }
+
+                    const command = new GetObjectCommand({
+                        Bucket: process.env.AWS_BUCKET_NAME,
+                        Key: s3Key,
+                        ResponseCacheControl: 'max-age=86400, public',
+                    });
+
+                    try {
+                        const url = await getSignedUrl(s3, command, { expiresIn: 60 }); // Short-lived URL
+                        return url;
+                    } catch (s3Error: any) {
+                        console.error(`Failed to generate pre-signed URL for option ${option}`, s3Error);
+                        throw new Error(`Failed to generate pre-signed URL for option: ${s3Error.message}`);
+                    }
+                })
+            );
+
+            question.options = optionUrls; // Replace options with signed URLs
+        }
 
         return NextResponse.json(question);
     }

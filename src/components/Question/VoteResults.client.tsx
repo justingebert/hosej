@@ -3,9 +3,10 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import ChatComponent from "../Chat/Chat.client";
-import { Separator } from "@/components/ui/separator"
+import { Separator } from "@/components/ui/separator";
 import { motion } from 'framer-motion';
 import { Badge } from "../ui/badge";
+import Image from "next/image";
 
 const VoteResults = ({ user, question, available }: any) => {
   const [animationTriggered, setAnimationTriggered] = useState(false);
@@ -35,15 +36,26 @@ const VoteResults = ({ user, question, available }: any) => {
           <Link key={index} href={`/groups/${question.groupId}/question/${question._id}/resultsdetailed/`}>
             <div className="bg-secondary my-2 rounded-md relative">
               <motion.div
-                className="bg-secondarydark h-12 rounded "
+                className="bg-secondarydark h-12 rounded"
                 initial={{ width: 0 }}
                 animate={{ width: animationTriggered ? `${result.percentage}%` : '0%' }}
                 transition={{ duration: 1, ease: 'easeInOut' }}
               ></motion.div>
-              <div className="absolute inset-0 flex justify-between px-3 items-center">
-                <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '80%' }}>
-                  {result.option}
-                </span>
+              <div className="absolute inset-0 flex justify-between px-2 items-center">
+              {question.questionType.startsWith("image") ? (
+                    <Image
+                      src={result.option}
+                      alt={`Option ${index + 1}`}
+                      width={45}
+                      height={45}
+                      className="object-cover rounded-sm"
+                      priority={index === 0}
+                    />
+                  ) : (
+                    <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '80%' }}>
+                      {result.option}
+                    </span>
+                  )}
                 <Badge>
                   <CountUpBadge targetPercentage={result.percentage} />
                 </Badge>
@@ -59,7 +71,6 @@ const VoteResults = ({ user, question, available }: any) => {
 };
 
 export default VoteResults;
-
 
 const CountUpBadge = ({ targetPercentage }: { targetPercentage: number }) => {
   const [currentPercentage, setCurrentPercentage] = useState(0);

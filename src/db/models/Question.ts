@@ -7,8 +7,9 @@ enum QuestionType {
   CustomSelectMultiple = "custom-select-multiple",
   Text = "text", 
   Rating = "rating",
-  MatchPairs = "match-pairs",
-  Sequence = "sequence",
+  ImageSelectOne = "image-select-one",
+  //MatchPairs = "match-pairs",
+  //Sequence = "sequence",
 }
 
 export interface IQuestion extends mongoose.Document {

@@ -1,9 +1,9 @@
 "use client";
 
-import { useUser } from "@/components/UserContext";
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea"
+import Image from "next/image";
 
 const VoteOptions = ({ user, question, onVote }:any) => {
   const [selectedOption, setSelectedOption] = useState(null);
@@ -38,7 +38,7 @@ const VoteOptions = ({ user, question, onVote }:any) => {
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-4">
-          {question.options.map((option:any, index:number) => (
+          {question.options.map((option: any, index: number) => (
             <Button
               key={index}
               onClick={() => {
@@ -48,7 +48,11 @@ const VoteOptions = ({ user, question, onVote }:any) => {
               className="p-2"
               style={{ whiteSpace: "normal", height: "100%" }}
             >
-              {option}
+              {question.questionType.startsWith("image") ? (
+                <Image src={option} alt={`Option ${index + 1}`} width={100} height={100} className="w-full h-full object-cover rounded-sm"/>
+              ) : (
+                option
+              )}
             </Button>
           ))}
         </div>
