@@ -7,6 +7,7 @@ import VoteResults from "@/components/Question/VoteResults.client";
 import BackLink from "@/components/ui/BackLink";
 import Loader from "@/components/ui/Loader";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
+import Image from "next/image";
 
 const ResultsPage = () => {
   const { session, status, user } = useAuthRedirect();
@@ -40,6 +41,14 @@ const ResultsPage = () => {
           <h1 className="text-xl font-bold text-center mb-10 mt-10">
             {question.question}
           </h1>
+          {question.imageUrl &&
+          <Image
+            src={question.imageUrl}
+              alt={`${question.question}`}
+            className="object-cover w-full h-full cursor-pointer rounded-lg mt-4"
+            width={300}
+            height={300}
+          />}
           <div className="flex flex-col items-center mb-10">
             {question.questionType !== "text" &&
               question.options &&

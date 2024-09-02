@@ -92,13 +92,14 @@ function QuestionsTabs({ user, groupId, questions, userHasVoted, setUserHasVoted
                 </div>
             </DrawerContent>
       </Drawer>
+      {question.imageUrl &&
       <Image
-         src={question.image}
-        alt={`${question.question}`}
-         className="object-cover w-full h-full cursor-pointer"
+         src={question.imageUrl}
+          alt={`${question.question}`}
+         className="object-cover w-full h-full cursor-pointer rounded-lg mt-4"
          width={300}
          height={300}
-      />
+      />}
           <div className="mt-10">
             {userHasVoted[question._id] ? (
               <VoteResults user={user} question={question} available={true}/>

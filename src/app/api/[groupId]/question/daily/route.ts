@@ -31,8 +31,8 @@ export async function GET(req: Request, { params }: { params: { groupId: string 
         // Map over questions and conditionally add pre-signed image URLs if an image is present
         const questionsWithImages = await Promise.all(
             questions.map(async (question) => {
-                if (question.imageUrl) {
-                    const urlObject = new URL(question.imageUrl);
+                if (question.image) {
+                    const urlObject = new URL(question.image);
                     let s3Key = urlObject.pathname;
                     if (s3Key.startsWith('/')) {
                         s3Key = s3Key.substring(2); // Remove leading '//'
