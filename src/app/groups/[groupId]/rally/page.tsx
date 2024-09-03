@@ -1,23 +1,18 @@
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
-import { IRally } from "@/db/models/rally";
-import { Button } from "@/components/ui/button";
 import RallyVoteCarousel from "@/components/Rally/VotingOptionsRally.client";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import RallyResults from "@/components/Rally/VoteResultsRally.client";
-import {
-  Card,
-  CardContent,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import imageCompression from 'browser-image-compression';
 import Loader from "@/components/ui/Loader";
 import Header from "@/components/ui/Header";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
+import SubmitRally from "@/components/Rally/submitImageRally.client";
+import { Card } from "@/components/ui/card";
 
-function RallyTabs({ user, rallies, userHasVoted, userHasUploaded, setUserHasVoted, setUserHasUploaded }: any) {
+function RallyTabs({ groupId, user, rallies, userHasVoted, userHasUploaded, setUserHasVoted, setUserHasUploaded }: any) {
   const searchParams = useSearchParams();
   const defaultTab = searchParams.get('returnTo') || (rallies.length > 0 ? rallies[0]._id : undefined);
 
@@ -35,187 +30,35 @@ function RallyTabs({ user, rallies, userHasVoted, userHasUploaded, setUserHasVot
         </TabsList>
       {rallies.map((rally: any) => (
         <TabsContent key={rally._id} value={rally._id}>
-          <RallyTabContent user={user} rally={rally} userHasVoted={userHasVoted} userHasUploaded={userHasUploaded} setUserHasVoted={setUserHasVoted}  setUserHasUploaded={setUserHasUploaded} />
+          <RallyTabContent groupId={groupId} user={user} rally={rally} userHasVoted={userHasVoted} userHasUploaded={userHasUploaded} setUserHasVoted={setUserHasVoted}  setUserHasUploaded={setUserHasUploaded} />
         </TabsContent>
       ))}
     </Tabs>
   );
 }
 
-function RallyTabContent({ user, rally, userHasVoted, userHasUploaded,setUserHasVoted, setUserHasUploaded }: any) {
-  const [file, setFile] = useState<File | null>(null);
-  const [uploading, setUploading] = useState(false);
+function RallyTabContent({ groupId, user, rally, userHasVoted, userHasUploaded,setUserHasVoted, setUserHasUploaded }: any) {
   const router = useRouter();
-
-  const getPresignedUrl = async (filename: string, contentType: string) => {
-    const response = await fetch(`/api/${rally.groupId}/rally/uploadimage`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        filename,
-        contentType,
-        userid: user.username,
-        rallyId: rally._id,
-      }),
-    });
-
-    if (!response.ok) {
-      const responseText = await response.text();
-      throw new Error(`Failed to get pre-signed URL: ${responseText}`);
-    }
-
-    return response.json();
-  };
-
-  const uploadToS3 = async (url: string, fields: Record<string, string>, file: File) => {
-    const formData = new FormData();
-
-    Object.entries(fields).forEach(([key, value]) => {
-      formData.append(key, value as string);
-    });
-    formData.append("file", file);
-
-    const uploadResponse = await fetch(url, {
-      method: "POST",
-      body: formData,
-    });
-
-    if (!uploadResponse.ok) {
-      const responseText = await uploadResponse.text();
-      throw new Error(`S3 Upload Error: ${responseText}`);
-    }
-
-    return fields.key; // Return the key to construct the image URL
-  };
-
-  const createRallySubmission = async (rallyId: string, groupId:string, userId: string, imageUrl: string) => {
-    const response = await fetch(`/api/${groupId}/rally/submissions`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        rallyId,
-        userId,
-        imageUrl,
-      }),
-    });
-
-    if (!response.ok) {
-      const responseText = await response.json();
-      throw new Error(`Submission failed: ${responseText}`);
-    }
-
-    return response.json();
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    if (!file) {
-      alert("Please select a file to upload.");
-      return;
-    }
-
-    setUploading(true);
-
-    try {
-      // Compress and resize the image
-      const options = {
-        maxSizeMB: 1,
-        maxWidthOrHeight: 1024,
-        useWebWorker: true,
-      };
-      const compressedFile = await imageCompression(file, options);
-
-      const { url, fields } = await getPresignedUrl(compressedFile.name, compressedFile.type);
-      const key = await uploadToS3(url, fields, compressedFile);
-      const imageUrl = `${url}/${key}`; // Construct the image URL
-      const submissionResponse = await createRallySubmission(
-        rally._id,
-        rally.groupId,
-        user.username,
-        imageUrl
-      );
-      console.log("Submission successful:", submissionResponse);
-      alert("Upload and submission successful!"); //TODO improve
-      setUserHasVoted((prev: any) => ({ ...prev, [rally._id]: true }));
-      setUserHasUploaded((prev: any) => ({ ...prev, [rally._id]: true }));
-    } catch (error: any) {
-      console.error(error);
-      alert(error.message);
-    } finally {
-      setUploading(false);
-    }
-  };
 
   const handleVote = async () => {
     setUserHasVoted((prev: any) => ({ ...prev, [rally._id]: true }));
     router.refresh();
   };
 
-  function calcTimeLeft(endTime: Date): any {
-    const difference = +new Date(endTime) - +new Date();
-    let timeLeft = {};
-
-    if (difference > 0) {
-      timeLeft = {
-        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-      };
-    }
-
-    return timeLeft;
-  }
-
   return (
     <>
-      <h2 className="mt-5 text-lg text-center">{rally.task}</h2>
+      <Card className=" bg-foreground text-center">
+        <h2 className="font-bold p-6 text-secondary">{rally.task}</h2>
+      </Card>
       {!rally.votingOpen && (
-        <div>
-          <div className="mt-5 text-xs text-center">
-            {calcTimeLeft(rally.endTime).days}d {" "}
-            {calcTimeLeft(rally.endTime).hours}h left
-          </div>
-
-          <Card className="mt-20">
-            <CardContent className="p-2">
-              {userHasUploaded[rally._id] ? (
-                <div className="text-center text-green-500 mb-4">
-                  You have already submitted an image.
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit}>
-                  <Input
-                    id="file"
-                    type="file"
-                    onChange={(e) => {
-                      const files = e.target.files;
-                      if (files) {
-                        setFile(files[0]);
-                      }
-                    }}
-                    accept="image/png, image/jpeg"
-                  />
-                  <div className="flex justify-center">
-                    <Button
-                      type="submit"
-                      disabled={uploading}
-                      className="mt-2 w-full"
-                    >
-                      Upload
-                    </Button>
-                  </div>
-                </form>
-              )}
-            </CardContent>
-          </Card>
-          <div className="absolute bottom-5 left-0 right-0 text-center">
-            {rally.submissions.length} uploads
-          </div>
-        </div>
+        <SubmitRally
+          rally={rally}
+          groupId={groupId}
+          user={user}
+          userHasUploaded={userHasUploaded}
+          setUserHasUploaded={setUserHasUploaded}
+          setUserHasVoted={setUserHasVoted}
+        />
       )}
       {rally.votingOpen &&
         (userHasVoted[rally._id] ? (
@@ -282,6 +125,7 @@ const RallyPage = () => {
     <>
       <Header href={`/groups/${groupId}/dashboard`} title="Rallies" />
       <RallyTabs
+            groupId={groupId}
             user={user}
             rallies={rallies}
             userHasVoted={userHasVoted}

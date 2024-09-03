@@ -22,7 +22,8 @@ export async function sendNotification(title: string, body: string) {
     }, []);
 
     if (tokens.length === 0) {
-      throw new Error('No tokens available to send messages');
+      console.log('No tokens available to send messages');
+      return
     }
 
     const message = {
