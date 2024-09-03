@@ -3,7 +3,6 @@
 import { useEffect, useState, Suspense } from "react";
 import { IRally } from "@/db/models/rally";
 import { Button } from "@/components/ui/button";
-import { useUser } from "@/components/UserContext";
 import RallyVoteCarousel from "@/components/Rally/VotingOptionsRally.client";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import RallyResults from "@/components/Rally/VoteResultsRally.client";
