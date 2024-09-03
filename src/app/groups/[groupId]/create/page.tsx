@@ -7,6 +7,7 @@ import {
 import CreateQuestion from "@/components/Question/createQuestion.client";
 import CreateRally from "@/components/Rally/createRally.client";
 import BackLink from "@/components/ui/BackLink";
+import Header from "@/components/ui/Header";
 
 
 const CreatePage = ({ params }: { params: { groupId: string } }) => {
@@ -14,13 +15,13 @@ const CreatePage = ({ params }: { params: { groupId: string } }) => {
   
   return (
     <>
-      <BackLink href={`/groups/${groupId}/dashboard`} />
+      <Header href={`/groups/${groupId}/dashboard`} title="Create" />
       <div className="mt-7">
       <Tabs defaultValue="create-question" className="w-full">
 
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="create-question">Create Question</TabsTrigger>
-          <TabsTrigger value="create-rally">Create Rally</TabsTrigger>
+          <TabsTrigger value="create-question">Question</TabsTrigger>
+          <TabsTrigger value="create-rally">Rally</TabsTrigger>
         </TabsList>
 
         <TabsContent value="create-question">
