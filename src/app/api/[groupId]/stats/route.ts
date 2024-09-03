@@ -1,10 +1,9 @@
 import dbConnect from "@/lib/dbConnect";
 import User from "@/db/models/user";
 import Question from '@/db/models/Question';
-import ChatMessage from '@/db/models/chatmessage';
 import Rally from '@/db/models/rally';
 import { NextRequest, NextResponse } from "next/server";
-
+import Chat from "@/db/models/Chat";
 export const revalidate = 0
 
 export async function GET(req: NextRequest, { params }: { params: { groupId: string } }) {
@@ -14,7 +13,14 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
   const userCount = await User.countDocuments({groups: groupId});
   const questionsUsedCount = await Question.countDocuments({groupId: groupId, used: true});
   const questionsLeftCount = await Question.countDocuments({ groupId: groupId, used: false });
-  const messagesCount = await ChatMessage.countDocuments({});
+  
+  const chatCountInGroup = await Chat.countDocuments({ group: groupId });
+  const messagesCount = await Chat.aggregate([
+    { $match: { group: mongoose.Types.ObjectId(groupId) } }, // Match the group ID
+    { $unwind: "$messages" }, // Deconstruct the messages array
+    { $count: "totalMessages" } // Count the number of messages
+]);
+
   const RalliesUsedCount = await Rally.countDocuments({ groupId: groupId, used: true });
   const RalliesLeftCount = await Rally.countDocuments({ groupId: groupId, used: false });
 
