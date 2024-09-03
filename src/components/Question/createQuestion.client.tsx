@@ -21,6 +21,7 @@ const CreateQuestion = () => {
   const { groupId } = useParams<{ groupId: string }>();
   const { session, status, user } = useAuthRedirect();
   const [question, setQuestion] = useState("");
+  const [mainImageFile, setMainImageFile] = useState<File | null>(null);
   const [questionType, setQuestionType] = useState("");
   const [options, setOptions] = useState<string[]>([""]);
   const [optionFiles, setOptionFiles] = useState<(File | null)[]>([]);
@@ -65,7 +66,7 @@ const CreateQuestion = () => {
 
   const handleImageReady = async (file: File | null) => {
     if (file) {
-      await compressImages([file]);
+      setMainImageFile(file); // Store the main image file for later use
     }
   };
 
@@ -95,7 +96,7 @@ const CreateQuestion = () => {
       category: "Daily",
       questionType: questionType,
       question: question,
-      options: [], // This will be populated after the image uploads
+      options: questionType.startsWith("custom") ? options : [], // This will be populated after the image uploads
       submittedBy: user.username,
     };
 
@@ -113,10 +114,9 @@ const CreateQuestion = () => {
       const { newQuestion } = await response.json();
 
       // Upload the main image if there is one
-      const mainImage = optionFiles[0]; // Assuming the first file is the main image
-      if (mainImage) {
-        const compressedFile = await compressImages([mainImage]);
-        const imageUrl = await handleImageUpload(groupId, "question", newQuestion._id, user._id, compressedFile);
+      if (mainImageFile) {
+        const [compressedMainImage] = await compressImages([mainImageFile]);
+        const imageUrl = await handleImageUpload(groupId, "question", newQuestion._id, user._id, [compressedMainImage]);
         
         if (imageUrl && imageUrl.length > 0) {
           // Attach the main image to the question
@@ -130,24 +130,26 @@ const CreateQuestion = () => {
           if (!response.ok) throw new Error("Failed to attach image");
         }
       }
+      if(questionType === "image-select-one") {
+          // Upload option images and update the options array
+        const compressedFiles = await compressImages(optionFiles.filter(Boolean) as File[]);
+        const optionImageUrls = await handleImageUpload(groupId, "question-option", newQuestion._id, user._id, compressedFiles);
 
-      // Upload option images and update the options array
-      const compressedFiles = await compressImages(optionFiles.filter(Boolean) as File[]);
-      const optionImageUrls = await handleImageUpload(groupId, "question-option", newQuestion._id, user._id, compressedFiles);
+        const updatedOptions = options.map((option, index) => {
+          return (optionImageUrls as any)[index] || option;
+        });
 
-      const updatedOptions = options.map((option, index) => {
-        return (optionImageUrls as any)[index] || option;
-      });
-
-      // Update the question with options
-      const res = await fetch(`/api/${groupId}/question/${newQuestion._id}/attachOptions`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ options: updatedOptions }),
-      });
-      if (!res.ok) throw new Error("Failed to attach options");
+        // Update the question with options
+        const res = await fetch(`/api/${groupId}/question/${newQuestion._id}/attachOptions`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ options: updatedOptions }),
+        });
+        if (!res.ok) throw new Error("Failed to attach options");
+      }
+      
 
       toast({ title: "Question created successfully!" });
       resetForm();
