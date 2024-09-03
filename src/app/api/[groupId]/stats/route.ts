@@ -1,3 +1,4 @@
+import { Types } from 'mongoose';
 import dbConnect from "@/lib/dbConnect";
 import User from "@/db/models/user";
 import Question from '@/db/models/Question';
@@ -15,11 +16,12 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
   const questionsLeftCount = await Question.countDocuments({ groupId: groupId, used: false });
   
   const chatCountInGroup = await Chat.countDocuments({ group: groupId });
-  const messagesCount = await Chat.aggregate([
-    { $match: { group: mongoose.Types.ObjectId(groupId) } }, // Match the group ID
+  const messages = await Chat.aggregate([
+    { $match: { group: (new Types.ObjectId(groupId) )} }, // Match the group ID
     { $unwind: "$messages" }, // Deconstruct the messages array
-    { $count: "totalMessages" } // Count the number of messages
-]);
+    { $count: "messagesCount" } // Count the number of messages
+  ]);
+  const messagesCount = messages[0]?.messagesCount || 0;
 
   const RalliesUsedCount = await Rally.countDocuments({ groupId: groupId, used: true });
   const RalliesLeftCount = await Rally.countDocuments({ groupId: groupId, used: false });

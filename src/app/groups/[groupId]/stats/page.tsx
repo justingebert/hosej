@@ -169,7 +169,7 @@ const StatsPage = () => {
           </div>
         </CardContent>
         <CardFooter className="flex justify-center z-10">
-            <Button variant="outline" onClick={() => router.push(`/groups/${groupId}/dashboard/create`)}>Create</Button>
+            <Button variant="outline" onClick={() => router.push(`/groups/${groupId}/create`)}>Create</Button>
         </CardFooter>
       </Card>
 
@@ -239,7 +239,7 @@ const StatsPage = () => {
           </div>
         </CardContent>
         <CardFooter className="flex justify-center z-10">
-            <Button variant="outline" onClick={() => router.push(`/groups/${groupId}/dashboard/create`)} >Create</Button>
+            <Button variant="outline" onClick={() => router.push(`/groups/${groupId}/create`)} >Create</Button>
         </CardFooter>
       </Card>
 
