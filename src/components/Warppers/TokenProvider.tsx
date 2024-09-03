@@ -1,21 +1,22 @@
-"use client"
+"use client";
 
-import { useEffect } from "react"
+import { useEffect } from "react";
 import useFcmToken from "@/hooks/useFcmToken";
 import { useSession } from "next-auth/react";
 
-const sendTokenToServer = async (token: string, username: string) => {
+const sendTokenToServer = async (token: string, userId: string) => {
   try {
-    const response = await fetch('/api/register-push', {
+    const response = await fetch(`/api/users/${userId}/register-push`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ token, username }),
+      body: JSON.stringify({ token }),
     });
 
     if (response.ok) {
       console.log('Token sent to server');
+      localStorage.setItem('lastSentFcmToken', token); // Store the token locally
     } else {
       console.error('Failed to send token to server.');
     }
@@ -24,16 +25,21 @@ const sendTokenToServer = async (token: string, username: string) => {
   }
 };
 
-export function TokenProvider({ children, ...props }: any) {
-  const { fcmToken } = useFcmToken();
+export function TokenProvider({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
+  const isAuthenticated = status === "authenticated";
+  const isRegistered = session && (session.user as any)._id;
+  const { fcmToken } = useFcmToken(isAuthenticated, isRegistered);
 
   useEffect(() => {
-    if (status === "authenticated" && fcmToken && (session.user as any).username) {
-      console.log('Sending token to server...');
-      sendTokenToServer(fcmToken, (session.user as any).username);
+    if (isAuthenticated && fcmToken && isRegistered) {
+      const lastSentToken = localStorage.getItem('lastSentFcmToken');
+      if (fcmToken !== lastSentToken) {
+        console.log("Sending token to server...");
+        sendTokenToServer(fcmToken, (session.user as any)._id);
+      }
     }
-  }, [fcmToken, session, status]);
+  }, [fcmToken, session, isAuthenticated, isRegistered]);
 
   return <>{children}</>;
 }

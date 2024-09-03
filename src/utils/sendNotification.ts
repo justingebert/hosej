@@ -1,5 +1,5 @@
 import dbConnect from "@/lib/dbConnect";
-import FcmToken from "@/db/models/FcmToken";
+import User from "@/db/models/user"; // Assuming the user model is defined in this path
 import admin from "firebase-admin";
 
 if (!admin.apps.length) {
@@ -12,9 +12,14 @@ if (!admin.apps.length) {
 export async function sendNotification(title: string, body: string) {
   try {
     await dbConnect();
-    const tokenDocs = await FcmToken.find();
 
-    const tokens = tokenDocs.map(doc => doc.token);
+    // Query all users and get their fcmTokens
+    const users = await User.find({ fcmTokens: { $exists: true, $ne: [] } });
+
+    // Aggregate all tokens
+    const tokens = users.reduce((acc: string[], user) => {
+      return acc.concat(user.fcmTokens);
+    }, []);
 
     if (tokens.length === 0) {
       throw new Error('No tokens available to send messages');

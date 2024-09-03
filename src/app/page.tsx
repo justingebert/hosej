@@ -6,27 +6,14 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { v4 as uuidv4 } from "uuid";
-import { useUser } from "@/components/UserContext";
 import Link from "next/link";
 import { motion } from 'framer-motion';
 
 export default function Home() {
   const router = useRouter();
-  const { createUserByDeviceId, migrateUser } = useUser();
   const [userName, setUserName] = useState("");
   const [loading, setLoading] = useState(true); // Add a loading state
 
-  useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      migrateUser(storedUser).then(() => {
-        console.log('User migrated successfully');
-        localStorage.removeItem('user');
-      }).catch(error => {
-        console.error('Error migrating user:', error);
-      });
-    }
-  }, [migrateUser]);
 
   useEffect(() => {
     const deviceId = localStorage.getItem("deviceId");
@@ -55,6 +42,29 @@ export default function Home() {
 
   const handleGoogleSignIn = () => {
     alert("coming soon!");
+  };
+
+  const createUserByDeviceId = async (userName: string) => {
+    const deviceId = uuidv4();
+
+    try {
+      console.log(deviceId, userName);
+      const response = await fetch('/api/users/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ deviceId, userName }),
+      });
+      if (response.ok) {;
+        localStorage.setItem('deviceId', deviceId);
+        router.push('/groups');
+      } else {
+        console.error('Failed to create user:', await response.text());
+      }
+    } catch (error) {
+      console.error('Error creating user:', error);
+    }
   };
 
   const handleStartWithoutAccount = async () => {

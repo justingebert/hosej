@@ -16,6 +16,7 @@ import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import { Plus } from 'lucide-react';
+import { motion, AnimatePresence } from "framer-motion";
 
 const CreateQuestion = () => {
   const { groupId } = useParams<{ groupId: string }>();
@@ -162,6 +163,12 @@ const CreateQuestion = () => {
     }
   };
 
+  const rollOutVariants = {
+    hidden: { opacity: 0, y: -30 },
+    visible: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -30 }
+  };
+
   return (
     <>
       <div className="mt-5">
@@ -197,58 +204,78 @@ const CreateQuestion = () => {
 
       {questionType === "custom-select-one" && (
         <>
-          <div className="mt-5">
-            {options.map((option, index) => (
-              <div key={index} className="mt-2 flex w-full items-center gap-4">
-                <Input
-                  type="text"
-                  placeholder={`Option ${index + 1}`}
-                  value={option}
-                  onChange={(e) => handleOptionChange(e.target.value, index)}
-                  className="w-full"
-                />
-                <Button
-                  className="w-12 p-2 flex items-center justify-center"
-                  variant="destructive"
-                  onClick={() => handleRemoveOption(index)}
+          <div className="mt-10 px-4">
+            <AnimatePresence>
+              {options.map((option, index) => (
+                <motion.div
+                  key={index}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  variants={rollOutVariants}
+                  transition={{ duration: 0.3 }}
+                  className="mt-2 flex w-full items-center gap-4"
                 >
-                  <Image src="/AppIcons/trash.svg" alt="Delete" width={20} height={20} />
-                </Button>
-              </div>
-            ))}
+                  <Input
+                    type="text"
+                    placeholder={`Option ${index + 1}`}
+                    value={option}
+                    onChange={(e) => handleOptionChange(e.target.value, index)}
+                    className="w-full"
+                  />
+                  <Button
+                    className="w-14 p-2 flex items-center justify-center"
+                    variant="secondary"
+                    onClick={() => handleRemoveOption(index)}
+                  >
+                    <Image src="/AppIcons/trash-red.svg" alt="Delete" width={25} height={25} />
+                  </Button>
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
-          <div className="flex justify-end mt-5">
-            <Button variant="outline" className="w-12 p-2" onClick={handleAddOption}>
-              <Plus size={20} />
+          <div className="flex justify-end mt-2 px-4">
+            <Button variant="ghost" className="w-12 p-2" onClick={handleAddOption}>
+              <Plus size={25} />
             </Button>
           </div>
         </>
       )}
 
-      {questionType === "image-select-one" && (
+{questionType === "image-select-one" && (
         <>
-          <div className="mt-5">
-            {options.map((_, index) => (
-              <div key={index} className="flex flex-row justify-between w-full items-center gap-4 mt-4">
-                <ImageUploader
-                  onFileSelect={(file) => handleOptionImageReady(file, index)}
-                  clearInput={clearImageInput}
-                  className="w-full"
-                  showFilename={true}
-                />
-                <Button
-                  className="w-14 p-2 flex items-center justify-center"
-                  variant="destructive"
-                  onClick={() => handleRemoveOption(index)}
+          <div className="mt-10 px-4">
+            <AnimatePresence>
+              {options.map((_, index) => (
+                <motion.div
+                  key={index}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  variants={rollOutVariants}
+                  transition={{ duration: 0.3 }}
+                  className="flex flex-row justify-between w-full items-center gap-4 mt-2"
                 >
-                  <Image src="/AppIcons/trash.svg" alt="Delete" width={20} height={20} />
-                </Button>
-              </div>
-            ))}
+                  <ImageUploader
+                    onFileSelect={(file) => handleOptionImageReady(file, index)}
+                    clearInput={clearImageInput}
+                    className="w-full"
+                    showFilename={true}
+                  />
+                  <Button
+                    className="w-14 p-2 flex items-center justify-center"
+                    variant="secondary"
+                    onClick={() => handleRemoveOption(index)}
+                  >
+                    <Image src="/AppIcons/trash-red.svg" alt="Delete" width={25} height={25} />
+                  </Button>
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
-          <div className="flex justify-end mt-5">
-            <Button variant="outline" className="w-12 p-2" onClick={handleAddOption}>
-              <Plus size={20} />
+          <div className="flex justify-end mt-2 px-4">
+            <Button variant="ghost" className="w-12 p-2" onClick={handleAddOption}>
+              <Plus size={25} />
             </Button>
           </div>
         </>

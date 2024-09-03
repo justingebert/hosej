@@ -1,15 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {  useState } from "react";
 import { Button } from "@/components/ui/button";
-import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
-import { v4 as uuidv4 } from "uuid";
-import { useUser } from "@/components/UserContext";
 import Link from "next/link";
 
-export default function Home() {
+export default function DeviceAuth() {
   const router = useRouter();
   const [deviceID, setDeviceId] = useState("");
 
