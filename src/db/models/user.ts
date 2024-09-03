@@ -4,7 +4,8 @@ import PointsEntry from "./Points";
 
 export interface IUser extends Document {
   _id: string;
-  deviceId?: string;
+  deviceId?: string; 
+  fcmToken?: string;
   googleId?: string;
   email?: string;
   username: string;
@@ -18,6 +19,11 @@ export interface IUser extends Document {
 
 const UserSchema = new Schema({
   deviceId: {
+    type: String,
+    unique: true,
+    sparse: true,
+  },
+  fcmToken: {
     type: String,
     unique: true,
     sparse: true,
