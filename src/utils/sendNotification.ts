@@ -14,11 +14,11 @@ export async function sendNotification(title: string, body: string) {
     await dbConnect();
 
     // Query all users and get their fcmTokens
-    const users = await User.find({ fcmTokens: { $exists: true, $ne: [] } });
+    const users = await User.find({ fcmToken: { $exists: true, $ne: "" } });
 
     // Aggregate all tokens
     const tokens = users.reduce((acc: string[], user) => {
-      return acc.concat(user.fcmTokens);
+      return acc.concat(user.fcmToken);
     }, []);
 
     if (tokens.length === 0) {
