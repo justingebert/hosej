@@ -9,9 +9,10 @@ interface ImageUploaderProps {
   className?: string;
   placeholder?: string;
   showFilename?: boolean;
+  buttonstyle?: string;
 }
 
-const ImageUploader: React.FC<ImageUploaderProps> = ({ onFileSelect, clearInput, showFilename, className }) => {
+const ImageUploader: React.FC<ImageUploaderProps> = ({ onFileSelect, clearInput, showFilename, className, buttonstyle }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null); // State to hold the selected file name
 
@@ -48,7 +49,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onFileSelect, clearInput,
             fileInputRef.current?.click();
           }
         }}
-        className="flex items-center justify-between w-full p-3" // Set the button to take full width
+        className={buttonstyle} // Set the button to take full width
         variant={"secondary"}
       >
         {selectedFileName ? (
