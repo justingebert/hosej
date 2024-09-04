@@ -61,7 +61,6 @@ const RallyPage = () => {
 
   return (
     <>
-     <div className="flex flex-col h-[100dvh]"> 
       <Header href={`/groups/${groupId}/dashboard`} title="Rallies" />
       <RallyTabs
             groupId={groupId}
@@ -72,7 +71,6 @@ const RallyPage = () => {
             setUserHasVoted={setUserHasVoted}
             setUserHasUploaded={setUserUploaded}
           />
-    </div>
     </>
   );
 };
@@ -82,7 +80,7 @@ function RallyTabs({ groupId, user, rallies, userHasVoted, userHasUploaded, setU
   const defaultTab = searchParams.get('returnTo') || (rallies.length > 0 ? rallies[0]._id : undefined);
 
   return (
-    <Tabs defaultValue={defaultTab} className="flex flex-col grow">
+    <Tabs defaultValue={defaultTab}>
              <TabsList
         className="grid w-full"
         style={{ gridTemplateColumns: `repeat(${rallies.length}, minmax(0, 1fr))` }}
@@ -94,7 +92,7 @@ function RallyTabs({ groupId, user, rallies, userHasVoted, userHasUploaded, setU
           ))}
         </TabsList>
       {rallies.map((rally: any) => (
-        <TabsContent key={rally._id} value={rally._id} className="flex flex-col grow h-100">
+        <TabsContent key={rally._id} value={rally._id}>
           <RallyTabContent groupId={groupId} user={user} rally={rally} userHasVoted={userHasVoted} userHasUploaded={userHasUploaded} setUserHasVoted={setUserHasVoted}  setUserHasUploaded={setUserHasUploaded} />
         </TabsContent>
       ))}
@@ -111,7 +109,7 @@ function RallyTabContent({ groupId, user, rally, userHasVoted, userHasUploaded,s
   };
 
   return (
-    <div className="flex flex-col grow h-[90dvh]">
+    <div className="flex flex-col grow h-[80dvh]">
       <Card className=" bg-foreground text-center flex-none">
         <h2 className="font-bold p-6 text-secondary">{rally.task}</h2>
       </Card>
