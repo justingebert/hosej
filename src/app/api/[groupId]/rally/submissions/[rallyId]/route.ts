@@ -51,6 +51,8 @@ export async function GET(req: Request, { params }: { params: { rallyId: string 
             })
         );
 
+        submissions.sort((a, b) => b.votes.length - a.votes.length);
+
         return NextResponse.json({ submissions });
     }
     catch (error) {
