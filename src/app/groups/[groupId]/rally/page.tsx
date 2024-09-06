@@ -72,7 +72,7 @@ const RallyPage = () => {
   )
 
   return (
-    <div className="flex flex-col justify-between h-[100dvh]"> 
+    <div className=""> 
       <Header href={`/groups/${groupId}/dashboard`} title="Rallies" />
       <RallyTabs
             groupId={groupId}
