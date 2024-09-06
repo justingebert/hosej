@@ -72,7 +72,7 @@ const RallyPage = () => {
   )
 
   return (
-    <div className=""> 
+    <div>
       <Header href={`/groups/${groupId}/dashboard`} title="Rallies" />
       <RallyTabs
             groupId={groupId}
