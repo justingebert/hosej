@@ -199,6 +199,7 @@ const CreateQuestion = () => {
           clearInput={clearImageInput}
           showFilename={false}
           className="w-12 flex items-center justify-center"
+          buttonstyle="flex items-center justify-between w-full p-3"
         />
       </div>
 
@@ -261,6 +262,7 @@ const CreateQuestion = () => {
                     clearInput={clearImageInput}
                     className="w-full"
                     showFilename={true}
+                    buttonstyle="flex items-center justify-between w-full p-3"
                   />
                   <Button
                     className="w-14 p-2 flex items-center justify-center"

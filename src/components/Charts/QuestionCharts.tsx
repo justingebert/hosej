@@ -46,7 +46,7 @@ export function QuestionsByType({ data }: { data: any[] }) {
   return (
     <Card className="flex flex-col">
       <CardHeader className="items-center pb-0">
-        <CardTitle>Questions by Type</CardTitle>
+        <CardTitle className="text-xl">By Type</CardTitle>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         <ChartContainer
@@ -104,7 +104,7 @@ export function QuestionsByUser({ data }: { data: any[] }) {
     return (
       <Card className="flex flex-col">
         <CardHeader className="items-center pb-0">
-          <CardTitle>Questions by User</CardTitle>
+          <CardTitle className="text-xl">By User</CardTitle>
         </CardHeader>
         <CardContent className="flex-1 pb-0">
           <ChartContainer

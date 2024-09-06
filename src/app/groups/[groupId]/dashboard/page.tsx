@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { History, Ellipsis, BarChartBig, Menu } from 'lucide-react';
+import { History, Ellipsis, BarChartBig, Menu, ScanSearch, MousePointerClick, PieChart, CircleSlash  } from 'lucide-react';
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CompletionChart } from "@/components/Charts/CompletionChart";
@@ -13,11 +13,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { set } from "mongoose";
 
 export default function Dashboard() {
   const router = useRouter();
   const [userCount, setUserCount] = useState(0);
   const [questions, setQuestions] = useState([]);
+  const [rallies, setRallies] = useState<any>([]);
   const [completion, setCompletion] = useState(0);
   const { groupId } = useParams<{ groupId: string }>();
 
@@ -40,6 +42,12 @@ export default function Dashboard() {
         calculateCompletion(data.questions, userCount); 
       };
       fetchQuestions();
+      const fetchRallies = async () => {
+        const response = await fetch(`/api/${groupId}/rally`);
+        const data = await response.json();
+        setRallies(data.rallies);
+      }
+      fetchRallies();
     }
   }, [groupId, userCount]);
 
@@ -87,15 +95,11 @@ export default function Dashboard() {
             <History className="mr-2 h-4 w-4"/> History
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => { router.push(`/groups/${groupId}/stats`)}}>
-            <BarChartBig className="mr-2 h-4 w-4"/>
+            <PieChart  className="mr-2 h-4 w-4"/>
               Statistics
           </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-
-          {/* <Button variant="outline" size="icon" onClick={() => { router.push(`/groups/${groupId}/leaderboard`)}}>
-            👖
-          </Button> */}
         </div>
       </div>
 
@@ -107,10 +111,25 @@ export default function Dashboard() {
           >
             <div className="flex flex-col justify-center">
               <div className="font-bold text-2xl">Rally</div>
-              <div className="text-sm text-primary/30">Vote now!</div>
-              <div className="text-lg">Inactive</div> 
+              <div className="text-sm text-primary/30">Submit now!</div>
+              {rallies.votingOpen && <div className="text-sm text-primary/30">Vote now!</div>}
+              {rallies.resultsShowing && <div className="text-sm text-primary/30">View results!</div>}
+              {rallies.length === 0 ? <div className="text-lg">Inactive</div> :
+              <div className="text-lg">Active: {rallies.length}</div> }
             </div>
-            <Skeleton className="w-24 h-24  rounded-lg"/> {/* Placeholder for the chart */}
+            <div className="w-24 h-24 rounded-lg flex items-center justify-center">
+              {rallies.votingOpen && <MousePointerClick className="w-full h-full p-4" />}
+              {rallies.resultsShowing && (
+                <div className="text-sm text-primary/30">
+                  <BarChartBig className="w-full h-full p-4 " />
+                </div>
+              )}
+              {rallies.length === 0 ? (
+                <CircleSlash  className="w-full h-full p-4 text-secondary" />
+              ) : (
+                <ScanSearch className="w-full h-full p-4" />
+              )}
+            </div>
           </Card>
           <Card
             className="bg-primary-foreground w-full px-6 py-4 flex items-center justify-between cursor-pointer"
@@ -119,7 +138,8 @@ export default function Dashboard() {
             <div className="flex flex-col justify-center">
               <div className="font-bold text-2xl">Daily</div>
               <div className="text-sm text-primary/30">Vote now!</div>
-              <div className="text-lg ">Active: {questions.length}</div> 
+              {questions.length === 0 ? <div className="text-lg">Inactive</div> :
+              <div className="text-lg">Active: {questions.length}</div> }
             </div>
             <div className="w-24 h-24 rounded-lg">
             <CompletionChart completion={completion} />

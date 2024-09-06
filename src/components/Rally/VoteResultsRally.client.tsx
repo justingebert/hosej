@@ -1,15 +1,17 @@
 'use client';
 
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import Image from "next/image";
-import Modal from 'react-modal';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "../ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "../ui/badge";
+import { Separator } from "../ui/separator";
+import ChatComponent from "../Chat/Chat.client";
+import { RallyVotesChart } from "../Charts/RallyResultsChart";
 
-const RallyResults = ({ rally }: any) => {
+const RallyResults = ({ user, rally }: any) => {
   const [submissions, setSubmissions] = useState<any[]>([]);
-  const [modalIsOpen, setModalIsOpen] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [loadedImages, setLoadedImages] = useState<{ [key: number]: boolean }>({})
 
   useEffect(() => {
     const fetchSubmissions = async () => {
@@ -20,74 +22,58 @@ const RallyResults = ({ rally }: any) => {
     fetchSubmissions();
   }, [rally]);
 
-  const openModal = (imageUrl: string) => {
-    setSelectedImage(imageUrl);
-    setModalIsOpen(true);
-  };
-
-  const closeModal = () => {
-    setSelectedImage(null);
-    setModalIsOpen(false);
-  };
-
-  const customStyles = {
-    content: {
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      border: 'none',
-      background: 'none',
-      overflow: 'auto', // Ensure the content can scroll on mobile
-    },
-    overlay: {
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: 'rgba(0, 0, 0, 0.75)',
-      zIndex: 1000, // Ensure the overlay is on top
-    },
-  };
+  const handleImageLoad = (id: number) => {
+    setLoadedImages((prev) => ({ ...prev, [id]: true }))
+  }
 
   return (
     <div>
+      <div className="mb-6">
+      <RallyVotesChart submissions={submissions}/>
+      </div>
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-5">
         {submissions.map((submission, index) => (
-          <Card key={submission._id} className=" w-full">
-            <CardHeader className="flex flex-col items-center">
-              <CardTitle className="text-center text-sm sm:text-base md:text-lg">{submission.username}</CardTitle>
+          <Card key={submission._id} className="overflow-hidden">
+            <CardHeader className="flex flex-row items-center justify-between p-5">
+              <div className="flex items-center gap-4">
+              <Avatar>
+                {/* <AvatarImage src={`x`} alt={submission.username} /> */}
+                <AvatarFallback>{submission.username[0]}</AvatarFallback>
+              </Avatar>
+              <div>
+                <h3 className="text-lg font-semibold">{submission.username}</h3>
+              </div>
+              </div>
+              {index < 3 && (
+              <Badge variant={index === 0 ? "default" : index === 1 ? "secondary" : "outline"}>
+                {index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉"}
+              </Badge>
+            )}
             </CardHeader>
-            <CardContent className="flex flex-col items-center">
+            <CardContent className="p-0 relative">
               <Image
-                src={submission.imageUrl}
-                alt={`Submission by ${submission.username}`}
-                className="object-cover w-full h-auto cursor-pointer"
-                width={300}
-                height={300}
-                onClick={() => openModal(submission.imageUrl)}
-                priority={index === 0}
-              />
-              <p className="mt-2 text-sm sm:text-base md:text-lg">{submission.votes.length} votes</p>
+                  src={submission.imageUrl}
+                  alt={`Submission by ${submission.username}`}
+                  className={`object-cover w-full h-auto cursor-pointer ${loadedImages[index] ? 'opacity-100' : 'opacity-0'}`}
+                  width={300}
+                  height={300}
+                  priority={index === 0}
+                  style={{ transition: 'opacity 0.3s ease-in-out' }}
+                  onLoad={() => handleImageLoad(index)}
+                />
             </CardContent>
+            <CardFooter className="flex justify-between items-center p-5">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl font-bold">{submission.votes.length}</span>
+              <span className="text-m ">votes</span>
+            </div>
+            <Badge variant="outline">Rank #{index + 1}</Badge>
+            </CardFooter>
           </Card>
         ))}
       </div>
-
-      <Modal
-        isOpen={modalIsOpen}
-        ariaHideApp={false}
-        onRequestClose={closeModal}
-        contentLabel="Image Modal"
-        className="flex justify-center items-center"
-        overlayClassName="fixed inset-0 bg-black bg-opacity-50"
-        style={customStyles}
-      >
-        {selectedImage && (
-          <div className="p-4 rounded">
-            <Image src={selectedImage} alt="Selected Submission" width={600} height={600} />
-            <Button onClick={closeModal} className="mt-4 p-2 bg-gray-800 text-white rounded">Close</Button>
-          </div>
-        )}
-      </Modal>
+      <Separator className="my-6"/>
+      <ChatComponent user={user} entity={rally} available={true} />
     </div>
   );
 };
