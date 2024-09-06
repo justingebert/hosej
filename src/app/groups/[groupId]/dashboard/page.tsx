@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { set } from "mongoose";
+import { Badge } from "@/components/ui/badge";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -106,16 +107,19 @@ export default function Dashboard() {
       <div className="flex flex-col items-center justify-center flex-grow"> {/* Center the cards and button */}
         <div className="flex flex-col items-center gap-8 w-full">
           <Card
-            className="bg-primary-foreground w-full  px-6 py-4 flex items-center justify-between cursor-pointer"
+            className="relative bg-primary-foreground w-full  px-6 py-4 flex items-center justify-between cursor-pointer"
             onClick={() => router.push(`/groups/${groupId}/rally`)}
           >
+              <div className="absolute -top-3 -right-3">
+              <Badge>{rallies.length}</Badge> {/* Customize badge content */}
+            </div>
             <div className="flex flex-col justify-center">
               <div className="font-bold text-2xl">Rally</div>
               <div className="text-sm text-primary/30">Submit now!</div>
               {rallies.votingOpen && <div className="text-sm text-primary/30">Vote now!</div>}
               {rallies.resultsShowing && <div className="text-sm text-primary/30">View results!</div>}
               {rallies.length === 0 ? <div className="text-lg">Inactive</div> :
-              <div className="text-lg">Active: {rallies.length}</div> }
+              <div className="text-lg">Active</div> }
             </div>
             <div className="w-24 h-24 rounded-lg flex items-center justify-center">
               {rallies.votingOpen && <MousePointerClick className="w-full h-full p-4" />}
@@ -132,14 +136,17 @@ export default function Dashboard() {
             </div>
           </Card>
           <Card
-            className="bg-primary-foreground w-full px-6 py-4 flex items-center justify-between cursor-pointer"
+            className="relative  bg-primary-foreground w-full px-6 py-4 flex items-center justify-between cursor-pointer"
             onClick={() => router.push(`/groups/${groupId}/daily`)}
           >
+            <div className="absolute -top-3 -right-3">
+              <Badge>{questions.length}</Badge> {/* Customize badge content */}
+            </div>
             <div className="flex flex-col justify-center">
               <div className="font-bold text-2xl">Daily</div>
               <div className="text-sm text-primary/30">Vote now!</div>
               {questions.length === 0 ? <div className="text-lg">Inactive</div> :
-              <div className="text-lg">Active: {questions.length}</div> }
+              <div className="text-lg">Active</div> }
             </div>
             <div className="w-24 h-24 rounded-lg">
             <CompletionChart completion={completion} />
