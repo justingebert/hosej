@@ -16,6 +16,7 @@ const RallyPage = () => {
   const [loading, setLoading] = useState(true);
   const { session, status, user } = useAuthRedirect();
   const [rallies, setRallies] = useState<any[]>([]);
+  const [rallyInactive, setRallyInactive] = useState<any>(false);
   const [userHasVoted, setUserHasVoted] = useState<any>({});
   const [userUploaded, setUserUploaded] = useState<any>({});
   const router = useRouter();
@@ -45,8 +46,8 @@ const RallyPage = () => {
         }, {});
         setUserUploaded(userHasUploaded);
       }
-      if (data.message) {
-        alert(data.message); //TODO improve
+      if (data.message === "No active rallies") {
+        setRallyInactive(true);
       }
       setLoading(false);
     };
@@ -57,10 +58,21 @@ const RallyPage = () => {
   }, [user, router, groupId]);
 
   if (loading) return <Loader loading={true} />
-  if (!rallies) return <p>No Rally avaiable</p>
+  if (rallyInactive) return (
+<div className="flex flex-col h-[100dvh]"> 
+  <Header href={`/groups/${groupId}/dashboard`} title="Rallies" />
+
+  <div className="flex flex-grow justify-center items-center"> 
+    <Card className="text-center p-6 bg-foreground">
+      <h2 className="font-bold text-secondary">No active rallies</h2>
+    </Card>
+  </div>
+</div>
+
+  )
 
   return (
-    <>
+    <div className="flex flex-col justify-between h-[100dvh]"> 
       <Header href={`/groups/${groupId}/dashboard`} title="Rallies" />
       <RallyTabs
             groupId={groupId}
@@ -71,7 +83,7 @@ const RallyPage = () => {
             setUserHasVoted={setUserHasVoted}
             setUserHasUploaded={setUserUploaded}
           />
-    </>
+    </div>
   );
 };
 
@@ -129,9 +141,7 @@ function RallyTabContent({ groupId, user, rally, userHasVoted, userHasUploaded,s
             <RallyResults user={user} rally={rally} />
           </div>
         ) : (
-          <div className="mt-10">
             <RallyVoteCarousel user={user} rally={rally} onVote={handleVote} />
-          </div>
         ))}
         </div>
   );

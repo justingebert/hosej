@@ -5,10 +5,11 @@ import Image from "next/image";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "../ui/badge";
-import { Skeleton } from "../ui/skeleton";
-import { Heading1 } from "lucide-react";
+import { Separator } from "../ui/separator";
+import ChatComponent from "../Chat/Chat.client";
+import { RallyVotesChart } from "../Charts/RallyResultsChart";
 
-const RallyResults = ({ rally }: any) => {
+const RallyResults = ({ user, rally }: any) => {
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [loadedImages, setLoadedImages] = useState<{ [key: number]: boolean }>({})
 
@@ -27,6 +28,9 @@ const RallyResults = ({ rally }: any) => {
 
   return (
     <div>
+      <div className="mb-6">
+      <RallyVotesChart submissions={submissions}/>
+      </div>
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-5">
         {submissions.map((submission, index) => (
           <Card key={submission._id} className="overflow-hidden">
@@ -68,6 +72,8 @@ const RallyResults = ({ rally }: any) => {
           </Card>
         ))}
       </div>
+      <Separator className="my-6"/>
+      <ChatComponent user={user} entity={rally} available={true} />
     </div>
   );
 };

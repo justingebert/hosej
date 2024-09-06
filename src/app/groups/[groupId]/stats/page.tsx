@@ -129,6 +129,10 @@ const StatsPage = () => {
             <TableCell>{stats.group.rallyCount}</TableCell>
           </TableRow>
           <TableRow>
+            <TableCell className="font-medium">Rally Gap in Days</TableCell>
+            <TableCell>{stats.group.rallyGapDays}</TableCell>
+          </TableRow>
+          <TableRow>
             <TableCell className="font-medium">Rallies Used</TableCell>
             <TableCell>{stats.RalliesUsedCount}</TableCell>
           </TableRow>

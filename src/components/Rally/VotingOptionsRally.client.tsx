@@ -14,6 +14,7 @@ import {
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Modal from 'react-modal';
+import { X } from 'lucide-react';
 
 const RallyVoteCarousel = ({ user, rally, onVote }: any) => {
   const [selectedSubmission, setSelectedSubmission] = useState<string | null>(null);
@@ -116,14 +117,14 @@ const RallyVoteCarousel = ({ user, rally, onVote }: any) => {
   };
 
   return (
-    <div >
-      <div className="flex justify-center">
-      <Carousel setApi={setApi} className="w-full max-w-xs mb-20 mt-5" orientation="vertical">
-        <CarouselContent className="h-[340px]">
+    <div className="flex flex-col grow justify-between" >
+      <Carousel setApi={setApi} orientation="vertical" className="mt-20">
+        <CarouselContent className="w-full h-[50dvh]">
           {submissions.map((submission, index) => (
-            <CarouselItem key={submission._id}>
-                <Card>
-                  <CardContent className="flex aspect-square items-center justify-center p-6">
+            <CarouselItem key={submission._id} className="h-[50dvh]">
+              <Card className="overflow-hidden rounded-md h-full">
+                <CardContent className="h-full p-0">
+                  <div className="relative h-full w-full overflow-hidden rounded-md">
                     <Image
                       src={submission.imageUrl}
                       alt={`Submission by ${submission.username}`}
@@ -133,39 +134,33 @@ const RallyVoteCarousel = ({ user, rally, onVote }: any) => {
                       priority={index === 0} // Add priority to the first image
                       onClick={() => openModal(submission.imageUrl)}
                     />
-                  </CardContent>
-                </Card>
+                  </div>
+                </CardContent>
+              </Card>
             </CarouselItem>
-          ))}
+          ))} 
         </CarouselContent>
-        <CarouselPrevious />
-        <CarouselNext />
+        <CarouselPrevious className="h-[40dvh] rounded-md -translate-y-[18dvh] " />
+        <CarouselNext className="h-[40dvh] rounded-md translate-y-[18dvh]" />
       </Carousel>
-      </div>
-      {hasVoted ? (
         <div className="flex justify-center">
-          <p>You have already voted!</p>
-        </div>
-      ) : (
-        <div className="flex justify-center">
-          <Button onClick={submitVote} className="m-5">
-            Vote for this
+          <Button onClick={submitVote} className="mt-24 w-full" disabled={hasVoted || modalIsOpen}>
+            vote for this
           </Button>
         </div>
-      )}
       <Modal
         isOpen={modalIsOpen}
         ariaHideApp={false}
         onRequestClose={closeModal}
         contentLabel="Image Modal"
         className="flex justify-center items-center"
-        overlayClassName="fixed inset-0 bg-black bg-opacity-50"
+        overlayClassName="fixed inset-0 bg-black bg-opacity-50 bg-blur"
         style={customStyles}
       >
         {selectedImage && (
-          <div className=" p-4 rounded">
-            <Image src={selectedImage} alt="Selected Submission" width={600} height={600} />
-            <Button onClick={closeModal} className="mt-4 p-2 bg-gray-800 text-white rounded">Close</Button>
+          <div className=" relative p-4">
+            <Image src={selectedImage} alt="Selected Submission" width={600} height={600} className="rounded-md " />
+            <Button onClick={closeModal} className="absolute top-4 right-2" variant={"ghost"}><X /></Button>
           </div>
         )}
       </Modal>

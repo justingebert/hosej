@@ -1,6 +1,7 @@
 import dbConnect from "@/lib/dbConnect";
 import Rally from "@/db/models/rally";
 import { NextRequest, NextResponse } from 'next/server'
+import User from "@/db/models/user";
 
 const POINTS = 1;
 
@@ -10,6 +11,8 @@ export async function POST(req: NextRequest, { params }: { params: { groupId: st
         await dbConnect();
         const { groupId } = params;
         const { rallyId, submissionId, userThatVoted } = await req.json()
+        console.log(rallyId, submissionId, userThatVoted)
+
 
         const rally = await Rally.findOne({groupId: groupId, _id: rallyId});
         if (!rally) {
@@ -26,8 +29,7 @@ export async function POST(req: NextRequest, { params }: { params: { groupId: st
         submission.votes.push({ username: userThatVoted, time: Date.now() });
         
         await rally.save();
-
-        const votingUser = await user.findOne({ username: userThatVoted });
+        const votingUser = await User.findOne({ username: userThatVoted });
         await votingUser.addPoints(POINTS);
        
         return NextResponse.json("Vote added successfully")

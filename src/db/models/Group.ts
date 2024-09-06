@@ -14,6 +14,7 @@ const groupSchema = new mongoose.Schema({
     members: [{ type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }],
     questionCount: { type: Number, default: 2 },
     rallyCount: { type: Number, default: 1 },
+    rallyGapDays: { type: Number, default: 14 },
     createdAt: { type: Date, default: Date.now },
 });
 

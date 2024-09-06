@@ -38,7 +38,7 @@ export async function GET(req: Request, { params }: { params: { rallyId: string 
                 let url;
                 try {
                     //@ts-ignore
-                    url = await getSignedUrl(s3, command, { expiresIn: 60 }); // URL expiration time in seconds
+                    url = await getSignedUrl(s3, command, { expiresIn: 300 }); // URL expiration time in seconds
                 } catch (s3Error:any) {
                     console.error(`Failed to generate pre-signed URL for ${submission.imageUrl}`, s3Error);
                     throw new Error(`Failed to generate pre-signed URL: ${s3Error.message}`);

@@ -20,6 +20,7 @@ export interface IRally extends mongoose.Document {
   startTime: Date;
   endTime: Date;
   votingOpen: boolean;
+  resultsShowing: boolean;
   used: boolean;
   active: boolean;
   lengthInDays: number;
@@ -49,6 +50,7 @@ const rallySchema = new mongoose.Schema({
   startTime: { type: Date, required: false },
   endTime: { type: Date, required: false },
   votingOpen: { type: Boolean, default: false },
+  resultsShowing: { type: Boolean, default: false },
   used: { type: Boolean, default: false },
   active: { type: Boolean, default: false },
   lengthInDays: { type: Number, required: true },
