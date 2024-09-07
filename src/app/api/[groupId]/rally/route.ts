@@ -46,8 +46,15 @@ export async function GET(
         rally.active = false;
         rally.used = true;
         rally.votingOpen = false;
+        rally.resultsShowing = true
+        rally.endTime = new Date(currentTime.getTime() + 24 * 60 * 60 * 1000); // 1 day for results viewing
         await rally.save();
+        await sendNotification('📷 HoseJ Rally Results! 📷', '📷 VIEW NOW 📷');
+      }
 
+      if(rally.resultsShowing && currentTime >= new Date(rally.endTime)) {
+        rally.resultsShowing = false;
+      
         // After results viewing day, set gap phase
         const gapEndTime = new Date(currentTime.getTime() + group.rallyGapDays * 24 * 60 * 60 * 1000);
 
@@ -57,6 +64,7 @@ export async function GET(
           active: false,
           used: false,
         });
+
 
         if (newRally) {
           newRally.active = true;
