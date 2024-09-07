@@ -109,10 +109,12 @@ export default function Dashboard() {
           <Card
             className="relative bg-primary-foreground w-full  px-6 py-4 flex items-center justify-between cursor-pointer"
             onClick={() => router.push(`/groups/${groupId}/rally`)}
-          >
+          > 
+            {rallies.length > 0 && (
               <div className="absolute -top-3 -right-3">
-              <Badge>{rallies.length}</Badge> {/* Customize badge content */}
-            </div>
+                <Badge>{rallies.length}</Badge> {/* Customize badge content */}
+              </div>
+            )}
             <div className="flex flex-col justify-center">
               <div className="font-bold text-2xl">Rally</div>
               <div className="text-sm text-primary/30">Submit now!</div>
@@ -139,9 +141,11 @@ export default function Dashboard() {
             className="relative  bg-primary-foreground w-full px-6 py-4 flex items-center justify-between cursor-pointer"
             onClick={() => router.push(`/groups/${groupId}/daily`)}
           >
-            <div className="absolute -top-3 -right-3">
+            {questions.length > 0 && (
+              <div className="absolute -top-3 -right-3">
               <Badge>{questions.length}</Badge> {/* Customize badge content */}
             </div>
+            )}
             <div className="flex flex-col justify-center">
               <div className="font-bold text-2xl">Daily</div>
               <div className="text-sm text-primary/30">Vote now!</div>
