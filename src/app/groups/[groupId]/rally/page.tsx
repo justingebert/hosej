@@ -136,7 +136,7 @@ function RallyTabContent({ groupId, user, rally, userHasVoted, userHasUploaded,s
         />
       )}
 
-      {userHasVoted[rally._id] ? (
+      {rally.votingOpen && userHasVoted[rally._id] ? (
           <div className="mt-5">
             <RallyResults user={user} rally={rally} />
           </div>
