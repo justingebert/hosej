@@ -41,7 +41,9 @@ export default function Home() {
   }, [router]);
 
   const handleGoogleSignIn = () => {
-    alert("coming soon!");
+    signIn('google', { callbackUrl: '/groups' }).catch(error => {
+      console.error('Google sign-in error:', error);
+    });
   };
 
   const createUserByDeviceId = async (userName: string) => {
@@ -141,7 +143,7 @@ export default function Home() {
         />
 
         <div className="space-y-4 w-full max-w-sm">
-          <Button onClick={handleGoogleSignIn} className="w-full" disabled={true}>
+          <Button onClick={handleGoogleSignIn} className="w-full" disabled={!userName}>
             Continue with Google
           </Button>
           <Button

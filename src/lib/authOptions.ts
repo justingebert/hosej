@@ -7,8 +7,8 @@ export const authOptions =
 {
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: process.env.AUTH_GOOGLE_ID!,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET!,
     }),
     CredentialsProvider({
       name: 'Device ID',
@@ -61,6 +61,10 @@ export const authOptions =
       
       session.user = user; // Include the full user object in the session
       return session;
+    },
+    async redirect({ url, baseUrl }) {
+      // Always redirect to /groups after a successful sign-in
+      return '/groups';
     },
   },
   pages: {

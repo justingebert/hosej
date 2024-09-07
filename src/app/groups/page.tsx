@@ -32,10 +32,10 @@ function CreateGroupDrawer({ onCreate }: { onCreate: (groupName: string) => void
   const [groupName, setGroupName] = useState("");
 
   const handleCreate = () => {
-    //if (groupName.trim() === "") return;
-    alert("GANZ RUHIG KOMMT NOCH");
-    /* onCreate(groupName);
-    setGroupName(""); */
+    if (groupName.trim() === "") return;
+    //alert("GANZ RUHIG KOMMT NOCH");
+    onCreate(groupName);
+    setGroupName("");
   };
 
   return (
