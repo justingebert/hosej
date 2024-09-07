@@ -125,7 +125,7 @@ function RallyTabContent({ groupId, user, rally, userHasVoted, userHasUploaded,s
       <Card className=" bg-foreground text-center flex-none">
         <h2 className="font-bold p-6 text-secondary">{rally.task}</h2>
       </Card>
-      {!rally.votingOpen && (
+      {!rally.votingOpen && !rally.resultsShowing && (
         <SubmitRally
           rally={rally}
           groupId={groupId}
@@ -135,15 +135,16 @@ function RallyTabContent({ groupId, user, rally, userHasVoted, userHasUploaded,s
           setUserHasVoted={setUserHasVoted}
         />
       )}
-      {rally.votingOpen &&
-        (userHasVoted[rally._id] ? (
+
+      {userHasVoted[rally._id] ? (
           <div className="mt-5">
             <RallyResults user={user} rally={rally} />
           </div>
         ) : (
             <RallyVoteCarousel user={user} rally={rally} onVote={handleVote} />
-        ))}
-        </div>
+        )}
+
+      </div>
   );
 }
 
