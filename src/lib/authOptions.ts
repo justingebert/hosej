@@ -62,10 +62,6 @@ export const authOptions =
       session.user = user; // Include the full user object in the session
       return session;
     },
-    async redirect({ url, baseUrl }) {
-      // Always redirect to /groups after a successful sign-in
-      return '/groups';
-    },
   },
   pages: {
     signIn: '/',
