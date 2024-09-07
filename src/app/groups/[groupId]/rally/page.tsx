@@ -136,15 +136,15 @@ function RallyTabContent({ groupId, user, rally, userHasVoted, userHasUploaded,s
         />
       )}
 
-      {rally.votingOpen && userHasVoted[rally._id] ? (
+      {rally.votingOpen &&
+        (userHasVoted[rally._id] ? (
           <div className="mt-5">
             <RallyResults user={user} rally={rally} />
           </div>
         ) : (
             <RallyVoteCarousel user={user} rally={rally} onVote={handleVote} />
-        )}
-
-      </div>
+        ))}
+        </div>
   );
 }
 
