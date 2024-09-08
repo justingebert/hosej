@@ -20,7 +20,7 @@ export async function POST(req: Request) {
     }
 
     googleUser.deviceId = deviceId;
-    googleUser.googleId = null;
+    googleUser.googleId = undefined;
     await googleUser.save();
     
     return NextResponse.json({ success: true, message: 'Google account successfully unlinked.' }, { status: 200 });

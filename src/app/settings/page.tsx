@@ -37,7 +37,7 @@ export default function SettingsPage() {
       setGoogleConnected(!!user.googleId);
       // Load the initial notification setting from local storage or server
       const notificationSetting =
-        localStorage.getItem("notificationsEnabled") === "true";
+        localStorage.getItem("notificationsEnabled") === "true" || !!user.fcmToken;
       setNotificationsEnabled(notificationSetting);
     }
   }, [status, user]);
