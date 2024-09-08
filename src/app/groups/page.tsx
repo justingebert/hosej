@@ -32,17 +32,17 @@ function CreateGroupDrawer({ onCreate }: { onCreate: (groupName: string) => void
   const [groupName, setGroupName] = useState("");
 
   const handleCreate = () => {
-    //if (groupName.trim() === "") return;
-    alert("GANZ RUHIG KOMMT NOCH");
-    /* onCreate(groupName);
-    setGroupName(""); */
+    if (groupName.trim() === "") return;
+    //alert("GANZ RUHIG KOMMT NOCH");
+    onCreate(groupName);
+    setGroupName("");
   };
 
   return (
     <Drawer>
       <DrawerTrigger asChild>
         <div className="flex justify-center">
-          <Button disabled={true}>Create Group</Button>
+          <Button >Create Group</Button>
         </div>
       </DrawerTrigger>
       <DrawerContent>

@@ -12,11 +12,13 @@ export async function middleware(req: NextRequest) {
     '/api/auth/providers', 
     '/api/auth/csrf', 
     '/api/auth/signin',
+    "/api/auth/signin/google",
     '/api/auth/callback',
     '/api/auth/callback/credentials',
     "/deviceauth",
     "/mainifest.json",
     "/api/cron",
+    "/api/auth/callback/google",
     '/',
   ];
 
