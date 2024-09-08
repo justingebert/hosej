@@ -33,6 +33,7 @@
     "@vercel/speed-insights": "^1.0.10",
     "aws-sdk": "^2.1632.0",
     "browser-image-compression": "^2.0.2",
+    "canvas-confetti": "^1.9.3",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "embla-carousel-react": "^8.1.3",

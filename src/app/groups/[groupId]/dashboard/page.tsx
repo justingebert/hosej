@@ -13,7 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { set } from "mongoose";
+import confetti from "canvas-confetti";
 import { Badge } from "@/components/ui/badge";
 
 export default function Dashboard() {
@@ -52,6 +52,14 @@ export default function Dashboard() {
     }
   }, [groupId, userCount]);
 
+  const triggerConfetti = () => {
+    confetti({
+      particleCount: 150,
+      spread: 70,
+      origin: { y: 0.6 },
+    });
+  };
+
   const calculateCompletion = (questions: any, userCount: number) => {
     if (questions.length === 0) {
       setCompletion(0);
@@ -66,7 +74,9 @@ export default function Dashboard() {
     });
 
     const completionPercentage = (totalVotes / totalRequiredVotes) * 100;
-    console.log("completionPercentage", completionPercentage);
+    if (completionPercentage >= 100) {
+      triggerConfetti();
+    }
     setCompletion(Math.round(completionPercentage)); 
   };
 
