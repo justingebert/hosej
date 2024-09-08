@@ -1,44 +1,42 @@
-import type { Metadata, Viewport } from "next";
-import "./globals.css";
+// app/layout.tsx (server-side)
 import { AppWrapper } from "../components/Warppers/AppWrapper";
-/* import { Analytics } from "@vercel/analytics/react" */
-import { ThemeProvider } from "@/components/Warppers/theme-provider"
 import { ThemeColorMeta } from "@/components/Warppers/ThemeColorVieport";
 import { Toaster } from "@/components/ui/toaster";
-/* import { SpeedInsights } from "@vercel/speed-insights/next"
- */
+import { Metadata } from "next";
+import "./globals.css";
+import PageTransitionWrapper from "@/components/Warppers/PageTransitionWrapper"; // Client-side wrapper for transitions
 
-export let metadata:any = {
+export const metadata: Metadata = {
   title: "HoseJ",
   description: "HoseJ",
-  manifest: 'manifest.json'
+  manifest: "manifest.json",
 };
-
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html>
-        <head>
-          <link rel="manifest" href="/manifest.json" id="manifest" />
-          <link rel="icon" href="AppIcons/favicon.ico" />
-          <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/> 
-          <ThemeColorMeta />
-        </head>
-        <body >
-          <div className="p-6 h-[100dvh]">
+    <html lang="en">
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="icon" href="AppIcons/favicon.ico" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"
+        />
+        <ThemeColorMeta />
+      </head>
+      <body>
+        <div className="p-6 h-[100dvh]">
           <AppWrapper>
-            {children}
-            </AppWrapper>
-          {/* <Analytics /> */}
-         {/*  <SpeedInsights /> */}
-         </div>
-         <Toaster /> 
-        </body>
+           {/*  <PageTransitionWrapper>{children}</PageTransitionWrapper> */}
+           {children}
+          </AppWrapper>
+          <Toaster />
+        </div>
+      </body>
     </html>
-    
   );
 }

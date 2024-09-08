@@ -31,7 +31,7 @@ export async function POST(req: Request) {
     await User.deleteOne({ _id: googleUserId });
 
     deviceUser.googleId = googleId;
-    deviceUser.deviceId = null;
+    deviceUser.deviceId = undefined;
     await deviceUser.save();
     
     return NextResponse.json({ success: true, message: 'Google account linked successfully.' }, { status: 200 });

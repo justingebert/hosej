@@ -53,10 +53,16 @@ export default function Dashboard() {
   }, [groupId, userCount]);
 
   const triggerConfetti = () => {
+
+    const scalar = 2
+    const hose = confetti.shapeFromText({ text: '👖', scalar });
+
     confetti({
       particleCount: 150,
       spread: 70,
       origin: { y: 0.6 },
+      shapes: [hose],
+      scalar
     });
   };
 
