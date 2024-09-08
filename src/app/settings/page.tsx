@@ -6,19 +6,24 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { useState, useEffect } from "react";
-import { signOut } from "next-auth/react";
+import { signIn, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Loader from "@/components/ui/Loader";
+import { v4 as uuidv4 } from "uuid";
+import { useToast } from "@/hooks/use-toast";
 
 export default function SettingsPage() {
     const [userId, setUserId] = useState('');
     const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+    const [googleConnected, setGoogleConnected] = useState(false);
     const { session, status, user } = useAuthRedirect();
     const router = useRouter();
+    const { toast } = useToast();
 
     useEffect(() => {
         if (status === "authenticated" && user) {
             setUserId(user._id);
+            setGoogleConnected(!!user.googleId);
             // Load the initial notification setting from local storage or server
             const notificationSetting = localStorage.getItem('notificationsEnabled') === 'true';
             setNotificationsEnabled(notificationSetting);
@@ -27,15 +32,37 @@ export default function SettingsPage() {
 
     if (status === "loading" || !user) return <Loader loading={true} />;
 
-    const handleGoogleSignIn = () => {
-        alert("coming soon!");
-    };
+    const handleGoogleConnect = async () => {
+        await signIn('google', { callbackUrl: `/connectgoogle` })
+    }
+
+    const handlegoogleDisconnect = async () => {
+        const deviceId = uuidv4();
+
+        await localStorage.setItem('deviceId', deviceId);
+
+        if (deviceId) {
+            const confirmation = window.confirm("If you did not Connect you Google or Mail all data will be lost if you log out. Do you wish to continue?");
+            if (!confirmation) {
+                return;
+            }
+        }
+
+        await fetch('/api/google/disconnect', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: user._id, deviceId: deviceId }),
+        });
+
+        await signIn('credentials', {redirect: false, deviceId: deviceId})
+        toast({ title: "Google account unlinked!" });
+    }
 
     const handleLogout = async () => {
         const deviceId = localStorage.getItem("deviceId");
 
         if (deviceId) {
-            const confirmation = window.confirm("All data will be lost if you log out. Do you wish to continue?");
+            const confirmation = window.confirm("If you did not Connect you Google or Mail all data will be lost if you log out. Do you wish to continue?");
             if (!confirmation) {
                 return;
             }
@@ -84,14 +111,15 @@ export default function SettingsPage() {
                     <div>User ID: {user._id}</div>
                     <div>Username: {user.username}</div>
                     <div>Joined: {formattedDate}</div>
-                    <div>DeviceID: {(user as any).deviceId}</div>
+                    <div>Google Connected: {googleConnected ? 'Yes' : 'No'}</div>
+                    {user.deviceId && <div>DeviceID: {user.deviceId}</div>}
                 </div>
                 
                 <div className="flex flex-col justify-center mt-10 gap-5">
-                    <Button onClick={handleGoogleSignIn} className="w-full" disabled={true}>
-                        Connect with Google
-                    </Button>
-                    <Button onClick={handleLogout} className="w-full">
+                    {!googleConnected ?  
+                    <Button onClick={handleGoogleConnect} className="w-full" >Connect with Google</Button> : 
+                    <Button onClick={handlegoogleDisconnect} className="w-full" variant={"destructive"}>Disconnect Google</Button> }
+                    <Button onClick={handleLogout} variant="destructive" className="w-full">
                         Logout
                     </Button>
                 </div>

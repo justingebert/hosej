@@ -8,12 +8,13 @@ import { Input } from "@/components/ui/input";
 import { v4 as uuidv4 } from "uuid";
 import Link from "next/link";
 import { motion } from 'framer-motion';
+import { useToast } from "@/hooks/use-toast";
 
 export default function Home() {
   const router = useRouter();
   const [userName, setUserName] = useState("");
   const [loading, setLoading] = useState(true); // Add a loading state
-
+  const { toast } = useToast();
 
   useEffect(() => {
     const deviceId = localStorage.getItem("deviceId");
@@ -41,10 +42,17 @@ export default function Home() {
   }, [router]);
 
   const handleGoogleSignIn = () => {
+      signIn('google', { callbackUrl: '/groups' }).catch(error => {
+        console.error('Google sign-in error:', error);
+      });
+  };
+
+  
+  const handleEmailSignIn = () => {
     signIn('google', { callbackUrl: '/groups' }).catch(error => {
       console.error('Google sign-in error:', error);
     });
-  };
+};
 
   const createUserByDeviceId = async (userName: string) => {
     const deviceId = uuidv4();
@@ -70,6 +78,10 @@ export default function Home() {
   };
 
   const handleStartWithoutAccount = async () => {
+    if(!userName) {
+      toast({ title: "Please Enter your name!" });
+      return;
+    }
     try {
       let deviceId = localStorage.getItem("deviceId");
       if (!deviceId) {
@@ -143,17 +155,19 @@ export default function Home() {
         />
 
         <div className="space-y-4 w-full max-w-sm">
-          <Button onClick={handleGoogleSignIn} className="w-full" disabled={!userName}>
-            Continue with Google
-          </Button>
-          <Button
+        <Button
             onClick={handleStartWithoutAccount}
-            variant="outline"
+            variant="secondary"
             className="w-full"
-            disabled={!userName}
           >
             Start without Account
           </Button>
+          <Button onClick={handleGoogleSignIn} className="w-full" >
+            Continue with Google
+          </Button>
+{/*           <Button onClick={handleGoogleSignIn} className="w-full" disabled={true} >
+            Continue with Email
+          </Button> */}
         </div>
       </main>
 

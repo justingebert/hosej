@@ -42,7 +42,7 @@ function CreateGroupDrawer({ onCreate }: { onCreate: (groupName: string) => void
     <Drawer>
       <DrawerTrigger asChild>
         <div className="flex justify-center">
-          <Button disabled={true}>Create Group</Button>
+          <Button >Create Group</Button>
         </div>
       </DrawerTrigger>
       <DrawerContent>

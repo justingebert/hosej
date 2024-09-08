@@ -22,7 +22,6 @@ export const authOptions =
         if (!deviceId) {
           throw new Error('No device ID provided');
         }
-        console.log(deviceId)
         const user = await User.findOne({ deviceId: deviceId });
         if (user) {
           return user;
@@ -33,15 +32,13 @@ export const authOptions =
     }),
   ],
   callbacks: {
-    async jwt({ token, user, account }:any) {
+    async jwt({ token, user, account, }:any) {
       if (account?.provider === 'google') {
         await dbConnect();
         const existingUser = await User.findOne({ googleId: account.providerAccountId });
-
         if (!existingUser) {
           const newUser = new User({
             googleId: account.providerAccountId,
-            email: user.email,
             username: user.name || '',
           });
           await newUser.save();
