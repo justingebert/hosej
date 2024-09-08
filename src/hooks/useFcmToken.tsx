@@ -3,7 +3,7 @@ import { getToken, onMessage, Unsubscribe } from "firebase/messaging";
 import { toast } from "sonner";
 import { messaging, fetchToken} from '@/firebase';
 
-async function requestPermissionReturnToken() {
+export async function requestPermissionReturnToken() {
   if(!("Notification" in window)) {
     console.log("This browser does not support notifications.");
     return null;
@@ -12,14 +12,17 @@ async function requestPermissionReturnToken() {
     const permission = await Notification.requestPermission();
     if (permission === "granted") {
       const currentToken = await fetchToken();
+      await localStorage.setItem('notificationsEnabled', "true")
       return currentToken;
     } else {
       console.log("Notification permission not granted.");
+      await localStorage.setItem('notificationsEnabled', "false")
       return null;
     }
   }
   if(Notification.permission === "granted") {
     const currentToken = await fetchToken();
+    await localStorage.setItem('notificationsEnabled', "true")
     return currentToken;
   }
   if(Notification.permission === "denied") {

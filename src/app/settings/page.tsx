@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import Loader from "@/components/ui/Loader";
 import { v4 as uuidv4 } from "uuid";
 import { useToast } from "@/hooks/use-toast";
+import { requestPermissionReturnToken } from "@/hooks/useFcmToken";
 
 export default function SettingsPage() {
     const [userId, setUserId] = useState('');
@@ -73,12 +74,36 @@ export default function SettingsPage() {
         router.push("/");
     };
 
-    const handleNotificationToggle = () => {
+    const handleNotificationToggle = async () => {
+        if (!notificationsEnabled) {
+            // Request permission and get FCM token
+            const token = await requestPermissionReturnToken();
+            if (token) {
+                // Send the token to the server
+                await fetch(`/api/users/${userId}/register-push`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token }),
+                });
+                console.log('FCM token registered successfully.');
+                await localStorage.setItem('lastSentFcmToken', token);
+            }
+        } else {
+            const token = localStorage.getItem('lastSentFcmToken');
+            if (token) {
+                await fetch(`/api/users/${userId}/unregister-push`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token }),
+                });
+                console.log('FCM token unregistered successfully.');
+                localStorage.removeItem('lastSentFcmToken');
+            }
+        }
+
         const newValue = !notificationsEnabled;
         setNotificationsEnabled(newValue);
         localStorage.setItem('notificationsEnabled', newValue.toString());
-        // Optionally, send this preference to your server to persist
-        // saveNotificationPreference(newValue);
     };
 
 /*     const handleReportBug = () => {
