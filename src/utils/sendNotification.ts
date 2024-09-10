@@ -9,13 +9,16 @@ if (!admin.apps.length) {
   });
 }
 
-export async function sendNotification(title: string, body: string) {
+export async function sendNotification(title: string, body: string, groupId = "") {
   try {
     await dbConnect();
 
-    // Query all users and get their fcmTokens
-    const users = await User.find({ fcmToken: { $exists: true, $ne: "" } });
-
+    let users
+    if(groupId === "") {
+      users = await User.find({ fcmToken: { $exists: true, $ne: "" } });
+    }else{
+      users = await User.find({ fcmToken: { $exists: true, $ne: "" }, groupId: groupId });
+    }
     // Aggregate all tokens
     const tokens = users.reduce((acc: string[], user) => {
       return acc.concat(user.fcmToken);
