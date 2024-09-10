@@ -25,7 +25,7 @@ export async function GET(req: Request, { params }: { params: { groupId: string 
         });
 
         if (!questions || questions.length === 0) {
-            return NextResponse.json({ message: "No questions available" });
+            return NextResponse.json({ questions: [], message: "No questions available" });
         }
 
         // Map over questions and conditionally add pre-signed image URLs if an image is present

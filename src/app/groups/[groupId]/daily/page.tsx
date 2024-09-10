@@ -8,12 +8,13 @@ import { useSearchParams } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Loader from "@/components/ui/Loader";
 import Header from "@/components/ui/Header";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { Badge } from "@/components/ui/badge";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import Image from "next/image";
+import { set } from "mongoose";
 
 function QuestionsTabs({ user, groupId, questions, userHasVoted, setUserHasVoted, selectedRating, setSelectedRating }: any) {
 
@@ -135,6 +136,12 @@ const DailyQuestionPage = () => {
       const data = await res.json();
 
       if (data.questions) {
+
+        if(data.questions.length === 0){ 
+          setQuestions(data.questions); 
+          return;
+        }
+
         setQuestions(data.questions);
         const votes = data.questions.reduce((acc: any, question: any) => {
           acc[question._id] = question.answers.some(
@@ -165,11 +172,21 @@ const DailyQuestionPage = () => {
   }, [session, router, groupId, user]);
 
   if (loading) return <Loader loading={true} />
-  if (!questions) return <p>No Questions avaiable</p>
 
   return (
     <>
       <Header href={`/groups/${groupId}/dashboard`} title="Daily Questions" />
+      {questions.length === 0 ? (
+        <Card className="text-center">
+          <CardContent>
+            <h2 className="font-bold p-6">No questions available</h2>
+          </CardContent>
+          <CardFooter>
+            <Button onClick={() => {router.push(`/groups/${groupId}/create`)}}>Create Questions</Button>
+          </CardFooter>
+        </Card>
+
+      ) :
       <QuestionsTabs
         user={user}
         groupId={groupId}
@@ -178,7 +195,7 @@ const DailyQuestionPage = () => {
         setUserHasVoted={setUserHasVoted}
         selectedRating={selectedRating}
         setSelectedRating={setSelectedRating}
-      />
+      />}
     </>
   );
 };
