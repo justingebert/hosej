@@ -3,22 +3,30 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { useAuthRedirect } from '@/hooks/useAuthRedirect';
 import Loader from '@/components/ui/Loader';
+import { useSession } from 'next-auth/react';
+import { set } from 'mongoose';
 
 
 export default function JoinGroup({ params }: { params: { id: string }; }) {
-  const { session, status, user } = useAuthRedirect();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const [group, setGroup] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (status === "loading") return; // Don't run the effect until user loading is complete
+    setLoading(true);
+    if (status === "loading") return; 
 
     const groupId = params.id;
-    if (!user || !groupId) {
-      setError('Missing user or group ID');
+    if (!groupId) {
+      setError('Missing  group ID');
+      return;
+    }
+
+    if (!session?.user) {
+      router.push(`/?groupId=${groupId}`);
       return;
     }
 
@@ -31,7 +39,7 @@ export default function JoinGroup({ params }: { params: { id: string }; }) {
           },
           body: JSON.stringify({
             groupId,
-            userId: user._id,
+            userId: (session?.user as any)._id,
           }),
         });
 
@@ -42,13 +50,16 @@ export default function JoinGroup({ params }: { params: { id: string }; }) {
 
         const joinedGroup = await res.json();
         setGroup(joinedGroup);
+        setLoading(false);
       } catch (error: any) {
         setError(error.message);
+        setLoading(false);
       }
     };
-
-    joinGroup();
-  }, [session, status, user, params.id]);
+    if (session?.user && groupId) {
+      joinGroup();
+    }
+  }, [session, status, params.id]);
 
   if (status === 'loading') {
     return <Loader loading={true} />;
@@ -60,13 +71,15 @@ export default function JoinGroup({ params }: { params: { id: string }; }) {
   }
 
   if (!group) {
-    return <div>Joining group...</div>;
+    return <Loader loading={true} />;
+  }
+
+  if(loading) {
+    return <Loader loading={true} />;
   }
 
   return (
-    <div className='flex justify-center'>
-      <h2>Successfully joined {group.name}</h2>
-      <Button onClick={() => router.push('/groups')}>Go to Groups</Button>
-    </div>
+    <>
+    </>
   );
 }

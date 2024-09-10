@@ -2,26 +2,41 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { signIn, useSession } from "next-auth/react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { v4 as uuidv4 } from "uuid";
 import Link from "next/link";
 import { motion } from 'framer-motion';
 import { useToast } from "@/hooks/use-toast";
+import { set } from "mongoose";
 
 export default function Home() {
+  const { data: session, status } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [userName, setUserName] = useState("");
-  const [loading, setLoading] = useState(true); // Add a loading state
+  const [loading, setLoading] = useState(true); 
   const { toast } = useToast();
 
+  const groupId = searchParams.get("groupId");
+
   useEffect(() => {
+    setLoading(true);
+    if (session?.user) {
+      const callbackUrl = groupId ? `/join/${groupId}` : "/groups";
+      router.push(callbackUrl);
+      setLoading(false); 
+      return;
+    }  
+
     const deviceId = localStorage.getItem("deviceId");
     if (deviceId) {
+      const callbackUrl = groupId ? `/join/${groupId}` : '/groups';
       signIn('credentials', {
         redirect: false,
         deviceId: deviceId,
+        callbackUrl: callbackUrl,
       }).then(result => {
         if (result?.ok) {
           console.log('Device ID authentication successful');
@@ -39,7 +54,7 @@ export default function Home() {
       console.warn('No device ID found in localStorage');
       setLoading(false); // Stop loading if no device ID found
     }
-  }, [router]);
+  }, [session, router]);
 
   const handleGoogleSignIn = () => {
       signIn('google', { callbackUrl: '/groups' }).catch(error => {
@@ -68,7 +83,8 @@ export default function Home() {
       });
       if (response.ok) {;
         localStorage.setItem('deviceId', deviceId);
-        router.push('/groups');
+        const callbackUrl = groupId ? `/join/${groupId}` : '/groups'; // Redirect to group join page if groupId exists
+        router.push(callbackUrl);
       } else {
         console.error('Failed to create user:', await response.text());
       }
@@ -90,14 +106,16 @@ export default function Home() {
         await createUserByDeviceId(userName);
       }
 
+      const callbackUrl = groupId ? `/join/${groupId}` : '/groups';
       const result = await signIn('credentials', {
         redirect: false,
         deviceId: deviceId,
+        callbackUrl: callbackUrl,
       });
 
       if (result?.ok) {
         console.log('Device ID authentication successful');
-        router.push('/groups');
+        router.push(callbackUrl);
       } else {
         console.error('Device ID authentication failed:', result?.error);
         setLoading(false);
