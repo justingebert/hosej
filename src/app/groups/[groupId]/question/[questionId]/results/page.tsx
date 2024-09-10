@@ -30,8 +30,7 @@ const ResultsPage = () => {
   }, [groupId, questionId]);
 
   if (loading) return <Loader loading={true} />;
-  if (!question) return <p>No Question available</p>;
-
+  
   return (
     <>
       <BackLink href={`/groups/${groupId}/history`} />
@@ -77,7 +76,7 @@ const ResultsPage = () => {
                 </div>
               ))}
           </div>
-          <VoteResults user={user} question={question} available={false} className="mt-2" />
+          <VoteResults user={user} question={question} available={false} returnTo={`question/${questionId}/results`}/>
         </div>
       )}
     </>

@@ -15,7 +15,6 @@ export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
 
-    // Check if required fields are present
     const { groupId, category, questionType, question, submittedBy, image } = data;
     if (!groupId || !category || !questionType || !question || !submittedBy) {
       return NextResponse.json(
@@ -35,7 +34,6 @@ export async function POST(req: NextRequest) {
       options = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
     }
 
-    // Create the question
     const newQuestion = new Question({
       groupId,
       category,
@@ -47,19 +45,19 @@ export async function POST(req: NextRequest) {
     });
 
     await newQuestion.save();
-    // Create the associated chat
+
     const newChat = new Chat({
       group: groupId,
       entity: newQuestion._id,
-      entityModel: "Question", // Specify the entity model as 'Question'
-      messages: [], // Initialize with no messages
+      entityModel: "Question", 
+      messages: [], 
     });
 
     await newChat.save();
     newQuestion.chat = newChat._id;
     await newQuestion.save();
 
-    // Add points to the submitting user
+
     const submittingUser = await User.findOne({ username: submittedBy });
     if (submittingUser) {
       await submittingUser.addPoints(POINTS);

@@ -6,18 +6,18 @@ import User from "@/db/models/user";
 import Image from "next/image";
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { useSearchParams } from "next/navigation";
 
 const s3 = new S3Client({
   region: process.env.AWS_REGION,
 });
 
-export default async function ResultsDetailPage({ params }: { params: { groupId: string, questionId: string }; }) {
+export default async function ResultsDetailPage({ params, searchParams }: { params: { groupId: string, questionId: string }, searchParams?: { [key: string]: string | string[] | undefined } }) {
   const { questionId, groupId } = params;
+  const { returnTo } = searchParams || {};
 
-  console.log("Connecting to the database...");
   await dbConnect();
 
-  // Ensure the User model is registered
   await User.findOne();
 
   const question = await Question.findById(questionId).populate({
@@ -34,7 +34,6 @@ export default async function ResultsDetailPage({ params }: { params: { groupId:
     groupedResponses[response].push(answer.username.username);
   });
 
-  console.log("Generating signed URLs...");
   const entries = await Promise.all(Object.entries(groupedResponses).map(async ([response, usernames]: any) => {
     if (question.questionType.startsWith("image")) {
       const urlObject = new URL(response);
@@ -63,10 +62,9 @@ export default async function ResultsDetailPage({ params }: { params: { groupId:
 
   const sortedGroupedResponses = Object.fromEntries(entries);
 
-  console.log("Rendering page with sorted responses...");
   return (
     <>
-      <Header href={`/groups/${groupId}/daily`} />
+      <Header href={`/groups/${groupId}/${returnTo}`} />
       <div className="grid grid-cols-1 gap-5 mb-7">
         {Object.entries(sortedGroupedResponses).map(
           ([response, usernames]: any, index) => (

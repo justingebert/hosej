@@ -169,9 +169,8 @@ export default function Dashboard() {
               <div className="text-lg">Active</div> }
             </div>
             <div className="w-24 h-24 rounded-lg">
-            <CompletionChart completion={completion} />
+              <CompletionChart completion={completion} />
             </div> 
-            {/* Placeholder for the chart */}
           </Card>
         </div>
       </div>

@@ -8,12 +8,13 @@ import { useSearchParams } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Loader from "@/components/ui/Loader";
 import Header from "@/components/ui/Header";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { Badge } from "@/components/ui/badge";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import Image from "next/image";
+import { set } from "mongoose";
 
 function QuestionsTabs({ user, groupId, questions, userHasVoted, setUserHasVoted, selectedRating, setSelectedRating }: any) {
 
@@ -102,7 +103,7 @@ function QuestionsTabs({ user, groupId, questions, userHasVoted, setUserHasVoted
       />}
           <div className="mt-10">
             {userHasVoted[question._id] ? (
-              <VoteResults user={user} question={question} available={true}/>
+              <VoteResults user={user} question={question} available={true} returnTo={`daily?returnTo=${question._id}`}/>
             ) : (
               <VoteOptions
                 user={user}
@@ -121,6 +122,7 @@ const DailyQuestionPage = () => {
   const [loading, setLoading] = useState(true);
   const { session, status, user } = useAuthRedirect();
   const [questions, setQuestions] = useState<any>([]);
+  const [questionsInactive , setQuestionsInactive] = useState<any>(false);
   const [userHasVoted, setUserHasVoted] = useState<any>({});
   const [selectedRating, setSelectedRating] = useState<any>({});
   const router = useRouter();
@@ -135,6 +137,14 @@ const DailyQuestionPage = () => {
       const data = await res.json();
 
       if (data.questions) {
+
+        if(data.questions.length === 0){ 
+          setQuestions(data.questions); 
+          setQuestionsInactive(true);
+          setLoading(false);
+          return;
+        }
+
         setQuestions(data.questions);
         const votes = data.questions.reduce((acc: any, question: any) => {
           acc[question._id] = question.answers.some(
@@ -165,11 +175,21 @@ const DailyQuestionPage = () => {
   }, [session, router, groupId, user]);
 
   if (loading) return <Loader loading={true} />
-  if (!questions) return <p>No Questions avaiable</p>
 
   return (
-    <>
+    <div className="flex flex-col h-[100dvh]">
       <Header href={`/groups/${groupId}/dashboard`} title="Daily Questions" />
+      {questions.length === 0 ? (
+        <div className="flex flex-grow justify-center items-center">
+        <Card className="w-full">
+          <CardContent className="flex flex-col justify-center">
+            <h2 className="font-bold p-6 text-center text-xl">No questions available :(</h2>
+            <Button onClick={() => {router.push(`/groups/${groupId}/create`)}}>Create Questions</Button>
+          </CardContent>
+        </Card>
+        </div>
+
+      ) :
       <QuestionsTabs
         user={user}
         groupId={groupId}
@@ -178,8 +198,8 @@ const DailyQuestionPage = () => {
         setUserHasVoted={setUserHasVoted}
         selectedRating={selectedRating}
         setSelectedRating={setSelectedRating}
-      />
-    </>
+      />}
+    </div>
   );
 };
 

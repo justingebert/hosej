@@ -9,7 +9,7 @@ export const revalidate = 0;
 
 //TODO seprate functions
 //deactives current questions and activates new ones
-async function selectDailyQuestions(groupId:string, limit: number): Promise<void> {
+async function selectDailyQuestions(groupId:string, limit: number): Promise<IQuestion[]> {
   try {
     await dbConnect();
 
@@ -26,25 +26,23 @@ async function selectDailyQuestions(groupId:string, limit: number): Promise<void
       active: false,
     }).limit(limit);
 
+    if(questions.length === 0){
+      console.log("No questions found for group: ", groupId);
+      return [];
+    }
+
     for (const question of questions) {
       question.active = true;
       question.used = true;
-      //TODO remove when migration is complete
-      if (question.questionType.startsWith("users-")) {
-        const users = await User.find({});
-        question.options = await users.map((u) => u.username);
-        await question.save();
-      }
-      if (question.questionType.startsWith("rating")) {
-        question.options = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
-        await question.save();
-      }
       await question.save();
     }
+
+    return questions;
 
   } catch (error: any) {
     console.error(error);
   }
+  return [];
 }
 
 //gets, populates and returns daily questions
@@ -56,12 +54,18 @@ export async function GET(req: Request) {
 
     const groups = await Group.find({});
 
+
+    //TODO this sends multiple notifications to one user this is wrong
     for(const group of groups){
-        await selectDailyQuestions(group._id, group.questionCount);
+        const questions = await selectDailyQuestions(group._id, group.questionCount);
+        if(questions.length === 0){
+          await sendNotification('🥗DA HABEN WIR DEN SALAT🥗', `${group.name} HAT KEINE FRAGEN MEHR, AN DIE ARBEIT!!`, group._id);
+        }else{
+          await sendNotification('🚨HoseJ Fragen!!🚨', '🚨JETZT VOTEN DU FISCH🚨');
+        }
+
     }
 
-    await sendNotification('🚨HoseJ Fragen!!🚨', '🚨JETZT VOTEN DU FISCH🚨');
-  
     return NextResponse.json({ message: "success" });
   } catch (error: any) {
     console.error(error);
