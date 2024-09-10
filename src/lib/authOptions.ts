@@ -9,6 +9,12 @@ export const authOptions =
     GoogleProvider({
       clientId: process.env.AUTH_GOOGLE_ID!,
       clientSecret: process.env.AUTH_GOOGLE_SECRET!,
+      /* authorization:{
+        params: {
+          access_type: 'offline',
+          prompt: 'consent',
+        } 
+      } */
     }),
     CredentialsProvider({
       name: 'Device ID',
@@ -65,3 +71,4 @@ export const authOptions =
   },
   secret: process.env.NEXTAUTH_SECRET,
 }
+

@@ -2,21 +2,30 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { v4 as uuidv4 } from "uuid";
 import Link from "next/link";
 import { motion } from 'framer-motion';
 import { useToast } from "@/hooks/use-toast";
+import { stat } from "fs";
 
 export default function Home() {
+  const { data: session, status } = useSession();
   const router = useRouter();
   const [userName, setUserName] = useState("");
   const [loading, setLoading] = useState(true); // Add a loading state
   const { toast } = useToast();
 
   useEffect(() => {
+    
+    if (session?.user) {
+      router.push('/groups');
+      setLoading(false); 
+      return;
+    }  
+
     const deviceId = localStorage.getItem("deviceId");
     if (deviceId) {
       signIn('credentials', {
@@ -39,7 +48,7 @@ export default function Home() {
       console.warn('No device ID found in localStorage');
       setLoading(false); // Stop loading if no device ID found
     }
-  }, [router]);
+  }, [session, router]);
 
   const handleGoogleSignIn = () => {
       signIn('google', { callbackUrl: '/groups' }).catch(error => {

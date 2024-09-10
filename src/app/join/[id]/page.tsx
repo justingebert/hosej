@@ -5,10 +5,11 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useAuthRedirect } from '@/hooks/useAuthRedirect';
 import Loader from '@/components/ui/Loader';
+import { useSession } from 'next-auth/react';
 
 
 export default function JoinGroup({ params }: { params: { id: string }; }) {
-  const { session, status, user } = useAuthRedirect();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const [group, setGroup] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
@@ -17,8 +18,13 @@ export default function JoinGroup({ params }: { params: { id: string }; }) {
     if (status === "loading") return; // Don't run the effect until user loading is complete
 
     const groupId = params.id;
-    if (!user || !groupId) {
-      setError('Missing user or group ID');
+    if (!groupId) {
+      setError('Missing  group ID');
+      return;
+    }
+
+    if (!session?.user) {
+      router.push(`/api/auth/signin?callbackUrl=/join/${groupId}`);
       return;
     }
 
@@ -31,7 +37,7 @@ export default function JoinGroup({ params }: { params: { id: string }; }) {
           },
           body: JSON.stringify({
             groupId,
-            userId: user._id,
+            userId: (session?.user as any)._id,
           }),
         });
 
@@ -46,9 +52,10 @@ export default function JoinGroup({ params }: { params: { id: string }; }) {
         setError(error.message);
       }
     };
-
-    joinGroup();
-  }, [session, status, user, params.id]);
+    if (session?.user && groupId) {
+      joinGroup();
+    }
+  }, [session, status, params.id]);
 
   if (status === 'loading') {
     return <Loader loading={true} />;
@@ -64,7 +71,7 @@ export default function JoinGroup({ params }: { params: { id: string }; }) {
   }
 
   return (
-    <div className='flex justify-center'>
+    <div className='flex flex-col justify-between text-center'>
       <h2>Successfully joined {group.name}</h2>
       <Button onClick={() => router.push('/groups')}>Go to Groups</Button>
     </div>

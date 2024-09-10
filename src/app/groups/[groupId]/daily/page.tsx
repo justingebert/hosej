@@ -14,7 +14,6 @@ import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, Dr
 import { Badge } from "@/components/ui/badge";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import Image from "next/image";
-import { set } from "mongoose";
 
 function QuestionsTabs({ user, groupId, questions, userHasVoted, setUserHasVoted, selectedRating, setSelectedRating }: any) {
 
