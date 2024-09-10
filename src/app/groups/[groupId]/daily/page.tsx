@@ -103,7 +103,7 @@ function QuestionsTabs({ user, groupId, questions, userHasVoted, setUserHasVoted
       />}
           <div className="mt-10">
             {userHasVoted[question._id] ? (
-              <VoteResults user={user} question={question} available={true}/>
+              <VoteResults user={user} question={question} available={true} returnTo={`daily?returnTo=${question._id}`}/>
             ) : (
               <VoteOptions
                 user={user}
@@ -122,6 +122,7 @@ const DailyQuestionPage = () => {
   const [loading, setLoading] = useState(true);
   const { session, status, user } = useAuthRedirect();
   const [questions, setQuestions] = useState<any>([]);
+  const [questionsInactive , setQuestionsInactive] = useState<any>(false);
   const [userHasVoted, setUserHasVoted] = useState<any>({});
   const [selectedRating, setSelectedRating] = useState<any>({});
   const router = useRouter();
@@ -139,6 +140,8 @@ const DailyQuestionPage = () => {
 
         if(data.questions.length === 0){ 
           setQuestions(data.questions); 
+          setQuestionsInactive(true);
+          setLoading(false);
           return;
         }
 
@@ -174,17 +177,17 @@ const DailyQuestionPage = () => {
   if (loading) return <Loader loading={true} />
 
   return (
-    <>
+    <div className="flex flex-col h-[100dvh]">
       <Header href={`/groups/${groupId}/dashboard`} title="Daily Questions" />
       {questions.length === 0 ? (
-        <Card className="text-center">
-          <CardContent>
-            <h2 className="font-bold p-6">No questions available</h2>
-          </CardContent>
-          <CardFooter>
+        <div className="flex flex-grow justify-center items-center">
+        <Card className="w-full">
+          <CardContent className="flex flex-col justify-center">
+            <h2 className="font-bold p-6 text-center text-xl">No questions available :(</h2>
             <Button onClick={() => {router.push(`/groups/${groupId}/create`)}}>Create Questions</Button>
-          </CardFooter>
+          </CardContent>
         </Card>
+        </div>
 
       ) :
       <QuestionsTabs
@@ -196,7 +199,7 @@ const DailyQuestionPage = () => {
         selectedRating={selectedRating}
         setSelectedRating={setSelectedRating}
       />}
-    </>
+    </div>
   );
 };
 

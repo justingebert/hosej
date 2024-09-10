@@ -8,7 +8,14 @@ import { motion } from 'framer-motion';
 import { Badge } from "../ui/badge";
 import Image from "next/image";
 
-const VoteResults = ({ user, question, available }: any) => {
+type VoteResultsProps = {
+  user: any;
+  question: any;
+  available: boolean;
+  returnTo?: string;
+};
+
+const VoteResults = ({ user, question, available, returnTo }: VoteResultsProps) => {
   const [animationTriggered, setAnimationTriggered] = useState(false);
   const [results, setResults] = useState([]);
   const [numOfVotes, setNumOfVotes] = useState('');
@@ -33,7 +40,7 @@ const VoteResults = ({ user, question, available }: any) => {
       </div>
       <div className="mb-10">
         {results.map((result: any, index) => (
-          <Link key={index} href={`/groups/${question.groupId}/question/${question._id}/resultsdetailed/`}>
+          <Link key={index} href={`/groups/${question.groupId}/question/${question._id}/resultsdetailed/?returnTo=${returnTo}`}>
             <div className="bg-secondary my-2 rounded-md relative">
               <motion.div
                 className="bg-secondarydark h-12 rounded"
