@@ -51,7 +51,7 @@ const RallyResults = ({ user, rally }: any) => {
             )}
             </CardHeader>
             <CardContent className="p-0 relative">
-              {/* <Image
+               <Image
                   src={submission.imageUrl}
                   alt={`Submission by ${submission.username}`}
                   className={`object-cover w-full h-auto cursor-pointer ${loadedImages[index] ? 'opacity-100' : 'opacity-0'}`}
@@ -60,7 +60,7 @@ const RallyResults = ({ user, rally }: any) => {
                   priority={index === 0}
                   style={{ transition: 'opacity 0.3s ease-in-out' }}
                   onLoad={() => handleImageLoad(index)}
-                /> */}
+                /> 
             </CardContent>
             <CardFooter className="flex justify-between items-center p-5">
             <div className="flex items-center gap-2">
