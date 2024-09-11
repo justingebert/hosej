@@ -11,7 +11,7 @@ export interface IUser extends Document {
   username: string;
   totalPoints: number;
   streak: number;
-  groups: IGroup[];
+  groups: {group: IGroup[], ponts: number}[];
   createdAt: Date;
   addPoints(points: number): Promise<void>;
   getTotalPoints(): Promise<number>;
@@ -52,8 +52,15 @@ const UserSchema = new Schema({
   },
   groups: [
     {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Group",
+      group: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Group",
+        required: true
+      },
+      points: {
+        type: Number,
+        default: 0,
+      }
     },
   ],
   createdAt: {
