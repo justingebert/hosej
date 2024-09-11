@@ -14,7 +14,7 @@ import { useParams } from "next/navigation";
 import { IUser } from "@/db/models/user";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 
-
+// Fetch users for a specific group
 const fetchUsers = async (groupId: string) => {
   const response = await fetch(`/api/${groupId}/users`);
   if (!response.ok) {
@@ -41,7 +41,20 @@ const LeaderboardPage = () => {
     fetchData();
   }, [groupId]);
 
-  const sortedUsers = users.sort((a, b) => b.totalPoints - a.totalPoints);
+  // Extract points and streak for the specific group
+  const getGroupData = (user: IUser, groupId: string) => {
+    const groupData = user.groups.find(
+      (group) => group.group.toString() === groupId
+    );
+    return groupData ? { points: groupData.points, streak: groupData.streak } : { points: 0, streak: 0 };
+  };
+
+  // Sort users by the points in the specific group
+  const sortedUsers = users.sort((a, b) => {
+    const aGroupData = getGroupData(a, groupId);
+    const bGroupData = getGroupData(b, groupId);
+    return bGroupData.points - aGroupData.points;
+  });
 
   return (
     <>
@@ -55,15 +68,18 @@ const LeaderboardPage = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {sortedUsers.map((user) => (
-            <TableRow key={user._id}>
-              <TableCell className="font-medium">{user.username}</TableCell>
-              <TableCell className="text-right">{user.totalPoints}</TableCell>
-              <TableCell className="text-right font-medium">
-                {user.streak} <span role="img" aria-label="streak">👖</span>
-              </TableCell>
-            </TableRow>
-          ))}
+          {sortedUsers.map((user) => {
+            const { points, streak } = getGroupData(user, groupId);
+            return (
+              <TableRow key={user._id}>
+                <TableCell className="font-medium">{user.username}</TableCell>
+                <TableCell className="text-right">{points}</TableCell>
+                <TableCell className="text-right font-medium">
+                  {streak} <span role="img" aria-label="streak">👖</span>
+                </TableCell>
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
       {error && <p className="text-red-500">{error}</p>}
