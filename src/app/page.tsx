@@ -1,52 +1,70 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { signIn, useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { v4 as uuidv4 } from "uuid";
 import Link from "next/link";
 import { motion } from 'framer-motion';
 import { useToast } from "@/hooks/use-toast";
 
-export default function Home() {
+
+const Loader = () => {
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+    <motion.h1
+      className="text-4xl font-bold text-center relative"
+      style={{
+        backgroundImage: "linear-gradient(90deg, var(--shine-color) 0%, var(--shine-highlight) 50%, var(--shine-color) 100%)",
+        backgroundSize: "200% 100%",
+        backgroundClip: "text",
+        WebkitBackgroundClip: "text",
+        color: "transparent",
+      }}
+      animate={{
+        backgroundPosition: ["-100% 0", "100% 0"],
+      }}
+      transition={{
+        duration: 1.5,
+        ease: "easeInOut",
+        repeat: Infinity,
+      }}
+    >
+      HoseJ
+    </motion.h1>
+  </div>
+  );
+}
+
+function Home() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [groupId, setGroupId] = useState("");
   const [userName, setUserName] = useState("");
   const [loading, setLoading] = useState(true); 
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/groups";
   const { toast } = useToast();
 
- 
 
   useEffect(() => {
     setLoading(true);
-    const params = new URLSearchParams(window.location.search);
-    if(params.get("groupId")) {
-      setGroupId(params.get("groupId") as string);
-    }
-    if (session?.user) {
-      const callbackUrl = groupId ? `/join/${groupId}` : "/groups";
+
+    if (session) {
       router.push(callbackUrl);
-      setLoading(false); 
-      return;
-    }  
+    }
 
     const deviceId = localStorage.getItem("deviceId");
     if (deviceId) {
-      const callbackUrl = groupId ? `/join/${groupId}` : '/groups';
       signIn('credentials', {
         redirect: false,
         deviceId: deviceId,
-        callbackUrl: callbackUrl,
       }).then(result => {
         if (result?.ok) {
-          console.log('Device ID authentication successful');
           router.push('/groups');
         } else {
-          console.error('Device ID authentication failed:', result?.error);
-          console.log(result);  // Log the full result object for more context
+          console.error('Device ID authentication failed:', result?.error); // Log the full result object for more context
           setLoading(false); // Stop loading if authentication fails
         }
       }).catch(error => {
@@ -57,10 +75,10 @@ export default function Home() {
       console.warn('No device ID found in localStorage');
       setLoading(false); // Stop loading if no device ID found
     }
-  }, [session, router]);
+  }, [session, router, callbackUrl]);
 
   const handleGoogleSignIn = () => {
-      signIn('google', { callbackUrl: '/groups' }).catch(error => {
+      signIn('google', { callbackUrl: callbackUrl }).catch(error => {
         console.error('Google sign-in error:', error);
       });
   };
@@ -85,9 +103,8 @@ export default function Home() {
         body: JSON.stringify({ deviceId, userName }),
       });
       if (response.ok) {;
-        localStorage.setItem('deviceId', deviceId);
-        const callbackUrl = groupId ? `/join/${groupId}` : '/groups'; // Redirect to group join page if groupId exists
-        router.push(callbackUrl);
+        await localStorage.setItem('deviceId', deviceId);
+        console.log('User created successfully');
       } else {
         console.error('Failed to create user:', await response.text());
       }
@@ -102,27 +119,27 @@ export default function Home() {
       return;
     }
     try {
-      let deviceId = localStorage.getItem("deviceId");
+      let deviceId = await localStorage.getItem("deviceId");
       if (!deviceId) {
-        deviceId = uuidv4();
-        localStorage.setItem("deviceId", deviceId);
         await createUserByDeviceId(userName);
       }
-
-      const callbackUrl = groupId ? `/join/${groupId}` : '/groups';
+      deviceId = await localStorage.getItem("deviceId");
+      
       const result = await signIn('credentials', {
-        redirect: false,
-        deviceId: deviceId,
-        callbackUrl: callbackUrl,
-      });
-
-      if (result?.ok) {
-        console.log('Device ID authentication successful');
-        router.push(callbackUrl);
-      } else {
-        console.error('Device ID authentication failed:', result?.error);
-        setLoading(false);
-      }
+          redirect: false,
+          deviceId: deviceId,
+          callbackUrl: callbackUrl,
+        });
+  
+        if (result?.ok) {
+          console.log('Device ID authentication successful');
+          router.push(callbackUrl); 
+        } else {
+          console.error('Device ID authentication failed:', result?.error);
+        }
+      
+      
+      setLoading(false);
     } catch (error) {
       console.error('Error during device ID authentication:', error);
       setLoading(false);
@@ -132,28 +149,7 @@ export default function Home() {
   // Render the loading state if the app is still authenticating
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <motion.h1
-          className="text-4xl font-bold text-center relative"
-          style={{
-            backgroundImage: "linear-gradient(90deg, var(--shine-color) 0%, var(--shine-highlight) 50%, var(--shine-color) 100%)",
-            backgroundSize: "200% 100%",
-            backgroundClip: "text",
-            WebkitBackgroundClip: "text",
-            color: "transparent",
-          }}
-          animate={{
-            backgroundPosition: ["-100% 0", "100% 0"],
-          }}
-          transition={{
-            duration: 1.5,
-            ease: "easeInOut",
-            repeat: Infinity,
-          }}
-        >
-          HoseJ
-        </motion.h1>
-      </div>
+        Loader()
     );
   }
 
@@ -206,5 +202,13 @@ export default function Home() {
         </p>
       </footer>
     </div>
+  );
+}
+
+export default function HomeWithSuspense(){
+  return (
+    <Suspense fallback={<Loader />}>
+      <Home />
+    </Suspense>
   );
 }

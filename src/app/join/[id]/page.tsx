@@ -2,14 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
 import Loader from '@/components/ui/Loader';
 import { useSession } from 'next-auth/react';
-import { set } from 'mongoose';
-
+import { useAuthRedirect } from '@/hooks/useAuthRedirect';
 
 export default function JoinGroup({ params }: { params: { id: string }; }) {
-  const { data: session, status } = useSession();
+  //const { data: session, status } = useSession();
+  const { session, status, user } = useAuthRedirect();
   const router = useRouter();
   const [group, setGroup] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
@@ -22,11 +21,6 @@ export default function JoinGroup({ params }: { params: { id: string }; }) {
     const groupId = params.id;
     if (!groupId) {
       setError('Missing  group ID');
-      return;
-    }
-
-    if (!session?.user) {
-      router.push(`/?groupId=${groupId}`);
       return;
     }
 
