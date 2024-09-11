@@ -33,7 +33,6 @@ function CreateGroupDrawer({ onCreate }: { onCreate: (groupName: string) => void
 
   const handleCreate = () => {
     if (groupName.trim() === "") return;
-    //alert("GANZ RUHIG KOMMT NOCH");
     onCreate(groupName);
     setGroupName("");
   };
@@ -148,22 +147,21 @@ export default function GroupsPage() {
   
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center mt-4 w-full">
-        <div>
-          <Button variant="outline" size="icon" onClick={() => { router.push(`/help`)}}>
-            <CircleHelp/>
-          </Button>
-        </div>
-          <h1 className="text-4xl font-bold">HoseJ</h1>
-        <div>
-          <Button variant="outline" size="icon" onClick={() => { router.push(`/settings`)}}>
-            <Settings/>
-          </Button> 
-        </div>
-      </div>
+    <div className="relative min-h-screen flex flex-col">
+    {/* Header */}
+    <div className="flex justify-between items-center w-full">
+      <Button variant="outline" size="icon" onClick={() => { router.push(`/help`)}}>
+        <CircleHelp/>
+      </Button>
+      <h1 className="text-4xl font-bold">HoseJ</h1>
+      <Button variant="outline" size="icon" onClick={() => { router.push(`/settings`)}}>
+        <Settings/>
+      </Button>
+    </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+    {/* Group List */}
+    <div className="flex-grow overflow-y-auto py-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-24">
         {groups.map((group) => (
           <Card
             key={group._id}
@@ -172,8 +170,8 @@ export default function GroupsPage() {
           >
             <CardContent className="flex justify-between items-center p-4">
               <div>
-              <CardTitle>{group.name}</CardTitle>
-              <CardDescription>Go Vote Now!</CardDescription>
+                <CardTitle>{group.name}</CardTitle>
+                <CardDescription>Go Vote Now!</CardDescription>
               </div>
               <Button
                 variant="ghost"
@@ -189,7 +187,12 @@ export default function GroupsPage() {
           </Card>
         ))}
       </div>
+    </div>
+
+    {/* Create Group Button - Fixed at Bottom */}
+    <div className="fixed bottom-0 left-0 w-full backdrop-blur-sm p-8">
       <CreateGroupDrawer onCreate={createGroup} />
     </div>
+  </div>
   );
 }
