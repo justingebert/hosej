@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { signIn, useSession } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { v4 as uuidv4 } from "uuid";
 import Link from "next/link";
@@ -13,16 +13,20 @@ import { useToast } from "@/hooks/use-toast";
 export default function Home() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const [groupId, setGroupId] = useState("");
   const [userName, setUserName] = useState("");
   const [loading, setLoading] = useState(true); 
   const { toast } = useToast();
 
+ 
+
   useEffect(() => {
     setLoading(true);
-    const groupId = searchParams.get("groupId");
+    const params = new URLSearchParams(window.location.search);
+    if(params.get("groupId")) {
+      setGroupId(params.get("groupId") as string);
+    }
     if (session?.user) {
-
       const callbackUrl = groupId ? `/join/${groupId}` : "/groups";
       router.push(callbackUrl);
       setLoading(false); 
@@ -70,7 +74,7 @@ export default function Home() {
 
   const createUserByDeviceId = async (userName: string) => {
     const deviceId = uuidv4();
-    const groupId = searchParams.get("groupId");
+
     try {
       console.log(deviceId, userName);
       const response = await fetch('/api/users/create', {
@@ -93,7 +97,6 @@ export default function Home() {
   };
 
   const handleStartWithoutAccount = async () => {
-    const groupId = searchParams.get("groupId");
     if(!userName) {
       toast({ title: "Please Enter your name!" });
       return;
