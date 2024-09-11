@@ -78,7 +78,7 @@ function Home() {
   }, [session, router, callbackUrl]);
 
   const handleGoogleSignIn = () => {
-      signIn('google', { callbackUrl: callbackUrl }).catch(error => {
+      signIn('google', { callbackUrl: "/groups" }).catch(error => {
         console.error('Google sign-in error:', error);
       });
   };

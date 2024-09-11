@@ -93,7 +93,7 @@ export default function GroupsPage() {
     };
 
     fetchGroups();
-  }, [session, status]);
+  }, [session, status, user]);
 
   const createGroup = async (groupName: string) => {
     const res = await fetch('/api/groups/create', {

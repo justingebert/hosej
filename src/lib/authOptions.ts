@@ -15,6 +15,9 @@ export const authOptions =
           prompt: 'consent',
         } 
       } */
+      httpOptions: {
+        timeout: 10000,
+      }
     }),
     CredentialsProvider({
       name: 'Device ID',

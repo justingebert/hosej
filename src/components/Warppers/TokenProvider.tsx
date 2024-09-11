@@ -28,7 +28,7 @@ const sendTokenToServer = async (token: string, userId: string) => {
 export function TokenProvider({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
   const isAuthenticated = status === "authenticated";
-  const isRegistered = session && (session.user as any)._id;
+  const isRegistered = session?.user && (session.user as any)._id;
   const { fcmToken } = useFcmToken(isAuthenticated, isRegistered);
 
   useEffect(() => {
