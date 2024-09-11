@@ -9,7 +9,6 @@ import { v4 as uuidv4 } from "uuid";
 import Link from "next/link";
 import { motion } from 'framer-motion';
 import { useToast } from "@/hooks/use-toast";
-import { set } from "mongoose";
 
 export default function Home() {
   const { data: session, status } = useSession();
@@ -19,11 +18,11 @@ export default function Home() {
   const [loading, setLoading] = useState(true); 
   const { toast } = useToast();
 
-  const groupId = searchParams.get("groupId");
-
   useEffect(() => {
     setLoading(true);
+    const groupId = searchParams.get("groupId");
     if (session?.user) {
+
       const callbackUrl = groupId ? `/join/${groupId}` : "/groups";
       router.push(callbackUrl);
       setLoading(false); 
@@ -71,7 +70,7 @@ export default function Home() {
 
   const createUserByDeviceId = async (userName: string) => {
     const deviceId = uuidv4();
-
+    const groupId = searchParams.get("groupId");
     try {
       console.log(deviceId, userName);
       const response = await fetch('/api/users/create', {
@@ -94,6 +93,7 @@ export default function Home() {
   };
 
   const handleStartWithoutAccount = async () => {
+    const groupId = searchParams.get("groupId");
     if(!userName) {
       toast({ title: "Please Enter your name!" });
       return;
