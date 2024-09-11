@@ -43,19 +43,21 @@ function Home() {
   const router = useRouter();
   const [userName, setUserName] = useState("");
   const [loading, setLoading] = useState(true); 
+  const [isRedirecting, setIsRedirecting] = useState(false); 
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/groups";
   const { toast } = useToast();
 
 
   useEffect(() => {
-    if (status === "loading") {
-      setLoading(true);
-      return;
+    if (status === "loading" || isRedirecting) {
+      return; 
     }
 
     if (session) {
+      setIsRedirecting(true);
       router.push(callbackUrl);
+      return;
     }
 
     const deviceId = localStorage.getItem("deviceId");
@@ -65,6 +67,7 @@ function Home() {
         deviceId: deviceId,
       }).then(result => {
         if (result?.ok) {
+          setIsRedirecting(true); 
           router.push('/groups');
         } else {
           console.error('Device ID authentication failed:', result?.error); // Log the full result object for more context
@@ -77,7 +80,7 @@ function Home() {
     } else {
       setLoading(false); // Stop loading if no device ID found
     }
-  }, [session, router, callbackUrl, status]);
+  }, [session, router, callbackUrl, status, isRedirecting]);
 
   const handleGoogleSignIn = () => {
       signIn('google', { callbackUrl: callbackUrl }).catch(error => {
@@ -134,7 +137,7 @@ function Home() {
         });
   
         if (result?.ok) {
-          console.log('Device ID authentication successful');
+          setIsRedirecting(true); 
           router.push(callbackUrl); 
         } else {
           console.error('Device ID authentication failed:', result?.error);
@@ -148,7 +151,7 @@ function Home() {
     }
   };
 
-  if (loading || status === "loading") {
+  if (loading || status === "loading" || isRedirecting) {
     return <Loader />;
   }
 
