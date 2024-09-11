@@ -1,6 +1,6 @@
 "use client"
 
-import { Bar, BarChart, XAxis, YAxis } from "recharts"
+import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from "recharts"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 
@@ -28,34 +28,54 @@ export function RallyVotesChart({ submissions }: { submissions: any[] }) {
 
   return (
     <Card>
-      <CardHeader>
-      </CardHeader>
-      <CardContent className="p-0">
+      <CardContent className="p-2"> 
         <ChartContainer config={rallyVotesConfig}>
-          <BarChart
-            accessibilityLayer
-            data={chartData}
-            layout="vertical"
-            margin={{
-              left: 0,
-            }}
-          >
-            <YAxis
-              dataKey="username"
-              type="category"
-              tickLine={false}
-              tickMargin={10}
-              axisLine={false}
-              width={110}
-            />
-            <XAxis dataKey="votes" type="number" hide />
-            <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
-            <Bar dataKey="votes" layout="vertical" radius={5} />
-          </BarChart>
-        </ChartContainer>
+      <BarChart
+        accessibilityLayer
+        data={chartData}
+        layout="vertical"
+        margin={{ right: 16 }}
+      >
+        <CartesianGrid horizontal={false} />
+        <YAxis
+          dataKey="username"
+          type="category"
+          tickLine={false}
+          tickMargin={10}
+          axisLine={false}
+          tickFormatter={(value) => value}
+          hide
+        />
+        <XAxis dataKey="votes" type="number" hide />
+        <ChartTooltip
+          cursor={false}
+          content={<ChartTooltipContent indicator="line" />}
+        />
+        <Bar
+          dataKey="votes"
+          layout="vertical"
+          fill="var(--color-desktop)"
+          radius={4}
+        >
+          <LabelList
+            dataKey="username"
+            position="insideLeft"
+            offset={8}
+            className="fill-[--color-label]"
+            fontSize={12}
+          />
+          <LabelList
+            dataKey="votes"
+            position="right"
+            offset={8}
+            className="fill-foreground"
+            fontSize={12}
+            formatter={(value:any) => (value === 0 ? "" : value)}
+          />
+        </Bar>
+      </BarChart>
+    </ChartContainer>
       </CardContent>
-      <CardFooter>
-      </CardFooter>
     </Card>
   )
 }

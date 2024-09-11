@@ -24,7 +24,7 @@ const Loader = () => {
         color: "transparent",
       }}
       animate={{
-        backgroundPosition: ["-100% 0", "100% 0"],
+        backgroundPosition: ["100% 0", "-100% 0"],
       }}
       transition={{
         duration: 1.5,
@@ -72,7 +72,6 @@ function Home() {
         setLoading(false); // Stop loading on error
       });
     } else {
-      console.warn('No device ID found in localStorage');
       setLoading(false); // Stop loading if no device ID found
     }
   }, [session, router, callbackUrl]);
