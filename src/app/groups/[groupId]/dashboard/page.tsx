@@ -134,22 +134,22 @@ export default function Dashboard() {
             <div className="flex flex-col justify-center">
               <div className="font-bold text-2xl">Rally</div>
               <div className="text-sm text-primary/30">Submit now!</div>
-              {rallies.votingOpen && <div className="text-sm text-primary/30">Vote now!</div>}
-              {rallies.resultsShowing && <div className="text-sm text-primary/30">View results!</div>}
+              {rallies[0].votingOpen && <div className="text-sm text-primary/30">Vote now!</div>}
+              {rallies[0].resultsShowing && <div className="text-sm text-primary/30">View results!</div>}
               {rallies.length === 0 ? <div className="text-lg">Inactive</div> :
               <div className="text-lg">Active</div> }
             </div>
             <div className="w-24 h-24 rounded-lg flex items-center justify-center">
-              {rallies.votingOpen && <MousePointerClick className="w-full h-full p-4" />}
-              {rallies.resultsShowing && (
+              {rallies[0].votingOpen && <MousePointerClick className="w-full h-full p-4" />}
+              {rallies[0].resultsShowing && (
                 <div className="text-sm text-primary/30">
                   <BarChartBig className="w-full h-full p-4 " />
                 </div>
               )}
-              {rallies.length === 0 ? (
-                <CircleSlash  className="w-full h-full p-4 text-secondary" />
-              ) : (
+              {rallies.length > 0 && !rallies[0].votingOpen ? (
                 <ScanSearch className="w-full h-full p-4" />
+              ) : (
+                <CircleSlash  className="w-full h-full p-4 text-secondary" />
               )}
             </div>
           </Card>
