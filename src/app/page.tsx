@@ -49,7 +49,10 @@ function Home() {
 
 
   useEffect(() => {
-    setLoading(true);
+    if (status === "loading") {
+      setLoading(true);
+      return;
+    }
 
     if (session) {
       router.push(callbackUrl);
@@ -74,7 +77,7 @@ function Home() {
     } else {
       setLoading(false); // Stop loading if no device ID found
     }
-  }, [session, router, callbackUrl]);
+  }, [session, router, callbackUrl, status]);
 
   const handleGoogleSignIn = () => {
       signIn('google', { callbackUrl: callbackUrl }).catch(error => {
@@ -145,11 +148,8 @@ function Home() {
     }
   };
 
-  // Render the loading state if the app is still authenticating
-  if (loading) {
-    return (
-        Loader()
-    );
+  if (loading || status === "loading") {
+    return <Loader />;
   }
 
   return (
