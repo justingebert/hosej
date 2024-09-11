@@ -4,6 +4,7 @@ import Question from '@/db/models/Question';
 import User from '@/db/models/user';
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import Group from '@/db/models/Group';
 
 const s3 = new S3Client({
     region: process.env.AWS_REGION,
@@ -30,7 +31,8 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
         }, {});
 
         // Get the total number of users
-        const totalUsers = await User.countDocuments({ groups: groupId });
+        const group =  await Group.findById(groupId)
+        const totalUsers = group.members.length;
         const totalVotes = question.answers.length;
 
         // Calculate the results with percentages

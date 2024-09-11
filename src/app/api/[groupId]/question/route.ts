@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     // Populate options based on question type
     let options = data.options || [];
     if (questionType.startsWith("users-")) {
-      const users = await User.find({ groups: groupId });
+      const users = await User.find({ "groups.group": groupId });
       options = users.map((user) => user.username);
     } else if (questionType.startsWith("rating")) {
       options = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
 
     const submittingUser = await User.findOne({ username: submittedBy });
     if (submittingUser) {
-      await submittingUser.addPoints(POINTS);
+      await submittingUser.addPoints(groupId, POINTS);
     } else {
       return NextResponse.json(
         { message: "Submitting user not found" },

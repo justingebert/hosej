@@ -10,7 +10,7 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
 
   const { groupId } = params;
 
-  const users = await User.find({groups: groupId});
+  const users = await User.find({"groups.group": groupId});
 
   return NextResponse.json(users);
 }

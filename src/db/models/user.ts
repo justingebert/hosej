@@ -1,6 +1,5 @@
-import mongoose, { Schema, Document, Model } from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 import { IGroup } from "./Group";
-import PointsEntry from "./Points";
 
 export interface IUser extends Document {
   _id: string;
@@ -9,12 +8,9 @@ export interface IUser extends Document {
   googleId?: string;
   email?: string;
   username: string;
-  totalPoints: number;
-  streak: number;
-  groups: IGroup[];
+  groups: {group: IGroup[], points: number, streak:number, lastPointsDate: Date}[];
   createdAt: Date;
-  addPoints(points: number): Promise<void>;
-  getTotalPoints(): Promise<number>;
+  addPoints(groupId:string, points: number): Promise<void>;
 }
 
 const UserSchema = new Schema({
@@ -42,18 +38,25 @@ const UserSchema = new Schema({
     type: String,
     required: true,
   },
-  totalPoints: {
-    type: Number,
-    default: 0,
-  },
-  streak: {
-    type: Number,
-    default: 0,
-  },
   groups: [
     {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Group",
+      group: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Group",
+        required: true
+      },
+      points: {
+        type: Number,
+        default: 0,
+      },
+      streak:{
+        type: Number,
+        default: 0,
+      },
+      lastPointDate: {
+        type: Date,
+        default: null,
+      },
     },
   ],
   createdAt: {
@@ -62,48 +65,31 @@ const UserSchema = new Schema({
   },
 });
 
-// Method to add points to a user
-UserSchema.methods.addPoints = async function (points: number) {
+
+UserSchema.methods.addPoints = async function (groupId: string, points: number) {
   const today = new Date();
   const yesterday = new Date(today);
   yesterday.setDate(today.getDate() - 1);
 
-  // Fetch the last points entry
-  const lastEntry = await PointsEntry.findOne({ user: this._id })
-    .sort({ date: -1 })
-    .exec();
+  const groupPointsEntry = this.groups.find(
+    (group: any) => group.group.toString() === groupId
+  );
 
-  // Update streak based on last entry's date
-  if (lastEntry && lastEntry.date.toDateString() === yesterday.toDateString()) {
-    this.streak += 1;
-  } else if (lastEntry && lastEntry.date.toDateString() === today.toDateString()) {
-    // Do nothing if there is already an entry for today
-  } else {
-    // Reset streak if last entry was not yesterday
-    this.streak = 1;
+  if (groupPointsEntry) {
+    groupPointsEntry.points += points;
+
+    if (groupPointsEntry.lastPointDate && groupPointsEntry.lastPointDate.toDateString() === yesterday.toDateString()) {
+      groupPointsEntry.streak += 1;
+    } else if (groupPointsEntry.lastPointDate && groupPointsEntry.lastPointDate.toDateString() === today.toDateString()) {
+      
+    } else {
+      groupPointsEntry.streak = 1;
+    }
+
+    groupPointsEntry.lastPointDate = today;
   }
 
-  // Create and save the new points entry
-  const newPointsEntry = new PointsEntry({
-    user: this._id,
-    points: points + (lastEntry ? lastEntry.points : 0),
-  });
-
-  await newPointsEntry.save();
-
-  // Update the user's total points and save
-  this.totalPoints += points;
   await this.save();
-};
-
-// Method to calculate the total points for a user
-UserSchema.methods.getTotalPoints = async function () {
-  const total = await PointsEntry.aggregate([
-    { $match: { user: this._id } },
-    { $group: { _id: null, total: { $sum: "$points" } } },
-  ]);
-
-  return total[0] ? total[0].total : 0;
 };
 
 const User = mongoose.models.User || mongoose.model<IUser>("User", UserSchema);

@@ -8,10 +8,11 @@ const POINTS = 1;
 export const revalidate = 0
 
 //vote on a question
-export async function POST(req: Request) {
+export async function POST(req: Request, { params }: { params: { groupId: string } }) {
   try {
     const data = await req.json();
     const { questionId, response, userThatVoted } = data;
+    const { groupId } = params;
 
     await dbConnect();
 
@@ -34,7 +35,7 @@ export async function POST(req: Request) {
       { new: true, runValidators: true }
     );
 
-    await votingUser.addPoints(POINTS);
+    await votingUser.addPoints(groupId, POINTS);
 
     return NextResponse.json({ message: "Vote submitted" });
   } catch (error) {

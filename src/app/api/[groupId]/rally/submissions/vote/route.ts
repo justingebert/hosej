@@ -30,7 +30,7 @@ export async function POST(req: NextRequest, { params }: { params: { groupId: st
         
         await rally.save();
         const votingUser = await User.findOne({ username: userThatVoted });
-        await votingUser.addPoints(POINTS);
+        await votingUser.addPoints(groupId, POINTS);
        
         return NextResponse.json("Vote added successfully")
     }catch (error) {

@@ -115,7 +115,7 @@ export async function POST(req: Request) {
     await newRally.save();
 
     const submittingUser = await User.findOne({ username: submittedBy });
-    await submittingUser.addPoints(POINTS);
+    await submittingUser.addPoints(groupId, POINTS);
 
     return NextResponse.json({ message: "Rally created successfully" });
   } catch (error: any) {
