@@ -61,7 +61,7 @@ export async function GET(req: Request) {
         if(questions.length === 0){
           await sendNotification('🥗DA HABEN WIR DEN SALAT🥗', `${group.name} HAT KEINE FRAGEN MEHR, AN DIE ARBEIT!!`, group._id);
         }else{
-          await sendNotification('🚨HoseJ Fragen!!🚨', '🚨JETZT VOTEN DU FISCH🚨');
+          await sendNotification('Neue Fragen!!🚨', '🚨JETZT VOTEN DU FISCH🚨');
         }
 
     }

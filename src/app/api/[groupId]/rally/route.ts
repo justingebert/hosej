@@ -38,7 +38,7 @@ export async function GET(
         rally.endTime = new Date(currentTime.getTime() + 24 * 60 * 60 * 1000); // 1 day for voting
         await rally.save();
 
-        await sendNotification('📷 HoseJ Rally Voting! 📷', '📷 VOTE NOW 📷');
+        await sendNotification('📷 Rally Voting! 📷', '📷 VOTE NOW 📷');
       }
 
       // Results phase: if voting is over, but the rally is still active
@@ -47,7 +47,7 @@ export async function GET(
         rally.resultsShowing = true
         rally.endTime = new Date(currentTime.getTime() + 24 * 60 * 60 * 1000); // 1 day for results viewing
         await rally.save();
-        await sendNotification('📷 HoseJ Rally Results! 📷', '📷 VIEW NOW 📷');
+        await sendNotification('📷 Rally Results! 📷', '📷 VIEW NOW 📷');
       }
 
       if(rally.resultsShowing && currentTime >= new Date(rally.endTime)) {
@@ -71,7 +71,7 @@ export async function GET(
           newRally.endTime = new Date(gapEndTime.getTime() + newRally.lengthInDays * 24 * 60 * 60 * 1000); // Set end time based on lengthInDays
           await newRally.save();
 
-          await sendNotification('📷 HoseJ Rally! 📷', '📷 NEW RALLY STARTED 📷');
+          await sendNotification('📷 Rally started! 📷', '📷 SUBMIT NOW 📷');
         }
       }
     }
