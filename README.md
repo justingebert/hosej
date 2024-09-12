@@ -1,24 +1,21 @@
 # hosej
 
-- question app for me and my friends
+- Question/Rally app for me and my friends
 
 # Features
 
+- Groups
 - Daily Questions with voting and results
 - Photo Rallies (tasks for taking a photo) with voting and results
-- Chat for every vote
+- Chats
 - History
 - Statistics
 - Leaderboard
 
 # Technical Features
 
-- installable (PWA)
+- Installable (PWA)
 - Push Notifications
-- no Login needed
+- No Login needed
+- Google auth available
 - Photo Uploading
-
-Group Migration:
-questions,rally: groupId
-users: groups: groupId
-questions population
