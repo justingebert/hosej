@@ -43,8 +43,6 @@ export async function GET(
 
       // Results phase: if voting is over, but the rally is still active
       if (rally.votingOpen && currentTime >= new Date(rally.endTime)) {
-        rally.active = false;
-        rally.used = true;
         rally.votingOpen = false;
         rally.resultsShowing = true
         rally.endTime = new Date(currentTime.getTime() + 24 * 60 * 60 * 1000); // 1 day for results viewing
@@ -54,7 +52,8 @@ export async function GET(
 
       if(rally.resultsShowing && currentTime >= new Date(rally.endTime)) {
         rally.resultsShowing = false;
-      
+        rally.active = false;
+        rally.used = true;
         // After results viewing day, set gap phase
         const gapEndTime = new Date(currentTime.getTime() + group.rallyGapDays * 24 * 60 * 60 * 1000);
 
