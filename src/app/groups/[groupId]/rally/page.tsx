@@ -126,25 +126,32 @@ function RallyTabContent({ groupId, user, rally, userHasVoted, userHasUploaded,s
         <h2 className="font-bold p-6 text-secondary">{rally.task}</h2>
       </Card>
       {!rally.votingOpen && !rally.resultsShowing && (
-        <SubmitRally
-          rally={rally}
-          groupId={groupId}
-          user={user}
-          userHasUploaded={userHasUploaded}
-          setUserHasUploaded={setUserHasUploaded}
-          setUserHasVoted={setUserHasVoted}
-        />
-      )}
+    <SubmitRally
+      rally={rally}
+      groupId={groupId}
+      user={user}
+      userHasUploaded={userHasUploaded}
+      setUserHasUploaded={setUserHasUploaded}
+      setUserHasVoted={setUserHasVoted}
+    />
+  )}
 
-      {rally.votingOpen &&
-        (userHasVoted[rally._id] ? (
-          <div className="mt-5">
-            <RallyResults user={user} rally={rally} />
-          </div>
-        ) : (
-            <RallyVoteCarousel user={user} rally={rally} onVote={handleVote} />
-        ))}
-        </div>
+  {rally.votingOpen && !rally.resultsShowing && (
+    userHasVoted[rally._id] ? (
+      <div className="mt-5">
+        <RallyResults user={user} rally={rally} />
+      </div>
+    ) : (
+      <RallyVoteCarousel user={user} rally={rally} onVote={handleVote} />
+    )
+  )}
+
+  {rally.resultsShowing && (
+    <div className="mt-5">
+      <RallyResults user={user} rally={rally} />
+    </div>
+  )}
+  </div>
   );
 }
 
