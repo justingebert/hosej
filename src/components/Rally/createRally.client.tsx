@@ -75,8 +75,8 @@ const CreateRally = () => {
           required
         />
       </div>
-      <div className="flex justify-center fixed bottom-20 left-0 w-full p-2 bg-background">
-        <Button onClick={handleSubmit} disabled={loading || !task.trim() || !lengthInDays}>
+      <div className="flex justify-center fixed bottom-6 left-0 w-full p-6 bg-background">
+        <Button onClick={handleSubmit} disabled={loading || !task.trim() || !lengthInDays} className="w-full">
           {loading ? "Creating..." : "Create Rally"}
         </Button>
       </div>
