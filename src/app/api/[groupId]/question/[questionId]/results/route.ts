@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Question from '@/db/models/Question';
-import User from '@/db/models/user';
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import Group from '@/db/models/Group';
@@ -18,19 +17,16 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
 
         const { groupId, questionId } = params;
 
-        // Find the question by ID
         const question = await Question.findOne({ groupId, _id: questionId });
         if (!question) {
             return NextResponse.json({ message: "Question not found" }, { status: 404 });
         }
 
-        // Calculate the vote counts
         const voteCounts = question.answers.reduce((acc: any, answer: any) => {
             acc[answer.response] = (acc[answer.response] || 0) + 1;
             return acc;
         }, {});
 
-        // Get the total number of users
         const group =  await Group.findById(groupId)
         const totalUsers = group.members.length;
         const totalVotes = question.answers.length;
@@ -60,8 +56,8 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
                     });
 
                     try {
-                        const signedUrl = await getSignedUrl(s3, command, { expiresIn: 60 }); // Short-lived URL
-                        return { ...result, option: signedUrl }; // Replace option with signed URL
+                        const signedUrl = await getSignedUrl(s3, command, { expiresIn: 180 }); // Short-lived URL
+                        return { ...result, option: signedUrl }; // Replace the option with the signed URL
                     } catch (s3Error: any) {
                         console.error(`Failed to generate pre-signed URL for option ${result.option}`, s3Error);
                         throw new Error(`Failed to generate pre-signed URL for option: ${s3Error.message}`);

@@ -24,7 +24,6 @@ export async function GET(req: Request, { params }: { params: { groupId: string 
             active: true,
         });
 
-        console.log(questions)
         if (!questions || questions.length === 0) {
             return NextResponse.json({ questions: [], message: "No questions available" });
         }

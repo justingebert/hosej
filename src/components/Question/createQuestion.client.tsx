@@ -98,8 +98,8 @@ const CreateQuestion = () => {
       category: "Daily",
       questionType: questionType,
       question: question,
-      options: questionType.startsWith("custom") ? options : [], // This will be populated after the image uploads
-      submittedBy: user.username,
+      options: questionType.startsWith("custom") ? options : [], 
+      submittedBy: user._id,
     };
 
     try {

@@ -141,10 +141,7 @@ export default function Dashboard() {
             </div>
             <div className="w-24 h-24 rounded-lg flex items-center justify-center">
               {rallies.length > 0 && rallies[0].votingOpen && <MousePointerClick className="w-full h-full p-4" />}
-              {rallies.length > 0 && rallies[0].resultsShowing && (
-                <div className="text-sm text-primary/30">
-                  <BarChartBig className="w-full h-full p-4 " />
-                </div>
+              {rallies.length > 0 && rallies[0].resultsShowing && (<BarChartBig className="w-full h-full p-4 " />
               )}
               {rallies.length > 0 && !rallies[0].votingOpen && !rallies[0].resultsShowing && (<ScanSearch className="w-full h-full p-4" />)} 
               {rallies.length === 0 && (  <CircleSlash  className="w-full h-full p-4 text-secondary" />)}

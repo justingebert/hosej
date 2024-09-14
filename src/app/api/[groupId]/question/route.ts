@@ -23,8 +23,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    console.log(groupId, category, questionType, question, submittedBy, image)
-
     await dbConnect();
 
     // Populate options based on question type
@@ -35,8 +33,6 @@ export async function POST(req: NextRequest) {
     } else if (questionType.startsWith("rating")) {
       options = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
     }
-
-   
 
     const newQuestion = new Question({
       groupId,
@@ -61,10 +57,7 @@ export async function POST(req: NextRequest) {
     newQuestion.chat = newChat._id;
     await newQuestion.save();
 
-
-
-
-    const submittingUser = await User.findOne({ username: submittedBy });
+    const submittingUser = await User.findById(submittedBy);
     if (submittingUser) {
       await submittingUser.addPoints(groupId, POINTS);
       console.log("test")

@@ -24,7 +24,7 @@ function QuestionsTabs({ user, groupId, questions, userHasVoted, setUserHasVoted
     await fetch(`/api/${groupId}/question/${questionId}/rate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username:user.username, rating:rating }),
+      body: JSON.stringify({ user:user._id, rating:rating }),
     });
 
     setSelectedRating((prevState: any) => ({
@@ -60,9 +60,9 @@ function QuestionsTabs({ user, groupId, questions, userHasVoted, setUserHasVoted
             <DrawerDescription></DrawerDescription>
           </DrawerHeader>
           <div className="flex flex-row justify-center space-x-4">
-            <Badge>🐟{question.rating.bad.count}</Badge>
-            <Badge>👍{question.rating.ok.count}</Badge>
-            <Badge>🐐{question.rating.good.count}</Badge>
+            <Badge>🐟{question.rating.bad.length}</Badge>
+            <Badge>👍{question.rating.ok.length}</Badge>
+            <Badge>🐐{question.rating.good.length}</Badge>
           </div>
             <div className="flex flex-row space-x-4 p-4">
             <Button

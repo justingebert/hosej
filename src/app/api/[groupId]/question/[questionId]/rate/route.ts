@@ -7,8 +7,8 @@ export const revalidate = 0;
 // Handle rating update
 export async function POST(req: NextRequest, { params }: { params: { questionId: string } }) {
     const { questionId } = params;
-    const body = await req.json();
-    const { rating, username } = body;
+    const data = await req.json();
+    const { rating, user } = data;
 
     try {
         await dbConnect();
@@ -18,19 +18,16 @@ export async function POST(req: NextRequest, { params }: { params: { questionId:
             return NextResponse.json({ message: "Question not found" }, { status: 404 });
         }
 
-        if (question.rating.good.usernames.includes(username) || question.rating.ok.usernames.includes(username) || question.rating.bad.usernames.includes(username)) {
+        if (question.rating.good.includes(user) || question.rating.ok.includes(user) || question.rating.bad.includes(user)) {
             return NextResponse.json({ message: "User already rated" });
         }
         
         if (rating === "good") {
-                question.rating.good.count += 1;
-                question.rating.good.usernames.push(username);
+            question.rating.good.push(user);
         } else if (rating === "ok") {
-                question.rating.ok.count += 1;
-                question.rating.ok.usernames.push(username);
+                question.rating.ok.push(user);
         } else if (rating === "bad") {
-                question.rating.bad.count += 1;
-                question.rating.bad.usernames.push(username);
+                question.rating.bad.push(user);
         }
         await question.save();
     

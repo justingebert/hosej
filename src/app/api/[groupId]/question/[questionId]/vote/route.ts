@@ -8,11 +8,11 @@ const POINTS = 1;
 export const revalidate = 0
 
 //vote on a question
-export async function POST(req: Request, { params }: { params: { groupId: string } }) {
+export async function POST(req: Request, { params }: { params: { groupId: string, questionId: string } }) {
   try {
     const data = await req.json();
-    const { questionId, response, userThatVoted } = data;
-    const { groupId } = params;
+    const { response, userThatVoted } = data;
+    const { groupId, questionId } = params;
 
     await dbConnect();
 
@@ -21,21 +21,21 @@ export async function POST(req: Request, { params }: { params: { groupId: string
       return NextResponse.json({ message: "Question not found" });
     }
 
-    const votingUser = await User.findOne({ username: userThatVoted });
+    const user = await User.findById(userThatVoted);
     const hasVoted = question.answers.some((answer: any) =>
-      answer.username.equals(votingUser._id)
+      answer.user.equals(user._id)
     );
     if (hasVoted) {
       return NextResponse.json({ message: "You have already voted" });
     }
 
-    const updatedQuestion = await Question.findByIdAndUpdate(
+    await Question.findByIdAndUpdate(
       questionId,
-      { $push: { answers: { username: votingUser._id, response: response, time: Date.now() } } },
+      { $push: { answers: { user: user._id, response: response, time: Date.now() } } },
       { new: true, runValidators: true }
     );
 
-    await votingUser.addPoints(groupId, POINTS);
+    await user.addPoints(groupId, POINTS);
 
     return NextResponse.json({ message: "Vote submitted" });
   } catch (error) {
