@@ -42,7 +42,7 @@ export async function GET(
       }
 
       // Results phase: if voting is over, but the rally is still active
-      if (currentTime >= new Date(rally.endTime) && rally.votingOpen) {
+      if (currentTime >= endTime && rally.votingOpen) {
         rally.votingOpen = false;
         rally.resultsShowing = true
         rally.endTime = new Date(currentTime.getTime() + 24 * 60 * 60 * 1000); // 1 day for results viewing
@@ -50,7 +50,7 @@ export async function GET(
         await sendNotification('📷 Rally Results! 📷', '📷 VIEW NOW 📷');
       }
 
-      if(currentTime >= new Date(rally.endTime) && rally.resultsShowing ) {
+      if(currentTime >= endTime && rally.resultsShowing ) {
         rally.resultsShowing = false;
         rally.active = false;
         rally.used = true;
@@ -76,7 +76,9 @@ export async function GET(
       }
     }
 
-    return NextResponse.json({ rallies });
+    const activeRallies = rallies.filter(rally => currentTime >= new Date(rally.startTime));
+
+    return NextResponse.json({ rallies: activeRallies });
   } catch (error: any) {
     console.error(error);
     return NextResponse.json({ message: error.message }, { status: 500 });
