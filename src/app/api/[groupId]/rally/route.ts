@@ -31,6 +31,14 @@ export async function GET(
 
     for (let rally of rallies) {
       const endTime = new Date(rally.endTime);
+      const startTime = new Date(rally.startTime);
+      
+      if (!rally.active && currentTime >= startTime && !rally.votingOpen && !rally.resultsShowing) {
+        rally.used = true;
+        await rally.save();
+
+        await sendNotification('📷 New Rally Started! 📷', '📷 PARTICIPATE NOW! 📷');
+      }
 
       // Voting phase: if current time is after the rally's endTime and voting is not yet open
       if (currentTime >= endTime && !rally.votingOpen && !rally.resultsShowing) {
@@ -70,8 +78,7 @@ export async function GET(
           newRally.startTime = gapEndTime; // New rally starts after the gap phase
           newRally.endTime = new Date(gapEndTime.getTime() + newRally.lengthInDays * 24 * 60 * 60 * 1000); // Set end time based on lengthInDays
           await newRally.save();
-
-          await sendNotification('📷 Rally started! 📷', '📷 SUBMIT NOW 📷');
+          await sendNotification('📷 Rally finished! 📷', `📷 Next Rally starting: ${newRally.startTime.toLocaleString()}📷`);
         }
       }
     }
