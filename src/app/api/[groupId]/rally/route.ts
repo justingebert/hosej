@@ -31,9 +31,17 @@ export async function GET(
 
     for (let rally of rallies) {
       const endTime = new Date(rally.endTime);
+      const startTime = new Date(rally.startTime);
+      
+      if (!rally.active && currentTime >= startTime && !rally.votingOpen && !rally.resultsShowing) {
+        rally.used = true;
+        await rally.save();
+
+        await sendNotification('📷 New Rally Started! 📷', '📷 PARTICIPATE NOW! 📷');
+      }
 
       // Voting phase: if current time is after the rally's endTime and voting is not yet open
-      if (currentTime >= endTime && !rally.votingOpen) {
+      if (currentTime >= endTime && !rally.votingOpen && !rally.resultsShowing) {
         rally.votingOpen = true;
         rally.endTime = new Date(currentTime.getTime() + 24 * 60 * 60 * 1000); // 1 day for voting
         await rally.save();
@@ -42,7 +50,7 @@ export async function GET(
       }
 
       // Results phase: if voting is over, but the rally is still active
-      if (rally.votingOpen && currentTime >= new Date(rally.endTime)) {
+      if (currentTime >= endTime && rally.votingOpen) {
         rally.votingOpen = false;
         rally.resultsShowing = true
         rally.endTime = new Date(currentTime.getTime() + 24 * 60 * 60 * 1000); // 1 day for results viewing
@@ -50,7 +58,7 @@ export async function GET(
         await sendNotification('📷 Rally Results! 📷', '📷 VIEW NOW 📷');
       }
 
-      if(rally.resultsShowing && currentTime >= new Date(rally.endTime)) {
+      if(currentTime >= endTime && rally.resultsShowing ) {
         rally.resultsShowing = false;
         rally.active = false;
         rally.used = true;
@@ -70,13 +78,14 @@ export async function GET(
           newRally.startTime = gapEndTime; // New rally starts after the gap phase
           newRally.endTime = new Date(gapEndTime.getTime() + newRally.lengthInDays * 24 * 60 * 60 * 1000); // Set end time based on lengthInDays
           await newRally.save();
-
-          await sendNotification('📷 Rally started! 📷', '📷 SUBMIT NOW 📷');
+          await sendNotification('📷 Rally finished! 📷', `📷 Next Rally starting: ${newRally.startTime.toLocaleString()}📷`);
         }
       }
     }
 
-    return NextResponse.json({ rallies });
+    const activeRallies = rallies.filter(rally => currentTime >= new Date(rally.startTime));
+
+    return NextResponse.json({ rallies: activeRallies });
   } catch (error: any) {
     console.error(error);
     return NextResponse.json({ message: error.message }, { status: 500 });
