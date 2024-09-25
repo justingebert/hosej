@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Question from '@/db/models/Question';
-import User from '@/db/models/user';
 
 export async function POST(req: NextRequest, { params }: { params: { groupId: string, questionId: string } }) {
   try {

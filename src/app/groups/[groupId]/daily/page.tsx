@@ -147,16 +147,16 @@ const DailyQuestionPage = () => {
         setQuestions(data.questions);
         const votes = data.questions.reduce((acc: any, question: any) => {
           acc[question._id] = question.answers.some(
-            (answer: any) => answer.username === user._id
+            (answer: any) => answer.user === user._id
           );
           return acc;
         }, {});
         setUserHasVoted(votes);
 
         const ratings = data.questions.reduce((acc: any, question: any) => {
-          if (question.rating.good.usernames.includes(user.username)) acc[question._id] = "good";
-          else if (question.rating.ok.usernames.includes(user.username)) acc[question._id] = "ok";
-          else if (question.rating.bad.usernames.includes(user.username)) acc[question._id] = "bad";
+          if (question.rating.good.includes(user._id)) acc[question._id] = "good";
+          else if (question.rating.ok.includes(user._id)) acc[question._id] = "ok";
+          else if (question.rating.bad.includes(user._id)) acc[question._id] = "bad";
           return acc;
         }, {});
 

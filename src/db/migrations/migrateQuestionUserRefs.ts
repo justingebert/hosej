@@ -16,7 +16,7 @@ async function migrateQuestions() {
 
       // Update submittedBy to reference a User if it is a string (username)
       if (typeof question.submittedBy === 'string') {
-        const user = await User.findOne({ username: question.submittedBy }).lean();
+        const user = await User.findOne({ username: question.submittedBy }).lean() as any;
         if (user) {
           question.submittedBy = user._id;
         }
@@ -28,7 +28,7 @@ async function migrateQuestions() {
         const userRefs = [];
 
         for (const username of usernames) {
-          const user = await User.findOne({ username }).lean();
+          const user = await User.findOne({ username }).lean() as any;
           if (user) {
             userRefs.push(user._id);
           }
@@ -39,12 +39,10 @@ async function migrateQuestions() {
 
       // Update answers to reference users instead of usernames
       for (const answer of question.answers) {
-        if (typeof answer.username === 'string') {
-          const user = await User.findOne({ username: answer.username }).lean();
+          const user = await User.findById(answer.username).lean() as any;
           if (user) {
             answer.user = user._id;
           }
-        }
         delete answer.username;
       }
 
