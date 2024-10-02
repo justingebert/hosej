@@ -33,7 +33,7 @@ export async function GET(
       const endTime = new Date(rally.endTime);
       const startTime = new Date(rally.startTime);
       
-      if (!rally.active && currentTime >= startTime && !rally.votingOpen && !rally.resultsShowing) {
+      if (rally.active && currentTime >= startTime && !rally.votingOpen && !rally.resultsShowing) {
         rally.used = true;
         await rally.save();
 
