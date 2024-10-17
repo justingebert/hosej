@@ -78,6 +78,7 @@ const CreateQuestion = () => {
     setOptionFiles([]);
     setQuestionType("");
     setClearImageInput(true);
+    setMainImageFile(null);
   };
 
   const handleSubmit = async (e: any) => {
