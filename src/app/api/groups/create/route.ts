@@ -7,24 +7,25 @@ export async function POST(req: NextRequest) {
   try{
     await dbConnect();
     const { name, user } = await req.json();
-    console.log(name)
-    console.log(user)
-  
+    
+    const userAdmin = await User.findById(user._id);
+    if (!userAdmin) {
+      return NextResponse.json({ message: 'User not found' }, { status: 404 });
+    }
+
     const newGroup = new Group({
       name: name,
-      admin: user._id,
-      members: [user._id],
+      admin: userAdmin._id,
+      members: [userAdmin._id],
     });
-  
     await newGroup.save();
-
-    const userAdmin = await User.findById(user._id);
+    
     userAdmin.groups.push(newGroup._id);
     await userAdmin.save();
 
     return NextResponse.json(newGroup, { status: 201 });
   }catch (error) {
-    console.error("Failed to fetch groups:", error);
-    return NextResponse.error();
+    console.error("Failed to create group", error);
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
 }

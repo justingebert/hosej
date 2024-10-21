@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Group from '@/db/models/Group';
-import User from '@/db/models/user';
-
 
 export async function POST (req: NextRequest) {
   try {
@@ -16,6 +14,6 @@ export async function POST (req: NextRequest) {
     return NextResponse.json(groups, { status: 200 });
   }catch (error) {
     console.error("Failed to fetch groups:", error);
-    return NextResponse.json({ message: "Failed to fetch groups" }, { status: 500 });
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
 }
