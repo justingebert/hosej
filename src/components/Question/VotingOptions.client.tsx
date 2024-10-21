@@ -12,7 +12,7 @@ const VoteOptions = ({ user, question, onVote }:any) => {
   const submitVote = async () => {
     const response = question.questionType === "text" ? textResponse : selectedOption;
 
-    await fetch(`/api/${question.groupId}/question/${question._id}/vote`, {
+    await fetch(`/api/groups/${question.groupId}/question/${question._id}/vote`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

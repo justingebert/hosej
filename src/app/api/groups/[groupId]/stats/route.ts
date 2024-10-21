@@ -29,16 +29,39 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
         submittedBy: { $exists: true, $ne: null } 
       } 
     },
-    { 
+    {
       $group: { 
         _id: "$submittedBy", 
         count: { $sum: 1 } 
-      } 
+      }
+    },
+    // Lookup to fetch the user details
+    {
+      $lookup: {
+        from: "users",                // Collection name of users
+        localField: "_id",            // Field in the current pipeline
+        foreignField: "_id",          // Field in the users collection
+        as: "user"                    // Output array field to store user details
+      }
+    },
+    // Unwind the array to get a single user object
+    { 
+      $unwind: "$user" 
+    },
+    // Replace submittedBy (which is user id) with username
+    {
+      $project: {
+        _id: 0,                      // Exclude the _id field
+        username: "$user.username",   // Get the username from the lookup
+        count: 1                      // Keep the count
+      }
     },
     {
       $sort: { count: -1 }  // Sort by count in descending order (largest first)
     }
   ]);
+
+  console.log(questionsByUser);
 
 
 

@@ -37,7 +37,6 @@ const StatsPage = () => {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<Statistics | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
   const { groupId } = useParams<{ groupId: string }>();
 
   useEffect(() => {

@@ -15,7 +15,7 @@ const RallyResults = ({ user, rally }: any) => {
 
   useEffect(() => {
     const fetchSubmissions = async () => {
-      const response = await fetch(`/api/${rally.groupId}/rally/submissions/${rally._id}`);
+      const response = await fetch(`/api/groups/${rally.groupId}/rally/submissions/${rally._id}`);
       const data = await response.json();
       setSubmissions(data.submissions);
     };

@@ -1,15 +1,5 @@
 import mongoose from "mongoose";
 
-enum QuestionType {
-  UsersSelectOne = "users-select-one",
-  UsersSelectMultiple = "users-select-multiple",
-  CustomSelectOne = "custom-select-one",
-  CustomSelectMultiple = "custom-select-multiple",
-  Text = "text",
-  Rating = "rating",
-  ImageSelectOne = "image-select-one",
-}
-
 export interface IQuestion extends mongoose.Document {
   category: string;
   questionType: QuestionType;
@@ -25,6 +15,17 @@ export interface IQuestion extends mongoose.Document {
   used: boolean;
   active: boolean;
   submittedBy: mongoose.Schema.Types.ObjectId;
+  chat: mongoose.Schema.Types.ObjectId;
+}
+
+enum QuestionType {
+  UsersSelectOne = "users-select-one",
+  UsersSelectMultiple = "users-select-multiple",
+  CustomSelectOne = "custom-select-one",
+  CustomSelectMultiple = "custom-select-multiple",
+  Text = "text",
+  Rating = "rating",
+  ImageSelectOne = "image-select-one",
 }
 
 const questionSchema = new mongoose.Schema({
@@ -36,8 +37,8 @@ const questionSchema = new mongoose.Schema({
   category: { type: String },
   questionType: {
     type: String,
-    required: true,
     enum: Object.values(QuestionType),
+    required: true,
   },
   question: { type: String, required: true },
   image: { type: String, required: false },
