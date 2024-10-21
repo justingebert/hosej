@@ -16,7 +16,7 @@ import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 
 // Fetch users for a specific group
 const fetchUsers = async (groupId: string) => {
-  const response = await fetch(`/api/${groupId}/users`);
+  const response = await fetch(`/api/groups/${groupId}/users`);
   if (!response.ok) {
     throw new Error("Failed to fetch users");
   }

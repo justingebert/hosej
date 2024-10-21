@@ -29,7 +29,7 @@ const CreateRally = () => {
     };
 
     try {
-      const response = await fetch(`/api/${groupId}/rally`, {
+      const response = await fetch(`/api/groups/${groupId}/rally`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

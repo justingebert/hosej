@@ -21,7 +21,7 @@ function QuestionsTabs({ user, groupId, questions, userHasVoted, setUserHasVoted
   const defaultTab = searchParams.get('returnTo') || (questions.length > 0 ? questions[0]._id : undefined);
 
   const rateQuestion = async (questionId: string, rating: string) => {
-    await fetch(`/api/${groupId}/question/${questionId}/rate`, {
+    await fetch(`/api/groups/${groupId}/question/${questionId}/rate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ user:user._id, rating:rating }),
@@ -132,7 +132,7 @@ const DailyQuestionPage = () => {
       if (!session?.user) return; 
       setLoading(true);
       router.refresh();
-      const res = await fetch(`/api/${groupId}/question/daily`, { cache: "no-store" });
+      const res = await fetch(`/api/groups/${groupId}/question/daily`, { cache: "no-store" });
       const data = await res.json();
 
       if (data.questions) {

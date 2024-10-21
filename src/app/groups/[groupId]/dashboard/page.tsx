@@ -26,7 +26,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     const fetchUserCount = async () => {
-      const response = await fetch(`/api/${groupId}/users/count`);
+      const response = await fetch(`/api/groups/${groupId}/users/count`);
       const data = await response.json();
       setUserCount(data);
     };
@@ -37,14 +37,14 @@ export default function Dashboard() {
   useEffect(() => {
     if (userCount > 0) {
       const fetchQuestions = async () => {
-        const response = await fetch(`/api/${groupId}/question/daily`);
+        const response = await fetch(`/api/groups/${groupId}/question/daily`);
         const data = await response.json();
         setQuestions(data.questions);
         calculateCompletion(data.questions, userCount); 
       };
       fetchQuestions();
       const fetchRallies = async () => {
-        const response = await fetch(`/api/${groupId}/rally`);
+        const response = await fetch(`/api/groups/${groupId}/rally`);
         const data = await response.json();
         setRallies(data.rallies);
       }

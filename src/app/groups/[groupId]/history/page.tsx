@@ -21,7 +21,7 @@ const QuestionHistoryPage = () => {
 
   const fetchQuestions = useCallback(async () => {
     setLoading(true);
-    const res = await fetch(`/api/${groupId}/question/history?limit=50&offset=${offset}`);
+    const res = await fetch(`/api/groups/${groupId}/question/history?limit=50&offset=${offset}`);
     const data = await res.json();
     setQuestions((prevQuestions) => {
       const combinedQuestions = [...prevQuestions, ...data.questions];

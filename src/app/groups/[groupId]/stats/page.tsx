@@ -26,7 +26,7 @@ type Statistics = {
 };
 
 const fetchStatistics = async (groupId: string): Promise<Statistics> => {
-  const response = await fetch(`/api/${groupId}/stats`);
+  const response = await fetch(`/api/groups/${groupId}/stats`);
   if (!response.ok) {
     throw new Error("Failed to fetch statistics");
   }

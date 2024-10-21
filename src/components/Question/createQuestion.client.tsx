@@ -105,7 +105,7 @@ const CreateQuestion = () => {
 
     try {
       // Create the question without options first
-      const response = await fetch(`/api/${groupId}/question/`, {
+      const response = await fetch(`/api/groups/${groupId}/question/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -126,7 +126,7 @@ const CreateQuestion = () => {
         if (imageUrl && imageUrl.length > 0) {
           // Attach the main image to the question
           const response = await fetch(
-            `/api/${groupId}/question/${newQuestion._id}/attachImage`,
+            `/api/groups/${groupId}/question/${newQuestion._id}/attachImage`,
             {
               method: "POST",
               headers: {
@@ -154,7 +154,7 @@ const CreateQuestion = () => {
         });
 
         // Update the question with options
-        const res = await fetch(`/api/${groupId}/question/${newQuestion._id}/attachOptions`, {
+        const res = await fetch(`/api/groups/${groupId}/question/${newQuestion._id}/attachOptions`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

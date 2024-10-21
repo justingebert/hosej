@@ -88,7 +88,7 @@ export default function SubmitRally({
     userId: string,
     imageUrl: string
   ) => {
-    const response = await fetch(`/api/${groupId}/rally/submissions`, {
+    const response = await fetch(`/api/groups/${groupId}/rally/submissions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

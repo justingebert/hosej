@@ -26,7 +26,7 @@ const RallyPage = () => {
     const fetchRallies = async () => {
       setLoading(true);
       router.refresh();
-      const res = await fetch(`/api/${groupId}/rally`);
+      const res = await fetch(`/api/groups/${groupId}/rally`);
       const data = await res.json();
 
       if (data.rallies) {
