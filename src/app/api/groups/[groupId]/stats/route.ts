@@ -1,6 +1,5 @@
 import { Types } from 'mongoose';
 import dbConnect from "@/lib/dbConnect";
-import User from "@/db/models/user";
 import Question from '@/db/models/Question';
 import Rally from '@/db/models/rally';
 import { NextRequest, NextResponse } from "next/server";
@@ -9,72 +8,91 @@ import Group from '@/db/models/Group';
 export const revalidate = 0
 
 export async function GET(req: NextRequest, { params }: { params: { groupId: string } }) {
-  await dbConnect();
   const { groupId } = params;
+  try{
+    await dbConnect();
 
-  const group = await Group.findById(groupId);
+    const group = await Group.findById(groupId);
 
-  const questionsUsedCount = await Question.countDocuments({groupId: groupId, used: true});
-  const questionsLeftCount = await Question.countDocuments({ groupId: groupId, used: false });
+    const questionsUsedCount = await Question.countDocuments({groupId: groupId, used: true});
+    const questionsLeftCount = await Question.countDocuments({ groupId: groupId, used: false });
 
-  const questionsByType = await Question.aggregate([
-    { $match: { groupId: (new Types.ObjectId(groupId) )} },
-    { $group: { _id: "$questionType", count: { $sum: 1 } } }
-  ]);
+    const questionsByType = await Question.aggregate([
+      { $match: { groupId: (new Types.ObjectId(groupId) )} },
+      { $group: { _id: "$questionType", count: { $sum: 1 } } }
+    ]);
 
-  const questionsByUser = await Question.aggregate([
-    { 
-      $match: { 
-        groupId: new Types.ObjectId(groupId), 
-        submittedBy: { $exists: true, $ne: null } 
-      } 
-    },
-    {
-      $group: { 
-        _id: "$submittedBy", 
-        count: { $sum: 1 } 
+    const questionsByUser = await Question.aggregate([
+      // Step 1: Find all questions from a specific group with a valid submittedBy field
+      { 
+        $match: { 
+          groupId: new Types.ObjectId(groupId), 
+          submittedBy: { $exsits: true, $ne: null } 
+        }
+      },
+      
+      // Step 2: Group by user (submittedBy) and count the number of questions
+      { 
+        $group: { 
+          _id: "$submittedBy",  // Group by the user ID (submittedBy)
+          count: { $sum: 1 }    // Count how many questions each user submitted
+        }
+      },
+    
+      // Step 3: Fetch the user's details using a lookup (join with the users collection)
+      { 
+        $lookup: {
+          from: "users",          // Collection name where users are stored
+          localField: "_id",      // Link with submittedBy field (user ID)
+          foreignField: "_id",    // Match it with the _id field in users collection
+          as: "user"              // Store result in a "user" field (an array)
+        }
+      },
+    
+      // Step 4: Simplify the user field from array to object
+      { 
+        $unwind: "$user"          // Convert the user array into a single user object
+      },
+    
+      // Step 5: Project (select) only the username and question count
+      { 
+        $project: {
+          _id: 0,                // Hide the internal ID
+          username: "$user.username",  // Show the user's username
+          count: 1               // Show the count of questions submitted
+        }
+      },
+    
+      // Step 6: Sort the results by the number of questions in descending order
+      { 
+        $sort: { count: -1 }
       }
-    },
-    // Lookup to fetch the user details
-    {
-      $lookup: {
-        from: "users",                // Collection name of users
-        localField: "_id",            // Field in the current pipeline
-        foreignField: "_id",          // Field in the users collection
-        as: "user"                    // Output array field to store user details
-      }
-    },
-    // Unwind the array to get a single user object
-    { 
-      $unwind: "$user" 
-    },
-    // Replace submittedBy (which is user id) with username
-    {
-      $project: {
-        _id: 0,                      // Exclude the _id field
-        username: "$user.username",   // Get the username from the lookup
-        count: 1                      // Keep the count
-      }
-    },
-    {
-      $sort: { count: -1 }  // Sort by count in descending order (largest first)
-    }
-  ]);
+    ]);
 
-  console.log(questionsByUser);
+    const RalliesUsedCount = await Rally.countDocuments({ groupId: groupId, used: true });
+    const RalliesLeftCount = await Rally.countDocuments({ groupId: groupId, used: false });
+    
+    const messages = await Chat.aggregate([
+      { $match: { group: (new Types.ObjectId(groupId) )} }, // Match the group ID
+      { $unwind: "$messages" }, // Deconstruct the messages array
+      { $count: "messagesCount" } // Count the number of messages
+    ]);
+    const messagesCount = messages[0]?.messagesCount || 0;
 
+    return NextResponse.json({ 
+      group,
+      questionsUsedCount, 
+      questionsLeftCount, 
+      questionsByType, 
+      questionsByUser,
+      RalliesUsedCount, 
+      RalliesLeftCount, 
+      messagesCount 
+    }, { status: 200 });
 
-
-  const RalliesUsedCount = await Rally.countDocuments({ groupId: groupId, used: true });
-  const RalliesLeftCount = await Rally.countDocuments({ groupId: groupId, used: false });
-  
-  const messages = await Chat.aggregate([
-    { $match: { group: (new Types.ObjectId(groupId) )} }, // Match the group ID
-    { $unwind: "$messages" }, // Deconstruct the messages array
-    { $count: "messagesCount" } // Count the number of messages
-  ]);
-  const messagesCount = messages[0]?.messagesCount || 0;
-
-  return NextResponse.json({ group, questionsUsedCount, questionsLeftCount, questionsByType, questionsByUser, RalliesUsedCount, RalliesLeftCount, messagesCount });
+  } catch (error) {
+    console.error(`Error fetching statistics for group: ${groupId}`, error);
+    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+  }
 }
 

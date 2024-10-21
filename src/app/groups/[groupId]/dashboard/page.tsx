@@ -26,9 +26,9 @@ export default function Dashboard() {
 
   useEffect(() => {
     const fetchUserCount = async () => {
-      const response = await fetch(`/api/groups/${groupId}/users/count`);
+      const response = await fetch(`/api/groups/${groupId}`);
       const data = await response.json();
-      setUserCount(data);
+      setUserCount(data.members.length);
     };
     fetchUserCount();
   }, [groupId, userCount]);
