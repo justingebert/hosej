@@ -6,7 +6,7 @@ const withSerwist = withSerwistInit({
   swSrc: "src/sw.ts",
   swDest: "public/firebase-messaging-sw.js",
   swUrl: "/firebase-messaging-sw.js",
-  disable: process.env.ENV === "development",
+  disable: process.env.ENV === "dev",
 });
 
 export default withSerwist({

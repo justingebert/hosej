@@ -11,7 +11,7 @@ function ChatComponent({ user, entity, available }: any) {
   useEffect(() => {
     const fetchMessages = async () => {
       if (entity.chat) {
-        const response = await fetch(`/api/${entity.groupId}/chats/${entity.chat}`);
+        const response = await fetch(`/api/groups/${entity.groupId}/chats/${entity.chat}`);
         const data = await response.json();
         setMessages(data.messages);
       }
@@ -24,7 +24,7 @@ function ChatComponent({ user, entity, available }: any) {
     if (!newMessage.trim()) return; // Prevent sending empty messages
 
     const messageData = { message: newMessage, userId: user._id };
-    const response = await fetch(`/api/${entity.groupId}/chats/${entity.chat}/messages`, {
+    const response = await fetch(`/api/groups/${entity.groupId}/chats/${entity.chat}/messages`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

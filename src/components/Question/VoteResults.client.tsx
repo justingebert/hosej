@@ -23,7 +23,7 @@ const VoteResults = ({ user, question, available, returnTo }: VoteResultsProps) 
   useEffect(() => {
     const fetchResults = async () => {
       const res = await fetch(
-        `/api/${question.groupId}/question/${question._id}/results/`);
+        `/api/groups/${question.groupId}/question/${question._id}/results/`);
       const data = await res.json();
       setResults(data.results);
       setNumOfVotes(`${data.totalVotes} of ${data.totalUsers} voted`);

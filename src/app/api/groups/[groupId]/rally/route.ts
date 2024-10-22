@@ -19,8 +19,7 @@ export async function GET(req: NextRequest,{ params }: { params: { groupId: stri
 
     const currentTime = new Date();
 
-    const rallies = await Rally.find({ groupId: groupId, active: true }).limit(group.rallyCount);
-
+    const rallies = await Rally.find({ groupId: groupId, active: true })
     if (rallies.length === 0) {
       return NextResponse.json({ message: "No active rallies", rallies: [] }, { status: 200 });
     }
@@ -29,35 +28,40 @@ export async function GET(req: NextRequest,{ params }: { params: { groupId: stri
       const endTime = new Date(rally.endTime);
       const startTime = new Date(rally.startTime);
       
-      //this newer enters
+      // start rally
       if (!rally.used && currentTime >= startTime && !rally.votingOpen && !rally.resultsShowing) {
         rally.used = true;
         await rally.save();
 
         await sendNotification('📷 New Rally Started! 📷', '📷 PARTICIPATE NOW! 📷');
+        continue;
       }
-
+  
+      if(currentTime < endTime) continue;
+      // set state of running rally
       // Voting phase: if current time is after the rally's endTime and voting is not yet open
-      if (currentTime >= endTime && !rally.votingOpen && !rally.resultsShowing) {
+      if (!rally.votingOpen && !rally.resultsShowing) {
         rally.votingOpen = true;
         rally.endTime = new Date(currentTime.getTime() + 24 * 60 * 60 * 1000); // 1 day for voting
         await rally.save();
 
         await sendNotification('📷 Rally Voting! 📷', '📷 VOTE NOW 📷');
       }
-
       // Results phase: if voting is over, but the rally is still active
-      if (currentTime >= endTime && rally.votingOpen && !rally.resultsShowing) {
+      else if (rally.votingOpen && !rally.resultsShowing) {
         rally.votingOpen = false;
         rally.resultsShowing = true
         rally.endTime = new Date(currentTime.getTime() + 24 * 60 * 60 * 1000); // 1 day for results viewing
         await rally.save();
+
         await sendNotification('📷 Rally Results! 📷', '📷 VIEW NOW 📷');
       }
-
-      if(currentTime >= endTime && rally.resultsShowing && !rally.votingOpen){ {
+      // end rally and active new ones
+      else if(rally.resultsShowing && !rally.votingOpen){ 
         rally.resultsShowing = false;
         rally.active = false;
+        rally.endTime = currentTime;
+        await rally.save();
         // After results viewing day, set gap phase
         const gapEndTime = new Date(currentTime.getTime() + group.rallyGapDays * 24 * 60 * 60 * 1000);
 
@@ -79,12 +83,11 @@ export async function GET(req: NextRequest,{ params }: { params: { groupId: stri
         }
       }
     }
-
     // return rallies that are currently running and are not in gaptime
     const currentRallies = rallies.filter(rally => currentTime >= new Date(rally.startTime));
 
     return NextResponse.json({ rallies: currentRallies });
-  }
+    
   } catch (error: any) {
     console.error(error);
     return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });

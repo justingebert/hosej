@@ -10,6 +10,10 @@ if (!admin.apps.length) {
 }
 
 export async function sendNotification(title: string, body: string, groupId = "") {
+  if(process.env.ENV === "dev") {
+    console.log("NOTIFICATION", title, body, groupId);
+    return { success: true, successCount: 0, failureCount: 0 };
+  }
   try {
     await dbConnect();
 
