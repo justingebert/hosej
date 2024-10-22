@@ -12,10 +12,9 @@ const s3 = new S3Client({
 export const revalidate = 0;
 
 export async function GET(req: NextRequest, { params }: { params: { groupId: string, questionId: string } }) {
+    const { groupId, questionId } = params;
     try {
         await dbConnect();
-
-        const { groupId, questionId } = params;
 
         const question = await Question.findOne({ groupId, _id: questionId });
         if (!question) {
@@ -68,10 +67,9 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
             return NextResponse.json({ results: resultsWithImages, totalVotes, totalUsers });
         }
 
-        // Return the results
-        return NextResponse.json({ results, totalVotes, totalUsers });
+        return NextResponse.json({ results, totalVotes, totalUsers }, { status: 200 });
     } catch (error) {
-        console.error('Error fetching question results:', error);
-        return NextResponse.json({ message: 'Error fetching question results' }, { status: 500 });
+        console.error('Error fetching question results:', questionId,  error);
+        return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
     }
 }

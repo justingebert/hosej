@@ -2,20 +2,22 @@ import dbConnect from "@/lib/dbConnect";
 import Question from "@/db/models/Question";
 import User from "@/db/models/user";
 import { NextResponse, type NextRequest } from "next/server";
-import { migrateQuestions } from "@/db/migrations/migrateQuestions";
 import Chat from "@/db/models/Chat";
-import { CopyObjectOutputFilterSensitiveLog } from "@aws-sdk/client-s3";
+import Group from "@/db/models/Group";
 
 const POINTS = 3;
 
 export const revalidate = 0;
 
 // Function to handle question creation with populated options
-export async function POST(req: NextRequest) {
+export async function POST(req: NextRequest, { params }: { params: { groupId: string } }) {
   try {
     const data = await req.json();
 
-    const { groupId, category, questionType, question, submittedBy, image } = data;
+    await dbConnect();
+
+    const { groupId } = params;
+    const { category, questionType, question, submittedBy, image } = data;
     if (!groupId || !category || !questionType || !question || !submittedBy) {
       return NextResponse.json(
         { message: "Missing required fields" },
@@ -23,7 +25,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    await dbConnect();
+    const group = await Group.findById(groupId);
+    if (!group) return NextResponse.json({ message: "Group not found" },{ status: 404 });
+
+    const submittingUser = await User.findById(submittedBy);
+    if (!submittingUser) return NextResponse.json({ message: "User not found" },{ status: 404 });
+   
+    if(!group.members.includes(submittingUser._id)) return NextResponse.json({ message: "User not in group" },{ status: 403 });
 
     // Populate options based on question type
     let options = data.options || [];
@@ -35,13 +43,13 @@ export async function POST(req: NextRequest) {
     }
 
     const newQuestion = new Question({
-      groupId,
-      category,
-      questionType,
-      question,
-      image,
-      options,
-      submittedBy,
+      groupId: groupId,
+      category: category,
+      questionType: questionType,
+      question: question,
+      image: image,
+      options: options,
+      submittedBy: submittedBy,
     });
 
     await newQuestion.save();
@@ -56,27 +64,12 @@ export async function POST(req: NextRequest) {
     await newChat.save();
     newQuestion.chat = newChat._id;
     await newQuestion.save();
-
-    const submittingUser = await User.findById(submittedBy);
-    if (submittingUser) {
-      await submittingUser.addPoints(groupId, POINTS);
-      console.log("test")
-    } else {
-      return NextResponse.json(
-        { message: "Submitting user not found" },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json(
-      { newQuestion },
-      { status: 201 }
-    );
-  } catch (error:any) {
+  
+    await submittingUser.addPoints(groupId, POINTS);
+   
+    return NextResponse.json({ newQuestion },{ status: 201 });
+  } catch (error) {
     console.error("Error creating question:", error);
-    return NextResponse.json(
-      { message: "Internal server error", error: error.message },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: "Internal server error" },{ status: 500 });
   }
 }

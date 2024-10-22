@@ -13,9 +13,9 @@ const s3 = new S3Client({
 
 //get question by id
 export async function GET(req: NextRequest,  { params }: { params: { groupId: string, questionId: string } }){
+    const {questionId, groupId} = params
     try{
         await dbConnect();
-        const {questionId, groupId} = params
         
         let question = await Question.findOne({groupId: groupId, _id: questionId});
 
@@ -76,7 +76,7 @@ export async function GET(req: NextRequest,  { params }: { params: { groupId: st
         return NextResponse.json(question);
     }
     catch (error) {
-        console.log(error);
-        return NextResponse.json({ message: error });
+        console.log("Error getting question: ", questionId, error);
+        return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
     }
 }
