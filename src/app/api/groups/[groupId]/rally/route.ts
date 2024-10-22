@@ -84,6 +84,7 @@ export async function GET(req: NextRequest,{ params }: { params: { groupId: stri
     const currentRallies = rallies.filter(rally => currentTime >= new Date(rally.startTime));
 
     return NextResponse.json({ rallies: currentRallies });
+  }
   } catch (error: any) {
     console.error(error);
     return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
