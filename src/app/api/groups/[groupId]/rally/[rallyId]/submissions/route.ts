@@ -1,5 +1,6 @@
 import dbConnect from "@/lib/dbConnect";
 import Rally from "@/db/models/rally";
+import User from "@/db/models/user";
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { NextResponse } from 'next/server'
@@ -59,4 +60,44 @@ export async function GET(req: Request, { params }: { params: { rallyId: string 
         console.log(error);
         return NextResponse.json({ message: error });
     }
+}
+
+const POINTS = 2
+
+//create submission 
+export async function POST(request: Request, { params }: { params: { groupId: string, rallyId:string } }) {
+  try {
+    const { userId, imageUrl } = await request.json();
+    const { groupId, rallyId } = params;
+    await dbConnect();
+
+    const sendUser = await User.findOne({ username: userId });
+
+    const newSubmission = {
+      userId: sendUser._id,
+      username: sendUser.username,
+      imageUrl: imageUrl,
+      time: Date.now(),
+    };
+
+    const updatedRally = await Rally.findByIdAndUpdate(
+      rallyId,
+      { $push: { submissions: newSubmission } },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedRally) {
+      return Response.json({ message: "Rally not found" });
+    }
+
+    await sendUser.addPoints(groupId, POINTS);
+
+    return Response.json({
+      message: "Picture submission added successfully",
+      updatedRally,
+    });
+  } catch (error) {
+    console.error("Error adding picture submission:", error);
+    return Response.json({ message: error });
+  }
 }

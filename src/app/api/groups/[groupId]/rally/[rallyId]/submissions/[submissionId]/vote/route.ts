@@ -6,13 +6,11 @@ import User from "@/db/models/user";
 const POINTS = 1;
 
 //vote on a submission
-export async function POST(req: NextRequest, { params }: { params: { groupId: string } }){
+export async function POST(req: NextRequest, { params }: { params: { groupId: string, rallyId:string, submissionId:string } }){
     try{
         await dbConnect();
-        const { groupId } = params;
-        const { rallyId, submissionId, userThatVoted } = await req.json()
-        console.log(rallyId, submissionId, userThatVoted)
-
+        const { groupId, rallyId, submissionId } = params;
+        const { userThatVoted } = await req.json()
 
         const rally = await Rally.findOne({groupId: groupId, _id: rallyId});
         if (!rally) {

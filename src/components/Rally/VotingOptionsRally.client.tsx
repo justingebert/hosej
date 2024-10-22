@@ -29,7 +29,7 @@ const RallyVoteCarousel = ({ user, rally, onVote }: any) => {
 
   useEffect(() => {
     const fetchSubmissions = async () => {
-      const response = await fetch(`/api/${rally.groupId}/rally/submissions/${rally._id}`);
+      const response = await fetch(`/api/${rally.groupId}/rally/${rally._id}/submissions`);
       const data = await response.json();
       setSubmissions(data.submissions);
       if (data.submissions.length > 0) {
@@ -81,14 +81,12 @@ const RallyVoteCarousel = ({ user, rally, onVote }: any) => {
       return;
     }
 
-    await fetch(`/api/${rally.groupId}/rally/submissions/vote`, {
+    await fetch(`/api/${rally.groupId}/rally/${rally._id}/submissions/${selectedSubmission}/vote`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        rallyId: rally._id,
-        submissionId: selectedSubmission,
         userThatVoted: user.username,
       }),
     });
