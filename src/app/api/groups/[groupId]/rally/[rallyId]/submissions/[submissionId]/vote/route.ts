@@ -14,7 +14,7 @@ export async function POST(req: NextRequest, { params }: { params: { groupId: st
 
         const rally = await Rally.findOne({groupId: groupId, _id: rallyId});
         if (!rally) {
-            return NextResponse.json({ message: 'Rally not found' });
+            return NextResponse.json({ message: 'Rally not found' }, { status: 404 });
         }
         const submission = rally.submissions.id(submissionId);
         if (!submission) {
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest, { params }: { params: { groupId: st
         }
         const user = submission.votes.find((vote:{username:string}) => vote.username === userThatVoted);
         if (user) {
-            return NextResponse.json({ message: 'User already voted' });
+            return NextResponse.json({ message: 'User already voted' }, {status: 304});
         }
         submission.votes.push({ username: userThatVoted, time: Date.now() });
         
@@ -33,6 +33,6 @@ export async function POST(req: NextRequest, { params }: { params: { groupId: st
         return NextResponse.json("Vote added successfully")
     }catch (error) {
         console.error(error)
-        return NextResponse.json({ message: error });
+        return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
     }
 }
