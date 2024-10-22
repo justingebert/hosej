@@ -4,7 +4,7 @@ import Chat from "@/db/models/Chat";
 import User from '@/db/models/user';
 
 export async function GET(req: NextRequest, { params }: { params: { groupId:string, chatId: string } }) {
-  const { groupId, chatId } = params;
+  const { chatId } = params;
 
   await dbConnect();
 
