@@ -55,10 +55,9 @@ export async function GET(req: NextRequest,{ params }: { params: { groupId: stri
         await sendNotification('📷 Rally Results! 📷', '📷 VIEW NOW 📷');
       }
 
-      if(currentTime >= endTime && rally.resultsShowing ) {
+      if(currentTime >= endTime && rally.resultsShowing && !rally.votingOpen){ {
         rally.resultsShowing = false;
         rally.active = false;
-        rally.used = true;
         // After results viewing day, set gap phase
         const gapEndTime = new Date(currentTime.getTime() + group.rallyGapDays * 24 * 60 * 60 * 1000);
 
