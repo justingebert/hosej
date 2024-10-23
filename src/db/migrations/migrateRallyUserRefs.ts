@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import User from '../models/user'; // User model
 import Rally from '../models/rally';
 
-async function migrateQuestions() {
+async function migrateRallyUserRefs() {
   try {
     await mongoose.connect('mongodb://localhost:27017/hosej'); // Replace with your DB URL
 
@@ -46,4 +46,4 @@ async function migrateQuestions() {
   }
 }
 
-migrateQuestions();
+migrateRallyUserRefs();

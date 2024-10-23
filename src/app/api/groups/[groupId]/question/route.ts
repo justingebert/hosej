@@ -65,7 +65,7 @@ export async function POST(req: NextRequest, { params }: { params: { groupId: st
     newQuestion.chat = newChat._id;
     await newQuestion.save();
   
-    await submittingUser.addPoints(groupId, POINTS);
+    await group.addPoints(submittingUser._id, POINTS);
    
     return NextResponse.json({ newQuestion },{ status: 201 });
   } catch (error) {
