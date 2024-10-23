@@ -41,7 +41,7 @@ next-env.d.ts
 /public/*.js.map
 
 /src/db/*.js
-/src/db/models/*.js
+/src/db/**/*.js
 # Local .terraform directories
 **/.terraform/*
 
