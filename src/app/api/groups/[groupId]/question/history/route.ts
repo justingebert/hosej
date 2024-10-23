@@ -26,7 +26,7 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
 
     return NextResponse.json({ questions });
   } catch (error) {
-    console.error(error);
-    return NextResponse.json({ message: error });
+    console.error("Error getting question history", error);
+    return NextResponse.json({ message: "Internal Sever Error" }, { status: 500 });
   }
 }

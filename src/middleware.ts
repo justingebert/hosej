@@ -6,7 +6,7 @@ export async function middleware(req: NextRequest) {
   
   // Define public routes
   const publicRoutes = [
-    '/api/users/migrate', 
+    "/api/*",
     '/api/users/create', 
     '/api/auth/session', 
     '/api/auth/providers', 

@@ -25,7 +25,7 @@ const CreateRally = () => {
       groupId: groupId,
       task: task,
       lengthInDays: Number(lengthInDays),
-      submittedBy: user.username,
+      submittedBy: user._id,
     };
 
     try {

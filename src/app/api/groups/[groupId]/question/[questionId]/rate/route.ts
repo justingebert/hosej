@@ -19,7 +19,7 @@ export async function POST(req: NextRequest, { params }: { params: { questionId:
         }
 
         if (question.rating.good.includes(user) || question.rating.ok.includes(user) || question.rating.bad.includes(user)) {
-            return NextResponse.json({ message: "User already rated" });
+            return NextResponse.json({ message: "User already rated" }, { status: 304 });
         }
         
         if (rating === "good") {
@@ -33,7 +33,7 @@ export async function POST(req: NextRequest, { params }: { params: { questionId:
     
         return NextResponse.json({ message: "Rating added" });
     } catch (error:any) {
-        console.error(error);
-        return NextResponse.json({ message: error.message }, { status: 500 });
+        console.error(`Error rating question: ${questionId}`,error);
+        return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
     }
 }

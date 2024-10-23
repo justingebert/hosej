@@ -94,6 +94,6 @@ export async function GET(req: Request, { params }: { params: { groupId: string 
         return NextResponse.json({ questions: questionsWithImages });
     } catch (error:any) {
         console.error(error);
-        return NextResponse.json({ message: error.message });
+        return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
     }
 }

@@ -11,10 +11,7 @@ const POINTS = 3;
 export const revalidate = 0;
 
 //get current rally and set state
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { groupId: string } }
-) {
+export async function GET(req: NextRequest,{ params }: { params: { groupId: string } }) {
   try {
     await dbConnect();
     const { groupId } = params;
@@ -22,46 +19,49 @@ export async function GET(
 
     const currentTime = new Date();
 
-    // Find all active rallies
-    const rallies = await Rally.find({ groupId: groupId, active: true }).limit(group.rallyCount);
-
+    const rallies = await Rally.find({ groupId: groupId, active: true })
     if (rallies.length === 0) {
-      return NextResponse.json({ message: "No active rallies", rallies: [] });
+      return NextResponse.json({ message: "No active rallies", rallies: [] }, { status: 200 });
     }
 
     for (let rally of rallies) {
       const endTime = new Date(rally.endTime);
       const startTime = new Date(rally.startTime);
       
-      if (!rally.active && currentTime >= startTime && !rally.votingOpen && !rally.resultsShowing) {
+      // start rally
+      if (!rally.used && currentTime >= startTime && !rally.votingOpen && !rally.resultsShowing) {
         rally.used = true;
         await rally.save();
 
         await sendNotification('📷 New Rally Started! 📷', '📷 PARTICIPATE NOW! 📷');
+        continue;
       }
-
+  
+      if(currentTime < endTime) continue;
+      // set state of running rally
       // Voting phase: if current time is after the rally's endTime and voting is not yet open
-      if (currentTime >= endTime && !rally.votingOpen && !rally.resultsShowing) {
+      if (!rally.votingOpen && !rally.resultsShowing) {
         rally.votingOpen = true;
         rally.endTime = new Date(currentTime.getTime() + 24 * 60 * 60 * 1000); // 1 day for voting
         await rally.save();
 
         await sendNotification('📷 Rally Voting! 📷', '📷 VOTE NOW 📷');
       }
-
       // Results phase: if voting is over, but the rally is still active
-      if (currentTime >= endTime && rally.votingOpen) {
+      else if (rally.votingOpen && !rally.resultsShowing) {
         rally.votingOpen = false;
         rally.resultsShowing = true
         rally.endTime = new Date(currentTime.getTime() + 24 * 60 * 60 * 1000); // 1 day for results viewing
         await rally.save();
+
         await sendNotification('📷 Rally Results! 📷', '📷 VIEW NOW 📷');
       }
-
-      if(currentTime >= endTime && rally.resultsShowing ) {
+      // end rally and active new ones
+      else if(rally.resultsShowing && !rally.votingOpen){ 
         rally.resultsShowing = false;
         rally.active = false;
-        rally.used = true;
+        rally.endTime = currentTime;
+        await rally.save();
         // After results viewing day, set gap phase
         const gapEndTime = new Date(currentTime.getTime() + group.rallyGapDays * 24 * 60 * 60 * 1000);
 
@@ -72,23 +72,25 @@ export async function GET(
           used: false,
         });
 
-
         if (newRally) {
           newRally.active = true;
           newRally.startTime = gapEndTime; // New rally starts after the gap phase
           newRally.endTime = new Date(gapEndTime.getTime() + newRally.lengthInDays * 24 * 60 * 60 * 1000); // Set end time based on lengthInDays
           await newRally.save();
           await sendNotification('📷 Rally finished! 📷', `📷 Next Rally starting: ${newRally.startTime.toLocaleString()}📷`);
+        }else{
+          return NextResponse.json({ message: "No rallies left", rallies: [] }, { status: 200 });
         }
       }
     }
+    // return rallies that are currently running and are not in gaptime
+    const currentRallies = rallies.filter(rally => currentTime >= new Date(rally.startTime));
 
-    const activeRallies = rallies.filter(rally => currentTime >= new Date(rally.startTime));
-
-    return NextResponse.json({ rallies: activeRallies });
+    return NextResponse.json({ rallies: currentRallies });
+    
   } catch (error: any) {
     console.error(error);
-    return NextResponse.json({ message: error.message }, { status: 500 });
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
 }
 
@@ -98,36 +100,42 @@ export async function POST(req: Request) {
     await dbConnect();
     const { groupId, task, lengthInDays, submittedBy } = await req.json();
 
-    //TODO this is different - garbage
-    const newRally = new Rally({
-      groupId,
-      task,
-      lengthInDays,
-      submittedBy,
-    });
+    const group = await Group.findById(groupId)
+    if (!group) {
+      return NextResponse.json({ message: "Group not found" }, { status: 404 });
+    }
+    const submittingUser = await User.findOne({ username: submittedBy });
+    if (!submittingUser) {
+      return NextResponse.json({ message: "User not found" }, { status: 404 });
+    }
+    if(!group.members.includes(submittingUser._id)){
+      return NextResponse.json({ message: "User not in group" }, { status: 404 });
+    }
 
+    const newRally = new Rally({
+      groupId: groupId,
+      task: task,
+      lengthInDays: lengthInDays,
+      submittedBy: submittedBy,
+    });
     await newRally.save();
 
-    // Create the associated chat
     const newChat = new Chat({
       group: groupId,
       entity: newRally._id,
       entityModel: "Rally", 
       messages: [], 
     });
-
     await newChat.save();
 
-    // Update the question with the chatId
     newRally.chat = newChat._id;
     await newRally.save();
 
-    const submittingUser = await User.findOne({ username: submittedBy });
     await submittingUser.addPoints(groupId, POINTS);
 
     return NextResponse.json({ message: "Rally created successfully" });
   } catch (error: any) {
     console.error(error);
-    return NextResponse.json({ message: error.message }, { status: 500 });
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
 }

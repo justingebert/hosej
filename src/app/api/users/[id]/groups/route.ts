@@ -10,10 +10,9 @@ export async function GET(req: NextRequest,  { params }: { params: { userId: str
     try{
         await dbConnect();
         const groups = await Group.find({members: userId});
-        return NextResponse.json({groups});
-    }
-    catch (error) {
-        console.log(error);
-        return NextResponse.json({ message: error });
+        return NextResponse.json({groups}, {status: 200});
+    }catch (error) {
+        console.log(`Error getting groups for user: ${userId}`, error);
+        return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
     }
 }

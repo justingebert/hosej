@@ -88,13 +88,12 @@ export default function SubmitRally({
     userId: string,
     imageUrl: string
   ) => {
-    const response = await fetch(`/api/groups/${groupId}/rally/submissions`, {
+    const response = await fetch(`/api/groups/${groupId}/rally/${rallyId}/submissions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        rallyId,
         userId,
         imageUrl,
       }),

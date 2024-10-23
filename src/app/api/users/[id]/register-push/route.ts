@@ -19,18 +19,16 @@ export async function POST(req: any, { params }: { params: { id: string } }) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
 
-    // Check if the token already exists
     if (user.fcmToken === token) {
       return NextResponse.json({ message: 'Token already exists' }, { status: 200 });
     }
 
-    // Attach the token to the user's document
     user.fcmToken = token
     await user.save();
 
     return NextResponse.json({ message: "Token registered successfully" }, { status: 201 });
   } catch (error) {
     console.error("Error saving FCM token:", error);
-    return NextResponse.json({ message: "Error saving FCM token", error }, { status: 500 });
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
 }

@@ -1,8 +1,9 @@
 import dbConnect from "@/lib/dbConnect";
 import Rally from "@/db/models/rally";
+import User from "@/db/models/user";
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 const s3 = new S3Client({
     region: process.env.AWS_REGION,
@@ -11,13 +12,13 @@ const s3 = new S3Client({
 export const revalidate = 0
 
 //get submissions for a rally
-export async function GET(req: Request, { params }: { params: { rallyId: string } }){
-    const rallyId = params.rallyId;
+export async function GET(req: NextRequest, { params }: { params: { rallyId: string } }){
+    const {rallyId } = params;
     try{
         await dbConnect();
         const rally = await Rally.findById(rallyId);
         if (!rally) {
-            return NextResponse.json({ message: "No active rally" , rally: null});
+            return NextResponse.json({ message: "Rally not found"}, { status: 404 });
         }
         
         const submissions = await Promise.all(
@@ -57,6 +58,46 @@ export async function GET(req: Request, { params }: { params: { rallyId: string 
     }
     catch (error) {
         console.log(error);
-        return NextResponse.json({ message: error });
+        return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
     }
+}
+
+const POINTS = 2
+
+//create submission 
+export async function POST(request: NextRequest, { params }: { params: { groupId: string, rallyId:string } }) {
+  try {
+    const { userId, imageUrl } = await request.json();
+    const { groupId, rallyId } = params;
+    await dbConnect();
+
+    const sendUser = await User.findOne({ username: userId });
+
+    const newSubmission = {
+      userId: sendUser._id,
+      username: sendUser.username,
+      imageUrl: imageUrl,
+      time: Date.now(),
+    };
+
+    const updatedRally = await Rally.findByIdAndUpdate(
+      rallyId,
+      { $push: { submissions: newSubmission } },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedRally) {
+      return Response.json({ message: "Rally not found" });
+    }
+
+    await sendUser.addPoints(groupId, POINTS);
+
+    return NextResponse.json({
+      message: "Picture submission added successfully",
+      updatedRally,
+    });
+  } catch (error) {
+    console.error("Error adding picture submission:", error);
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
+  }
 }

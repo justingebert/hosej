@@ -33,7 +33,7 @@ const RallyPage = () => {
         setRallies(data.rallies);
         const votes = data.rallies.reduce((acc: any, rally: any) => {
           acc[rally._id] = rally.submissions.some((submission: any) =>
-            submission.votes.some((vote: any) => vote.username === user.username)
+            submission.votes.some((vote: any) => vote.user === user._id)
           );
           return acc;
         }, {});
