@@ -12,7 +12,7 @@ async function migrateQuestions() {
     const rallies = await Rally.find({}).lean();
 
     for (const rally of rallies) {
-      console.log(`Migrating question: ${rally._id}`);
+      console.log(`Migrating rally: ${rally._id}`);
 
       // Update submittedBy to reference a User if it is a string (username)
       if (typeof rally.submittedBy === 'string') {
@@ -25,7 +25,7 @@ async function migrateQuestions() {
       // Update answers to reference users instead of usernames
       for (const submission of rally.submissions) {
         for(let vote of submission.votes) {
-          const user = await User.findById(vote.username).lean() as any;
+          const user = await User.findOne({username: vote.username}).lean() as any;
           if (user) {
             vote.user = user._id;
           }

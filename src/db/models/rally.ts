@@ -34,7 +34,7 @@ const pictureSubmissionSchema = new mongoose.Schema({
   votes: [
     {
       user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-      time:     { type: Date},
+      time: { type: Date},
     }
   ]
 });
