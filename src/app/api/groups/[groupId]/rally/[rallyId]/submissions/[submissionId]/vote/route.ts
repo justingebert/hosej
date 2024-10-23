@@ -20,7 +20,7 @@ export async function POST(req: NextRequest, { params }: { params: { groupId: st
         if (!submission) {
             return NextResponse.json({ message: 'Submission not found' });
         }
-        const user = submission.votes.find((vote:{username:string}) => vote.username === userThatVoted);
+        const user = submission.votes.find((vote:{user:string}) => vote.user === userThatVoted);
         if (user) {
             return NextResponse.json({ message: 'User already voted' }, {status: 304});
         }

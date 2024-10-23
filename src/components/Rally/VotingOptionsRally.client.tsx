@@ -38,7 +38,7 @@ const RallyVoteCarousel = ({ user, rally, onVote }: any) => {
 
       // Check if the user has already voted
       const userHasVoted = data.submissions.some((submission:any) =>
-        submission.votes.some((vote:any) => vote.username === user.username)
+        submission.votes.some((vote:any) => vote.user === user._id)
       );
       setHasVoted(userHasVoted);
     };
@@ -87,7 +87,7 @@ const RallyVoteCarousel = ({ user, rally, onVote }: any) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        userThatVoted: user.username,
+        userThatVoted: user._id,
       }),
     });
 
