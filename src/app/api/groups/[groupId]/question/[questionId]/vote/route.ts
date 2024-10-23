@@ -22,18 +22,13 @@ export async function POST(req: Request, { params }: { params: { groupId: string
       return NextResponse.json({ message: "Question not found" }, { status: 404 });
     }
     const user = await User.findById(userThatVoted);
+
     const hasVoted = question.answers.some((answer: any) =>
       answer.user.equals(user._id)
     );
     if (hasVoted) {
       return NextResponse.json({ message: "You have already voted" }, { status: 304 });
     }
-    const group = await Group.findById(groupId)
-    if (!group) {
-      return NextResponse.json({ message: "Group not found" }, { status: 404 });
-    }
-    
-
 
     await Question.findByIdAndUpdate(
       questionId,
@@ -41,7 +36,8 @@ export async function POST(req: Request, { params }: { params: { groupId: string
       { new: true, runValidators: true }
     );
 
-    await user.addPoints(groupId, POINTS);
+    const group = await Group.findById(groupId)
+    await group.addPoints(user._id, POINTS);
 
     return NextResponse.json({ message: "Vote submitted" }, { status: 200 });
   } catch (error) {

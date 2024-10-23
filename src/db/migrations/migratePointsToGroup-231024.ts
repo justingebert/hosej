@@ -35,8 +35,7 @@ async function migratePointsFromUserToGroups() {
 
       await User.updateOne({ _id: user._id }, user);
       console.log(`Migrated user: ${user.username} (${user._id})`);
-    }
-    
+    }``
 
     console.log('Migration complete!');
   } catch (error) {

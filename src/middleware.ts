@@ -1,10 +1,11 @@
 import { getToken } from 'next-auth/jwt';
 import { NextRequest, NextResponse } from 'next/server';
+import mongoose from 'mongoose';
+import Group from './db/models/Group';
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   
-  // Define public routes
   const publicRoutes = [
     "/api/*",
     '/api/users/create', 
@@ -21,32 +22,42 @@ export async function middleware(req: NextRequest) {
     "/api/auth/callback/google",
     '/',
   ];
-
-  // Log the request URL and token status
-  //console.log(`Requesting: ${pathname}`);
-  
   if (publicRoutes.includes(pathname)) {
-    //console.log('Public route, allowing access.');
     return NextResponse.next();
   }
 
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-  //console.log(`Token retrieved: ${token ? 'Valid' : 'Invalid or Missing'}`);
-
-  if (token) {
-    //console.log('Token is valid, allowing access.');
-    return NextResponse.next();
+  if (!token) {
+    const loginUrl = new URL('/', req.url);
+    return NextResponse.redirect(loginUrl);
   }
 
-  if (req.nextUrl.pathname.startsWith('/api/auth/callback/credentials')) {
-    return NextResponse.next();
+  // For routes under /api/groups/[groupId]/**, check groupId validity
+  const groupIdMatch = pathname.match(/\/api\/groups\/([^/]+)\/?/);
+  if (groupIdMatch) {
+    const groupId = groupIdMatch[1];
+
+    if (!mongoose.Types.ObjectId.isValid(groupId)) {
+      return NextResponse.json({ message: 'Invalid groupId format' }, { status: 400 });
+    }
+
+    const group = await Group.findById(groupId);
+    if (!group) {
+      return NextResponse.json({ message: 'Group not found' }, { status: 404 });
+    }
+
+    const userId = token?.userId; 
+    const isMember = group.members.some((member:any) => member.user.toString() === userId);
+    if (!isMember) {
+      return NextResponse.json({ message: 'You are not a member of this group' }, { status: 403 });
+    }
   }
 
-  //console.log('No valid token, redirecting to login.');
-  const loginUrl = new URL('/', req.url);
-  return NextResponse.redirect(loginUrl);
+  // Allow the request to proceed if all checks pass
+  return NextResponse.next();
 }
 
+// Middleware configuration to match relevant routes
 export const config = {
   matcher: ['/dashboard/:path*', '/api/:path*'],
 };

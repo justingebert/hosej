@@ -4,6 +4,7 @@ import User from "@/db/models/user";
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { NextRequest, NextResponse } from 'next/server'
+import Group from "@/db/models/Group";
 
 const s3 = new S3Client({
     region: process.env.AWS_REGION,
@@ -71,6 +72,7 @@ export async function POST(request: NextRequest, { params }: { params: { groupId
     const { groupId, rallyId } = params;
     await dbConnect();
 
+    const group = await Group.findById(groupId);
     const sendUser = await User.findOne({ username: userId });
 
     const newSubmission = {
@@ -90,7 +92,7 @@ export async function POST(request: NextRequest, { params }: { params: { groupId
       return Response.json({ message: "Rally not found" });
     }
 
-    await sendUser.addPoints(groupId, POINTS);
+    await group.addPoints(sendUser._id, POINTS);
 
     return NextResponse.json({
       message: "Picture submission added successfully",

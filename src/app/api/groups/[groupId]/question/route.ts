@@ -12,11 +12,11 @@ export const revalidate = 0;
 // Function to handle question creation with populated options
 export async function POST(req: NextRequest, { params }: { params: { groupId: string } }) {
   try {
-    const data = await req.json();
-
     await dbConnect();
 
     const { groupId } = params;
+    
+    const data = await req.json();
     const { category, questionType, question, submittedBy, image } = data;
     if (!groupId || !category || !questionType || !question || !submittedBy) {
       return NextResponse.json(
@@ -24,14 +24,6 @@ export async function POST(req: NextRequest, { params }: { params: { groupId: st
         { status: 400 }
       );
     }
-
-    const group = await Group.findById(groupId);
-    if (!group) return NextResponse.json({ message: "Group not found" },{ status: 404 });
-
-    const submittingUser = await User.findById(submittedBy);
-    if (!submittingUser) return NextResponse.json({ message: "User not found" },{ status: 404 });
-   
-    if(!group.members.includes(submittingUser._id)) return NextResponse.json({ message: "User not in group" },{ status: 403 });
 
     // Populate options based on question type
     let options = data.options || [];
@@ -64,7 +56,10 @@ export async function POST(req: NextRequest, { params }: { params: { groupId: st
     await newChat.save();
     newQuestion.chat = newChat._id;
     await newQuestion.save();
-  
+    
+    //TODO pass from context
+    const group = await Group.findById(groupId);
+    const submittingUser = await User.findById(submittedBy);
     await group.addPoints(submittingUser._id, POINTS);
    
     return NextResponse.json({ newQuestion },{ status: 201 });

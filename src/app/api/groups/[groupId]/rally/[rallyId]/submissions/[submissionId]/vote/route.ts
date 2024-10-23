@@ -2,6 +2,7 @@ import dbConnect from "@/lib/dbConnect";
 import Rally from "@/db/models/rally";
 import { NextRequest, NextResponse } from 'next/server'
 import User from "@/db/models/user";
+import Group from "@/db/models/Group";
 
 const POINTS = 1;
 
@@ -11,6 +12,9 @@ export async function POST(req: NextRequest, { params }: { params: { groupId: st
         await dbConnect();
         const { groupId, rallyId, submissionId } = params;
         const { userThatVoted } = await req.json()
+        
+        const user = await User.findById( userThatVoted );
+        const group = await Group.findById(groupId)
 
         const rally = await Rally.findOne({groupId: groupId, _id: rallyId});
         if (!rally) {
@@ -20,15 +24,15 @@ export async function POST(req: NextRequest, { params }: { params: { groupId: st
         if (!submission) {
             return NextResponse.json({ message: 'Submission not found' });
         }
-        const user = submission.votes.find((vote:{user:string}) => vote.user === userThatVoted);
-        if (user) {
+        const userVoted = submission.votes.find((vote:{user:string}) => vote.user === userThatVoted);
+        if (userVoted) {
             return NextResponse.json({ message: 'User already voted' }, {status: 304});
         }
         submission.votes.push({ username: userThatVoted, time: Date.now() });
         
         await rally.save();
-        const votingUser = await User.findOne({ username: userThatVoted });
-        await votingUser.addPoints(groupId, POINTS);
+
+        await group.addPoints(user._id, POINTS);
        
         return NextResponse.json("Vote added successfully")
     }catch (error) {

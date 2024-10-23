@@ -19,11 +19,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Group not found' }, { status: 404 });
     }
 
-    if (group.members.includes(user._id)) {
-      return NextResponse.json({ message: 'User is already a member' }, { status: 200 });
+    const isMember = group.members.some((member: any) => member.toString() === userId);
+    if (isMember) {
+      return NextResponse.json({ message: 'User is already a member of this group' }, { status: 400 });
     }
 
-    group.members.push(user._id);
+    group.members.push({user: user._id});
     await group.save();
 
     if (!user.groups.includes(groupId)) {

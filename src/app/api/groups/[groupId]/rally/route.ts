@@ -101,16 +101,7 @@ export async function POST(req: Request) {
     const { groupId, task, lengthInDays, submittedBy } = await req.json();
 
     const group = await Group.findById(groupId)
-    if (!group) {
-      return NextResponse.json({ message: "Group not found" }, { status: 404 });
-    }
     const submittingUser = await User.findOne({ username: submittedBy });
-    if (!submittingUser) {
-      return NextResponse.json({ message: "User not found" }, { status: 404 });
-    }
-    if(!group.members.includes(submittingUser._id)){
-      return NextResponse.json({ message: "User not in group" }, { status: 404 });
-    }
 
     const newRally = new Rally({
       groupId: groupId,
@@ -131,7 +122,7 @@ export async function POST(req: Request) {
     newRally.chat = newChat._id;
     await newRally.save();
 
-    await submittingUser.addPoints(groupId, POINTS);
+    await group.addPoints(submittingUser._id, POINTS);
 
     return NextResponse.json({ message: "Rally created successfully" });
   } catch (error: any) {
