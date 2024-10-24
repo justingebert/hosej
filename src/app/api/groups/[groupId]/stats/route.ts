@@ -5,11 +5,18 @@ import Rally from '@/db/models/rally';
 import { NextRequest, NextResponse } from "next/server";
 import Chat from "@/db/models/Chat";
 import Group from '@/db/models/Group';
+import { isUserInGroup } from '@/lib/groupAuth';
 export const revalidate = 0
 
 export async function GET(req: NextRequest, { params }: { params: { groupId: string } }) {
   const { groupId } = params;
+  const userId = req.headers.get('x-user-id') as string;
   try{
+    const authCheck = await isUserInGroup(userId, groupId);
+    if (!authCheck.isAuthorized) {
+      return NextResponse.json({ message: authCheck.message }, { status: authCheck.status });
+    }
+    
     await dbConnect();
 
     const group = await Group.findById(groupId);
@@ -27,7 +34,7 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
       { 
         $match: { 
           groupId: new Types.ObjectId(groupId), 
-          submittedBy: { $exsits: true, $ne: null } 
+          submittedBy: { $exists: true, $ne: null } 
         }
       },
       

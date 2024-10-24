@@ -19,7 +19,6 @@ const VoteOptions = ({ user, question, onVote }:any) => {
       },
       body: JSON.stringify({
         response: response,
-        userThatVoted: user._id,
       }),
     });
     onVote(); // Callback to update state in the parent component

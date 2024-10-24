@@ -3,6 +3,7 @@ import Question from "@/db/models/Question";
 import { NextResponse } from 'next/server'
 import User from "@/db/models/user";
 import Group from "@/db/models/Group";
+import { isUserInGroup } from "@/lib/groupAuth";
 
 const POINTS = 1;
 
@@ -11,9 +12,14 @@ export const revalidate = 0
 //vote on a question
 export async function POST(req: Request, { params }: { params: { groupId: string, questionId: string } }) {
   const { groupId, questionId } = params;
+  const userId = req.headers.get('x-user-id') as string;
   try {
+    const authCheck = await isUserInGroup(userId, groupId);
+    if (!authCheck.isAuthorized) {
+      return NextResponse.json({ message: authCheck.message }, { status: authCheck.status });
+    }
     const data = await req.json();
-    const { response, userThatVoted } = data;
+    const { response } = data;
 
     await dbConnect();
 
@@ -21,7 +27,7 @@ export async function POST(req: Request, { params }: { params: { groupId: string
     if (!question) {
       return NextResponse.json({ message: "Question not found" }, { status: 404 });
     }
-    const user = await User.findById(userThatVoted);
+    const user = await User.findById(userId);
 
     const hasVoted = question.answers.some((answer: any) =>
       answer.user.equals(user._id)

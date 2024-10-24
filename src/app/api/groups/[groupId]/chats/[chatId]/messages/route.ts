@@ -1,15 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from "@/lib/dbConnect";
 import Chat from "@/db/models/Chat";
+import { isUserInGroup } from '@/lib/groupAuth';
 
 export async function POST(req: NextRequest, { params }: { params: { groupId:string, chatId: string } }) {
-  const { chatId } = params;
-
-  await dbConnect();
+  const { groupId, chatId } = params;
+  const userId = req.headers.get('x-user-id') as string;
 
   try {
+    const authCheck = await isUserInGroup(userId, groupId);
+    if (!authCheck.isAuthorized) {
+      return NextResponse.json({ message: authCheck.message }, { status: authCheck.status });
+    }
+
+    await dbConnect();
+
     const body = await req.json();
-    const { userId, message } = body;
+    const { message } = body;
 
     const chat = await Chat.findById(chatId);
     if (!chat) {

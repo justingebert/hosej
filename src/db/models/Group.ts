@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { IUser } from "./user"; // Import the IUser interface
 
 export interface IGroup extends mongoose.Document {
@@ -6,7 +6,7 @@ export interface IGroup extends mongoose.Document {
   name: string;
   description: string;
   members: {
-    user: IUser;
+    user: mongoose.Schema.Types.ObjectId | IUser;
     name: string;
     points: number;
     streak: number;
@@ -33,13 +33,15 @@ const groupSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now },
 });
 
-groupSchema.methods.addPoints = async function (userId: string, points: number) {
+groupSchema.methods.addPoints = async function (userId: string | Types.ObjectId, points: number) {
   const today = new Date();
+
   const yesterday = new Date(today);
   yesterday.setDate(today.getDate() - 1);
 
+  const userIdString = userId.toString();
   const memberEntry = this.members.find(
-    (member: any) => member.user.toString() === userId
+    (member: any) => member.user.toString() === userIdString
   );
 
   if (memberEntry) {

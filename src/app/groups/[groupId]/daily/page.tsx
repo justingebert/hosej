@@ -24,7 +24,7 @@ function QuestionsTabs({ user, groupId, questions, userHasVoted, setUserHasVoted
     await fetch(`/api/groups/${groupId}/question/${questionId}/rate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user:user._id, rating:rating }),
+      body: JSON.stringify({ rating:rating }),
     });
 
     setSelectedRating((prevState: any) => ({

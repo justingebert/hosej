@@ -5,6 +5,7 @@ import User from "@/db/models/user";
 import { sendNotification } from "@/utils/sendNotification";
 import Chat from "@/db/models/Chat";
 import Group from "@/db/models/Group";
+import { isUserInGroup } from "@/lib/groupAuth";
 
 const POINTS = 3;
 
@@ -12,9 +13,15 @@ export const revalidate = 0;
 
 //get current rally and set state
 export async function GET(req: NextRequest,{ params }: { params: { groupId: string } }) {
+  const userId = req.headers.get('x-user-id') as string;
+  const { groupId } = params;
   try {
+    const authCheck = await isUserInGroup(userId, groupId);
+    if (!authCheck.isAuthorized) {
+      return NextResponse.json({ message: authCheck.message }, { status: authCheck.status });
+    }
+
     await dbConnect();
-    const { groupId } = params;
     const group = await Group.findById(groupId);
 
     const currentTime = new Date();
@@ -95,19 +102,27 @@ export async function GET(req: NextRequest,{ params }: { params: { groupId: stri
 }
 
 //create rally
-export async function POST(req: Request) {
+export async function POST(req: NextRequest, { params }: { params: { groupId: string } }) {
+  const userId = req.headers.get('x-user-id') as string;
+  const { groupId } = params;
+
   try {
+    const authCheck = await isUserInGroup(userId, groupId);
+    if (!authCheck.isAuthorized) {
+      return NextResponse.json({ message: authCheck.message }, { status: authCheck.status });
+    }
+    
     await dbConnect();
-    const { groupId, task, lengthInDays, submittedBy } = await req.json();
+    const { task, lengthInDays } = await req.json();
 
     const group = await Group.findById(groupId)
-    const submittingUser = await User.findOne({ username: submittedBy });
+    const submittingUser = await User.findById(userId);
 
     const newRally = new Rally({
       groupId: groupId,
       task: task,
       lengthInDays: lengthInDays,
-      submittedBy: submittedBy,
+      submittedBy: submittingUser._id,
     });
     await newRally.save();
 

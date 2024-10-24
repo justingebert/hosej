@@ -13,27 +13,29 @@ import Header from "@/components/ui/Header";
 import { useParams } from "next/navigation";
 import { IUser } from "@/db/models/user";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
+import { IGroup } from "@/db/models/Group";
 
 // Fetch users for a specific group
 const fetchUsers = async (groupId: string) => {
-  const response = await fetch(`/api/groups/${groupId}/users`);
-  if (!response.ok) {
-    throw new Error("Failed to fetch users");
-  }
-  return response.json();
+  
 };
 
 const LeaderboardPage = () => {
-  const { session, status, user } = useAuthRedirect();
-  const [users, setUsers] = useState<IUser[]>([]);
+  const [members, setMembers] = useState<IGroup["members"]>([]);
   const [error, setError] = useState<string | null>(null);
   const { groupId } = useParams<{ groupId: string }>();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const users = await fetchUsers(groupId);
-        setUsers(users);
+        const response = await fetch(`/api/groups/${groupId}/`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch users");
+        }
+        const data =  await response.json() as IGroup;
+        const members =  data.members
+        console.log(members)
+        setMembers(members);
       } catch (error: any) {
         setError(error.message);
       }
@@ -41,19 +43,9 @@ const LeaderboardPage = () => {
     fetchData();
   }, [groupId]);
 
-  // Extract points and streak for the specific group
-  const getGroupData = (user: IUser, groupId: string) => {
-    const groupData = user.groups.find(
-      (group) => group.group.toString() === groupId
-    );
-    return groupData ? { points: groupData.points, streak: groupData.streak } : { points: 0, streak: 0 };
-  };
-
   // Sort users by the points in the specific group
-  const sortedUsers = users.sort((a, b) => {
-    const aGroupData = getGroupData(a, groupId);
-    const bGroupData = getGroupData(b, groupId);
-    return bGroupData.points - aGroupData.points;
+  const sortedUsers = members.sort((a, b) => {
+    return a.points - a.points;
   });
 
   return (
@@ -68,14 +60,13 @@ const LeaderboardPage = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {sortedUsers.map((user) => {
-            const { points, streak } = getGroupData(user, groupId);
+          {sortedUsers.map((member) => {
             return (
-              <TableRow key={user._id}>
-                <TableCell className="font-medium">{user.username}</TableCell>
-                <TableCell className="text-right">{points}</TableCell>
+              <TableRow key={member.user}>
+                <TableCell className="font-medium">{member.name}</TableCell>
+                <TableCell className="text-right">{member.points}</TableCell>
                 <TableCell className="text-right font-medium">
-                  {streak} <span role="img" aria-label="streak">👖</span>
+                  {member.streak} <span role="img" aria-label="streak">👖</span>
                 </TableCell>
               </TableRow>
             );

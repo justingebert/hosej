@@ -21,17 +21,18 @@ export default async function ResultsDetailPage({ params, searchParams }: { para
   await User.findOne();
 
   const question = await Question.findById(questionId).populate({
-    path: 'answers.username',
+    path: 'answers.user',
     model: 'User',
   });
 
+  //TODO THIS NEEDS TO BE CAHGNED TO GROUP NAME
   const groupedResponses: any = {};
   question.answers.forEach((answer: any) => {
     const response = answer.response;
     if (!groupedResponses[response]) {
       groupedResponses[response] = [];
     }
-    groupedResponses[response].push(answer.username.username);
+    groupedResponses[response].push(answer.user.username);
   });
 
   const entries = await Promise.all(Object.entries(groupedResponses).map(async ([response, usernames]: any) => {

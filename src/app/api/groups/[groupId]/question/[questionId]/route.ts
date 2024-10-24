@@ -3,6 +3,7 @@ import Question from "@/db/models/Question";
 import { NextResponse, type NextRequest } from 'next/server'
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { isUserInGroup } from "@/lib/groupAuth";
 
 //export const revalidate = 0
 
@@ -14,7 +15,13 @@ const s3 = new S3Client({
 //get question by id
 export async function GET(req: NextRequest,  { params }: { params: { groupId: string, questionId: string } }){
     const {questionId, groupId} = params
+    const userId = req.headers.get('x-user-id') as string;
+    
     try{
+        const authCheck = await isUserInGroup(userId, groupId);
+        if (!authCheck.isAuthorized) {
+          return NextResponse.json({ message: authCheck.message }, { status: authCheck.status });
+        }
         await dbConnect();
         
         let question = await Question.findOne({groupId: groupId, _id: questionId});

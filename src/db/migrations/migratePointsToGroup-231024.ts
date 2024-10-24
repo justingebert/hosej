@@ -9,9 +9,8 @@ async function migratePointsFromUserToGroups() {
     console.log('Starting migration of points...');
 
     // Fetch all groups and reset members
-    const groups = await Group.find({}).lean();
+    const groups = await Group.find({});
     for (let group of groups) {
-      group.members = []; // Clear existing members
       await Group.updateOne({ _id: group._id }, { $set: { members: [] } }); // Use $set to clear members array in DB
     }
 
@@ -24,16 +23,25 @@ async function migratePointsFromUserToGroups() {
       for (let groupInfo of user.groups) {
         const curGroup = await Group.findById(groupInfo.group); // Fetch group by ID
         if (curGroup) {
+          // Check if groupInfo fields are defined before using them
+          const points = groupInfo.points || 0;
+          const streak = groupInfo.streak || 0;
+          const lastPointDate = groupInfo.lastPointDate || null;
+
+          // Log these values to debug the source of the error
+          console.log(`Migrating points for group ${curGroup._id}: points=${points}, streak=${streak}, lastPointDate=${lastPointDate}`);
+
           // Add user points and streak data to the group's members array
           curGroup.members.push({
             user: user._id, // Ensure you correctly reference the user's _id
             name: user.username,
-            points: groupInfo.points || 0, // Default points to 0 if undefined
-            streak: groupInfo.streak || 0, // Default streak to 0 if undefined
-            lastPointDate: groupInfo.lastPointDate || null,
+            points: points,
+            streak: streak,
+            lastPointDate: lastPointDate,
           });
 
-          await curGroup.save(); // Save updated group
+          await curGroup.save();
+          console.log(curGroup.members);
         } else {
           console.warn(`Group with ID ${groupInfo.group} not found for user ${user.username}`);
         }

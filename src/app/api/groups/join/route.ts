@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Group not found' }, { status: 404 });
     }
 
-    const isMember = group.members.some((member: any) => member.toString() === userId);
+    const isMember = group.members.some((member: any) => member.user.toString() === userId);
     if (isMember) {
       return NextResponse.json({ message: 'User is already a member of this group' }, { status: 400 });
     }

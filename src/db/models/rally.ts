@@ -20,7 +20,7 @@ export interface IPictureSubmission {
   imageUrl: string; 
   votes: [
     {
-      username: String
+      user: mongoose.Schema.Types.ObjectId
       time: Date
     },
     time: Date

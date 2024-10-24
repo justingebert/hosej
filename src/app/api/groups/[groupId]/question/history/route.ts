@@ -1,10 +1,19 @@
 import dbConnect from "@/lib/dbConnect";
 import Question from "@/db/models/Question";
 import { NextResponse, type NextRequest } from "next/server";
+import { isUserInGroup } from "@/lib/groupAuth";
 
 export const revalidate = 0;
 export async function GET(req: NextRequest, { params }: { params: { groupId: string } }) {
+  const { groupId } = params;
+  const userId = req.headers.get('x-user-id') as string;
+
   try {
+    const authCheck = await isUserInGroup(userId, groupId);
+    if (!authCheck.isAuthorized) {
+      return NextResponse.json({ message: authCheck.message }, { status: authCheck.status });
+    }
+
     await dbConnect();
 
     const searchParams = req.nextUrl.searchParams;
@@ -12,7 +21,7 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
     const offset = searchParams.get("offset") as string;
 
     const questions = await Question.find({
-      groupId: params.groupId,
+      groupId: groupId,
       used: true,
       active: false,
       category: "Daily",

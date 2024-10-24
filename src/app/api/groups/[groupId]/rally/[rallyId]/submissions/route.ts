@@ -5,6 +5,7 @@ import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { NextRequest, NextResponse } from 'next/server'
 import Group from "@/db/models/Group";
+import { isUserInGroup } from "@/lib/groupAuth";
 
 const s3 = new S3Client({
     region: process.env.AWS_REGION,
@@ -13,9 +14,17 @@ const s3 = new S3Client({
 export const revalidate = 0
 
 //get submissions for a rally
-export async function GET(req: NextRequest, { params }: { params: { rallyId: string } }){
-    const {rallyId } = params;
+export async function GET(req: NextRequest, { params }: { params: { groupId:string , rallyId: string } }){
+  const userId = req.headers.get('x-user-id') as string;  
+  const { groupId, rallyId } = params;
+
     try{
+
+        const authCheck = await isUserInGroup(userId, groupId);
+        if (!authCheck.isAuthorized) {
+          return NextResponse.json({ message: authCheck.message }, { status: authCheck.status });
+        }
+
         await dbConnect();
         const rally = await Rally.findById(rallyId);
         if (!rally) {
@@ -66,10 +75,17 @@ export async function GET(req: NextRequest, { params }: { params: { rallyId: str
 const POINTS = 2
 
 //create submission 
-export async function POST(request: NextRequest, { params }: { params: { groupId: string, rallyId:string } }) {
+export async function POST(req: NextRequest, { params }: { params: { groupId: string, rallyId:string } }) {
+  const { groupId, rallyId } = params;
+  const userId = req.headers.get('x-user-id') as string;
+ 
   try {
-    const { userId, imageUrl } = await request.json();
-    const { groupId, rallyId } = params;
+    const authCheck = await isUserInGroup(userId, groupId);
+    if (!authCheck.isAuthorized) {
+      return NextResponse.json({ message: authCheck.message }, { status: authCheck.status });
+    }
+    const { imageUrl } = await req.json();
+
     await dbConnect();
 
     const group = await Group.findById(groupId);

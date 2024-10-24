@@ -3,6 +3,7 @@ import Question from "@/db/models/Question";
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { NextResponse } from 'next/server';
+import { isUserInGroup } from "@/lib/groupAuth";
 
 const s3 = new S3Client({
     region: process.env.AWS_REGION,
@@ -12,10 +13,15 @@ export const revalidate = 60;
 
 // Return active daily questions
 export async function GET(req: Request, { params }: { params: { groupId: string } }) {
+    const { groupId } = params;
+    const userId = req.headers.get('x-user-id') as string;
+    
     try {
+        const authCheck = await isUserInGroup(userId, groupId);
+        if (!authCheck.isAuthorized) {
+          return NextResponse.json({ message: authCheck.message }, { status: authCheck.status });
+        }
         await dbConnect();
-
-        const { groupId } = params;
 
         const questions = await Question.find({
             groupId: groupId,

@@ -3,17 +3,23 @@ import Rally from "@/db/models/rally";
 import { NextRequest, NextResponse } from 'next/server'
 import User from "@/db/models/user";
 import Group from "@/db/models/Group";
+import { isUserInGroup } from "@/lib/groupAuth";
 
 const POINTS = 1;
 
 //vote on a submission
 export async function POST(req: NextRequest, { params }: { params: { groupId: string, rallyId:string, submissionId:string } }){
+    const { groupId, rallyId, submissionId } = params;
+    const userId = req.headers.get('x-user-id') as string;
+    
     try{
+        const authCheck = await isUserInGroup(userId, groupId);
+        if (!authCheck.isAuthorized) {
+          return NextResponse.json({ message: authCheck.message }, { status: authCheck.status });
+        }
         await dbConnect();
-        const { groupId, rallyId, submissionId } = params;
-        const { userThatVoted } = await req.json()
         
-        const user = await User.findById( userThatVoted );
+        const user = await User.findById(userId);
         const group = await Group.findById(groupId)
 
         const rally = await Rally.findOne({groupId: groupId, _id: rallyId});
@@ -24,11 +30,11 @@ export async function POST(req: NextRequest, { params }: { params: { groupId: st
         if (!submission) {
             return NextResponse.json({ message: 'Submission not found' });
         }
-        const userVoted = submission.votes.find((vote:{user:string}) => vote.user === userThatVoted);
+        const userVoted = submission.votes.find((vote:{user:string}) => vote.user === user._id);
         if (userVoted) {
             return NextResponse.json({ message: 'User already voted' }, {status: 304});
         }
-        submission.votes.push({ username: userThatVoted, time: Date.now() });
+        submission.votes.push({ user: user._id, time: Date.now() });
         
         await rally.save();
 

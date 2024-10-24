@@ -12,6 +12,9 @@ function ChatComponent({ user, entity, available }: any) {
     const fetchMessages = async () => {
       if (entity.chat) {
         const response = await fetch(`/api/groups/${entity.groupId}/chats/${entity.chat}`);
+        if (!response.ok) {
+          return;
+        }
         const data = await response.json();
         setMessages(data.messages);
       }
@@ -23,7 +26,7 @@ function ChatComponent({ user, entity, available }: any) {
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return; // Prevent sending empty messages
 
-    const messageData = { message: newMessage, userId: user._id };
+    const messageData = { message: newMessage };
     const response = await fetch(`/api/groups/${entity.groupId}/chats/${entity.chat}/messages`, {
       method: 'POST',
       headers: {

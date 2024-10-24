@@ -22,10 +22,8 @@ const CreateRally = () => {
     setLoading(true);
 
     const rallyData = {
-      groupId: groupId,
       task: task,
       lengthInDays: Number(lengthInDays),
-      submittedBy: user._id,
     };
 
     try {

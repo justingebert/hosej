@@ -86,9 +86,6 @@ const RallyVoteCarousel = ({ user, rally, onVote }: any) => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        userThatVoted: user._id,
-      }),
     });
 
     setHasVoted(true);

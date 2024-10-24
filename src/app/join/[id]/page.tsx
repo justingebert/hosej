@@ -45,6 +45,7 @@ export default function JoinGroup({ params }: { params: { id: string }; }) {
         const joinedGroup = await res.json();
         setGroup(joinedGroup);
         setLoading(false);
+        router.push(`/groups/`);
       } catch (error: any) {
         setError(error.message);
         setLoading(false);

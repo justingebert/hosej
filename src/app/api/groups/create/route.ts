@@ -4,19 +4,23 @@ import Group from '@/db/models/Group';
 import User from '@/db/models/user';
 
 export async function POST(req: NextRequest) {
+  const userId = req.headers.get('x-user-id') as string;
   try{
     await dbConnect();
-    const { name, user } = await req.json();
+    const { name } = await req.json();
     
-    const userAdmin = await User.findById(user._id);
+    const userAdmin = await User.findById(userId);
     if (!userAdmin) {
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
-
+    
+    const member = {
+      user: userAdmin._id,
+    }
     const newGroup = new Group({
       name: name,
       admin: userAdmin._id,
-      members: [userAdmin._id],
+      members: [member],
     });
     await newGroup.save();
     
@@ -29,3 +33,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
 }
+//
