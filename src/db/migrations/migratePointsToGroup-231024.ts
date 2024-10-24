@@ -41,7 +41,6 @@ async function migratePointsFromUserToGroups() {
           });
 
           await curGroup.save();
-          console.log(curGroup.members);
         } else {
           console.warn(`Group with ID ${groupInfo.group} not found for user ${user.username}`);
         }

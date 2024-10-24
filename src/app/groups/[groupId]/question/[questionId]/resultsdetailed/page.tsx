@@ -6,7 +6,6 @@ import User from "@/db/models/user";
 import Image from "next/image";
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { useSearchParams } from "next/navigation";
 
 const s3 = new S3Client({
   region: process.env.AWS_REGION,
@@ -18,14 +17,12 @@ export default async function ResultsDetailPage({ params, searchParams }: { para
 
   await dbConnect();
 
-  await User.findOne();
-
   const question = await Question.findById(questionId).populate({
     path: 'answers.user',
-    model: 'User',
+    model: User,
   });
 
-  //TODO THIS NEEDS TO BE CAHGNED TO GROUP NAME
+  //TODO THIS NEEDS TO BE CHANGED TO GROUP NAME
   const groupedResponses: any = {};
   question.answers.forEach((answer: any) => {
     const response = answer.response;

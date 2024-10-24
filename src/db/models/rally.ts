@@ -23,7 +23,6 @@ export interface IPictureSubmission {
       user: mongoose.Schema.Types.ObjectId
       time: Date
     },
-    time: Date
   ];
 }
 
