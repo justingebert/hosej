@@ -11,14 +11,7 @@ import {
 } from "@/components/ui/table";
 import Header from "@/components/ui/Header";
 import { useParams } from "next/navigation";
-import { IUser } from "@/db/models/user";
-import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { IGroup } from "@/db/models/Group";
-
-// Fetch users for a specific group
-const fetchUsers = async (groupId: string) => {
-  
-};
 
 const LeaderboardPage = () => {
   const [members, setMembers] = useState<IGroup["members"]>([]);
@@ -34,7 +27,6 @@ const LeaderboardPage = () => {
         }
         const data =  await response.json() as IGroup;
         const members =  data.members
-        console.log(members)
         setMembers(members);
       } catch (error: any) {
         setError(error.message);
@@ -45,7 +37,7 @@ const LeaderboardPage = () => {
 
   // Sort users by the points in the specific group
   const sortedUsers = members.sort((a, b) => {
-    return a.points - a.points;
+    return b.points - a.points;
   });
 
   return (
@@ -62,7 +54,7 @@ const LeaderboardPage = () => {
         <TableBody>
           {sortedUsers.map((member) => {
             return (
-              <TableRow key={member.user}>
+              <TableRow key={member.user.toString()}>
                 <TableCell className="font-medium">{member.name}</TableCell>
                 <TableCell className="text-right">{member.points}</TableCell>
                 <TableCell className="text-right font-medium">

@@ -31,6 +31,8 @@ export async function GET(req: NextRequest,{ params }: { params: { groupId: stri
       return NextResponse.json({ message: "No active rallies", rallies: [] }, { status: 200 });
     }
 
+  
+
     for (let rally of rallies) {
       const endTime = new Date(rally.endTime);
       const startTime = new Date(rally.startTime);

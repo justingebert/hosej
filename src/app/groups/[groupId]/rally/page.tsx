@@ -30,6 +30,9 @@ const RallyPage = () => {
       const data = await res.json();
 
       if (data.rallies) {
+        if (data.rallies.length === 0) {
+          setRallyInactive(true);
+        }
         setRallies(data.rallies);
         const votes = data.rallies.reduce((acc: any, rally: any) => {
           acc[rally._id] = rally.submissions.some((submission: any) =>
