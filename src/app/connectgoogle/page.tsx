@@ -19,7 +19,7 @@ export default function GoogleCallbackPage() {
 
       if (deviceId && status === 'authenticated' && user?.googleId) {
         try {
-          const response = await fetch('/api/google/connect', {
+          const response = await fetch('/api/auth/google/connect', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ deviceId: deviceId, googleUserId: user._id }),

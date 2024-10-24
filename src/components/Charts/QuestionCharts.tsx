@@ -82,7 +82,7 @@ export function QuestionsByType({ data }: { data: any[] }) {
 export function QuestionsByUser({ data }: { data: any[] }) {
     // Step 1: Generate chart data for the Pie chart
     const chartData = data.map((item, index) => ({
-      name: item._id,  // Use the actual name (user) from the data
+      name: item.username,  // Use the actual name (user) from the data
       value: item.count,  // The count value for each user
       fill: COLORS[index % COLORS.length],  // Assign color based on index
     }));

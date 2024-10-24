@@ -4,27 +4,33 @@ import Group from '@/db/models/Group';
 import User from '@/db/models/user';
 
 export async function POST(req: NextRequest) {
+  const userId = req.headers.get('x-user-id') as string;
   try{
     await dbConnect();
-    const { name, user } = await req.json();
-    console.log(name)
-    console.log(user)
-  
+    const { name } = await req.json();
+    
+    const userAdmin = await User.findById(userId);
+    if (!userAdmin) {
+      return NextResponse.json({ message: 'User not found' }, { status: 404 });
+    }
+    
+    const member = {
+      user: userAdmin._id,
+    }
     const newGroup = new Group({
       name: name,
-      admin: user._id,
-      members: [user._id],
+      admin: userAdmin._id,
+      members: [member],
     });
-  
     await newGroup.save();
-
-    const userAdmin = await User.findById(user._id);
+    
     userAdmin.groups.push(newGroup._id);
     await userAdmin.save();
 
     return NextResponse.json(newGroup, { status: 201 });
   }catch (error) {
-    console.error("Failed to fetch groups:", error);
-    return NextResponse.error();
+    console.error("Failed to create group", error);
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
 }
+//

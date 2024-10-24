@@ -8,6 +8,7 @@ export async function POST(req: Request) {
     const result = await sendNotification(title, body) as any;
     return NextResponse.json({ message: `${result.successCount} messages were sent successfully` });
   } catch (error: any) {
-    return NextResponse.json({ message: error.message }, { status: 500 });
+    console.error('Error sending notification:', error);
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
 }

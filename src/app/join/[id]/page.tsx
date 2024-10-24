@@ -3,16 +3,16 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Loader from '@/components/ui/Loader';
-import { useSession } from 'next-auth/react';
 import { useAuthRedirect } from '@/hooks/useAuthRedirect';
+import { useToast } from '@/hooks/use-toast';
 
 export default function JoinGroup({ params }: { params: { id: string }; }) {
-  //const { data: session, status } = useSession();
   const { session, status, user } = useAuthRedirect();
   const router = useRouter();
   const [group, setGroup] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     setLoading(true);
@@ -26,7 +26,7 @@ export default function JoinGroup({ params }: { params: { id: string }; }) {
 
     const joinGroup = async () => {
       try {
-        const res = await fetch('/api/groups/join', {
+        const res:any = await fetch('/api/groups/join', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -35,16 +35,22 @@ export default function JoinGroup({ params }: { params: { id: string }; }) {
             groupId,
             userId: (session?.user as any)._id,
           }),
-        });
-
-        if (!res.ok) {
-          const errorData = await res.json();
-          throw new Error(errorData.error || 'Failed to join group');
+        }) as any;
+        if(res.status === 400){
+          console.log(res);
+          toast({
+            title: "Error",
+            description: "You are already a member of this group",
+            variant: "destructive",
+          });
+          setLoading(false);
+          router.push(`/groups/`);
         }
 
         const joinedGroup = await res.json();
         setGroup(joinedGroup);
         setLoading(false);
+        router.push(`/groups/`);
       } catch (error: any) {
         setError(error.message);
         setLoading(false);

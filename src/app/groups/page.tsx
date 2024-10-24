@@ -9,18 +9,13 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
-  CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import {
   Drawer,
   DrawerClose,
   DrawerContent,
-  DrawerDescription,
   DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { IGroup } from "@/db/models/Group";
@@ -77,15 +72,15 @@ export default function GroupsPage() {
     const fetchGroups = async () => {
       if (status === "loading") return; // Do nothing while loading
 
-      const res = await fetch('/api/groups', {
-        method: 'POST',
+      const res = await fetch('/api/users/groups', {
+        method: 'GET',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user: user }),
+        //body: JSON.stringify({ user: user }),
       });
 
       if (res.ok) {
         const groupsData = await res.json();
-        setGroups(groupsData);
+        setGroups(groupsData.groups);
       } else {
         console.error('Failed to fetch groups');
       }
@@ -98,7 +93,7 @@ export default function GroupsPage() {
     const res = await fetch('/api/groups/create', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: groupName, user: user }),
+      body: JSON.stringify({ name: groupName}),
     });
 
     if (res.ok) {

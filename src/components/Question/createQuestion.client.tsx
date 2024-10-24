@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,7 +15,7 @@ import { useParams } from "next/navigation";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
-import { Plus } from 'lucide-react';
+import { Plus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const CreateQuestion = () => {
@@ -29,11 +29,12 @@ const CreateQuestion = () => {
   const { toast } = useToast();
   const [clearImageInput, setClearImageInput] = useState(false);
 
-  const {
-    uploading,
-    compressImages,
-    handleImageUpload,
-  } = useImageUploader();
+  const { uploading, compressImages, handleImageUpload } = useImageUploader();
+
+  // Refs and state for dynamic height calculation
+  const [availableHeight, setAvailableHeight] = useState<number | null>(null);
+  const optionsContainerRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (clearImageInput) {
@@ -77,6 +78,7 @@ const CreateQuestion = () => {
     setOptionFiles([]);
     setQuestionType("");
     setClearImageInput(true);
+    setMainImageFile(null);
   };
 
   const handleSubmit = async (e: any) => {
@@ -97,13 +99,13 @@ const CreateQuestion = () => {
       category: "Daily",
       questionType: questionType,
       question: question,
-      options: questionType.startsWith("custom") ? options : [], // This will be populated after the image uploads
-      submittedBy: user.username,
+      options: questionType.startsWith("custom") ? options : [], 
+      submittedBy: user._id,
     };
 
     try {
       // Create the question without options first
-      const response = await fetch(`/api/${groupId}/question/`, {
+      const response = await fetch(`/api/groups/${groupId}/question/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -117,31 +119,42 @@ const CreateQuestion = () => {
       // Upload the main image if there is one
       if (mainImageFile) {
         const [compressedMainImage] = await compressImages([mainImageFile]);
-        const imageUrl = await handleImageUpload(groupId, "question", newQuestion._id, user._id, [compressedMainImage]);
-        
+        const imageUrl = await handleImageUpload(groupId, "question", newQuestion._id, user._id, [
+          compressedMainImage,
+        ]);
+
         if (imageUrl && imageUrl.length > 0) {
           // Attach the main image to the question
-          const response = await fetch(`/api/${groupId}/question/${newQuestion._id}/attachImage`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ imageUrl: imageUrl[0] }),
-          });
+          const response = await fetch(
+            `/api/groups/${groupId}/question/${newQuestion._id}/attachImage`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ imageUrl: imageUrl[0] }),
+            }
+          );
           if (!response.ok) throw new Error("Failed to attach image");
         }
       }
-      if(questionType === "image-select-one") {
-          // Upload option images and update the options array
+      if (questionType === "image-select-one") {
+        // Upload option images and update the options array
         const compressedFiles = await compressImages(optionFiles.filter(Boolean) as File[]);
-        const optionImageUrls = await handleImageUpload(groupId, "question-option", newQuestion._id, user._id, compressedFiles);
+        const optionImageUrls = await handleImageUpload(
+          groupId,
+          "question-option",
+          newQuestion._id,
+          user._id,
+          compressedFiles
+        );
 
         const updatedOptions = options.map((option, index) => {
           return (optionImageUrls as any)[index] || option;
         });
 
         // Update the question with options
-        const res = await fetch(`/api/${groupId}/question/${newQuestion._id}/attachOptions`, {
+        const res = await fetch(`/api/groups/${groupId}/question/${newQuestion._id}/attachOptions`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -150,7 +163,6 @@ const CreateQuestion = () => {
         });
         if (!res.ok) throw new Error("Failed to attach options");
       }
-      
 
       toast({ title: "Question created successfully!" });
       resetForm();
@@ -163,10 +175,29 @@ const CreateQuestion = () => {
     }
   };
 
+  // Calculate available height between options container and button
+  useEffect(() => {
+    const calculateAvailableHeight = () => {
+      if (optionsContainerRef.current && buttonRef.current) {
+        const buttonTop = buttonRef.current.getBoundingClientRect().top;
+        const optionsTop = optionsContainerRef.current.getBoundingClientRect().top;
+        const newAvailableHeight = buttonTop - optionsTop - 20; // 20px for padding/margin
+        setAvailableHeight(newAvailableHeight);
+      }
+    };
+
+    calculateAvailableHeight();
+    window.addEventListener("resize", calculateAvailableHeight);
+
+    return () => {
+      window.removeEventListener("resize", calculateAvailableHeight);
+    };
+  }, []);
+
   const rollOutVariants = {
     hidden: { opacity: 0, y: -30 },
     visible: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -30 }
+    exit: { opacity: 0, y: -30 },
   };
 
   return (
@@ -202,10 +233,14 @@ const CreateQuestion = () => {
           buttonstyle="flex items-center justify-between w-full p-3"
         />
       </div>
-
-      {questionType === "custom-select-one" && (
-        <>
-          <div className="mt-10 px-4">
+      {/* Dynamically resizable options section */}
+      <div
+        ref={optionsContainerRef}
+        className="mt-4 px-4 overflow-y-auto"
+        style={{ maxHeight: availableHeight ? `${availableHeight}px` : "auto" }}
+      >
+        {questionType === "custom-select-one" && (
+          <>
             <AnimatePresence>
               {options.map((option, index) => (
                 <motion.div
@@ -234,18 +269,16 @@ const CreateQuestion = () => {
                 </motion.div>
               ))}
             </AnimatePresence>
-          </div>
-          <div className="flex justify-end mt-2 px-4">
-            <Button variant="ghost" className="w-12 p-2" onClick={handleAddOption}>
-              <Plus size={25} />
-            </Button>
-          </div>
-        </>
-      )}
+            <div className="flex justify-end mt-2">
+              <Button variant="ghost" className="w-12 p-2" onClick={handleAddOption}>
+                <Plus size={25} />
+              </Button>
+            </div>
+          </>
+        )}
 
-{questionType === "image-select-one" && (
-        <>
-          <div className="mt-10 px-4">
+        {questionType === "image-select-one" && (
+          <>
             <AnimatePresence>
               {options.map((_, index) => (
                 <motion.div
@@ -274,16 +307,17 @@ const CreateQuestion = () => {
                 </motion.div>
               ))}
             </AnimatePresence>
-          </div>
-          <div className="flex justify-end mt-2 px-4">
-            <Button variant="ghost" className="w-12 p-2" onClick={handleAddOption}>
-              <Plus size={25} />
-            </Button>
-          </div>
-        </>
-      )}
-      <div className="flex justify-center fixed bottom-20 left-0 w-full p-2 bg-background">
-        <Button onClick={handleSubmit} disabled={uploading || !question.trim()}>
+            <div className="flex justify-end mt-2">
+              <Button variant="ghost" className="w-12 p-2" onClick={handleAddOption}>
+                <Plus size={25} />
+              </Button>
+            </div>
+          </>
+        )}
+      </div>
+      {/* Fixed full-width submit button */}
+      <div ref={buttonRef} className="flex justify-center fixed bottom-6 left-0 w-full p-6 bg-background">
+        <Button onClick={handleSubmit} disabled={uploading || !question.trim()} className="w-full">
           {uploading ? "Creating..." : "Create Question"}
         </Button>
       </div>

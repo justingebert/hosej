@@ -9,12 +9,11 @@ export async function POST(req: any, { params }: { params: { id: string } }) {
 
     await dbConnect();
 
-    // Find the user by userId and remove their FCM token
     await User.updateOne({ _id: userId }, { $unset: { fcmToken: token } });
 
-    return NextResponse.json({ success: true, message: 'FCM token unregistered successfully.' }, { status: 200 });
+    return NextResponse.json({message: 'FCM token unregistered successfully.' }, { status: 200 });
   } catch (error) {
     console.error('Error during FCM token unregistration:', error);
-    return NextResponse.json({ success: false, message: 'Server error.' }, { status: 500 });
+    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
   }
 }

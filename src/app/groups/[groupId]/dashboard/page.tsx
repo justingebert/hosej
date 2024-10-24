@@ -26,9 +26,9 @@ export default function Dashboard() {
 
   useEffect(() => {
     const fetchUserCount = async () => {
-      const response = await fetch(`/api/${groupId}/users/count`);
+      const response = await fetch(`/api/groups/${groupId}`);
       const data = await response.json();
-      setUserCount(data);
+      setUserCount(data.members.length);
     };
     fetchUserCount();
   }, [groupId, userCount]);
@@ -37,14 +37,14 @@ export default function Dashboard() {
   useEffect(() => {
     if (userCount > 0) {
       const fetchQuestions = async () => {
-        const response = await fetch(`/api/${groupId}/question/daily`);
+        const response = await fetch(`/api/groups/${groupId}/question/daily`);
         const data = await response.json();
         setQuestions(data.questions);
         calculateCompletion(data.questions, userCount); 
       };
       fetchQuestions();
       const fetchRallies = async () => {
-        const response = await fetch(`/api/${groupId}/rally`);
+        const response = await fetch(`/api/groups/${groupId}/rally`);
         const data = await response.json();
         setRallies(data.rallies);
       }
@@ -141,10 +141,7 @@ export default function Dashboard() {
             </div>
             <div className="w-24 h-24 rounded-lg flex items-center justify-center">
               {rallies.length > 0 && rallies[0].votingOpen && <MousePointerClick className="w-full h-full p-4" />}
-              {rallies.length > 0 && rallies[0].resultsShowing && (
-                <div className="text-sm text-primary/30">
-                  <BarChartBig className="w-full h-full p-4 " />
-                </div>
+              {rallies.length > 0 && rallies[0].resultsShowing && (<BarChartBig className="w-full h-full p-4 " />
               )}
               {rallies.length > 0 && !rallies[0].votingOpen && !rallies[0].resultsShowing && (<ScanSearch className="w-full h-full p-4" />)} 
               {rallies.length === 0 && (  <CircleSlash  className="w-full h-full p-4 text-secondary" />)}

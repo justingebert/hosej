@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
 
     return Response.json({ url, fields })
   } catch (error:any) {
-    console.error('Error creating presigned URL:', error)
-    return Response.json({ message: error })
+    console.error('Error uploading image', error)
+    return Response.json({ message: "Internal Server Error" }, { status: 500 })
   }
 }

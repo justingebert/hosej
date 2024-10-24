@@ -26,14 +26,17 @@ const RallyPage = () => {
     const fetchRallies = async () => {
       setLoading(true);
       router.refresh();
-      const res = await fetch(`/api/${groupId}/rally`);
+      const res = await fetch(`/api/groups/${groupId}/rally`);
       const data = await res.json();
 
       if (data.rallies) {
+        if (data.rallies.length === 0) {
+          setRallyInactive(true);
+        }
         setRallies(data.rallies);
         const votes = data.rallies.reduce((acc: any, rally: any) => {
           acc[rally._id] = rally.submissions.some((submission: any) =>
-            submission.votes.some((vote: any) => vote.username === user.username)
+            submission.votes.some((vote: any) => vote.user === user._id)
           );
           return acc;
         }, {});
