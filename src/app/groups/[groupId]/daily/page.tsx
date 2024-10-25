@@ -21,10 +21,10 @@ function QuestionsTabs({ user, groupId, questions, userHasVoted, setUserHasVoted
   const defaultTab = searchParams.get('returnTo') || (questions.length > 0 ? questions[0]._id : undefined);
 
   const rateQuestion = async (questionId: string, rating: string) => {
-    await fetch(`/api/${groupId}/question/${questionId}/rate`, {
+    await fetch(`/api/groups/${groupId}/question/${questionId}/rate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username:user.username, rating:rating }),
+      body: JSON.stringify({ rating:rating }),
     });
 
     setSelectedRating((prevState: any) => ({
@@ -60,9 +60,9 @@ function QuestionsTabs({ user, groupId, questions, userHasVoted, setUserHasVoted
             <DrawerDescription></DrawerDescription>
           </DrawerHeader>
           <div className="flex flex-row justify-center space-x-4">
-            <Badge>🐟{question.rating.bad.count}</Badge>
-            <Badge>👍{question.rating.ok.count}</Badge>
-            <Badge>🐐{question.rating.good.count}</Badge>
+            <Badge>🐟{question.rating.bad.length}</Badge>
+            <Badge>👍{question.rating.ok.length}</Badge>
+            <Badge>🐐{question.rating.good.length}</Badge>
           </div>
             <div className="flex flex-row space-x-4 p-4">
             <Button
@@ -132,7 +132,7 @@ const DailyQuestionPage = () => {
       if (!session?.user) return; 
       setLoading(true);
       router.refresh();
-      const res = await fetch(`/api/${groupId}/question/daily`, { cache: "no-store" });
+      const res = await fetch(`/api/groups/${groupId}/question/daily`, { cache: "no-store" });
       const data = await res.json();
 
       if (data.questions) {
@@ -147,16 +147,16 @@ const DailyQuestionPage = () => {
         setQuestions(data.questions);
         const votes = data.questions.reduce((acc: any, question: any) => {
           acc[question._id] = question.answers.some(
-            (answer: any) => answer.username === user._id
+            (answer: any) => answer.user === user._id
           );
           return acc;
         }, {});
         setUserHasVoted(votes);
 
         const ratings = data.questions.reduce((acc: any, question: any) => {
-          if (question.rating.good.usernames.includes(user.username)) acc[question._id] = "good";
-          else if (question.rating.ok.usernames.includes(user.username)) acc[question._id] = "ok";
-          else if (question.rating.bad.usernames.includes(user.username)) acc[question._id] = "bad";
+          if (question.rating.good.includes(user._id)) acc[question._id] = "good";
+          else if (question.rating.ok.includes(user._id)) acc[question._id] = "ok";
+          else if (question.rating.bad.includes(user._id)) acc[question._id] = "bad";
           return acc;
         }, {});
 

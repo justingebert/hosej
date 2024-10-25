@@ -34,8 +34,8 @@ export default function RootLayout({
            {/*  <PageTransitionWrapper>{children}</PageTransitionWrapper> */}
            {children}
           </AppWrapper>
-          <Toaster />
         </div>
+        <Toaster />
       </body>
     </html>
   );

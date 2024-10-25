@@ -85,17 +85,14 @@ export default function SubmitRally({
   const createRallySubmission = async (
     rallyId: string,
     groupId: string,
-    userId: string,
     imageUrl: string
   ) => {
-    const response = await fetch(`/api/${groupId}/rally/submissions`, {
+    const response = await fetch(`/api/groups/${groupId}/rally/${rallyId}/submissions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        rallyId,
-        userId,
         imageUrl,
       }),
     });
@@ -127,7 +124,6 @@ export default function SubmitRally({
         await createRallySubmission(
           rally._id,
           rally.groupId,
-          user.username,
           imageUrl[0]
         );
       }

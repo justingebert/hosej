@@ -1,12 +1,14 @@
 import { getToken } from 'next-auth/jwt';
 import { NextRequest, NextResponse } from 'next/server';
+import mongoose from 'mongoose';
+import Group from './db/models/Group';
+import dbConnect from './lib/dbConnect';
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   
-  // Define public routes
   const publicRoutes = [
-    '/api/users/migrate', 
+    "/api/*",
     '/api/users/create', 
     '/api/auth/session', 
     '/api/auth/providers', 
@@ -21,32 +23,24 @@ export async function middleware(req: NextRequest) {
     "/api/auth/callback/google",
     '/',
   ];
-
-  // Log the request URL and token status
-  //console.log(`Requesting: ${pathname}`);
-  
   if (publicRoutes.includes(pathname)) {
-    //console.log('Public route, allowing access.');
     return NextResponse.next();
   }
 
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-  //console.log(`Token retrieved: ${token ? 'Valid' : 'Invalid or Missing'}`);
-
-  if (token) {
-    //console.log('Token is valid, allowing access.');
-    return NextResponse.next();
+  if (!token) {
+    const loginUrl = new URL('/', req.url);
+    return NextResponse.redirect(loginUrl);
   }
 
-  if (req.nextUrl.pathname.startsWith('/api/auth/callback/credentials')) {
-    return NextResponse.next();
-  }
+  const userId = token.userId as string;
+  const response = NextResponse.next();
+  response.headers.set('x-user-id', userId);
 
-  //console.log('No valid token, redirecting to login.');
-  const loginUrl = new URL('/', req.url);
-  return NextResponse.redirect(loginUrl);
+  return response;
 }
 
+// Middleware configuration to match relevant routes
 export const config = {
   matcher: ['/dashboard/:path*', '/api/:path*'],
 };

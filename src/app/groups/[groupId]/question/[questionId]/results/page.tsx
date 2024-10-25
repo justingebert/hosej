@@ -18,7 +18,7 @@ const ResultsPage = () => {
   useEffect(() => {
     const fetchQuestion = async () => {
       setLoading(true);
-      const res = await fetch(`/api/${groupId}/question/${questionId}`);
+      const res = await fetch(`/api/groups/${groupId}/question/${questionId}`);
       const data = await res.json();
       setQuestion(data);
       setLoading(false);

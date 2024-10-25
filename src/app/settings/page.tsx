@@ -62,7 +62,7 @@ export default function SettingsPage() {
       }
     }
 
-    await fetch("/api/google/disconnect", {
+    await fetch("/api/auth/google/disconnect", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId: user._id, deviceId: deviceId }),

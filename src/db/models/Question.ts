@@ -1,32 +1,31 @@
 import mongoose from "mongoose";
 
-enum QuestionType {
-  UsersSelectOne = "users-select-one",
-  UsersSelectMultiple = "users-select-multiple",
-  CustomSelectOne = "custom-select-one",
-  CustomSelectMultiple = "custom-select-multiple",
-  Text = "text", 
-  Rating = "rating",
-  ImageSelectOne = "image-select-one",
-  //MatchPairs = "match-pairs",
-  //Sequence = "sequence",
-}
-
 export interface IQuestion extends mongoose.Document {
   category: string;
   questionType: QuestionType;
   question: string;
   options?: any;
-  answers: [{ userId: mongoose.Schema.Types.ObjectId; response: any, time: Date}];
+  answers: [{ user: mongoose.Schema.Types.ObjectId; response: any; time: Date }];
   rating: {
-    good: { count: number, username: string},
-    ok: { count: number, username: string},
-    bad: { count: number, username: string},
+    good: mongoose.Schema.Types.ObjectId[];
+    ok: mongoose.Schema.Types.ObjectId[];
+    bad: mongoose.Schema.Types.ObjectId[];
   };
   createdAt: Date;
   used: boolean;
   active: boolean;
-  submittedBy: String
+  submittedBy: mongoose.Schema.Types.ObjectId;
+  chat: mongoose.Schema.Types.ObjectId;
+}
+
+enum QuestionType {
+  UsersSelectOne = "users-select-one",
+  UsersSelectMultiple = "users-select-multiple",
+  CustomSelectOne = "custom-select-one",
+  CustomSelectMultiple = "custom-select-multiple",
+  Text = "text",
+  Rating = "rating",
+  ImageSelectOne = "image-select-one",
 }
 
 const questionSchema = new mongoose.Schema({
@@ -38,28 +37,28 @@ const questionSchema = new mongoose.Schema({
   category: { type: String },
   questionType: {
     type: String,
-    required: true,
     enum: Object.values(QuestionType),
+    required: true,
   },
   question: { type: String, required: true },
   image: { type: String, required: false },
   options: { type: mongoose.Schema.Types.Mixed, required: false },
   answers: [
     {
-      username: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true},
-      response: { type: mongoose.Schema.Types.Mixed, required: true},
-      time:     { type: Date},
+      user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+      response: { type: mongoose.Schema.Types.Mixed, required: true },
+      time: { type: Date },
     },
   ],
-  rating: { 
-    good: { count:{type: Number, default: 0}, usernames: [String]},
-    ok: {count:{type: Number, default: 0}, usernames: [String]},
-    bad: {count:{type: Number, default: 0}, usernames: [String]},
+  rating: {
+    good: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    ok: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    bad: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   },
   createdAt: { type: Date, default: Date.now },
   used: { type: Boolean, default: false },
   active: { type: Boolean, default: false },
-  submittedBy: {type: String},
+  submittedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   chat: { type: mongoose.Schema.Types.ObjectId, ref: "Chat" },
 });
 

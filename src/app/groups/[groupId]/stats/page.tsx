@@ -26,7 +26,7 @@ type Statistics = {
 };
 
 const fetchStatistics = async (groupId: string): Promise<Statistics> => {
-  const response = await fetch(`/api/${groupId}/stats`);
+  const response = await fetch(`/api/groups/${groupId}/stats`);
   if (!response.ok) {
     throw new Error("Failed to fetch statistics");
   }
@@ -37,7 +37,6 @@ const StatsPage = () => {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<Statistics | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
   const { groupId } = useParams<{ groupId: string }>();
 
   useEffect(() => {

@@ -11,7 +11,10 @@ function ChatComponent({ user, entity, available }: any) {
   useEffect(() => {
     const fetchMessages = async () => {
       if (entity.chat) {
-        const response = await fetch(`/api/${entity.groupId}/chats/${entity.chat}`);
+        const response = await fetch(`/api/groups/${entity.groupId}/chats/${entity.chat}`);
+        if (!response.ok) {
+          return;
+        }
         const data = await response.json();
         setMessages(data.messages);
       }
@@ -23,8 +26,8 @@ function ChatComponent({ user, entity, available }: any) {
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return; // Prevent sending empty messages
 
-    const messageData = { message: newMessage, userId: user._id };
-    const response = await fetch(`/api/${entity.groupId}/chats/${entity.chat}/messages`, {
+    const messageData = { message: newMessage };
+    const response = await fetch(`/api/groups/${entity.groupId}/chats/${entity.chat}/messages`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -44,7 +47,7 @@ function ChatComponent({ user, entity, available }: any) {
       };
       setMessages([...messages, completeMessage]);
       setNewMessage('');
-      scrollToBottom(); // Scroll to the bottom after sending a message
+      //scrollToBottom(); // Scroll to the bottom after sending a message
     }
   };
 
@@ -55,7 +58,7 @@ function ChatComponent({ user, entity, available }: any) {
   };
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className={`flex flex-col ${available ? "h-screen" : ""}`}>
       {/* Messages container */}
       <div className="flex-1 overflow-y-auto p-4">
         {messages.length > 0 ? (
@@ -77,7 +80,7 @@ function ChatComponent({ user, entity, available }: any) {
                 </div>
               </div>
             ))}
-            <div ref={messagesEndRef} /> {/* Empty div to keep track of the bottom */}
+            { available && <div ref={messagesEndRef} /> } {/*  Empty div to keep track of the bottom */}
           </>
         ) : (
           <div className="flex-grow"></div> /* Empty space to push input to bottom */
