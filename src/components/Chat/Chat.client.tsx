@@ -47,7 +47,7 @@ function ChatComponent({ user, entity, available }: any) {
       };
       setMessages([...messages, completeMessage]);
       setNewMessage('');
-      scrollToBottom(); // Scroll to the bottom after sending a message
+      //scrollToBottom(); // Scroll to the bottom after sending a message
     }
   };
 
@@ -58,7 +58,7 @@ function ChatComponent({ user, entity, available }: any) {
   };
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className={`flex flex-col ${available ? "h-screen" : ""}`}>
       {/* Messages container */}
       <div className="flex-1 overflow-y-auto p-4">
         {messages.length > 0 ? (
@@ -80,7 +80,7 @@ function ChatComponent({ user, entity, available }: any) {
                 </div>
               </div>
             ))}
-            <div ref={messagesEndRef} /> {/* Empty div to keep track of the bottom */}
+            { available && <div ref={messagesEndRef} /> } {/*  Empty div to keep track of the bottom */}
           </>
         ) : (
           <div className="flex-grow"></div> /* Empty space to push input to bottom */
