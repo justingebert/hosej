@@ -6,6 +6,7 @@ import User from "@/db/models/user";
 import Image from "next/image";
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { generateSignedUrl } from "@/lib/question/questionOptions";
 
 const s3 = new S3Client({
   region: process.env.AWS_REGION,
@@ -34,24 +35,12 @@ export default async function ResultsDetailPage({ params, searchParams }: { para
 
   const entries = await Promise.all(Object.entries(groupedResponses).map(async ([response, usernames]: any) => {
     if (question.questionType.startsWith("image")) {
-      const urlObject = new URL(response);
-      let s3Key = urlObject.pathname;
-      if (s3Key.startsWith('/')) {
-        s3Key = s3Key.substring(1); // Remove leading '/'
-      }
-
-      const command = new GetObjectCommand({
-        Bucket: process.env.AWS_BUCKET_NAME,
-        Key: s3Key,
-        ResponseCacheControl: 'max-age=86400, public',
-      });
-
       try {
-        const signedUrl = await getSignedUrl(s3, command, { expiresIn: 60 }); // Short-lived URL
-        return [signedUrl, usernames];
+        const { url } = await generateSignedUrl(response, 60);
+        return [url, usernames];
       } catch (s3Error: any) {
-        console.error(`Failed to generate pre-signed URL for ${response}`, s3Error);
-        throw new Error(`Failed to generate pre-signed URL: ${s3Error.message}`);
+          console.error(`Failed to generate pre-signed URL for ${response}`, s3Error);
+          throw new Error(`Failed to generate pre-signed URL: ${s3Error.message}`);
       }
     } else {
       return [response, usernames];

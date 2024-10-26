@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea"
 import Image from "next/image";
 
 const VoteOptions = ({ user, question, onVote }:any) => {
-  const [selectedOption, setSelectedOption] = useState(null);
+  const [selectedOption, setSelectedOption] = useState<any>(null);
   const [textResponse, setTextResponse] = useState("");
 
   const submitVote = async () => {
@@ -18,7 +18,7 @@ const VoteOptions = ({ user, question, onVote }:any) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        response: response,
+        response: response.key ? response.key : response,
       }),
     });
     onVote(); // Callback to update state in the parent component
@@ -47,7 +47,7 @@ const VoteOptions = ({ user, question, onVote }:any) => {
               style={{ whiteSpace: "normal", height: "100%" }}
             >
               {question.questionType.startsWith("image") ? (
-                <Image src={option} alt={`Option ${index + 1}`} width={100} height={100} className="w-full h-full object-cover rounded-sm"/>
+                <Image src={option.url} alt={`Option ${index + 1}`} width={100} height={100} className="w-full h-full object-cover rounded-sm"/>
               ) : (
                 option
               )}

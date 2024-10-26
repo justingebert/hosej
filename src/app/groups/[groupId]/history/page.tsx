@@ -8,6 +8,7 @@ import Loader from "@/components/ui/Loader";
 import Header from "@/components/ui/Header";
 import { useParams } from "next/navigation";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
+import { ArrowDown, ArrowUp } from 'lucide-react';
 
 // Attach newly paged questions 
 const QuestionHistoryPage = () => {
@@ -76,40 +77,46 @@ const QuestionHistoryPage = () => {
     <>
       <Header href={`/groups/${groupId}/dashboard`} title="Question History" />
       <div className="pb-6">
-        {questions && questions.map((question) => (
-          <Card key={question._id} className="mb-4">
-            <CardHeader>
-              <CardTitle>{question.question}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Link href={`/groups/${groupId}/question/${question._id}/results`}>
-                <Button>View Results</Button>
-              </Link>
-            </CardContent>
-          </Card>
-        ))}
+        {questions &&
+          questions.map((question) => (
+            <Card key={question._id} className="mb-4">
+              <CardHeader>
+                <CardTitle>{question.question}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Link
+                  href={`/groups/${groupId}/question/${question._id}/results`}
+                >
+                  <Button>View Results</Button>
+                </Link>
+              </CardContent>
+            </Card>
+          ))}
         {!loading && hasMore && (
           <div className="flex justify-center mt-4 mb-6">
-            <Button variant="secondary" onClick={handleLoadMore}>Load More</Button>
+            <Button variant="secondary" onClick={handleLoadMore}>
+              Load More
+            </Button>
           </div>
         )}
       </div>
 
-      {/* Scroll buttons */}
       {showGoTop && (
-        <Button 
-          variant="secondary" 
-          className="fixed bottom-20 right-6" 
-          onClick={scrollToTop}>
-          ↑
+        <Button
+          variant="secondary"
+          className="fixed bottom-20 right-6 w-10 h-10 p-0 " // Square and centered content
+          onClick={scrollToTop}
+        >
+          <ArrowUp size={24} /> {/* Larger icon size */}
         </Button>
       )}
       {showGoBottom && (
-        <Button 
-          variant="secondary" 
-          className="fixed bottom-5 right-6" 
-          onClick={scrollToBottom}>
-          ↓
+        <Button
+          variant="secondary"
+          className="fixed bottom-5 right-6 w-10 h-10 p-0" // Square and centered content
+          onClick={scrollToBottom}
+        >
+          <ArrowDown size={24} /> {/* Larger icon size */}
         </Button>
       )}
     </>

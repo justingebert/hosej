@@ -132,7 +132,7 @@ const CreateQuestion = () => {
               headers: {
                 "Content-Type": "application/json",
               },
-              body: JSON.stringify({ imageUrl: imageUrl[0] }),
+              body: JSON.stringify({ imageUrl: imageUrl[0].url }),
             }
           );
           if (!response.ok) throw new Error("Failed to attach image");
@@ -317,7 +317,7 @@ const CreateQuestion = () => {
       </div>
       {/* Fixed full-width submit button */}
       <div ref={buttonRef} className="flex justify-center fixed bottom-6 left-0 w-full p-6 bg-background">
-        <Button onClick={handleSubmit} disabled={uploading || !question.trim()} className="w-full">
+        <Button onClick={handleSubmit} disabled={uploading || !question.trim() || !questionType} className="w-full">
           {uploading ? "Creating..." : "Create Question"}
         </Button>
       </div>

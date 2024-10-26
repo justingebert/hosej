@@ -29,8 +29,8 @@ export async function POST(req: NextRequest) {
 
     if (!user.groups.includes(groupId)) {
       user.groups.push(groupId); 
+      await user.save();
     }
-    await user.save();
 
     return NextResponse.json({ message: `User ${user.username} successfully joined the group`, group }, { status: 200 });
   } catch (error) {

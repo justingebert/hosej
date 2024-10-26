@@ -56,7 +56,7 @@ const ResultsPage = () => {
                   className="p-4 m-2 bg-primary text-primary-foreground rounded-lg w-full max-w-md"
                 >
                   <Image
-                    src={option}
+                    src={option.url}
                     alt={`Option ${index + 1}`}
                     className="object-cover w-full h-full rounded-lg"
                     width={300}
