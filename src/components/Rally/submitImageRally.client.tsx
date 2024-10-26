@@ -124,7 +124,7 @@ export default function SubmitRally({
         await createRallySubmission(
           rally._id,
           rally.groupId,
-          imageUrl[0]
+          imageUrl[0].url
         );
       }
 
