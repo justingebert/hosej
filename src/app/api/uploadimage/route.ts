@@ -8,9 +8,10 @@ export async function POST(request: NextRequest) {
   try {
     const { filename, contentType, groupId, entity, entityId, userId } = await request.json()
     const client = new S3Client({ region: process.env.AWS_REGION })
+    const key = `${groupId}/${entity}/${entityId}/${uuidv4()}`
     const { url, fields } = await createPresignedPost(client, {
       Bucket: process.env.AWS_BUCKET_NAME as string,
-      Key:`${groupId}/${entity}/${entityId}/${uuidv4()}`,
+      Key: key,
       Conditions: [
         ['content-length-range', 0, 10485760], // up to 10 MBh
         ['eq', '$Content-Type', contentType],
@@ -22,7 +23,6 @@ export async function POST(request: NextRequest) {
       },
       Expires: 600, // Seconds before the presigned post expires. 3600 by default.
     })
-
     return Response.json({ url, fields })
   } catch (error:any) {
     console.error('Error uploading image', error)

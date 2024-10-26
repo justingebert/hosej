@@ -5,6 +5,7 @@ import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import Group from '@/db/models/Group';
 import { isUserInGroup } from '@/lib/groupAuth';
+import { generateSignedUrl } from '@/lib/question/questionOptions';
 
 const s3 = new S3Client({
     region: process.env.AWS_REGION,
@@ -38,7 +39,7 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
         const totalVotes = question.answers.length;
 
         // Calculate the results with percentages
-        const results = Object.entries(voteCounts).map(([option, votes]: [string, any]) => {
+        const results = Object.entries(voteCounts).map(([option, votes]: [any, any]) => {
             const percentage = Math.round((votes / totalVotes) * 100);
             return { option, votes, percentage };
         });
@@ -49,25 +50,8 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
         if (question.questionType.startsWith("image")) {
             const resultsWithImages = await Promise.all(
                 results.map(async (result) => {
-                    const optionUrl = new URL(result.option);
-                    let s3Key = optionUrl.pathname;
-                    if (s3Key.startsWith('/')) {
-                        s3Key = s3Key.substring(1); // Remove leading '/'
-                    }
-
-                    const command = new GetObjectCommand({
-                        Bucket: process.env.AWS_BUCKET_NAME,
-                        Key: s3Key,
-                        ResponseCacheControl: 'max-age=86400, public',
-                    });
-
-                    try {
-                        const signedUrl = await getSignedUrl(s3, command, { expiresIn: 180 }); // Short-lived URL
-                        return { ...result, option: signedUrl }; // Replace the option with the signed URL
-                    } catch (s3Error: any) {
-                        console.error(`Failed to generate pre-signed URL for option ${result.option}`, s3Error);
-                        throw new Error(`Failed to generate pre-signed URL for option: ${s3Error.message}`);
-                    }
+                    const { url } = await generateSignedUrl(result.option);
+                    return { ...result, option: url };
                 })
             );
 

@@ -132,7 +132,7 @@ const CreateQuestion = () => {
               headers: {
                 "Content-Type": "application/json",
               },
-              body: JSON.stringify({ imageUrl: imageUrl[0] }),
+              body: JSON.stringify({ imageUrl: imageUrl[0].url }),
             }
           );
           if (!response.ok) throw new Error("Failed to attach image");

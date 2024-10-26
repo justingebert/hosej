@@ -53,9 +53,9 @@ const VoteResults = ({ user, question, available, returnTo }: VoteResultsProps) 
                     <Image
                       src={result.option}
                       alt={`Option ${index + 1}`}
-                      width={45}
-                      height={45}
-                      className="object-cover rounded-sm"
+                      height={30}
+                      width={30}
+                      className="object-cover rounded-sm w-8 h-8"
                       priority={index === 0}
                     />
                   ) : (

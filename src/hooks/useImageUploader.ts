@@ -4,7 +4,7 @@ import imageCompression from "browser-image-compression";
 export const useImageUploader = () => {
   const [uploading, setUploading] = useState(false);
   const [compressedImages, setCompressedImages] = useState<File[]>([]);
-  const [fileUrls, setFileUrls] = useState<string[]>([]);
+  const [fileData, setFileDat] = useState<{key:string, url:string}[]>([]);
 
   // Compress a single image or an array of images
   const compressImages = async (files: File[]) => {
@@ -69,15 +69,18 @@ export const useImageUploader = () => {
 
     setUploading(true);
     try {
-      const urls = await Promise.all(
+      const uploadedFileData = await Promise.all(
         files.map(async (file) => {
-          const { url, fields } = await getPresignedUrl(file.name, file.type, groupId, entity, entityId, userId);
+          const { url, fields, } = await getPresignedUrl(file.name, file.type, groupId, entity, entityId, userId);
           const key = await uploadToS3(url, fields, file);
-          return `${url}/${key}`;
+          return {
+            key: key,
+            url: `${url}/${key}`,
+          };
         })
       );
-      setFileUrls(urls);
-      return urls;
+      setFileDat(uploadedFileData);
+      return uploadedFileData;
     } catch (error) {
       console.error("Upload failed", error);
       alert("Failed to upload file(s)");
@@ -90,7 +93,7 @@ export const useImageUploader = () => {
   return {
     uploading,
     compressedImages,
-    fileUrls,
+    fileUrls: fileData,
     compressImages,
     handleImageUpload,
   };

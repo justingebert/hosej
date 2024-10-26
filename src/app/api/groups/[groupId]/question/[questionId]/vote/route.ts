@@ -36,6 +36,7 @@ export async function POST(req: Request, { params }: { params: { groupId: string
       return NextResponse.json({ message: "You have already voted" }, { status: 304 });
     }
 
+    
     await Question.findByIdAndUpdate(
       questionId,
       { $push: { answers: { user: user._id, response: response, time: Date.now() } } },
