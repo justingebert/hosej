@@ -27,10 +27,11 @@ export default function GoogleCallbackPage() {
 
           const result = await response.json();
 
-          if (result.success) {
+          if (response.ok) {
             console.log('Google account linked successfully.');
             toast({ title: "Google account linked successfully." });
             await signIn('google', { callbackUrl: `/groups` })
+            console.log('Redirecting to groups page');
           } else {
             console.error('Failed to link Google account:', result.message);
           }
