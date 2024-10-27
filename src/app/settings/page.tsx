@@ -186,9 +186,14 @@ export default function SettingsPage() {
 
     <div className="flex flex-col justify-center mt-10 gap-5">
       {!googleConnected ? (
+        <div>
         <Button onClick={handleGoogleConnect} className="w-full">
           Connect with Google
         </Button>
+        <div>
+          test
+        </div>
+        </div>
       ) : (
         <Button
           onClick={handlegoogleDisconnect}
