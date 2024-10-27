@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Settings, CircleHelp } from 'lucide-react';
 import {
   Card,
@@ -11,57 +10,13 @@ import {
   CardDescription,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerFooter,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
+
 import { IGroup } from "@/db/models/Group";
 import { Copy } from "lucide-react";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { motion } from 'framer-motion';
+import { CreateGroupDrawer, JoinGroupDrawer } from "@/components/Group/groupdrawers";
 
-function CreateGroupDrawer({ onCreate }: { onCreate: (groupName: string) => void }) {
-  const [groupName, setGroupName] = useState("");
-
-  const handleCreate = () => {
-    if (groupName.trim() === "") return;
-    onCreate(groupName);
-    setGroupName("");
-  };
-
-  return (
-    <Drawer>
-      <DrawerTrigger asChild>
-        <div className="flex justify-center">
-          <Button >Create Group</Button>
-        </div>
-      </DrawerTrigger>
-      <DrawerContent>
-        <div className="mx-auto w-full max-w-sm">
-
-          <div className="p-4 pb-0">
-            <div className="flex flex-col space-y-1.5">
-              <Input
-                id="groupName"
-                placeholder="Group Name"
-                value={groupName}
-                onChange={(e) => setGroupName(e.target.value)}
-              />
-            </div>
-          </div>
-          <DrawerFooter>
-            <DrawerClose asChild>
-              <Button onClick={handleCreate} disabled={!groupName}>Create</Button>
-            </DrawerClose>
-          </DrawerFooter>
-        </div>
-      </DrawerContent>
-    </Drawer>
-  );
-}
 
 export default function GroupsPage() {
   const { session, status, user } = useAuthRedirect();
@@ -173,7 +128,7 @@ export default function GroupsPage() {
                 size="icon"
                 onClick={(e) => {
                   e.stopPropagation();
-                  copyToClipboard(`${window.location.origin}/join/${group._id}`);
+                  copyToClipboard(`${group._id}`);
                 }}
               >
                 <Copy className="w-4 h-4" />
@@ -184,10 +139,14 @@ export default function GroupsPage() {
       </div>
     </div>
 
-    {/* Create Group Button - Fixed at Bottom */}
-    <div className="fixed bottom-0 left-0 w-full backdrop-blur-sm p-8">
-      <CreateGroupDrawer onCreate={createGroup} />
+    <div className="fixed bottom-0 left-0 w-full backdrop-blur-sm p-8 flex space-x-4">
+        <div className="w-1/2">
+          <CreateGroupDrawer onCreate={createGroup} />
+        </div>
+        <div className="w-1/2">
+          <JoinGroupDrawer />
+        </div>
+      </div>
     </div>
-  </div>
   );
 }
