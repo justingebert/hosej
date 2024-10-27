@@ -16,21 +16,50 @@ import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import Image from "next/image";
 
 function QuestionsTabs({ user, groupId, questions, userHasVoted, setUserHasVoted, selectedRating, setSelectedRating }: any) {
-
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [ratings, setRatings] = useState<any>({});
   const searchParams = useSearchParams();
   const defaultTab = searchParams.get('returnTo') || (questions.length > 0 ? questions[0]._id : undefined);
+
+  useEffect(() => {
+    // Initialize ratings state with default structure
+    const initialRatings = questions.reduce((acc: any, question: any) => {
+      acc[question._id] = {
+        bad: question.rating.bad || [],
+        ok: question.rating.ok || [],
+        good: question.rating.good || []
+      };
+      return acc;
+    }, {});
+    setRatings(initialRatings);
+    console.log(initialRatings);
+  }, [questions]);
 
   const rateQuestion = async (questionId: string, rating: string) => {
     await fetch(`/api/groups/${groupId}/question/${questionId}/rate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ rating:rating }),
-    });
+    });    
 
     setSelectedRating((prevState: any) => ({
       ...prevState,
       [questionId]: rating,
     }));
+
+    setRatings((prevRatings: any) => {
+      const updatedQuestionRatings = { ...prevRatings[questionId] };
+      updatedQuestionRatings[rating] = [...(updatedQuestionRatings[rating] || []), user._id];
+
+      return {
+        ...prevRatings,
+        [questionId]: updatedQuestionRatings,
+      };
+    });
+  }
+
+  const handleDrawer = () => {
+    setDrawerOpen(!drawerOpen);
   }
 
 
@@ -48,7 +77,7 @@ function QuestionsTabs({ user, groupId, questions, userHasVoted, setUserHasVoted
         </TabsList>
       {questions.map((question: any) => (
         <TabsContent key={question._id} value={question._id}>
-          <Drawer>
+          <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
           <DrawerTrigger className="w-full">
           <Card className=" bg-foreground text-center">
                 <h2 className="font-bold p-6 text-secondary">{question.question}</h2>
@@ -60,9 +89,9 @@ function QuestionsTabs({ user, groupId, questions, userHasVoted, setUserHasVoted
             <DrawerDescription></DrawerDescription>
           </DrawerHeader>
           <div className="flex flex-row justify-center space-x-4">
-            <Badge>🐟{question.rating.bad.length}</Badge>
-            <Badge>👍{question.rating.ok.length}</Badge>
-            <Badge>🐐{question.rating.good.length}</Badge>
+              <Badge>🐟{ratings[question._id]?.bad?.length || 0}</Badge>
+              <Badge>👍{ratings[question._id]?.ok?.length || 0}</Badge>
+              <Badge>🐐{ratings[question._id]?.good?.length || 0}</Badge>
           </div>
             <div className="flex flex-row space-x-4 p-4">
             <Button
@@ -107,7 +136,10 @@ function QuestionsTabs({ user, groupId, questions, userHasVoted, setUserHasVoted
               <VoteOptions
                 user={user}
                 question={question}
-                onVote={() => setUserHasVoted({ ...userHasVoted, [question._id]: true })}
+                onVote={() => {
+                  setUserHasVoted({ ...userHasVoted, [question._id]: true })
+                  handleDrawer();
+                  }}
               />
             )}
           </div>
