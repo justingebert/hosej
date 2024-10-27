@@ -181,9 +181,9 @@ function Home() {
           >
             Start without Account
           </Button>
-          <Button onClick={handleGoogleSignIn} className="w-full" >
+          {/* <Button onClick={handleGoogleSignIn} className="w-full" disabled={true} >
             Continue with Google
-          </Button>
+          </Button> */}
 {/*           <Button onClick={handleGoogleSignIn} className="w-full" disabled={true} >
             Continue with Email
           </Button> */}
