@@ -36,7 +36,6 @@ export async function POST(req: NextRequest, { params }: { params: { groupId: st
     if (questionType.startsWith("users-")) {
       const group = await Group.findById(groupId);
       options = group.members.map((member:any) => member.name);
-      console.log(options);
     } else if (questionType.startsWith("rating")) {
       options = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
     }

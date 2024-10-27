@@ -16,6 +16,7 @@ export async function POST(req: NextRequest) {
     
     const member = {
       user: userAdmin._id,
+      name: userAdmin.username,
     }
     const newGroup = new Group({
       name: name,

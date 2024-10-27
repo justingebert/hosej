@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: 'User is already a member of this group' }, { status: 400 });
     }
 
-    group.members.push({user: user._id});
+    group.members.push({user: user._id, name: user.username});
     await group.save();
 
     if (!user.groups.includes(groupId)) {
