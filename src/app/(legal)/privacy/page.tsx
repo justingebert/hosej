@@ -9,7 +9,7 @@ export default function PrivacyPage() {
                 <p><strong>Last updated:</strong> 2024/10/27</p>
                 
                 <h2>Introduction</h2>
-                <p>Welcome to HoseJ! Your privacy is very important to us. This Privacy Policy explains how we collect, use, and protect your information when you use our web application ("App"). We comply with the General Data Protection Regulation (GDPR) and other applicable privacy laws.</p>
+                <p>Welcome to HoseJ! Your privacy is very important to us. This Privacy Policy explains how we collect, use, and protect your information when you use our web application (&quotApp&quot). We comply with the General Data Protection Regulation (GDPR) and other applicable privacy laws.</p>
                 
                 <h2>1. Information We Collect</h2>
                 

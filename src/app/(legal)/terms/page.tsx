@@ -9,7 +9,7 @@ export default function TermsPage() {
                 <p><strong>Last updated:</strong> 2024/10/27</p>
 
                 <h2>Welcome to HoseJ!</h2>
-                <p>These Terms of Service ("Terms") govern your use of our app ("App"), and by using or accessing our App, you agree to comply with these Terms. Please read them carefully. If you do not agree with these Terms, please do not use our App.</p>
+                <p>These Terms of Service (&quotTerms&quot) govern your use of our app (&quotApp&quot), and by using or accessing our App, you agree to comply with these Terms. Please read them carefully. If you do not agree with these Terms, please do not use our App.</p>
 
                 <h2>1. Acceptance of Terms</h2>
                 <p>By accessing or using HoseJ, you agree to these Terms, along with our Privacy Policy, which is incorporated into these Terms. If you do not agree, you may not use the App.</p>
@@ -44,7 +44,7 @@ export default function TermsPage() {
                 </ul>
 
                 <h2>7. Disclaimer of Warranties</h2>
-                <p>We strive to keep our App safe, secure, and functioning properly, but we cannot guarantee continuous or error-free operation. Your use of the App is at your own risk, and you agree that the App is provided "as-is" and "as available."</p>
+                <p>We strive to keep our App safe, secure, and functioning properly, but we cannot guarantee continuous or error-free operation. Your use of the App is at your own risk, and you agree that the App is provided &quotas-is&quot and &quotas available.&quot</p>
 
                 <h2>8. Modification and Termination</h2>
                 <p>We reserve the right to modify, suspend, or terminate the App or your access to the App at any time, for any reason, without notice or liability. We may also update these Terms from time to time, and the latest version will always be available within the App. By continuing to use the App after any changes, you agree to be bound by the updated Terms.</p>
