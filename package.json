@@ -29,6 +29,7 @@
     "@radix-ui/react-toast": "^1.2.1",
     "@serwist/next": "^9.0.5",
     "@smithy/node-http-handler": "^3.0.0",
+    "@tanstack/react-table": "^8.20.5",
     "@vercel/analytics": "^1.2.2",
     "@vercel/speed-insights": "^1.0.10",
     "aws-sdk": "^2.1632.0",

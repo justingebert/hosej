@@ -10,9 +10,9 @@ import { useParams } from "next/navigation";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { ArrowDown, ArrowUp } from 'lucide-react';
 
-// Attach newly paged questions 
+
 const QuestionHistoryPage = () => {
-  const { session, status, user } = useAuthRedirect();
+  const { user } = useAuthRedirect();
   const [questions, setQuestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [offset, setOffset] = useState(0);
@@ -49,7 +49,6 @@ const QuestionHistoryPage = () => {
     const windowHeight = window.innerHeight;
     const documentHeight = document.documentElement.scrollHeight;
 
-    // Determine if at top or bottom
     const scrolledToBottom = windowHeight + scrollTop >= documentHeight - 50; // Near bottom threshold
     const scrolledToTop = scrollTop <= 50; // Near top threshold
 
@@ -71,7 +70,6 @@ const QuestionHistoryPage = () => {
   }, []);
 
   if (loading) return <Loader loading={true} />;
-  if (!questions) return <p>No Questions available</p>;
 
   return (
     <>
@@ -92,10 +90,10 @@ const QuestionHistoryPage = () => {
               </CardContent>
             </Card>
           ))}
-        {!loading && hasMore && (
+        {hasMore && (
           <div className="flex justify-center mt-4 mb-6">
             <Button variant="secondary" onClick={handleLoadMore}>
-              Load More
+              {loading ?  <Loader loading={true}/> : <div>Load More</div>}
             </Button>
           </div>
         )}
@@ -104,19 +102,19 @@ const QuestionHistoryPage = () => {
       {showGoTop && (
         <Button
           variant="secondary"
-          className="fixed bottom-20 right-6 w-10 h-10 p-0 " // Square and centered content
+          className="fixed bottom-20 right-6 w-10 h-10 p-0 " 
           onClick={scrollToTop}
         >
-          <ArrowUp size={24} /> {/* Larger icon size */}
+          <ArrowUp size={24} /> 
         </Button>
       )}
       {showGoBottom && (
         <Button
           variant="secondary"
-          className="fixed bottom-5 right-6 w-10 h-10 p-0" // Square and centered content
+          className="fixed bottom-5 right-6 w-10 h-10 p-0" 
           onClick={scrollToBottom}
         >
-          <ArrowDown size={24} /> {/* Larger icon size */}
+          <ArrowDown size={24} /> 
         </Button>
       )}
     </>

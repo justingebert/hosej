@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 
 export interface IQuestion extends mongoose.Document {
+  _id: mongoose.Schema.Types.ObjectId | string;
+  groupId: mongoose.Schema.Types.ObjectId | string;
   category: string;
   questionType: QuestionType;
   question: string;
