@@ -27,6 +27,7 @@ async function selectDailyQuestions(groupId:string, limit: number): Promise<IQue
     for (const question of questions) {
       question.active = true;
       question.used = true;
+      question.usedAt = new Date();
       await question.save();
     }
 

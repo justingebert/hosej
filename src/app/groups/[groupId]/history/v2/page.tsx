@@ -1,25 +1,24 @@
-import { PartialIQuestion, columns } from "./columns"
-import { DataTable } from "./data-table"
+"use client";
 
-async function getData(): Promise<PartialIQuestion[]> {
-  // Fetch data from your API here.
-  return [
-    {
-      id: "667ec00a173e2ea2af293043",
-      _id: "667ec00a173e2ea2af293043",
-      groupId: "66c9f1307cfaf063db4777e3",
-      question: "test",
-    },
-    // ...
-  ]
-}
+import React from "react";
+import { usePaginatedData } from "@/hooks/usePaginatedData";
+import { columns } from "./columns";
+import { useParams } from "next/navigation";
+import { DataTable } from "./data-table";
 
-export default async function HistoryPage() {
-  const data = await getData()
+export default function HistoryPage() {
+  const { groupId } = useParams<{ groupId: string }>();
+  const { data, loading, hasMore, loadMore } = usePaginatedData({ groupId });
 
   return (
-    <div className="">
-      <DataTable columns={columns} data={data} />
+    <div >
+      <DataTable
+        columns={columns}
+        data={data}
+        hasMore={hasMore}
+        loading={loading}
+        onLoadMore={loadMore}
+      />
     </div>
-  )
+  );
 }

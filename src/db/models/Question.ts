@@ -58,6 +58,7 @@ const questionSchema = new mongoose.Schema({
     bad: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   },
   createdAt: { type: Date, default: Date.now },
+  usedAt: { type: Date },
   used: { type: Boolean, default: false },
   active: { type: Boolean, default: false },
   submittedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },

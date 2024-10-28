@@ -18,8 +18,6 @@ export const columns: ColumnDef<PartialIQuestion>[] = [
       const questionId = row.original._id;
       const question = row.original.question;
 
-      console.log("Question:", question, "Group ID:", groupId, "Question ID:", questionId);
-
       return (
         <a href={`/groups/${groupId}/question/${questionId}/results`}>
           Results
