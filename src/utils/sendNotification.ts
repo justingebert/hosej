@@ -21,7 +21,10 @@ export async function sendNotification(title: string, body: string, groupId = ""
     if(groupId === "") {
       users = await User.find({ fcmToken: { $exists: true, $ne: "" } });
     }else{
-      users = await User.find({ fcmToken: { $exists: true, $ne: "" }, groupId: groupId });
+      users = await User.find({
+        fcmToken: { $exists: true, $ne: "" },
+        groups: { $in: [groupId] },  
+      });
     }
     // Aggregate all tokens
     const tokens = users.reduce((acc: string[], user) => {

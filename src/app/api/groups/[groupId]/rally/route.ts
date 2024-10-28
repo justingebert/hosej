@@ -42,7 +42,7 @@ export async function GET(req: NextRequest,{ params }: { params: { groupId: stri
         rally.used = true;
         await rally.save();
 
-        await sendNotification('📷 New Rally Started! 📷', '📷 PARTICIPATE NOW! 📷');
+        await sendNotification(`📷 New ${group.name} Rally Started! 📷`, '📷 PARTICIPATE NOW! 📷', group._id);
         continue;
       }
   
@@ -54,7 +54,7 @@ export async function GET(req: NextRequest,{ params }: { params: { groupId: stri
         rally.endTime = new Date(currentTime.getTime() + 24 * 60 * 60 * 1000); // 1 day for voting
         await rally.save();
 
-        await sendNotification('📷 Rally Voting! 📷', '📷 VOTE NOW 📷');
+        await sendNotification(`📷${group.name} Rally Voting! 📷`, '📷 VOTE NOW 📷', group._id);
       }
       // Results phase: if voting is over, but the rally is still active
       else if (rally.votingOpen && !rally.resultsShowing) {
@@ -63,7 +63,7 @@ export async function GET(req: NextRequest,{ params }: { params: { groupId: stri
         rally.endTime = new Date(currentTime.getTime() + 24 * 60 * 60 * 1000); // 1 day for results viewing
         await rally.save();
 
-        await sendNotification('📷 Rally Results! 📷', '📷 VIEW NOW 📷');
+        await sendNotification(`📷 ${group.name} Rally Results! 📷`, '📷 VIEW NOW 📷', group._id);
       }
       // end rally and active new ones
       else if(rally.resultsShowing && !rally.votingOpen){ 
@@ -86,7 +86,7 @@ export async function GET(req: NextRequest,{ params }: { params: { groupId: stri
           newRally.startTime = gapEndTime; // New rally starts after the gap phase
           newRally.endTime = new Date(gapEndTime.getTime() + newRally.lengthInDays * 24 * 60 * 60 * 1000); // Set end time based on lengthInDays
           await newRally.save();
-          await sendNotification('📷 Rally finished! 📷', `📷 Next Rally starting: ${newRally.startTime.toLocaleString()}📷`);
+          await sendNotification(`📷 ${group.name} Rally finished! 📷`, `📷 Next Rally starting: ${newRally.startTime.toLocaleString()}📷`, group._id);
         }else{
           return NextResponse.json({ message: "No rallies left", rallies: [] }, { status: 200 });
         }
