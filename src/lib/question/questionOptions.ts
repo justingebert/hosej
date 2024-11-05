@@ -6,6 +6,9 @@ const s3 = new S3Client({
 });
 
 export async function generateSignedUrl(s3Key: string, expiresIn: number = 180) {
+    if (s3Key.startsWith('//')) {
+        s3Key = s3Key.substring(2); // Remove leading '/'
+    }
     const command = new GetObjectCommand({
         Bucket: process.env.AWS_BUCKET_NAME,
         Key: s3Key,
