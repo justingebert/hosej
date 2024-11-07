@@ -1,5 +1,6 @@
 import dbConnect from "@/lib/dbConnect";
-import Question, { IQuestion } from "@/db/models/Question";
+import Question from "@/db/models/Question";
+import { IQuestion } from "@/types/Question";
 import { NextResponse } from "next/server";
 import { sendNotification } from "@/utils/sendNotification";
 import Group from "@/db/models/Group";

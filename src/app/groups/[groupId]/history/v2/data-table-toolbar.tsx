@@ -6,18 +6,24 @@ import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { DataTableFacetedFilter } from "./data-table-faceted-filter"
-import { questionTypes } from "./questionTypes"
+import { QuestionType } from "@/types/Question"
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>
 }
 
+const questionTypesOptions = Object.values(QuestionType).map((type) => ({
+  label: type,
+  value: type,
+}));
+
+
 export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0
 
   return (
-    <div className="">
-      <div className="w-full">
+    <div className="grid grid-cols-2 grid-rows-3  gap-y-2">
+      <div className="col-span-2">
         {/* Filter by Question */}
         <Input
           placeholder="Filter by question..."
@@ -26,26 +32,24 @@ export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>)
           className=""
         />
       </div>
-      <div>
+      <div className="col-span-2">
+        {/* Filter by Question Type */}
+        {table.getColumn("questionType") && (
+          <DataTableFacetedFilter
+            column={table.getColumn("questionType")}
+            title="Question Type"
+            options={questionTypesOptions}
+          />
+        )}
+
         {/* Filter by Submitted By */}
         {/* {table.getColumn("submittedBy") && (
           <DataTableFacetedFilter
             column={table.getColumn("submittedBy")}
             title="Submitted By"
-            options={members}
+            options={[]}
           />
         )} */}
-
-        {/* Filter by Question Type */}
-        {/* {table.getColumn("questionType") && (
-          <DataTableFacetedFilter
-            column={table.getColumn("questionType")}
-            title="Question Type"
-            options={questionTypes}
-          />
-        )} */}
-
-        {/* Reset Filters Button */}
         
       </div>
       <div>

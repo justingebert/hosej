@@ -1,6 +1,6 @@
 "use client"
 
-import { IQuestion } from "@/db/models/Question"
+import { IQuestion } from "@/types/Question";
 import { ColumnDef } from "@tanstack/react-table"
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
@@ -26,14 +26,19 @@ export const columns: ColumnDef<PartialIQuestion>[] = [
       );
     },
   },
-  // {
-  //   accessorKey: "submittedBy",
-  //   header: "Submitted By",
-  //   enableColumnFilter: true,
-  // },
+  {
+    accessorKey: "submittedBy",
+    header: "Submitted By",
+    enableColumnFilter: true,
+    enableHiding: true,
+  },
   {
     accessorKey: "questionType",
     enableColumnFilter: true,
+    filterFn : (row, id, filterValues) => {
+      const cellValue = row.getValue(id);
+      return filterValues.includes(cellValue);
+    },
     enableHiding: true,
   },
 ];

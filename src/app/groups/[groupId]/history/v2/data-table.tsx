@@ -40,6 +40,7 @@ export function DataTable<TData, TValue>({
     question: true,
     answers: true, 
     questionType: false,
+    submittedBy: false,
   });
   
 
@@ -56,6 +57,7 @@ export function DataTable<TData, TValue>({
   return (
     <div className="rounded-md">
       <DataTableToolbar table={table} />
+      <div>{table.getFilteredRowModel().rows.length}</div>
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (

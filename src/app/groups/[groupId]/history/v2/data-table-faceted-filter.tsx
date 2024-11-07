@@ -6,15 +6,6 @@ import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-} from "@/components/ui/command"
-import {
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -36,8 +27,17 @@ export function DataTableFacetedFilter<TData, TValue>({
   title,
   options,
 }: DataTableFacetedFilterProps<TData, TValue>) {
-  // Retrieve unique values and current filter state
   const selectedValues = new Set(column?.getFilterValue() as string[])
+
+  const toggleSelection = (value: string) => {
+    if (selectedValues.has(value)) {
+      selectedValues.delete(value)
+    } else {
+      selectedValues.add(value)
+    }
+    const filterValues = Array.from(selectedValues)
+    column?.setFilterValue(filterValues.length ? filterValues : undefined)
+  }
 
   return (
     <Popover>
@@ -71,60 +71,42 @@ export function DataTableFacetedFilter<TData, TValue>({
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent className="w-[200px] p-0" align="start">
-        <Command>
-          <CommandInput placeholder={`Search ${title}...`} />
-          <CommandList>
-            <CommandEmpty>No results found.</CommandEmpty>
-            <CommandGroup>
-              {options.map((option) => {
-                const isSelected = selectedValues.has(option.value)
-                return (
-                  <CommandItem
-                    key={option.value}
-                    onSelect={() => {
-                      // Update selected values
-                      if (isSelected) {
-                        selectedValues.delete(option.value)
-                      } else {
-                        selectedValues.add(option.value)
-                      }
-
-                      // Set the new filter values for the column
-                      const filterValues = Array.from(selectedValues)
-                      column?.setFilterValue(filterValues.length ? filterValues : undefined)
-                    }}
-                  >
-                    <div
-                      className={cn(
-                        "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
-                        isSelected ? "bg-primary text-primary-foreground" : "opacity-50 [&_svg]:invisible"
-                      )}
-                    >
-                      <Check className={isSelected ? "" : "invisible"} />
-                    </div>
-                    {option.icon && <option.icon className="mr-2 h-4 w-4 text-muted-foreground" />}
-                    <span>{option.label}</span>
-                  </CommandItem>
-                )
-              })}
-            </CommandGroup>
-
-            {selectedValues.size > 0 && (
-              <>
-                <CommandSeparator />
-                <CommandGroup>
-                  <CommandItem
-                    onSelect={() => column?.setFilterValue(undefined)}
-                    className="justify-center text-center"
-                  >
-                    Clear filters
-                  </CommandItem>
-                </CommandGroup>
-              </>
-            )}
-          </CommandList>
-        </Command>
+      <PopoverContent className="w-[200px] p-2" align="start">
+        <div className="flex flex-col space-y-1">
+          {options.map((option) => {
+            const isSelected = selectedValues.has(option.value)
+            return (
+              <label
+                key={option.value}
+                className="flex items-center space-x-2 cursor-pointer"
+                onClick={() => toggleSelection(option.value)}
+              >
+                <div
+                  className={cn(
+                    "flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
+                    isSelected ? "bg-primary text-primary-foreground" : "opacity-50"
+                  )}
+                >
+                  {isSelected && <Check className="h-3 w-3" />}
+                </div>
+                {option.icon && <option.icon className="h-4 w-4 text-muted-foreground" />}
+                <span>{option.label}</span>
+              </label>
+            )
+          })}
+          {selectedValues.size > 0 && (
+            <div className="mt-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => column?.setFilterValue(undefined)}
+                className="w-full"
+              >
+                Clear filters
+              </Button>
+            </div>
+          )}
+        </div>
       </PopoverContent>
     </Popover>
   )
