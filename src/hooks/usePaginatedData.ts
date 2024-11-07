@@ -7,7 +7,7 @@ interface UsePaginatedDataProps {
   limit?: number;
 }
 
-export function usePaginatedData({ groupId, limit = 50 }: UsePaginatedDataProps) {
+export function usePaginatedData({ groupId, limit = 3000 }: UsePaginatedDataProps) {
   const [data, setData] = useState<PartialIQuestion[]>([]);
   const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState(true);

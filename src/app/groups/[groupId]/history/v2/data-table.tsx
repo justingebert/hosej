@@ -4,6 +4,7 @@ import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 
@@ -16,6 +17,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { DataTableToolbar } from "./data-table-toolbar";
+import { useState } from "react";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -32,14 +35,27 @@ export function DataTable<TData, TValue>({
   loading,
   onLoadMore,
 }: DataTableProps<TData, TValue>) {
+
+  const [columnVisibility, setColumnVisibility] = useState({
+    question: true,
+    answers: true, 
+    questionType: false,
+  });
+  
+
   const table = useReactTable({
     data,
     columns,
+    state: {
+      columnVisibility,
+    },
     getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel()
   });
 
   return (
     <div className="rounded-md">
+      <DataTableToolbar table={table} />
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (

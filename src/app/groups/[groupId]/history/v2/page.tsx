@@ -10,6 +10,8 @@ export default function HistoryPage() {
   const { groupId } = useParams<{ groupId: string }>();
   const { data, loading, hasMore, loadMore } = usePaginatedData({ groupId });
 
+  
+
   return (
     <div >
       <DataTable

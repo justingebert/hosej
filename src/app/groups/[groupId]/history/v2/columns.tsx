@@ -2,6 +2,8 @@
 
 import { IQuestion } from "@/db/models/Question"
 import { ColumnDef } from "@tanstack/react-table"
+import { ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 export type PartialIQuestion = Partial<IQuestion>
 
@@ -16,13 +18,22 @@ export const columns: ColumnDef<PartialIQuestion>[] = [
     cell: ({ row }) => {
       const groupId = row.original.groupId;
       const questionId = row.original._id;
-      const question = row.original.question;
 
       return (
-        <a href={`/groups/${groupId}/question/${questionId}/results`}>
-          Results
-        </a>
+        <Link href={`/groups/${groupId}/question/${questionId}/results`} className="flex justify-center">
+            <ArrowRight/>
+        </Link>
       );
     },
+  },
+  // {
+  //   accessorKey: "submittedBy",
+  //   header: "Submitted By",
+  //   enableColumnFilter: true,
+  // },
+  {
+    accessorKey: "questionType",
+    enableColumnFilter: true,
+    enableHiding: true,
   },
 ];
