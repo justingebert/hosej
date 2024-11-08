@@ -5,13 +5,19 @@ export interface IGroup extends mongoose.Document {
   _id: string
   name: string;
   description: string;
+  admin: mongoose.Schema.Types.ObjectId | IUser | string;
   members: {
     user: mongoose.Schema.Types.ObjectId | IUser;
     name: string;
     points: number;
     streak: number;
     lastPointDate: Date;
+    joinedAt: Date;
   }[],
+  questionCount: number;
+  lastQuestionDate: Date;
+  rallyCount: number;
+  rallyGapDays: number;
   createdAt: Date;
   addPoints(userId: string, points: number): Promise<void>;
 }
@@ -25,6 +31,7 @@ const groupSchema = new mongoose.Schema({
         points: { type: Number, default: 0 },
         streak: { type: Number, default: 0 },
         lastPointDate: { type: Date, default: null },
+        joinedAt: { type: Date, default: Date.now },
       }
     ],
     questionCount: { type: Number, default: 2 },
