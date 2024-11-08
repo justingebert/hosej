@@ -15,6 +15,7 @@ export interface IQuestion extends mongoose.Document {
   };
   createdAt: Date;
   used: boolean;
+  usedAt: Date
   active: boolean;
   submittedBy: mongoose.Schema.Types.ObjectId;
   chat: mongoose.Schema.Types.ObjectId;
