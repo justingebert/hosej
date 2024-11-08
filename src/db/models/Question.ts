@@ -1,32 +1,5 @@
+import { QuestionType, IQuestion } from "@/types/Question";
 import mongoose from "mongoose";
-
-export interface IQuestion extends mongoose.Document {
-  category: string;
-  questionType: QuestionType;
-  question: string;
-  options?: any;
-  answers: [{ user: mongoose.Schema.Types.ObjectId; response: any; time: Date }];
-  rating: {
-    good: mongoose.Schema.Types.ObjectId[];
-    ok: mongoose.Schema.Types.ObjectId[];
-    bad: mongoose.Schema.Types.ObjectId[];
-  };
-  createdAt: Date;
-  used: boolean;
-  active: boolean;
-  submittedBy: mongoose.Schema.Types.ObjectId;
-  chat: mongoose.Schema.Types.ObjectId;
-}
-
-enum QuestionType {
-  UsersSelectOne = "users-select-one",
-  UsersSelectMultiple = "users-select-multiple",
-  CustomSelectOne = "custom-select-one",
-  CustomSelectMultiple = "custom-select-multiple",
-  Text = "text",
-  Rating = "rating",
-  ImageSelectOne = "image-select-one",
-}
 
 const questionSchema = new mongoose.Schema({
   groupId: {
@@ -56,6 +29,7 @@ const questionSchema = new mongoose.Schema({
     bad: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   },
   createdAt: { type: Date, default: Date.now },
+  usedAt: { type: Date },
   used: { type: Boolean, default: false },
   active: { type: Boolean, default: false },
   submittedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },

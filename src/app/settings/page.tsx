@@ -190,9 +190,6 @@ export default function SettingsPage() {
         <Button onClick={handleGoogleConnect} className="w-full">
           Connect with Google
         </Button>
-        <div>
-          test
-        </div>
         </div>
       ) : (
         <Button

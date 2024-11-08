@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 
 export default function Dashboard() {
   const router = useRouter();
+  const [group, setGroup] = useState<any>({});
   const [userCount, setUserCount] = useState(0);
   const [questions, setQuestions] = useState([]);
   const [rallies, setRallies] = useState<any>([]);
@@ -29,6 +30,8 @@ export default function Dashboard() {
       const response = await fetch(`/api/groups/${groupId}`);
       const data = await response.json();
       setUserCount(data.members.length);
+      console.log(data);
+      setGroup(data);
     };
     fetchUserCount();
   }, [groupId, userCount]);
@@ -86,6 +89,8 @@ export default function Dashboard() {
     setCompletion(Math.round(completionPercentage)); 
   };
 
+  const titleClass = group.name && group.name.length > 15 ? "text-2xl" : "text-4xl";
+
   return (
     <div className="flex flex-col justify-between h-[100dvh]"> 
       <div className="flex justify-between items-center mt-4 w-full">
@@ -94,7 +99,9 @@ export default function Dashboard() {
             <Menu />
           </Button>
         </div>
-          <h1 className="text-4xl font-bold">HoseJ</h1>
+        <h1 className={`flex-grow ${titleClass} font-bold text-center break-words`}>
+          {group.name}
+        </h1>
         <div>
         <DropdownMenu>
       <DropdownMenuTrigger asChild>
