@@ -2,18 +2,18 @@
 
 import React from "react";
 import { usePaginatedData } from "@/hooks/usePaginatedData";
-import { columns } from "./columns";
+import { columns } from "../columns";
 import { useParams } from "next/navigation";
-import { DataTable } from "./data-table";
+import { DataTable } from "../data-table";
+import Header from "@/components/ui/Header";
 
 export default function HistoryPage() {
   const { groupId } = useParams<{ groupId: string }>();
   const { data, loading, hasMore, loadMore } = usePaginatedData({ groupId });
 
-
-
   return (
-    <div >
+    <>
+      <Header href={`/groups/${groupId}/dashboard`} title="Question History" />
       <DataTable
         columns={columns}
         data={data}
@@ -21,6 +21,6 @@ export default function HistoryPage() {
         loading={loading}
         onLoadMore={loadMore}
       />
-    </div>
+    </>
   );
 }

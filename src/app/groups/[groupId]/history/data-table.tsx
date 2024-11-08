@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { DataTableToolbar } from "./data-table-toolbar";
+import { ClipLoader } from "react-spinners"; // Import the ClipLoader component
 import { useState } from "react";
 
 interface DataTableProps<TData, TValue> {
@@ -55,9 +56,9 @@ export function DataTable<TData, TValue>({
   });
 
   return (
+    
     <div className="rounded-md">
       <DataTableToolbar table={table} />
-      <div>{table.getFilteredRowModel().rows.length}</div>
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -84,19 +85,27 @@ export function DataTable<TData, TValue>({
               </TableRow>
             ))
           ) : (
+            !loading && (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-24 text-center">
+                  No results.
+                </TableCell>
+              </TableRow>
+            )
+          )}
+          {/* Loading indicator at the bottom */}
+          {loading && (
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
+              <TableCell colSpan={columns.length} className="text-center">
+                <ClipLoader size={24} />
               </TableCell>
             </TableRow>
           )}
         </TableBody>
       </Table>
-      {hasMore && (
+      {hasMore && !loading && (
         <div className="flex justify-center mt-4 mb-6">
-          <Button onClick={onLoadMore} disabled={loading}>
-            {loading ? "Loading..." : "Load More"}
-          </Button>
+          <Button onClick={onLoadMore}>Load More</Button>
         </div>
       )}
     </div>

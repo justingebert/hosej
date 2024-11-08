@@ -31,6 +31,10 @@ export const columns: ColumnDef<PartialIQuestion>[] = [
     header: "Submitted By",
     enableColumnFilter: true,
     enableHiding: true,
+    filterFn : (row, id, filterValues) => {
+      const cellValue = row.getValue(id);
+      return filterValues.includes(cellValue);
+    },
   },
   {
     accessorKey: "questionType",
