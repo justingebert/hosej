@@ -166,6 +166,7 @@ export default function GroupPage() {
                   {userIsAdmin ? (
                     <Input
                       type="number"
+                      pattern="\d*"
                       name="questionCount"
                       value={settings.questionCount}
                       onChange={handleInputChange}
@@ -188,6 +189,7 @@ export default function GroupPage() {
                   {userIsAdmin ? (
                     <Input
                       type="number"
+                      pattern="\d*"
                       name="rallyCount"
                       value={settings.rallyCount}
                       onChange={handleInputChange}
@@ -204,6 +206,7 @@ export default function GroupPage() {
                   {userIsAdmin ? (
                     <Input
                       type="number"
+                      pattern="\d*"
                       name="rallyGapDays"
                       value={settings.rallyGapDays}
                       onChange={handleInputChange}
