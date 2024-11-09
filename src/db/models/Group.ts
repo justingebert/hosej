@@ -7,7 +7,7 @@ export interface IGroup extends mongoose.Document {
   description: string;
   admin: mongoose.Schema.Types.ObjectId | IUser | string;
   members: {
-    user: mongoose.Schema.Types.ObjectId | IUser;
+    user: mongoose.Schema.Types.ObjectId | IUser | string;
     name: string;
     points: number;
     streak: number;

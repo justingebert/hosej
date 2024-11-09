@@ -9,17 +9,28 @@ import { IGroup } from "@/db/models/Group";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { useParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { DoorOpen } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function GroupPage() {
   const { groupId } = useParams<{ groupId: string }>();
   const { session, status, user } = useAuthRedirect();
   const [group, setGroup] = useState<IGroup | null>(null);
   const [loading, setLoading] = useState(true);
-  const [settings, setSettings] = useState({
-    questionCount: 2,
-    rallyCount: 1,
-    rallyGapDays: 14,
-  });
+  const [settings, setSettings] = useState<any>({});
+  const { toast } = useToast();
+  const [memberToKick, setMemberToKick] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchGroup = async () => {
@@ -54,34 +65,43 @@ export default function GroupPage() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setSettings((prev) => ({ ...prev, [name]: Number(value) }));
+    setSettings((prev:any) => ({ ...prev, [name]: Number(value) }));
   };
 
   const saveSettings = async () => {
     try {
-      await fetch(`/api/groups/${groupId}/settings`, {
+      await fetch(`/api/groups/${groupId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(settings),
       });
-      alert("Settings updated successfully");
+      toast({title: "Group Settings saved"});
     } catch (error) {
       console.error("Failed to save settings:", error);
+      toast({title: "Failed to save Settings", variant: "destructive",});
     }
   };
 
-  const kickMember = async (memberId: string) => {
+  const confirmKickMember = (memberId: string) => {
+    setMemberToKick(memberId);
+  };
+
+  const kickMember = async () => {
+    if (!memberToKick) return;
+
     try {
-      await fetch(`/api/groups/${groupId}/members/${memberId}`, {
+      await fetch(`/api/groups/${groupId}/members/${memberToKick}`, {
         method: "DELETE",
       });
-      alert("Member kicked successfully");
-      setGroup((prevGroup) => ({
+      setGroup((prevGroup:any) => ({
         ...prevGroup,
-        members: prevGroup?.members.filter((member) => member.user !== memberId),
+        members: prevGroup?.members.filter((member:any) => member.user.toString() !== memberToKick),
       }));
+      toast({title: "Member kicked"});
     } catch (error) {
       console.error("Failed to kick member:", error);
+    } finally {
+      setMemberToKick(null);  // Reset the member to kick after the action
     }
   };
 
@@ -119,7 +139,7 @@ export default function GroupPage() {
                       name="questionCount"
                       value={settings.questionCount}
                       onChange={handleInputChange}
-                      className="w-20 text-right"
+                      className="w-11 text-center"
                     />
                   ) : (
                     group.questionCount
@@ -141,7 +161,7 @@ export default function GroupPage() {
                       name="rallyCount"
                       value={settings.rallyCount}
                       onChange={handleInputChange}
-                      className="w-20 text-right"
+                      className="w-11 text-center"
                     />
                   ) : (
                     group.rallyCount
@@ -157,7 +177,7 @@ export default function GroupPage() {
                       name="rallyGapDays"
                       value={settings.rallyGapDays}
                       onChange={handleInputChange}
-                      className="w-20 text-right"
+                      className="w-11 text-center"
                     />
                   ) : (
                     group.rallyGapDays
@@ -173,14 +193,14 @@ export default function GroupPage() {
               <TableRow>
                 <TableCell>Admin</TableCell>
                 <TableCell className="text-right">
-                  {group.admin ? group.admin : "N/A"}
+                  {group.admin ? `${group.admin}` : "N/A"}
                 </TableCell>
               </TableRow>
             </TableBody>
           </Table>
 
           {userIsAdmin && (
-            <Button className="mt-4" onClick={saveSettings}>
+            <Button className="mt-4 w-full" onClick={saveSettings}>
               Save Settings
             </Button>
           )}
@@ -195,27 +215,45 @@ export default function GroupPage() {
             </TableHeader>
             <TableBody>
               {group.members.map((member) => (
-                <TableRow key={member.user}>
+                <TableRow key={member.user.toString()}>
                   <TableCell className="font-medium">{member.name || "N/A"}</TableCell>
                   <TableCell className="text-right">
                     {member.joinedAt ? new Date(member.joinedAt).toLocaleDateString() : "N/A"}
                   </TableCell>
-                  {userIsAdmin && member.user != user._id && (
+                  {userIsAdmin && member.user !== user._id && (
                     <TableCell className="text-right">
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => kickMember(member.user.toString())}
-                      >
-                        Kick
-                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="destructive"
+                            onClick={() => confirmKickMember(member.user.toString())}
+                          >
+                            Kick
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent className="">
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This action cannot be undone. This will remove {member.name} from the group.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={kickMember} className="bg-destructive" >Kick</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </TableCell>
                   )}
                 </TableRow>
               ))}
             </TableBody>
           </Table>
-          <Button className="mt-4">Leave Group</Button>
+          <Button variant="destructive" className="my-6 w-full">
+            <DoorOpen />
+            Leave Group
+            </Button>
         </>
       ) : (
         <p>Group not found.</p>

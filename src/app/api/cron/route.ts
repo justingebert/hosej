@@ -50,10 +50,10 @@ export async function GET(req: Request) {
         const questions = await selectDailyQuestions(group._id, group.questionCount);
         if(questions.length === 0){
           await sendNotification('🥗DA HABEN WIR DEN SALAT🥗', `${group.name} HAT KEINE FRAGEN MEHR, AN DIE ARBEIT!!`, group._id);
-          group.lastQuestionDate = new Date();
           await group.save();
         }else{
           await sendNotification(`🚨Neue ${group.name} Fragen!!🚨`, '🚨JETZT VOTEN DU FISCH🚨', group._id);
+          group.lastQuestionDate = new Date();
         }
     }
 
