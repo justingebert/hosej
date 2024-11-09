@@ -17,6 +17,7 @@ import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import { Plus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { set } from "mongoose";
 
 const CreateQuestion = () => {
   const { groupId } = useParams<{ groupId: string }>();
@@ -28,7 +29,7 @@ const CreateQuestion = () => {
   const [optionFiles, setOptionFiles] = useState<(File | null)[]>([]);
   const { toast } = useToast();
   const [clearImageInput, setClearImageInput] = useState(false);
-
+  const [loading, setLoading] = useState(false);
   const { uploading, compressImages, handleImageUpload } = useImageUploader();
 
   // Refs and state for dynamic height calculation
@@ -82,6 +83,7 @@ const CreateQuestion = () => {
   };
 
   const handleSubmit = async (e: any) => {
+    setLoading(true);
     e.preventDefault();
 
     if (questionType.startsWith("custom") && options.length < 2) {
@@ -172,6 +174,8 @@ const CreateQuestion = () => {
         description: err.message,
         variant: "destructive",
       });
+    }finally{
+      setLoading(false);
     }
   };
 
@@ -317,8 +321,8 @@ const CreateQuestion = () => {
       </div>
       {/* Fixed full-width submit button */}
       <div ref={buttonRef} className="flex justify-center fixed bottom-6 left-0 w-full p-6 bg-background">
-        <Button onClick={handleSubmit} disabled={uploading || !question.trim() || !questionType} className="w-full">
-          {uploading ? "Creating..." : "Create Question"}
+        <Button onClick={handleSubmit} disabled={uploading || loading || !question.trim() || !questionType} className="w-full">
+          {uploading || loading ? "Creating..." : "Create Question"}
         </Button>
       </div>
     </>
