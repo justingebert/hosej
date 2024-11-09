@@ -87,12 +87,12 @@ const CreateQuestion = () => {
     e.preventDefault();
 
     if (questionType.startsWith("custom") && options.length < 2) {
-      alert("Please add at least two options for custom selections.");
+      toast({title: "Please add at least two options for custom selections.",variant: "destructive",});
       return;
     }
 
     if (questionType.startsWith("image-select") && options.length < 2) {
-      alert("Please add at least two options for image selections.");
+      toast({title: "Please add at least two options for image selections.", variant: "destructive",});
       return;
     }
 

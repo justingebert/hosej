@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import confetti from "canvas-confetti";
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -30,7 +31,6 @@ export default function Dashboard() {
       const response = await fetch(`/api/groups/${groupId}`);
       const data = await response.json();
       setUserCount(data.members.length);
-      console.log(data);
       setGroup(data);
     };
     fetchUserCount();
@@ -99,9 +99,11 @@ export default function Dashboard() {
             <Menu />
           </Button>
         </div>
-        <h1 className={`flex-grow ${titleClass} font-bold text-center break-words`}>
-          {group.name}
-        </h1>
+        <Link href={`/groups/${groupId}`} >
+          <h1 className={`flex-grow ${titleClass} font-bold text-center break-words`}>
+            {group.name}
+          </h1>
+        </Link>
         <div>
         <DropdownMenu>
       <DropdownMenuTrigger asChild>
