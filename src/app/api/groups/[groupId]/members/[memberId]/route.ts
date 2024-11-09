@@ -15,14 +15,23 @@ export async function DELETE(req: NextRequest, { params }: { params: { groupId: 
     if (!authCheck.isAuthorized) {
       return NextResponse.json({ message: authCheck.message }, { status: authCheck.status });
     }
+    const member = await User.findById(memberId);
     const user = await User.findById(userId);
     const group = await Group.findById(groupId);
-    if(!group.admin.equals(user._id)){
+    if(!group.admin.equals(user._id) || userId !== memberId){
       return NextResponse.json({ message: "You are not the admin of this group" }, { status: 403 });
     }
 
     group.members = group.members.filter((member:IGroup["members"][number]) => member.user.toString() !== memberId);
     await group.save();
+
+    member.groups = member.groups.filter((group: string) => group !== groupId);
+    await member.save();
+
+    if(group.members.length === 0) {
+      await Group.findByIdAndDelete(groupId);
+      return NextResponse.json({ message: "Group deleted" }, { status: 200 });
+    }
 
     return NextResponse.json(group, { status: 200 });
   }

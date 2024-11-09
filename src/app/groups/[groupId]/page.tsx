@@ -7,10 +7,10 @@ import { Table, TableBody, TableCaption, TableCell, TableHeader, TableHead, Tabl
 import { Input } from "@/components/ui/input";
 import { IGroup } from "@/db/models/Group";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { DoorOpen } from "lucide-react";
+import { DoorOpen, UserRoundMinus } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,7 +30,9 @@ export default function GroupPage() {
   const [loading, setLoading] = useState(true);
   const [settings, setSettings] = useState<any>({});
   const { toast } = useToast();
+  const [deleteInput, setDeleteInput] = useState("");
   const [memberToKick, setMemberToKick] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchGroup = async () => {
@@ -58,6 +60,11 @@ export default function GroupPage() {
     group?.admin && 
     user?._id && 
     group.admin.toString() === user._id.toString();
+
+    const adminName = group?.admin
+    ? group.members.find((member) => member.user.toString() === group.admin.toString())?.name || "N/A"
+    : "N/A";
+  
 
   // Find the current user's entry in group members based on user._id
   const currentMember = group?.members.find((member) => member.user.toString() === user?._id.toString());
@@ -102,6 +109,29 @@ export default function GroupPage() {
       console.error("Failed to kick member:", error);
     } finally {
       setMemberToKick(null);  // Reset the member to kick after the action
+    }
+  };
+
+  const leaveGroup = async () => {
+    try {
+      await fetch(`/api/groups/${groupId}/members/${user._id}`, { method: "DELETE" });
+      toast({ title: "You have left the group" });
+      router.push("/groups");
+    } catch (error) {
+      console.error("Failed to leave group:", error);
+      toast({ title: "Failed to leave group", variant: "destructive" });
+    }
+  };
+
+  const deleteGroup = async () => {
+    if (!userIsAdmin || deleteInput !== group?.name) return;
+    try {
+      await fetch(`/api/groups/${groupId}`, { method: "DELETE" });
+      toast({ title: "Group deleted successfully" });
+      router.push("/groups");
+    } catch (error) {
+      console.error("Failed to delete group:", error);
+      toast({ title: "Failed to delete group", variant: "destructive" });
     }
   };
 
@@ -193,7 +223,7 @@ export default function GroupPage() {
               <TableRow>
                 <TableCell>Admin</TableCell>
                 <TableCell className="text-right">
-                  {group.admin ? `${group.admin}` : "N/A"}
+                  {group.admin ? `${adminName}` : "N/A"}
                 </TableCell>
               </TableRow>
             </TableBody>
@@ -210,7 +240,7 @@ export default function GroupPage() {
               <TableRow>
                 <TableHead className="w-[150px]">Name</TableHead>
                 <TableHead className="text-right">Joined At</TableHead>
-                {userIsAdmin && <TableHead className="text-right">Actions</TableHead>}
+                {userIsAdmin && <TableHead className="text-right">Remove</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -218,7 +248,8 @@ export default function GroupPage() {
                 <TableRow key={member.user.toString()}>
                   <TableCell className="font-medium">{member.name || "N/A"}</TableCell>
                   <TableCell className="text-right">
-                    {member.joinedAt ? new Date(member.joinedAt).toLocaleDateString() : "N/A"}
+                    {/* {member.joinedAt ? new Date(member.joinedAt).toLocaleDateString() : "N/A"} */}
+                    N/A
                   </TableCell>
                   {userIsAdmin && member.user !== user._id && (
                     <TableCell className="text-right">
@@ -228,7 +259,7 @@ export default function GroupPage() {
                             variant="destructive"
                             onClick={() => confirmKickMember(member.user.toString())}
                           >
-                            Kick
+                            <UserRoundMinus size={20} />
                           </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent className="">
@@ -252,8 +283,58 @@ export default function GroupPage() {
           </Table>
           <Button variant="destructive" className="my-6 w-full">
             <DoorOpen />
-            Leave Group
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <span>Leave Group</span>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you sure you want to leave?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. You will lose access to this group.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={leaveGroup} className="bg-destructive">Leave</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </Button>
+
+          {userIsAdmin && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" className="w-full my-10">
+                  Delete Group
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you sure you want to delete this group?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action is permanent and cannot be undone. Type <strong>{group.name}</strong> to confirm.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <Input
+                  placeholder="Type group name"
+                  value={deleteInput}
+                  onChange={(e) => setDeleteInput(e.target.value)}
+                  className="my-2"
+                />
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    disabled={deleteInput !== group.name}
+                    onClick={deleteGroup}
+                    className="bg-destructive"
+                  >
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
         </>
       ) : (
         <p>Group not found.</p>
