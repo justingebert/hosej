@@ -6,8 +6,8 @@ import {
 } from "@/components/ui/tabs";
 import CreateQuestion from "@/components/Question/createQuestion.client";
 import CreateRally from "@/components/Rally/createRally.client";
-import BackLink from "@/components/ui/BackLink";
-import Header from "@/components/ui/Header";
+import BackLink from "@/components/ui/custom/BackLink";
+import Header from "@/components/ui/custom/Header";
 
 
 const CreatePage = ({ params }: { params: { groupId: string } }) => {

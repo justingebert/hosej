@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import Header from "@/components/ui/Header";
+import Header from "@/components/ui/custom/Header";
 import { useParams } from "next/navigation";
 import { IGroup } from "@/db/models/Group";
 

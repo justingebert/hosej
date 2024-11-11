@@ -4,7 +4,6 @@ import { ThemeColorMeta } from "@/components/Warppers/ThemeColorVieport";
 import { Toaster } from "@/components/ui/toaster";
 import { Metadata } from "next";
 import "./globals.css";
-import PageTransitionWrapper from "@/components/Warppers/PageTransitionWrapper"; // Client-side wrapper for transitions
 
 export const metadata: Metadata = {
   title: "HoseJ",
@@ -31,7 +30,6 @@ export default function RootLayout({
       <body>
         <div className="p-6 h-[100dvh]">
           <AppWrapper>
-           {/*  <PageTransitionWrapper>{children}</PageTransitionWrapper> */}
            {children}
           </AppWrapper>
         </div>

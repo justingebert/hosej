@@ -1,6 +1,6 @@
 "use client";
 
-import Header from "@/components/ui/Header";
+import Header from "@/components/ui/custom/Header";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCaption, TableCell, TableHeader, TableHead, TableRow } from "@/components/ui/table";

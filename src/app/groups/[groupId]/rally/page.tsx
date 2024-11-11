@@ -6,8 +6,8 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import RallyResults from "@/components/Rally/VoteResultsRally.client";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import Loader from "@/components/ui/Loader";
-import Header from "@/components/ui/Header";
+import SpinningLoader from "@/components/ui/custom/SpinningLoader";
+import Header from "@/components/ui/custom/Header";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import SubmitRally from "@/components/Rally/submitImageRally.client";
 import { Card } from "@/components/ui/card";
@@ -60,7 +60,7 @@ const RallyPage = () => {
     }
   }, [user, router, groupId]);
 
-  if (loading) return <Loader loading={true} />
+  if (loading) return <SpinningLoader loading={true} />
   if (rallyInactive) return (
 <div className="flex flex-col h-[100dvh]"> 
   <Header href={`/groups/${groupId}/dashboard`} title="Rallies" />

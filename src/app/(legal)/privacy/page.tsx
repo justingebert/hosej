@@ -1,4 +1,4 @@
-import Header from "@/components/ui/Header";
+import Header from "@/components/ui/custom/Header";
 
 export default function PrivacyPage() {
     return (

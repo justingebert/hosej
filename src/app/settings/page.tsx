@@ -1,14 +1,14 @@
 "use client";
 
-import Header from "@/components/ui/Header";
-import ThemeSelector from "@/components/ui/ThemeSelector";
+import Header from "@/components/ui/custom/Header";
+import ThemeSelector from "@/components/ui/custom/ThemeSelector";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { useState, useEffect } from "react";
 import { signIn, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import Loader from "@/components/ui/Loader";
+import SpinningLoader from "@/components/ui/custom/SpinningLoader";
 import { v4 as uuidv4 } from "uuid";
 import { useToast } from "@/hooks/use-toast";
 import { requestPermissionReturnToken } from "@/hooks/useFcmToken";
@@ -42,7 +42,7 @@ export default function SettingsPage() {
     }
   }, [status, user]);
 
-  if (status === "loading" || !user) return <Loader loading={true} />;
+  if (status === "loading" || !user) return <SpinningLoader loading={true} />;
 
   const handleGoogleConnect = async () => {
     await signIn("google", { callbackUrl: `/connectgoogle` });

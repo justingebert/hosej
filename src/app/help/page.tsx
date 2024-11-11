@@ -1,4 +1,4 @@
-import Header from '@/components/ui/Header';
+import Header from '@/components/ui/custom/Header';
 import cat from '/public/cat.jpg';
 import Image from 'next/image'
 import Link from 'next/link';

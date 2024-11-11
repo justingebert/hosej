@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import Header from "@/components/ui/Header";
+import Header from "@/components/ui/custom/Header";
 import { useParams } from "next/navigation";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { ArrowDown, ArrowUp } from 'lucide-react';

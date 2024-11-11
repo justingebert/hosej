@@ -4,8 +4,8 @@ import React, { useState, useEffect, Suspense } from "react";
 import { useParams } from 'next/navigation';
 import { ClipLoader } from "react-spinners";
 import VoteResults from "@/components/Question/VoteResults.client";
-import BackLink from "@/components/ui/BackLink";
-import Loader from "@/components/ui/Loader";
+import BackLink from "@/components/ui/custom/BackLink";
+import SpinningLoader from "@/components/ui/custom/SpinningLoader";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import Image from "next/image";
 
@@ -29,7 +29,7 @@ const ResultsPage = () => {
     }
   }, [groupId, questionId]);
 
-  if (loading) return <Loader loading={true} />;
+  if (loading) return <SpinningLoader loading={true} />;
   
   return (
     <>

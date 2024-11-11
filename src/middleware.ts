@@ -1,14 +1,10 @@
 import { getToken } from 'next-auth/jwt';
 import { NextRequest, NextResponse } from 'next/server';
-import mongoose from 'mongoose';
-import Group from './db/models/Group';
-import dbConnect from './lib/dbConnect';
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   
   const publicRoutes = [
-    "/api/*",
     '/api/users/create', 
     '/api/auth/session', 
     '/api/auth/providers', 
@@ -42,5 +38,7 @@ export async function middleware(req: NextRequest) {
 
 // Middleware configuration to match relevant routes
 export const config = {
-  matcher: ['/dashboard/:path*', '/api/:path*'],
+  matcher: [
+  '/((?!_next/static|_next/image|favicon.ico|assets|public|manifest.json).*)'
+  ]
 };

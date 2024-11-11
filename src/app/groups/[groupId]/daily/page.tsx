@@ -6,8 +6,8 @@ import VoteResults from "@/components/Question/VoteResults.client";
 import { useParams, useRouter } from "next/navigation";
 import { useSearchParams } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import Loader from "@/components/ui/Loader";
-import Header from "@/components/ui/Header";
+import SpinningLoader from "@/components/ui/custom/SpinningLoader";
+import Header from "@/components/ui/custom/Header";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
@@ -205,7 +205,7 @@ const DailyQuestionPage = () => {
     }
   }, [session, router, groupId, user]);
 
-  if (loading) return <Loader loading={true} />
+  if (loading) return <SpinningLoader loading={true} />
 
   return (
     <div className="flex flex-col h-[100dvh]">

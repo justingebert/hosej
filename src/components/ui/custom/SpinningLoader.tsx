@@ -2,7 +2,7 @@ import React from "react";
 import { ClipLoader } from "react-spinners";
 import { useTheme } from "next-themes";
 
-const Loader = ({ loading }: { loading: boolean }) => {
+const SpinningLoader = ({ loading }: { loading: boolean }) => {
   const { theme } = useTheme();
   const color = theme === "dark" ? "#FFFFFF" : "#000000";
 
@@ -13,4 +13,4 @@ const Loader = ({ loading }: { loading: boolean }) => {
   );
 };
 
-export default Loader;
+export default SpinningLoader;

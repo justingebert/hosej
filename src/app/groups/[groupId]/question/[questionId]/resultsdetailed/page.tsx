@@ -1,7 +1,7 @@
 import dbConnect from "@/lib/dbConnect";
 import Question from "@/db/models/Question";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import Header from "@/components/ui/Header";
+import Header from "@/components/ui/custom/Header";
 import User from "@/db/models/user";
 import Image from "next/image";
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
@@ -51,7 +51,7 @@ export default async function ResultsDetailPage({ params, searchParams }: { para
 
   return (
     <>
-      <Header href={`/groups/${groupId}/${returnTo}`} />
+      <Header href={`/groups/${groupId}/${returnTo}`} title={" "}/>
       <div className="grid grid-cols-1 gap-5 mb-7">
         {Object.entries(sortedGroupedResponses).map(
           ([response, usernames]: any, index) => (

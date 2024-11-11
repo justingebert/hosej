@@ -8,8 +8,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useParams, useRouter } from "next/navigation";
-import Loader from "@/components/ui/Loader";
-import Header from "@/components/ui/Header";
+import SpinningLoader from "@/components/ui/custom/SpinningLoader";
+import Header from "@/components/ui/custom/Header";
 import { QuestionsByType, QuestionsByUser } from "@/components/Charts/QuestionCharts"; 
 import { Separator } from "@/components/ui/separator";
 
@@ -57,7 +57,7 @@ const StatsPage = () => {
     return <p className="text-red-500">{error}</p>;
   }
 
-  if (loading) return <Loader loading={true} />;
+  if (loading) return <SpinningLoader loading={true} />;
   if (!stats) return <p>No statistics available</p>;
 
   const chartDataQuestions = [

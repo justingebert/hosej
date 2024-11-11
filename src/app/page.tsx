@@ -7,36 +7,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { v4 as uuidv4 } from "uuid";
 import Link from "next/link";
-import { motion } from 'framer-motion';
 import { useToast } from "@/hooks/use-toast";
+import { HoseJLoader } from "../components/ui/custom/HoseJLoader";
 
-
-const Loader = () => {
-  return (
-    <div className="flex items-center justify-center min-h-screen">
-    <motion.h1
-      className="text-4xl font-bold text-center relative"
-      style={{
-        backgroundImage: "linear-gradient(90deg, var(--shine-color) 0%, var(--shine-highlight) 50%, var(--shine-color) 100%)",
-        backgroundSize: "200% 100%",
-        backgroundClip: "text",
-        WebkitBackgroundClip: "text",
-        color: "transparent",
-      }}
-      animate={{
-        backgroundPosition: ["100% 0", "-100% 0"],
-      }}
-      transition={{
-        duration: 1.5,
-        ease: "easeInOut",
-        repeat: Infinity,
-      }}
-    >
-      HoseJ
-    </motion.h1>
-  </div>
-  );
-}
 
 function Home() {
   const { data: session, status } = useSession();
@@ -107,6 +80,7 @@ function Home() {
         },
         body: JSON.stringify({ deviceId, userName }),
       });
+      console.log(response);
       if (response.ok) {;
         await localStorage.setItem('deviceId', deviceId);
         console.log('User created successfully');
@@ -152,7 +126,7 @@ function Home() {
   };
 
   if (loading || status === "loading" || isRedirecting) {
-    return <Loader />;
+    return <HoseJLoader />;
   }
 
   return (
@@ -181,9 +155,9 @@ function Home() {
           >
             Start without Account
           </Button>
-          {/* <Button onClick={handleGoogleSignIn} className="w-full" disabled={true} >
+          <Button onClick={handleGoogleSignIn} className="w-full">
             Continue with Google
-          </Button> */}
+          </Button>
 {/*           <Button onClick={handleGoogleSignIn} className="w-full" disabled={true} >
             Continue with Email
           </Button> */}
@@ -209,7 +183,7 @@ function Home() {
 
 export default function HomeWithSuspense(){
   return (
-    <Suspense fallback={<Loader />}>
+    <Suspense fallback={<HoseJLoader />}>
       <Home />
     </Suspense>
   );
