@@ -3,19 +3,13 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { History, Ellipsis, BarChartBig, Menu, ScanSearch, MousePointerClick, PieChart, CircleSlash  } from 'lucide-react';
+import {  BarChartBig, Menu, ScanSearch, MousePointerClick, CircleSlash, Settings} from 'lucide-react';
 import { Card } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { CompletionChart } from "@/components/Charts/CompletionChart";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import confetti from "canvas-confetti";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+import TabsLayout from "../TabsLayout";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -34,11 +28,7 @@ export default function Dashboard() {
       setGroup(data);
     };
     fetchUserCount();
-  }, [groupId, userCount]);
-
-
-  useEffect(() => {
-    if (userCount > 0) {
+    if(userCount > 0) {
       const fetchQuestions = async () => {
         const response = await fetch(`/api/groups/${groupId}/question/daily`);
         const data = await response.json();
@@ -55,8 +45,8 @@ export default function Dashboard() {
     }
   }, [groupId, userCount]);
 
-  const triggerConfetti = () => {
 
+  const triggerConfetti = () => {
     const scalar = 2
     const hose = confetti.shapeFromText({ text: '👖', scalar });
 
@@ -92,44 +82,22 @@ export default function Dashboard() {
   const titleClass = group.name && group.name.length > 15 ? "text-2xl" : "text-4xl";
 
   return (
-    <div className="flex flex-col justify-between h-[100dvh]"> 
+    <TabsLayout>
       <div className="flex justify-between items-center mt-4 w-full">
-        <div>
           <Button variant="outline" size="icon" onClick={() => { router.push(`/groups`)}}>
             <Menu />
           </Button>
-        </div>
-        <Link href={`/groups/${groupId}`} >
-          <h1 className={`flex-grow ${titleClass} font-bold text-center break-words`}>
+        <h1 className={`flex-grow ${titleClass} font-bold text-center break-words`}>
             {group.name}
-          </h1>
+        </h1>
+        <Link href={`/groups/${groupId}/settings`}>
+          <Button variant="outline" size="icon" className="no-zoom">
+            <Settings />
+          </Button>
         </Link>
-        <div>
-        <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon" className="no-zoom">
-          <Ellipsis className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <Ellipsis className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="" align="center">
-        <DropdownMenuItem onClick={() => { router.push(`/groups/${groupId}/leaderboard`)}}>
-            <span className="mr-2 h-4 w-4">👖</span>
-            Leaderboard
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => { router.push(`/groups/${groupId}/history`)}}>
-            <History className="mr-2 h-4 w-4"/> History
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => { router.push(`/groups/${groupId}/stats`)}}>
-            <PieChart  className="mr-2 h-4 w-4"/>
-              Statistics
-          </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-        </div>
       </div>
 
-      <div className="flex flex-col items-center justify-center flex-grow"> {/* Center the cards and button */}
+      
         <div className="flex flex-col items-center gap-8 w-full">
           <Card
             className="relative bg-primary-foreground w-full  px-6 py-4 flex items-center justify-between cursor-pointer"
@@ -162,7 +130,7 @@ export default function Dashboard() {
           >
             {questions.length > 0 && (
               <div className="absolute -top-3 -right-3">
-              <Badge>{questions.length}</Badge> {/* Customize badge content */}
+              <Badge>{questions.length}</Badge>
             </div>
             )}
             <div className="flex flex-col justify-center">
@@ -176,7 +144,6 @@ export default function Dashboard() {
             </div> 
           </Card>
         </div>
-      </div>
       <div className="flex justify-center mb-20">
       <Button
           className="mt-8 w-full"
@@ -185,7 +152,7 @@ export default function Dashboard() {
           Create
         </Button>
       </div>
-    </div>
+    </TabsLayout>
   );
 }
 
