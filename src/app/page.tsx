@@ -20,13 +20,11 @@ function Home() {
   const { toast } = useToast();
   const [userName, setUserName] = useState("");
   const [loading, setLoading] = useState(true); 
-  const [isRedirecting, setIsRedirecting] = useState(false); 
 
   const handleSignIn = useCallback(async (provider:string, options = {}) => {
     try {
       const result = await signIn(provider, { ...options, redirect: false });
       if (result?.ok) {
-        setIsRedirecting(true);
         router.push(callbackUrl);
       } else {
         console.error(`${provider} sign-in failed:`, result?.error);
@@ -73,20 +71,19 @@ function Home() {
   };
 
   useEffect(() => {
-    if (status === "loading" || isRedirecting) return;
+    if (status === "loading") return;
 
     if (session) {
-      setIsRedirecting(true);
       router.push(callbackUrl);
     } else {
       const deviceId = localStorage.getItem("deviceId");
       if (deviceId) handleSignIn("credentials", { deviceId });
       else setLoading(false);
     }
-  }, [session, status, isRedirecting, handleSignIn, router, callbackUrl]);
+  }, [session, status, handleSignIn, router, callbackUrl]);
 
 
-  if (loading || status === "loading" || isRedirecting) {
+  if (loading || status === "loading") {
     return <HoseJLoader />;
   }
 
