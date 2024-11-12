@@ -57,6 +57,10 @@ const config = {
           DEFAULT: "hsl(var(--secondary-darker))",
           foreground: "hsl(var(--secondary-darker-foreground))",
         },
+        secondarydarktransparent: {
+          DEFAULT: "hsl(var(--secondary-darker-transparent))",
+          foreground: "hsl(var(--secondary-darker-transparent-foreground))",
+        },
         chart3: "hsl(var(--chart-3))",
       },
       borderRadius: {

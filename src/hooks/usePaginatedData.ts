@@ -1,4 +1,4 @@
-import { PartialIQuestion } from "@/app/groups/[groupId]/history/columns";
+import { PartialIQuestion } from "@/app/groups/[groupId]/(pages)/history/columns";
 import { useState, useEffect, useCallback, useRef } from "react";
 
 interface UsePaginatedDataProps {
