@@ -93,7 +93,6 @@ export function DataTable<TData, TValue>({
               </TableRow>
             )
           )}
-          {/* Loading indicator at the bottom */}
           {loading && (
             <TableRow>
               <TableCell colSpan={columns.length} className="text-center">

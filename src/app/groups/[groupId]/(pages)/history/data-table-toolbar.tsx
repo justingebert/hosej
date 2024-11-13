@@ -1,14 +1,16 @@
 "use client"
 
 import { Table } from "@tanstack/react-table"
-import { X } from "lucide-react"
+import { Search, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { DataTableFacetedFilter } from "./data-table-faceted-filter"
 import { QuestionType } from "@/types/Question"
-import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
+import useSWR from "swr"
+import fetcher from "@/lib/fetcher"
+import { IGroup } from "@/db/models/Group"
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>
@@ -21,67 +23,59 @@ const questionTypesOptions = Object.values(QuestionType).map((type) => ({
 
 export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>) {
   const { groupId } = useParams<{ groupId: string }>();
-  const [groupMembers, setGroupMembers] = useState<[] | null>(null);
+  const { data: users } = useSWR<IGroup["members"]>(`/api/groups/${groupId}/members`, fetcher);
 
-  useEffect(() => {
-    const fetchSubmittedBy = async () => {
-      const res = await fetch(`/api/groups/${groupId}/members`);
-      const users = await res.json();
-      const groupmembers = users.map((user: any) => ({
+  const groupMembers = users
+    ? users.map((user: any) => ({
         label: user.name,
-        value: user.user
-      }));
-      setGroupMembers(groupmembers);
-    };
-
-    fetchSubmittedBy();
-  }, [groupId]);
+        value: user.user,
+      }))
+    : [];
 
   const isFiltered = table.getState().columnFilters.length > 0;
 
   return (
     <div className="space-y-2 mb-4">
-      <div>
-        <Input
-          placeholder="Filter by question..."
-          value={(table.getColumn("question")?.getFilterValue() as string) ?? ""}
-          onChange={(event) => table.getColumn("question")?.setFilterValue(event.target.value)}
-          className="w-full"
+    <div className="relative w-full">
+
+      <Input
+        value={(table.getColumn("question")?.getFilterValue() as string) ?? ""}
+        onChange={(event) => table.getColumn("question")?.setFilterValue(event.target.value)}
+        className="w-full pr-10"
+      />
+      <Search className="absolute right-3 top-1/2 transform -translate-y-1/2" />
+    </div>
+
+    <div className="flex flex-wrap justify-between md:space-x-2">
+    {table.getColumn("questionType") && (
+      <div className="w-full md:w-1/2 max-w-[49%]">
+        <DataTableFacetedFilter
+          column={table.getColumn("questionType")}
+          title="Question Type"
+          options={questionTypesOptions}
         />
       </div>
+    )}
 
-      <div className="flex justify-between space-x-2">
-        {table.getColumn("questionType") && (
-          <div className="w-1/2 max-w-[48%]">
-            <DataTableFacetedFilter
-              column={table.getColumn("questionType")}
-              title="Question Type"
-              options={questionTypesOptions}
-            />
-          </div>
-        )}
-
-        {table.getColumn("submittedBy") && (
-          <div className="w-1/2 max-w-[48%]">
-            <DataTableFacetedFilter
-              column={table.getColumn("submittedBy")}
-              title="Submitted By"
-              options={groupMembers ?? []}
-            />
-          </div>
-        )}
+    {table.getColumn("submittedBy") && (
+      <div className="w-full md:w-1/2 max-w-[49%]">
+        <DataTableFacetedFilter
+          column={table.getColumn("submittedBy")}
+          title="Submitted By"
+          options={groupMembers ?? []}
+        />
       </div>
+    )}
+  </div>
 
       <div className="flex justify-between items-center">
-        <Button size="sm" variant="outline">
+        <Button size="sm" variant="outline" className="h-8">
           <div className="text-sm">{table.getFilteredRowModel().rows.length} Results</div>
         </Button>
-        {isFiltered && (
-          <Button variant="outline" onClick={() => table.resetColumnFilters()} className="h-8 px-2 lg:px-3">
+          <Button disabled={!isFiltered} variant="outline" onClick={() => table.resetColumnFilters()} className="h-8 px-2 lg:px-3">
             Reset
             <X />
           </Button>
-        )}
       </div>
     </div>
   );

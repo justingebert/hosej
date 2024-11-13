@@ -1,22 +1,19 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/ui/custom/Header";
 import { useParams } from "next/navigation";
-import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { ArrowDown, ArrowUp } from 'lucide-react';
 import { usePaginatedData } from "@/hooks/usePaginatedData";
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
 
-
 const QuestionHistoryPage = () => {
-  const { user } = useAuthRedirect();
   const { groupId } = useParams<{ groupId: string }>();
   const { data, loading, hasMore, loadMore } = usePaginatedData({ groupId });
-  const [showGoTop, setShowGoTop] = useState(false); // Track if near top
-  const [showGoBottom, setShowGoBottom] = useState(true); // Track if near bottom
+  const [showGoTop, setShowGoTop] = useState(false); 
+  const [showGoBottom, setShowGoBottom] = useState(true); 
 
   const handleScroll = () => {
     const scrollTop = window.scrollY;
@@ -45,7 +42,7 @@ const QuestionHistoryPage = () => {
 
   return (
     <>
-      <Header href={`/groups/${groupId}/dashboard`} title="Question History" />
+      <Header title="Question History" />
       <DataTable
         columns={columns}
         data={data}
@@ -54,24 +51,26 @@ const QuestionHistoryPage = () => {
         onLoadMore={loadMore}
       />
     
-      {showGoTop && (
-        <Button
-          variant="secondary"
-          className="fixed bottom-20 left-6 w-10 h-10 p-0 " 
-          onClick={scrollToTop}
-        >
-          <ArrowUp size={24} /> 
-        </Button>
-      )}
-      {showGoBottom && (
-        <Button
-          variant="secondary"
-          className="fixed bottom-5 left-6 w-10 h-10 p-0" 
-          onClick={scrollToBottom}
-        >
-          <ArrowDown size={24} /> 
-        </Button>
-      )}
+    <div className="fixed bottom-24 left-6 space-y-4 flex flex-col">
+    {showGoTop && (
+      <Button
+        variant="secondary"
+        className="w-10 h-10 p-0"
+        onClick={scrollToTop}
+      >
+        <ArrowUp size={24} /> 
+      </Button>
+    )}
+    {showGoBottom && (
+      <Button
+        variant="secondary"
+        className="w-10 h-10 p-0"
+        onClick={scrollToBottom}
+      >
+        <ArrowDown size={24} /> 
+      </Button>
+    )}
+  </div>
     </>
   );
 };

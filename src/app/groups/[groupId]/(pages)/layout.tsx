@@ -46,7 +46,7 @@ export default function TabsLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <div className="flex flex-col h-[100dvh]">
-      <div className="flex-grow">{children}</div>
+      <div className="flex-grow pb-20">{children}</div>
       <footer className="fixed bottom-0 left-0 right-0 flex justify-between items-center bg-secondarydark-transparent backdrop-blur-lg mb-6 rounded-full mx-6 drop-shadow-md">
 
         <motion.div

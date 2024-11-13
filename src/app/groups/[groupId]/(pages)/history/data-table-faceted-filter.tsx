@@ -41,35 +41,31 @@ export function DataTableFacetedFilter<TData, TValue>({
 
   return (
     <Popover>
-      <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="h-8 border-dashed text-xs">
-          <PlusCircle size={12} className="mr-2" />
-          {title}
-          {selectedValues.size > 0 && (
-            <>
-              <Separator orientation="vertical" className="mx-2 h-4" />
-              <Badge variant="secondary" className="rounded-sm px-1 font-normal lg:hidden text-xs">
-                {selectedValues.size}
-              </Badge>
-              <div className="hidden space-x-1 lg:flex">
-                {selectedValues.size > 2 ? (
-                  <Badge variant="secondary" className="rounded-sm px-1 font-normal">
-                    {selectedValues.size} selected
-                  </Badge>
-                ) : (
-                  options
-                    .filter((option) => selectedValues.has(option.value))
-                    .map((option) => (
-                      <Badge key={option.value} variant="secondary" className="rounded-sm px-1 font-normal">
-                        {option.label}
-                      </Badge>
-                    ))
-                )}
-              </div>
-            </>
+    <PopoverTrigger asChild>
+      <Button className="text-xs truncate w-full">
+        <PlusCircle size={15} className="mr-2" />
+        {title}
+        <Separator orientation="vertical" className="mx-2 h-4" />
+        <Badge variant="secondary" className="rounded-sm px-1 font-normal lg:hidden text-xs">
+          {selectedValues.size}
+        </Badge>
+        <div className="hidden space-x-1 lg:flex">
+          {selectedValues.size > 2 ? (
+            <Badge variant="secondary" className="rounded-sm px-1 font-normal">
+              {selectedValues.size} selected
+            </Badge>
+          ) : (
+            options
+              .filter((option) => selectedValues.has(option.value))
+              .map((option) => (
+                <Badge key={option.value} variant="secondary" className="rounded-sm px-1 font-normal">
+                  {option.label}
+                </Badge>
+              ))
           )}
-        </Button>
-      </PopoverTrigger>
+        </div>
+      </Button>
+    </PopoverTrigger>
 
       <PopoverContent className="w-[200px] p-2" align="start">
         <div className="flex flex-col space-y-1">
