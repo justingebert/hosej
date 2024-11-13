@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from "next/navigation";
-import Loader from '@/components/ui/Loader';
+import SpinningLoader from '@/components/ui/custom/SpinningLoader';
 import { useAuthRedirect } from '@/hooks/useAuthRedirect';
 import { signIn } from 'next-auth/react';
 import { useToast } from '@/hooks/use-toast';
@@ -47,8 +47,8 @@ export default function GoogleCallbackPage() {
   }, [status, session, router]);
 
   if (status === 'loading') {
-    return <Loader loading={true} />;
+    return <SpinningLoader loading={true} />;
   }
 
-  return <Loader loading={true} />; 
+  return <SpinningLoader loading={true} />; 
 }

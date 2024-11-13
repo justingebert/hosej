@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea"
 import Image from "next/image";
 
-const VoteOptions = ({ user, question, onVote }:any) => {
+const VoteOptions = ({ question, onVote }:any) => {
   const [selectedOption, setSelectedOption] = useState<any>(null);
   const [textResponse, setTextResponse] = useState("");
 
@@ -21,7 +21,7 @@ const VoteOptions = ({ user, question, onVote }:any) => {
         response: response.key ? response.key : response,
       }),
     });
-    onVote(); // Callback to update state in the parent component
+    onVote();
   };
 
   return (
@@ -35,7 +35,7 @@ const VoteOptions = ({ user, question, onVote }:any) => {
           />
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4 pb-20">
           {question.options.map((option: any, index: number) => (
             <Button
               key={index}
@@ -55,18 +55,19 @@ const VoteOptions = ({ user, question, onVote }:any) => {
           ))}
         </div>
       )}
-      <div className="flex justify-center realtive bottom-20 left-0 w-full p-2 bg-background">
-        <Button
-          onClick={() => {
-            if (question.questionType === "text" ? textResponse : selectedOption) {
-              submitVote();
-            }
-          }}
-          className="m-5"
-        >
-          Submit
-        </Button>
-      </div>
+      <div className="absolute bottom-6 left-0 w-full p-6 -mb-12 bg-inherit">
+      <Button
+        onClick={() => {
+          if (question.questionType === "text" ? textResponse : selectedOption) {
+            submitVote();
+          }
+        }}
+        className="w-full h-12 mb-6 text-lg font-bold"
+      >
+        Submit
+      </Button>
+
+    </div>
     </>
   );
 };

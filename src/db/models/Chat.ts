@@ -1,5 +1,19 @@
 import mongoose from "mongoose";
 
+export interface IMessage {
+    user: string;
+    message: string;
+    createdAt: Date;
+}
+
+export interface IChat {
+    group: string;
+    messages: IMessage[];
+    entity: string;
+    entityModel: string;
+    createdAt: Date;
+}
+
 const messageSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,

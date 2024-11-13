@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import Loader from '@/components/ui/Loader';
+import SpinningLoader from '@/components/ui/custom/SpinningLoader';
 import { useAuthRedirect } from '@/hooks/useAuthRedirect';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -81,7 +81,7 @@ export default function JoinGroup({ params }: { params: { id: string }; }) {
   }, [session?.user, status, params.id, joined]); // Simplified dependencies
 
   if (status === 'loading' || loading) {
-    return <Loader loading={true} />;
+    return <SpinningLoader loading={true} />;
   }
 
   if (error) {

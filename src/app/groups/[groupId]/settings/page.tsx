@@ -1,9 +1,9 @@
 "use client";
 
-import Header from "@/components/ui/Header";
+import Header from "@/components/ui/custom/Header";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Table, TableBody, TableCaption, TableCell, TableHeader, TableHead, TableRow } from "@/components/ui/table";
+import { Table, TableBody,  TableCell, TableHeader, TableHead, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { IGroup } from "@/db/models/Group";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
@@ -22,57 +22,47 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import BackLink from "@/components/ui/custom/BackLink";
+import useSWR from "swr";
+import fetcher from "@/lib/fetcher";
 
 export default function GroupPage() {
   const { groupId } = useParams<{ groupId: string }>();
   const { session, status, user } = useAuthRedirect();
-  const [group, setGroup] = useState<IGroup | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [settings, setSettings] = useState<any>({});
   const { toast } = useToast();
+  const [settings, setSettings] = useState<any>({});
   const [deleteInput, setDeleteInput] = useState("");
   const [memberToKick, setMemberToKick] = useState<string | null>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    const fetchGroup = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch(`/api/groups/${groupId}`);
-        const data = await response.json();
-        setGroup(data);
-        setSettings({
-          questionCount: data.questionCount,
-          rallyCount: data.rallyCount,
-          rallyGapDays: data.rallyGapDays,
-        });
-      } catch (error) {
-        console.error("Failed to fetch group data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchGroup();
-  }, [groupId]);
+  const { data: group, error, mutate } = useSWR<IGroup>(`/api/groups/${groupId}`, fetcher, {
+    onSuccess: (data) => {
+      setSettings({
+        questionCount: data.questionCount,
+        rallyCount: data.rallyCount,
+        rallyGapDays: data.rallyGapDays,
+      });
+    },
+  });
 
-  const userIsAdmin = 
-    !loading && 
-    group?.admin && 
-    user?._id && 
-    group.admin.toString() === user._id.toString();
+  if (error) return <p className="text-red-500">Failed to load group data</p>;
+  const loading = !group;
 
-    const adminName = group?.admin
+  const userIsAdmin =
+    !loading && group?.admin && user?._id && group.admin.toString() === user._id.toString();
+
+  const adminName = group?.admin
     ? group.members.find((member) => member.user.toString() === group.admin.toString())?.name || "N/A"
     : "N/A";
-  
 
-  // Find the current user's entry in group members based on user._id
-  const currentMember = group?.members.find((member) => member.user.toString() === user?._id.toString());
+  const currentMember = group?.members.find(
+    (member) => member.user.toString() === user?._id.toString()
+  );
   const currentMemberName = currentMember?.name || "Member not found";
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setSettings((prev:any) => ({ ...prev, [name]: Number(value) }));
+    setSettings((prev: any) => ({ ...prev, [name]: Number(value) }));
   };
 
   const saveSettings = async () => {
@@ -82,10 +72,11 @@ export default function GroupPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(settings),
       });
-      toast({title: "Group Settings saved"});
+      toast({ title: "Group Settings saved" });
+      mutate(); // Revalidate group data after saving settings
     } catch (error) {
       console.error("Failed to save settings:", error);
-      toast({title: "Failed to save Settings", variant: "destructive",});
+      toast({ title: "Failed to save Settings", variant: "destructive" });
     }
   };
 
@@ -100,15 +91,12 @@ export default function GroupPage() {
       await fetch(`/api/groups/${groupId}/members/${memberToKick}`, {
         method: "DELETE",
       });
-      setGroup((prevGroup:any) => ({
-        ...prevGroup,
-        members: prevGroup?.members.filter((member:any) => member.user.toString() !== memberToKick),
-      }));
-      toast({title: "Member kicked"});
+      toast({ title: "Member kicked" });
+      mutate(); // Revalidate group data after kicking a member
     } catch (error) {
       console.error("Failed to kick member:", error);
     } finally {
-      setMemberToKick(null);  // Reset the member to kick after the action
+      setMemberToKick(null);
     }
   };
 
@@ -138,7 +126,7 @@ export default function GroupPage() {
   return (
     <>
       <Suspense fallback={<Skeleton className="h-8 w-40 mx-auto mb-4" />}>
-        <Header href={`/groups/${groupId}/dashboard`} title={group?.name || null} />
+        <Header leftComponent={<BackLink href={`/groups/${groupId}/dashboard`}/>} title={group?.name || null} />
       </Suspense>
 
       {loading ? (

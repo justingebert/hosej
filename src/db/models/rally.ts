@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 export interface IRally extends mongoose.Document {
+  _id: string | mongoose.Schema.Types.ObjectId;
   groupId: mongoose.Schema.Types.ObjectId;
   task: string;
   submissions: IPictureSubmission[];

@@ -33,6 +33,9 @@ const config = {
           DEFAULT: "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))",
         },
+        secondarytransparent: {
+          DEFAULT: "hsl(var(--secondary-transparent))",
+        },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
@@ -56,6 +59,10 @@ const config = {
         secondarydark: {
           DEFAULT: "hsl(var(--secondary-darker))",
           foreground: "hsl(var(--secondary-darker-foreground))",
+        },
+        secondarydarktransparent: {
+          DEFAULT: "hsl(var(--secondary-darker-transparent))",
+          foreground: "hsl(var(--secondary-darker-transparent-foreground))",
         },
         chart3: "hsl(var(--chart-3))",
       },

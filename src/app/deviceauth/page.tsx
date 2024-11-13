@@ -10,7 +10,6 @@ export default function DeviceAuth() {
   const router = useRouter();
   const [deviceID, setDeviceId] = useState("");
 
-
   const handleStart = async () => {
     await localStorage.setItem("deviceId", deviceID);
     router.push("/");
@@ -43,21 +42,6 @@ export default function DeviceAuth() {
           </Button>
         </div>
       </main>
-
-      {/* Footer Section with Legal Notice */}
-      <footer className="text-center p-4 ">
-        <p className="text-sm text-muted">
-          By continuing, you agree to our{" "}
-          <a href="/terms" className="underline">
-            Terms of Service
-          </a>{" "}
-          and{" "}
-          <a href="/privacy" className="underline">
-            Privacy Policy
-          </a>
-          .
-        </p>
-      </footer>
     </div>
   );
 }

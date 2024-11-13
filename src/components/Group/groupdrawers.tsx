@@ -3,6 +3,8 @@ import {
     DrawerClose,
     DrawerContent,
     DrawerFooter,
+    DrawerHeader,
+    DrawerTitle,
     DrawerTrigger,
   } from "@/components/ui/drawer";
 import { useState } from "react";
@@ -25,6 +27,11 @@ export function CreateGroupDrawer({ onCreate }: { onCreate: (groupName: string) 
           <Button className="w-full">Create</Button>
         </DrawerTrigger>
         <DrawerContent>
+        <DrawerHeader>
+          <DrawerTitle>
+            Create a Group
+          </DrawerTitle>
+        </DrawerHeader>
           <div className="mx-auto w-full max-w-sm">
             <div className="p-4 pb-0">
               <Input
@@ -36,7 +43,7 @@ export function CreateGroupDrawer({ onCreate }: { onCreate: (groupName: string) 
             </div>
             <DrawerFooter>
               <DrawerClose asChild>
-                <Button onClick={handleCreate} disabled={!groupName}>Create</Button>
+                <Button onClick={handleCreate} disabled={!groupName} className="mb-6">Create</Button>
               </DrawerClose>
             </DrawerFooter>
           </div>
@@ -60,6 +67,11 @@ export function JoinGroupDrawer() {
           <Button className="w-full">Join</Button>
         </DrawerTrigger>
         <DrawerContent>
+        <DrawerHeader>
+          <DrawerTitle>
+            Join a Group
+          </DrawerTitle>
+        </DrawerHeader>
           <div className="mx-auto w-full max-w-sm">
             <div className="p-4 pb-0">
               <Input
@@ -71,7 +83,7 @@ export function JoinGroupDrawer() {
             </div>
             <DrawerFooter>
               <DrawerClose asChild>
-                <Button onClick={handleJoin} disabled={!groupId}>Join</Button>
+                <Button onClick={handleJoin} disabled={!groupId} className="mb-6">Join</Button>
               </DrawerClose>
             </DrawerFooter>
           </div>

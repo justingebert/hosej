@@ -1,9 +1,11 @@
-import Header from "@/components/ui/Header";
+import BackLink from "@/components/ui/custom/BackLink";
+import Header from "@/components/ui/custom/Header";
 
 export default function PrivacyPage() {
     return (
         <>
-            <Header href={`/help`} />
+            <Header leftComponent={<BackLink href={`/help`}/>} title={"Privacy"}/>
+            <p>This is a private app in development </p>
             <div style={{ padding: '20px', lineHeight: '1.6' }}>
                 <h1>Privacy Policy</h1>
                 <p><strong>Last updated:</strong> 2024/10/27</p>

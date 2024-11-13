@@ -1,30 +1,25 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from '../ui/button';
 import { Send } from 'lucide-react';
 import { Input } from "@/components/ui/input";
+import useSWR from 'swr';
+import fetcher from '@/lib/fetcher';
+import { IChat } from '@/db/models/Chat';
+
 
 function ChatComponent({ user, entity, available }: any) {
-  const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
 
-  useEffect(() => {
-    const fetchMessages = async () => {
-      if (entity.chat) {
-        const response = await fetch(`/api/groups/${entity.groupId}/chats/${entity.chat}`);
-        if (!response.ok) {
-          return;
-        }
-        const data = await response.json();
-        setMessages(data.messages);
-      }
-    };
+  const { data, error, mutate } = useSWR<IChat>(
+    entity.chat ? `/api/groups/${entity.groupId}/chats/${entity.chat}` : null,
+    fetcher
+  );
 
-    fetchMessages();
-  }, [entity.chat, entity.groupId]); 
+  const messages = data?.messages || [];
 
   const handleSendMessage = async () => {
-    if (!newMessage.trim()) return; // Prevent sending empty messages
+    if (!newMessage.trim()) return;
 
     const messageData = { message: newMessage };
     const response = await fetch(`/api/groups/${entity.groupId}/chats/${entity.chat}/messages`, {
@@ -37,7 +32,6 @@ function ChatComponent({ user, entity, available }: any) {
 
     if (response.ok) {
       const newMsg = await response.json();
-      // Add the current user's info to the message immediately
       const completeMessage = {
         ...newMsg,
         user: {
@@ -45,21 +39,24 @@ function ChatComponent({ user, entity, available }: any) {
           username: user.username,
         },
       };
-      setMessages([...messages, completeMessage]);
+      
+      // Update the messages cache with the new message
+      mutate(
+        (data) => ({
+          ...data,
+          messages: [...messages, completeMessage],
+        }) as IChat,
+        false // Revalidate after this update
+      );
+
       setNewMessage('');
-      //scrollToBottom(); // Scroll to the bottom after sending a message
     }
   };
 
-  const scrollToBottom = () => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
+  if (error) return <div className="text-red-500">Failed to load messages</div>;
 
   return (
     <div className={`flex flex-col ${available ? "h-screen" : ""}`}>
-      {/* Messages container */}
       <div className="flex-1 overflow-y-auto p-4">
         {messages.length > 0 ? (
           <>
@@ -80,17 +77,16 @@ function ChatComponent({ user, entity, available }: any) {
                 </div>
               </div>
             ))}
-            { available && <div ref={messagesEndRef} /> } {/*  Empty div to keep track of the bottom */}
+            { available && <div ref={messagesEndRef} /> } {/* Empty div to keep track of the bottom */}
           </>
         ) : (
           <div className="flex-grow"></div> /* Empty space to push input to bottom */
         )}
       </div>
 
-      {/* Input container */}
       {available && (
-        <div className="bg-background p-4 sticky bottom-0 left-0 w-full">
-          <div className="flex gap-2">
+        <div className="bg-background sticky pb-6 bottom-0 left-0 w-full">
+          <div className="flex gap-x-2">
             <Input
               className="flex-grow p-2"
               value={newMessage}
