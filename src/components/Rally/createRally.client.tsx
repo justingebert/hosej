@@ -5,17 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useParams } from "next/navigation";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
-import { IUser } from "@/db/models/user";
 import { useToast } from "@/hooks/use-toast"; 
 
 const CreateRally = () => {
-  const { session, status } = useAuthRedirect();
-  const user = session!.user as IUser;
   const [task, setTask] = useState("");
   const [lengthInDays, setLengthInDays] = useState("");
   const [loading, setLoading] = useState(false);
   const { groupId } = useParams<{ groupId: string }>();
-  const { toast } = useToast(); // Initialize the toast
+  const { toast } = useToast(); 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,7 +71,7 @@ const CreateRally = () => {
         />
       </div>
       <div className="flex justify-center fixed bottom-6 left-0 w-full p-6 bg-background">
-        <Button onClick={handleSubmit} disabled={loading || !task.trim() || !lengthInDays} className="w-full">
+        <Button onClick={handleSubmit} disabled={loading || !task.trim() || !lengthInDays} className="w-full h-12">
           {loading ? "Creating..." : "Create Rally"}
         </Button>
       </div>

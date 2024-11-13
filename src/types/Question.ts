@@ -19,6 +19,8 @@ export interface IQuestion extends mongoose.Document {
   active: boolean;
   submittedBy: mongoose.Schema.Types.ObjectId;
   chat: mongoose.Schema.Types.ObjectId;
+  image?: string;
+  imageUrl?: string;
 }
 
 export enum QuestionType {

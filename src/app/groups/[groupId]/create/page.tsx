@@ -15,10 +15,10 @@ const CreatePage = ({ params }: { params: { groupId: string } }) => {
   
   return (
     <>
-      <Header href={`/groups/${groupId}/dashboard`} title="Create" />
+      <Header leftComponent={<BackLink href={`/groups/${groupId}/dashboard`} />} title="Create" />
       <div className="mt-7">
       <Tabs defaultValue="create-question" className="w-full">
-
+        
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="create-question">Question</TabsTrigger>
           <TabsTrigger value="create-rally">Rally</TabsTrigger>

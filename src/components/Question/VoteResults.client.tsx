@@ -7,31 +7,40 @@ import { Separator } from "@/components/ui/separator";
 import { motion } from 'framer-motion';
 import { Badge } from "../ui/badge";
 import Image from "next/image";
+import useSWR from "swr";
+import fetcher from "@/lib/fetcher";
+import { Skeleton } from "../ui/skeleton";
+import { IQuestion } from "@/types/Question";
+import { IUser } from "@/db/models/user";
 
 type VoteResultsProps = {
-  user: any;
-  question: any;
+  user: IUser;
+  question: IQuestion;
   available: boolean;
   returnTo?: string;
 };
 
+
 const VoteResults = ({ user, question, available, returnTo }: VoteResultsProps) => {
   const [animationTriggered, setAnimationTriggered] = useState(false);
-  const [results, setResults] = useState([]);
-  const [numOfVotes, setNumOfVotes] = useState('');
+  const { data, error } = useSWR<any>(
+    `/api/groups/${question.groupId}/question/${question._id}/results/`,
+    fetcher
+  );
 
   useEffect(() => {
-    const fetchResults = async () => {
-      const res = await fetch(
-        `/api/groups/${question.groupId}/question/${question._id}/results/`);
-      const data = await res.json();
-      setResults(data.results);
-      setNumOfVotes(`${data.totalVotes} of ${data.totalUsers} voted`);
-    };
+    if (data) setAnimationTriggered(true);
+  }, [data]);
 
-    fetchResults();
-    setAnimationTriggered(true);
-  }, [question]);
+  if (error) return <div className="text-red-500">Failed to load results</div>;
+  if (!data) return (
+    <div className="flex justify-center">
+      <Skeleton className="w-full h-20"/>
+    </div>
+  );
+
+  const results = data.results;
+  const numOfVotes = `${data.totalVotes} of ${data.totalUsers} voted`;
 
   return (
     <div>
@@ -39,7 +48,7 @@ const VoteResults = ({ user, question, available, returnTo }: VoteResultsProps) 
         {numOfVotes}
       </div>
       <div className="mb-10">
-        {results.map((result: any, index) => (
+        {results.map((result: any, index: number) => (
           <Link key={index} href={`/groups/${question.groupId}/question/${question._id}/resultsdetailed/?returnTo=${returnTo}`}>
             <div className="bg-secondary my-2 rounded-md relative">
               <motion.div
@@ -49,20 +58,20 @@ const VoteResults = ({ user, question, available, returnTo }: VoteResultsProps) 
                 transition={{ duration: 1, ease: 'easeInOut' }}
               ></motion.div>
               <div className="absolute inset-0 flex justify-between px-2 items-center">
-              {question.questionType.startsWith("image") ? (
-                    <Image
-                      src={result.option}
-                      alt={`Option ${index + 1}`}
-                      height={30}
-                      width={30}
-                      className="object-cover rounded-sm w-8 h-8"
-                      priority={index === 0}
-                    />
-                  ) : (
-                    <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '80%' }}>
-                      {result.option}
-                    </span>
-                  )}
+                {question.questionType.startsWith("image") ? (
+                  <Image
+                    src={result.option}
+                    alt={`Option ${index + 1}`}
+                    height={30}
+                    width={30}
+                    className="object-cover rounded-sm w-8 h-8"
+                    priority={index === 0}
+                  />
+                ) : (
+                  <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '80%' }}>
+                    {result.option}
+                  </span>
+                )}
                 <Badge>
                   <CountUpBadge targetPercentage={result.percentage} />
                 </Badge>

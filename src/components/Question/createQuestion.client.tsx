@@ -17,7 +17,6 @@ import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import { Plus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { set } from "mongoose";
 
 const CreateQuestion = () => {
   const { groupId } = useParams<{ groupId: string }>();
@@ -319,9 +318,9 @@ const CreateQuestion = () => {
           </>
         )}
       </div>
-      {/* Fixed full-width submit button */}
+      
       <div ref={buttonRef} className="flex justify-center fixed bottom-6 left-0 w-full p-6 bg-background">
-        <Button onClick={handleSubmit} disabled={uploading || loading || !question.trim() || !questionType} className="w-full">
+        <Button onClick={handleSubmit} disabled={uploading || loading || !question.trim() || !questionType} className="h-12 w-full">
           {uploading || loading ? "Creating..." : "Create Question"}
         </Button>
       </div>
