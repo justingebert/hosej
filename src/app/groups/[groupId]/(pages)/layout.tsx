@@ -40,21 +40,20 @@ export default function TabsLayout({ children }: { children: React.ReactNode }) 
     const activeRef = getActiveRef().current;
     if (activeRef) {
       const { offsetLeft, offsetWidth } = activeRef;
-      setIndicatorX(offsetLeft + offsetWidth / 2 - 28); // Centered under icon (28 is half indicator width)
+      setIndicatorX(offsetLeft + offsetWidth / 2 - 52); // Centered under icon (28 is half indicator width)
     }
   }, [currentPath]);
 
   return (
     <div className="flex flex-col h-[100dvh]">
       <div className="flex-grow pb-20">{children}</div>
-      <footer className="fixed bottom-0 left-0 right-0 flex justify-between items-center bg-secondarydark-transparent backdrop-blur-lg mb-6 rounded-lg mx-6 drop-shadow-md">
-
+      <footer className="fixed bottom-0 left-0 right-0 flex justify-between items-center bg-secondarydark-transparent backdrop-blur-lg rounded-lg px-6 drop-shadow-md pb-6 pt-2 ">
         <motion.div
           className="absolute w-14 h-14 rounded-lg bg-secondary z-0"
           initial={{ x: indicatorX }}
           animate={{ x: indicatorX }}
           transition={{ type: "spring", stiffness: 400, damping: 30 }}
-          style={{ top: "0%"}}
+          style={{ top: "10%"}}
         />
 
         <Link ref={dashboardRef} href={`/groups/${groupId}/dashboard`} className="p-4 z-10">
