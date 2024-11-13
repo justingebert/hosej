@@ -35,15 +35,17 @@ export default function GroupPage() {
   const [memberToKick, setMemberToKick] = useState<string | null>(null);
   const router = useRouter();
 
-  const { data: group, error, mutate } = useSWR<IGroup>(`/api/groups/${groupId}`, fetcher, {
-    onSuccess: (data) => {
+  const { data: group, error, mutate } = useSWR<IGroup>(`/api/groups/${groupId}`, fetcher, {});
+
+  useEffect(() => {
+    if (group) {
       setSettings({
-        questionCount: data.questionCount,
-        rallyCount: data.rallyCount,
-        rallyGapDays: data.rallyGapDays,
+        questionCount: group.questionCount,
+        rallyCount: group.rallyCount,
+        rallyGapDays: group.rallyGapDays,
       });
-    },
-  });
+    }
+  }, [group]);
 
   if (error) return <p className="text-red-500">Failed to load group data</p>;
   const loading = !group;

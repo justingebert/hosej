@@ -10,7 +10,7 @@ const s3 = new S3Client({
     region: process.env.AWS_REGION,
 });
 
-export const revalidate = 60;
+export const revalidate = 0;
 
 // Return active daily questions
 export async function GET(req: Request, { params }: { params: { groupId: string } }) {

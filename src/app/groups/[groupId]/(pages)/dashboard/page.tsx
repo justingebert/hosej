@@ -8,8 +8,7 @@ import { CompletionChart } from "@/components/Charts/CompletionChart";
 import confetti from "canvas-confetti";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import TabsLayout from "../layout";
-import useSWR from "swr";
+import useSWR, { useSWRConfig } from "swr";
 import fetcher from "@/lib/fetcher";
 import { IGroup } from "@/db/models/Group";
 import { IQuestion } from "@/types/Question";
@@ -17,6 +16,7 @@ import { IRally } from "@/db/models/rally";
 
 export default function Dashboard() {
   const router = useRouter();
+  const { mutate } = useSWRConfig()
   const { groupId } = useParams<{ groupId: string }>();
   const { data: group } = useSWR<IGroup>(`/api/groups/${groupId}`, fetcher);
   const { data: questionsData } = useSWR<{questions: IQuestion[]}>(group ? `/api/groups/${groupId}/question/daily` : null, fetcher);
@@ -97,7 +97,10 @@ export default function Dashboard() {
     
     <Card
       className="relative bg-primary-foreground w-full px-6 py-4 flex items-center justify-between"
-      onClick={() => router.push(`/groups/${groupId}/daily`)}
+      onClick={() => {
+        mutate(`/api/groups/${groupId}/question/daily`)
+        router.push(`/groups/${groupId}/daily`)
+      }}
     >
       {questions.length > 0 && (
         <div className="absolute -top-3 -right-3">

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Header from "@/components/ui/custom/Header";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,30 +22,29 @@ const DailyQuestionPage = () => {
 
   // Fetch questions data using SWR
   const { data, error, isLoading } = useSWR<{ questions: IQuestion[] }>(
-    session?.user ? `/api/groups/${groupId}/question/daily` : null,
-    fetcher,
-    {
-      onSuccess: (data) => {
-        if (data.questions?.length) {
-          const votes = data.questions.reduce((acc: any, question: any) => {
-            acc[question._id] = question.answers.some(
-              (answer: any) => answer.user === user._id
-            );
-            return acc;
-          }, {});
-          setUserHasVoted(votes);
+    user ? `/api/groups/${groupId}/question/daily` : null, fetcher);
 
-          const ratings = data.questions.reduce((acc: any, question: any) => {
-            if (question.rating.good.includes(user._id)) acc[question._id] = "good";
-            else if (question.rating.ok.includes(user._id)) acc[question._id] = "ok";
-            else if (question.rating.bad.includes(user._id)) acc[question._id] = "bad";
-            return acc;
-          }, {});
-          setSelectedRating(ratings);
-        }
-      },
+  useEffect(() => {
+    if (data?.questions?.length && user) {
+      // Calculate user votes
+      const votes = data.questions.reduce((acc: any, question: any) => {
+        acc[question._id] = question.answers.some(
+          (answer: any) => answer.user === user._id
+        );
+        return acc;
+      }, {});
+      setUserHasVoted(votes);
+
+      // Calculate user ratings
+      const ratings = data.questions.reduce((acc: any, question: any) => {
+        if (question.rating.good.includes(user._id)) acc[question._id] = "good";
+        else if (question.rating.ok.includes(user._id)) acc[question._id] = "ok";
+        else if (question.rating.bad.includes(user._id)) acc[question._id] = "bad";
+        return acc;
+      }, {});
+      setSelectedRating(ratings);
     }
-  );
+  }, [data, user]);
 
   if (error) return <p className="text-red-500">Failed to load questions</p>;
 
