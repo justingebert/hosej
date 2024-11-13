@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
+import useSWR from "swr";
 import {
   Table,
   TableBody,
@@ -12,37 +13,18 @@ import {
 import Header from "@/components/ui/custom/Header";
 import { useParams } from "next/navigation";
 import { IGroup } from "@/db/models/Group";
+import fetcher from "@/lib/fetcher";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const LeaderboardPage = () => {
-  const [members, setMembers] = useState<IGroup["members"]>([]);
-  const [error, setError] = useState<string | null>(null);
   const { groupId } = useParams<{ groupId: string }>();
+  const { data, isLoading } = useSWR<IGroup>(`/api/groups/${groupId}/`, fetcher);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(`/api/groups/${groupId}/`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch users");
-        }
-        const data =  await response.json() as IGroup;
-        const members =  data.members
-        setMembers(members);
-      } catch (error: any) {
-        setError(error.message);
-      }
-    };
-    fetchData();
-  }, [groupId]);
-
-  // Sort users by the points in the specific group
-  const sortedUsers = members.sort((a, b) => {
-    return b.points - a.points;
-  });
+  const sortedUsers = data?.members.sort((a, b) => b.points - a.points) || [];
 
   return (
     <>
-      <Header href={`/groups/${groupId}/dashboard`} title="Leaderboard" />
+      <Header title="Leaderboard" />
       <Table>
         <TableHeader>
           <TableRow>
@@ -52,20 +34,26 @@ const LeaderboardPage = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {sortedUsers.map((member) => {
-            return (
-              <TableRow key={member.user.toString()}>
-                <TableCell className="font-medium">{member.name}</TableCell>
-                <TableCell className="text-right">{member.points}</TableCell>
-                <TableCell className="text-right font-medium">
-                  {member.streak} <span role="img" aria-label="streak">👖</span>
-                </TableCell>
-              </TableRow>
-            );
-          })}
+        {isLoading &&
+          [...Array(10)].map((_, i) => (
+            <TableRow key={i}>
+              <TableCell colSpan={3} className="p-2">
+                <Skeleton className="h-10" />
+              </TableCell>
+          </TableRow>
+          ))
+        }
+          {sortedUsers.map((member) => (
+            <TableRow key={member.user.toString()}>
+              <TableCell className="font-medium">{member.name}</TableCell>
+              <TableCell className="text-right">{member.points}</TableCell>
+              <TableCell className="text-right font-medium">
+                {member.streak} <span role="img" aria-label="streak">👖</span>
+              </TableCell>
+            </TableRow>
+          ))}
         </TableBody>
       </Table>
-      {error && <p className="text-red-500">{error}</p>}
     </>
   );
 };

@@ -3,30 +3,74 @@
 import { useParams, usePathname } from "next/navigation";
 import Link from "next/link";
 import { PieChart, History, Home } from "lucide-react";
+import { motion } from "framer-motion";
+import { useEffect, useState, useRef } from "react";
 
-export default function TabsLayout({ children }:{children: React.ReactNode}) {
+export default function TabsLayout({ children }: { children: React.ReactNode }) {
   const { groupId } = useParams<{ groupId: string }>();
   const currentPath = usePathname();
 
-  const isActive = (path: string) => currentPath === path ? "bg-primary rounded-full text-secondary" : ""; 
+  // To store refs for each link
+  const dashboardRef = useRef<HTMLAnchorElement>(null);
+  const leaderboardRef = useRef<HTMLAnchorElement>(null);
+  const historyRef = useRef<HTMLAnchorElement>(null);
+  const statsRef = useRef<HTMLAnchorElement>(null);
+
+  // State to hold the X position of the active link
+  const [indicatorX, setIndicatorX] = useState(0);
+
+  // Function to get the active ref based on the path
+  const getActiveRef = () => {
+    switch (currentPath) {
+      case `/groups/${groupId}/dashboard`:
+        return dashboardRef;
+      case `/groups/${groupId}/leaderboard`:
+        return leaderboardRef;
+      case `/groups/${groupId}/history`:
+        return historyRef;
+      case `/groups/${groupId}/stats`:
+        return statsRef;
+      default:
+        return dashboardRef;
+    }
+  };
+
+  // Update the indicator position based on the active link
+  useEffect(() => {
+    const activeRef = getActiveRef().current;
+    if (activeRef) {
+      const { offsetLeft, offsetWidth } = activeRef;
+      setIndicatorX(offsetLeft + offsetWidth / 2 - 28); // Centered under icon (28 is half indicator width)
+    }
+  }, [currentPath]);
 
   return (
     <div className="flex flex-col h-[100dvh]">
-    <div className="flex-grow">{children}</div>
-    <footer className="fixed bottom-0 left-0 right-0 flex justify-between items-center bg-secondarydark-transparent backdrop-blur-lg mb-6 rounded-full mx-6 drop-shadow-md">
-      <Link href={`/groups/${groupId}/dashboard`} className={`${isActive(`/groups/${groupId}/dashboard`)} p-4`} >
-        <Home/>
-      </Link>
-      <Link href={`/groups/${groupId}/leaderboard`} className={`flex items-center justify-center w-14 h-14 ${isActive(`/groups/${groupId}/leaderboard`)} p-4`}>
-        <span className="text-xl">👖</span>
-      </Link>
-      <Link href={`/groups/${groupId}/history`} className={`${isActive(`/groups/${groupId}/history`)} p-4`}>
-        <History />
-      </Link>
-      <Link href={`/groups/${groupId}/stats`} className={`${isActive(`/groups/${groupId}/stats`)} p-4`}>
-        <PieChart  />
-      </Link>
-    </footer>
-  </div>
+      <div className="flex-grow">{children}</div>
+      <footer className="fixed bottom-0 left-0 right-0 flex justify-between items-center bg-secondarydark-transparent backdrop-blur-lg mb-6 rounded-full mx-6 drop-shadow-md">
+
+        <motion.div
+          className="absolute w-14 h-14 rounded-full bg-secondary z-0"
+          initial={{ x: indicatorX }}
+          animate={{ x: indicatorX }}
+          transition={{ type: "spring", stiffness: 400, damping: 30 }}
+          style={{ top: "0%"}}
+        />
+
+        <Link ref={dashboardRef} href={`/groups/${groupId}/dashboard`} className="p-4 z-10">
+          <Home />
+        </Link>
+        <Link ref={leaderboardRef} href={`/groups/${groupId}/leaderboard`} className="flex items-center justify-center w-14 h-14 p-4 z-10">
+          <span className="text-xl">👖</span>
+        </Link>
+        <Link ref={historyRef} href={`/groups/${groupId}/history`} className="p-4 z-10">
+          <History />
+        </Link>
+        <Link ref={statsRef} href={`/groups/${groupId}/stats`} className="p-4 z-10">
+          <PieChart />
+        </Link>
+
+      </footer>
+    </div>
   );
 }
