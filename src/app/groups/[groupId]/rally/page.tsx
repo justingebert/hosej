@@ -1,87 +1,83 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
 import { useParams, useRouter } from "next/navigation";
+import useSWR from "swr";
 import SpinningLoader from "@/components/ui/custom/SpinningLoader";
 import Header from "@/components/ui/custom/Header";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { Card } from "@/components/ui/card";
 import BackLink from "@/components/ui/custom/BackLink";
 import { RallyTabs } from "./RallyTabs";
+import fetcher from "@/lib/fetcher";
+import { IRally } from "@/db/models/rally";
 
 const RallyPage = () => {
-  const [loading, setLoading] = useState(true);
   const { user } = useAuthRedirect();
-  const [rallies, setRallies] = useState<any[]>([]);
-  const [rallyInactive, setRallyInactive] = useState<any>(false);
-  const [userHasVoted, setUserHasVoted] = useState<any>({});
-  const [userUploaded, setUserUploaded] = useState<any>({});
-  const router = useRouter();
   const { groupId } = useParams<{ groupId: string }>();
+  const router = useRouter();
 
-  useEffect(() => {
-    const fetchRallies = async () => {
-      setLoading(true);
-      router.refresh();
-      const res = await fetch(`/api/groups/${groupId}/rally`);
-      const data = await res.json();
+  const { data, error, isLoading } = useSWR<{rallies: IRally[]}>(user ? `/api/groups/${groupId}/rally` : null, fetcher);
 
-      if (data.rallies) {
-        if (data.rallies.length === 0) {
-          setRallyInactive(true);
-        }
-        setRallies(data.rallies);
-        const votes = data.rallies.reduce((acc: any, rally: any) => {
-          acc[rally._id] = rally.submissions.some((submission: any) =>
-            submission.votes.some((vote: any) => vote.user === user._id)
-          );
-          return acc;
-        }, {});
-        setUserHasVoted(votes);
-        const userHasUploaded = data.rallies.reduce((acc: any, rally: any) => {
-          acc[rally._id] = rally.submissions.some((submission: any) =>
-            submission.username === user.username
-          );
-          return acc;
-        }, {});
-        setUserUploaded(userHasUploaded);
-      }
-      if (data.message === "No active rallies") {
-        setRallyInactive(true);
-      }
-      setLoading(false);
-    };
+  if (isLoading) return <SpinningLoader loading={true} />;
+  if (error) return <div className="text-red-500">Failed to load rallies data.</div>;
 
-    if (user) {
-      fetchRallies();
-    }
-  }, [user, router, groupId]);
+  const rallies = data?.rallies || [];
+  const rallyInactive = !rallies.length
 
-  if (loading) return <SpinningLoader loading={true} />
-  if (rallyInactive) return (
-    <div className="flex flex-col h-[100dvh]"> 
-      <Header leftComponent={<BackLink href={`/groups/${groupId}/dashboard`}/>}  title="Rallies" />
+  // Calculate user vote and upload status based on the fetched data
+  const userHasVoted = rallies.reduce((acc: Record<string, boolean>, rally) => {
+    const rallyId = rally._id.toString(); // Ensure _id is a string
+    acc[rallyId] = rally.submissions.some((submission) =>
+      submission.votes.some((vote:any) => vote.user === user._id)
+    );
+    return acc;
+  }, {});
 
-      <div className="flex flex-grow justify-center items-center"> 
-        <Card className="text-center p-6 bg-foreground">
-          <h2 className="font-bold text-secondary">No active rallies</h2>
-        </Card>
+  const userHasUploaded = rallies.reduce((acc: Record<string, boolean>, rally) => {
+    const rallyId = rally._id.toString(); // Ensure _id is a string
+    acc[rallyId] = rally.submissions.some((submission) =>
+      submission.username === user.username
+    );
+    return acc;
+  }, {});
+
+  if (rallyInactive) {
+    return (
+      <div className="flex flex-col h-[100dvh]"> 
+        <Header leftComponent={<BackLink href={`/groups/${groupId}/dashboard`} />} title="Rallies" />
+        <div className="flex flex-grow justify-center items-center"> 
+          <Card className="text-center p-6 bg-foreground">
+            <h2 className="font-bold text-secondary">No active rallies</h2>
+          </Card>
+        </div>
       </div>
-    </div>
-  )
+    );
+  }
 
   return (
     <div>
-      <Header leftComponent={<BackLink href={`/groups/${groupId}/dashboard`}/>}  title="Rallies" />
+      <Header leftComponent={<BackLink href={`/groups/${groupId}/dashboard`} />} title="Rallies" />
       <RallyTabs
-            groupId={groupId}
-            user={user}
-            rallies={rallies}
-            userHasVoted={userHasVoted}
-            userHasUploaded={userUploaded}
-            setUserHasVoted={setUserHasVoted}
-            setUserHasUploaded={setUserUploaded}
-          />
+        groupId={groupId}
+        user={user}
+        rallies={rallies}
+        userHasVoted={userHasVoted}
+        userHasUploaded={userHasUploaded}
+        setUserHasVoted={(newStatus: boolean) => {
+          if (rallies.length > 0) {
+            const rallyId = rallies[0]._id.toString(); // Convert to string before using as an index
+            userHasVoted[rallyId] = newStatus;
+            router.refresh();
+          }
+        }}
+        setUserHasUploaded={(newStatus: boolean) => {
+          if (rallies.length > 0) {
+            const rallyId = rallies[0]._id.toString(); // Convert to string before using as an index
+            userHasUploaded[rallyId] = newStatus;
+            router.refresh();
+          }
+        }}
+      />
     </div>
   );
 };
