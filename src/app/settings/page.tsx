@@ -20,6 +20,7 @@ import {
 import { FaGoogle } from "react-icons/fa";
 import { IUser } from "@/db/models/user";
 import { Skeleton } from "@/components/ui/skeleton";
+import BackLink from "@/components/ui/custom/BackLink";
 
 export default function SettingsPage() {
   const { status, user } = useAuthRedirect();
@@ -101,7 +102,7 @@ export default function SettingsPage() {
 
   return (
     <div className="flex flex-col h-[100dvh]">
-      <Header href={`/groups/`} title="Settings" rightComponent={<ThemeSelector />} />
+      <Header leftComponent={<BackLink href={`/groups/`}/>} title="Settings" rightComponent={<ThemeSelector />} />
       <div className="flex-grow mt-4">
           <div className="flex items-center justify-between mb-4">
             <span>Notifications</span>
