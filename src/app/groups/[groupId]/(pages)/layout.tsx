@@ -47,10 +47,10 @@ export default function TabsLayout({ children }: { children: React.ReactNode }) 
   return (
     <div className="flex flex-col h-[100dvh]">
       <div className="flex-grow pb-20">{children}</div>
-      <footer className="fixed bottom-0 left-0 right-0 flex justify-between items-center bg-secondarydark-transparent backdrop-blur-lg mb-6 rounded-full mx-6 drop-shadow-md">
+      <footer className="fixed bottom-0 left-0 right-0 flex justify-between items-center bg-secondarydark-transparent backdrop-blur-lg mb-6 rounded-lg mx-6 drop-shadow-md">
 
         <motion.div
-          className="absolute w-14 h-14 rounded-full bg-secondary z-0"
+          className="absolute w-14 h-14 rounded-lg bg-secondary z-0"
           initial={{ x: indicatorX }}
           animate={{ x: indicatorX }}
           transition={{ type: "spring", stiffness: 400, damping: 30 }}

@@ -11,6 +11,7 @@ import Image from "next/image";
 import fetcher from "@/lib/fetcher";
 import { IQuestion } from "@/types/Question";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const ResultsPage = () => {
   const { user } = useAuthRedirect();
@@ -21,7 +22,7 @@ const ResultsPage = () => {
     fetcher
   );
 
-  if (isLoading) return <SpinningLoader loading={true} />;
+  if (isLoading) return <Loading/>
   if (error) return <div className="text-red-500">Failed to load question data.</div>;
 
   return (
@@ -83,9 +84,26 @@ const ResultsPage = () => {
 };
 
 const ResultsPageWrapper = () => (
-  <Suspense fallback={<div className="flex items-center justify-center h-screen"><SpinningLoader loading={true} /></div>}>
+  <Suspense fallback={<Loading/>}>
     <ResultsPage />
   </Suspense>
 );
+
+const Loading = () => (
+  <div className="flex flex-col items-center mt-20">
+    <Skeleton className="w-3/4 h-8 mb-6" />
+    <div className="flex w-full justify-around mb-6 mt-6">
+      <Skeleton className="w-12 h-6 rounded-full" />
+      <Skeleton className="w-12 h-6 rounded-full" />
+      <Skeleton className="w-12 h-6 rounded-full" />
+    </div>
+    <Skeleton className="w-full h-40 rounded-lg" />
+    <div className="flex flex-col space-y-3 mt-6 w-full max-w-md">
+      {[...Array(10)].map((_, i) => (
+            <Skeleton key={i} className="h-12" />
+        ))}
+    </div>
+  </div>
+)
 
 export default ResultsPageWrapper;
