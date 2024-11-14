@@ -2,9 +2,7 @@ import dbConnect from "@/lib/dbConnect";
 import Rally from "@/db/models/rally";
 import { NextRequest, NextResponse } from "next/server";
 import Group from "@/db/models/Group";
-import { isUserInGroup } from "@/lib/groupAuth";
-
-export const revalidate = 0;
+import { isUserAdmin, isUserInGroup } from "@/lib/groupAuth";
 
 //get current rally and set state
 export async function POST(req: NextRequest,{ params }: { params: { groupId: string } }) {
@@ -12,7 +10,7 @@ export async function POST(req: NextRequest,{ params }: { params: { groupId: str
   const userId = req.headers.get('x-user-id') as string;
 
   try {
-    const authCheck = await isUserInGroup(userId, groupId);
+    const authCheck = await isUserAdmin(userId, groupId);
     if (!authCheck.isAuthorized) {
       return NextResponse.json({ message: authCheck.message }, { status: authCheck.status });
     }
@@ -25,7 +23,6 @@ export async function POST(req: NextRequest,{ params }: { params: { groupId: str
         return NextResponse.json({ message: "rallies already active", rallies: activeRallies }, { status: 200 });
     }
     const countToActivate = group.rallyCount - activeRallies.length;
-
 
     const rallies = await Rally.find({ groupId: groupId, active: false, used: false }).limit(countToActivate);
     const currentTime = new Date();
