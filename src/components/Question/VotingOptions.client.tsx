@@ -42,9 +42,7 @@ const VoteOptions = ({ question, onVote }:any) => {
           key={index}
           onClick={() => setSelectedOption(option)}
           variant={selectedOption === option ? "default" : "secondary"}
-          className="p-2 text-sm md:text-base lg:text-lg h-auto" // Adjusted text size for responsiveness
-          style={{ whiteSpace: "normal", height: "100%" }}
-
+          className="p-2 text-sm md:text-base lg:text-lg h-auto whitespace-normal" // Adjusted text size for responsiveness
         >
           {question.questionType.startsWith("image") ? (
             <Image
