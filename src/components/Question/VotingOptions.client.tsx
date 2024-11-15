@@ -36,13 +36,13 @@ const VoteOptions = ({ question, onVote }:any) => {
       />
     </div>
   ) : (
-    <div className="grid grid-cols-2 gap-4 pb-20">
+    <div className="grid grid-cols-2 gap-4 pb-32">
       {question.options.map((option: any, index: number) => (
         <Button
           key={index}
           onClick={() => setSelectedOption(option)}
           variant={selectedOption === option ? "default" : "secondary"}
-          className="p-2 text-sm md:text-base lg:text-lg h-auto" // Adjusted text size for responsiveness
+          className="p-2 text-sm md:text-base lg:text-lg h-auto whitespace-normal" // Adjusted text size for responsiveness
         >
           {question.questionType.startsWith("image") ? (
             <Image
