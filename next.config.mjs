@@ -9,10 +9,12 @@ const withSerwist = withSerwistInit({
   disable: process.env.ENV === "dev",
 });
 
+const dev = process.env.ENV === "dev"
+
 export default withSerwist({
     logging: {
         fetches:{
-            fullUrl: true,
+            fullUrl: !dev,
         }
     },
     images: {
