@@ -54,6 +54,7 @@ export async function GET(req: Request) {
         }else{
           await sendNotification(`🚨Neue ${group.name} Fragen!!🚨`, '🚨JETZT VOTEN DU FISCH🚨', group._id);
           group.lastQuestionDate = new Date();
+          await group.save();
         }
     }
 

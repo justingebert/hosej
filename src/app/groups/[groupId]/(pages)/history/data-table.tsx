@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { DataTableToolbar } from "./data-table-toolbar";
 import { ClipLoader } from "react-spinners"; // Import the ClipLoader component
 import { useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -93,13 +94,15 @@ export function DataTable<TData, TValue>({
               </TableRow>
             )
           )}
-          {loading && (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="text-center">
-                <ClipLoader size={24} />
+          {loading &&
+          [...Array(10)].map((_, i) => (
+            <TableRow key={i}>
+              <TableCell colSpan={3} className="p-2">
+                <Skeleton className="h-10" />
               </TableCell>
-            </TableRow>
-          )}
+          </TableRow>
+          ))
+        }
         </TableBody>
       </Table>
       {hasMore && !loading && (

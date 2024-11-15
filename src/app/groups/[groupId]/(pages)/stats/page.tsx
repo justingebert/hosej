@@ -14,6 +14,7 @@ import { QuestionsByType, QuestionsByUser } from "@/components/Charts/QuestionCh
 import { Separator } from "@/components/ui/separator";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type Statistics = {
   group :any
@@ -33,8 +34,18 @@ const StatsPage = () => {
 
   const { data: stats, isLoading } = useSWR<Statistics>(`/api/groups/${groupId}/stats`, fetcher);
 
-  if (isLoading) return <SpinningLoader loading={true} />;
-  if (!stats) return <p>No statistics available</p>;
+  if (isLoading || !stats) return (
+    <div>
+      <Header title="Statistics" />
+      <Separator className="my-6" />
+      <Skeleton className="h-10 mb-2" />
+      <Skeleton className="h-10 mb-2" />
+      <Skeleton className="h-10 mb-2" />
+      <Skeleton className="h-10 mb-6" />
+      <Skeleton className="h-80 mb-6" />
+      <Skeleton className="h-80" />
+    </div>
+  )
 
   const chartDataQuestions = [
     { questionsUsedCount: stats.questionsUsedCount, questionsLeftCount: stats.questionsLeftCount },

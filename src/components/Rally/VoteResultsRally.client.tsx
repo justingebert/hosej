@@ -1,26 +1,26 @@
 'use client';
 
-import React, { Suspense, useEffect, useState } from "react";
+import React, { useState, useMemo } from "react";
 import Image from "next/image";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "../ui/badge";
 import { Separator } from "../ui/separator";
 import ChatComponent from "../Chat/Chat.client";
 import { RallyVotesChart } from "../Charts/RallyResultsChart";
+import useSWR from "swr";
+import { IPictureSubmission } from "@/db/models/rally";
+import fetcher from "@/lib/fetcher";
 
 const RallyResults = ({ user, rally }: any) => {
-  const [submissions, setSubmissions] = useState<any[]>([]);
   const [loadedImages, setLoadedImages] = useState<{ [key: number]: boolean }>({})
 
-  useEffect(() => {
-    const fetchSubmissions = async () => {
-      const response = await fetch(`/api/groups/${rally.groupId}/rally/${rally._id}/submissions`);
-      const data = await response.json();
-      setSubmissions(data.submissions);
-    };
-    fetchSubmissions();
-  }, [rally]);
+  const { data, isLoading } = useSWR<{submissions: IPictureSubmission[]}>(
+    `/api/groups/${rally.groupId}/rally/${rally._id}/submissions`,
+    fetcher
+  );
+
+  const submissions = useMemo(() => data?.submissions || [], [data]);
 
   const handleImageLoad = (id: number) => {
     setLoadedImages((prev) => ({ ...prev, [id]: true }))
@@ -33,7 +33,7 @@ const RallyResults = ({ user, rally }: any) => {
       </div>
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-5">
         {submissions.map((submission, index) => (
-          <Card key={submission._id} className="overflow-hidden">
+          <Card key={submission._id.toString()} className="overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between p-5">
               <div className="flex items-center gap-4">
               <Avatar>

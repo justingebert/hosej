@@ -89,7 +89,7 @@ export async function POST(req: NextRequest, { params }: { params: { groupId: st
     await dbConnect();
 
     const group = await Group.findById(groupId);
-    const sendUser = await User.findOne({ username: userId });
+    const sendUser = await User.findById(userId);
 
     const newSubmission = {
       userId: sendUser._id,

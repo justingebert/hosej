@@ -16,6 +16,7 @@ export interface IRally extends mongoose.Document {
 }
 
 export interface IPictureSubmission {
+  _id: string | mongoose.Schema.Types.ObjectId;
   userId: mongoose.Schema.Types.ObjectId;
   username: string;
   imageUrl: string; 
@@ -59,7 +60,7 @@ const rallySchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-rallySchema.index({ groupId: 1, createdAt: -1 })
+rallySchema.index({ groupId: 1 })
 
 const Rally = mongoose.models.Rally || mongoose.model<IRally>("Rally", rallySchema);
 

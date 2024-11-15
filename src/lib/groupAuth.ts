@@ -19,3 +19,19 @@ export async function isUserInGroup(userId:string, groupId:string) {
 
   return { isAuthorized: true };
 }
+
+export async function isUserAdmin(userId:string, groupId:string) {
+  await dbConnect();
+
+  const group = await Group.findById(groupId);
+  if (!group) {
+    return { isAuthorized: false, status: 404, message: 'Group not found' };
+  }
+
+  const isAdmin = group.admin.toString() === userId.toString();
+  if(!isAdmin){
+    return { isAuthorized: false, status: 403, message: 'You are not an admin of this group' };
+  }
+
+  return { isAuthorized: true };
+}
