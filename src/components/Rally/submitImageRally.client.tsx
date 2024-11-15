@@ -57,6 +57,7 @@ export default function SubmitRally({
   setUserHasUploaded,
   setUserHasVoted,
 }: any) {
+  const [loading, setLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [clearImageInput, setClearImageInput] = useState(false);
   const [uploadsCount, setUploadsCount] = useState(rally.submissions.length); // Track uploads count
@@ -110,7 +111,7 @@ export default function SubmitRally({
       alert("Please select a file to upload.");
       return;
     }
-
+    setLoading(true);
     try {
       const [compressedMainImage] = await compressImages([file]);
       const imageUrl = await handleImageUpload(
@@ -127,23 +128,23 @@ export default function SubmitRally({
           imageUrl[0].url
         );
       }
-
-      toast({ title: "Submission successful!" });
       setUserHasVoted((prev: any) => ({ ...prev, [rally._id]: true }));
       setUserHasUploaded((prev: any) => ({ ...prev, [rally._id]: true }));
-      setUploadsCount((prevCount: any) => prevCount + 1); // Increase the uploads count
+      setUploadsCount((prevCount: any) => prevCount + 1);
+      toast({ title: "Submission successful!" });
     } catch (error: any) {
       toast({
         title: "Error",
         description: error.message,
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="flex flex-col grow justify-between">
-      {/* Top Section: Time Left */}
       <div>
         <div className="mt-5 text-sm  text-center">
           <span className="text-2xl font-bold">{timeLeft.days}</span>
@@ -155,14 +156,16 @@ export default function SubmitRally({
           <span className="text-2xl font-bold">{timeLeft.seconds}</span>
           <span>s</span>
         </div>
-        <div className="mb-4 mt-2">
-          {/* Progress bar showing the time progress */}
+        <div className="mt-2">
           <Progress value={progressValue} />
         </div>
       </div>
 
-      {/* Middle Section: Image Uploader (centered) */}
-      <div>
+      <div className="mb-20">
+          <div className="mb-4 text-m text-center">
+            <span className="font-bold">{uploadsCount}</span>
+            <span> uploads</span>
+          </div>
         {userHasUploaded[rally._id] ? (
           <div className="border rounded-lg text-center text-green-500 h-40 flex items-center justify-center text-2xl font-bold">
             Already submitted
@@ -172,28 +175,27 @@ export default function SubmitRally({
             onFileSelect={setFile}
             clearInput={clearImageInput}
             showFilename={true}
-            className=""
             buttonstyle="w-full h-40"
           />
         )}
       </div>
-      {/* Bottom Section: Submit Button */}
-      <div className="text-center mt-4">
-        <div className="">
-          <div className="mb-5 text-m text-muted text-center">
-            <span className="font-bold">{uploadsCount}</span>
-            <span> uploads</span>
-          </div>
-        </div>
-        {!userHasUploaded[rally._id] && (
+
+      <div className="text-center">
+          {userHasUploaded[rally._id] ? (
+            <Button
+            disabled={true}
+            className="w-full h-12 font-bold text-lg"
+          >
+           Submitted
+          </Button>) :
           <Button
             onClick={handleSubmit}
-            disabled={uploading || !file}
-            className="w-full"
+            disabled={uploading || !file || loading}
+            className="w-full h-12 font-bold text-lg"
           >
             {uploading ? "Submitting..." : "Submit"}
           </Button>
-        )}
+          }
       </div>
     </div>
   );

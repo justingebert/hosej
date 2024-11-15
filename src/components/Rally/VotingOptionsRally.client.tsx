@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -12,39 +12,36 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import Modal from 'react-modal';
 import { X } from 'lucide-react';
+import useSWR from "swr";
+import fetcher from "@/lib/fetcher";
+import { IPictureSubmission } from "@/db/models/rally";
 
 const RallyVoteCarousel = ({ user, rally, onVote }: any) => {
-  const [selectedSubmission, setSelectedSubmission] = useState<string | null>(null);
-  const [submissions, setSubmissions] = useState<any[]>([]);
+  const [selectedSubmission, setSelectedSubmission] = useState<string>("");
   const [api, setApi] = useState<CarouselApi | null>(null);
-  const [current, setCurrent] = useState(0);
   const [hasVoted, setHasVoted] = useState(false);
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const router = useRouter();
 
+  const { data, isLoading } = useSWR<{submissions: IPictureSubmission[]}>(
+    `/api/groups/${rally.groupId}/rally/${rally._id}/submissions`,
+    fetcher
+  );
+
+  const submissions = useMemo(() => data?.submissions || [], [data]);
 
   useEffect(() => {
-    const fetchSubmissions = async () => {
-      const response = await fetch(`/api/groups/${rally.groupId}/rally/${rally._id}/submissions`);
-      const data = await response.json();
-      setSubmissions(data.submissions);
-      if (data.submissions.length > 0) {
-        setSelectedSubmission(data.submissions[0]._id);
-      }
+    if (submissions.length > 0) {
+      setSelectedSubmission(submissions[0]._id.toString());
+    }
 
-      // Check if the user has already voted
-      const userHasVoted = data.submissions.some((submission:any) =>
-        submission.votes.some((vote:any) => vote.user === user._id)
-      );
-      setHasVoted(userHasVoted);
-    };
-
-    fetchSubmissions();
-  }, [rally, user]);
+    const userHasVoted = submissions.some((submission: any) =>
+      submission.votes.some((vote: any) => vote.user === user._id)
+    );
+    setHasVoted(userHasVoted);
+  }, [submissions, user]);
 
   useEffect(() => {
     if (!api || submissions.length === 0) return;
@@ -52,8 +49,7 @@ const RallyVoteCarousel = ({ user, rally, onVote }: any) => {
     const onSelect = () => {
       const selectedIndex = api.selectedScrollSnap();
       if (selectedIndex >= 0 && selectedIndex < submissions.length) {
-        setCurrent(selectedIndex);
-        setSelectedSubmission(submissions[selectedIndex]._id);
+        setSelectedSubmission(submissions[selectedIndex]._id.toString());
       }
     };
 
@@ -90,24 +86,24 @@ const RallyVoteCarousel = ({ user, rally, onVote }: any) => {
 
     setHasVoted(true);
 
-    onVote(); // Callback to update state in the parent component
+    onVote();
   };
 
-  const customStyles = {
+  const modalStyles = {
     content: {
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
       border: 'none',
       background: 'none',
-      overflow: 'auto', // Ensure the content can scroll on mobile
+      overflow: 'auto', 
     },
     overlay: {
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center',
       backgroundColor: 'rgba(0, 0, 0, 0.75)',
-      zIndex: 1000, // Ensure the overlay is on top
+      zIndex: 1000, 
     },
   };
 
@@ -116,7 +112,7 @@ const RallyVoteCarousel = ({ user, rally, onVote }: any) => {
       <Carousel setApi={setApi} orientation="vertical" className="mt-20">
         <CarouselContent className="w-full h-[50dvh]">
           {submissions.map((submission, index) => (
-            <CarouselItem key={submission._id} className="h-[50dvh]">
+            <CarouselItem key={submission._id.toString()} className="h-[50dvh]">
               <Card className="overflow-hidden rounded-md h-full">
                 <CardContent className="h-full p-0">
                   <div className="relative h-full w-full overflow-hidden rounded-md">
@@ -138,9 +134,9 @@ const RallyVoteCarousel = ({ user, rally, onVote }: any) => {
         <CarouselPrevious className="h-[40dvh] rounded-md -translate-y-[18dvh] " />
         <CarouselNext className="h-[40dvh] rounded-md translate-y-[18dvh]" />
       </Carousel>
-        <div className="flex justify-center">
-          <Button onClick={submitVote} className="mt-24 w-full" disabled={hasVoted || modalIsOpen}>
-            vote for this
+        <div className="flex justify-center mb-6">
+          <Button onClick={submitVote} className="mt-24 w-full h-12 text-lg font-bold" disabled={hasVoted || modalIsOpen}>
+            Vote for this
           </Button>
         </div>
       <Modal
@@ -150,7 +146,7 @@ const RallyVoteCarousel = ({ user, rally, onVote }: any) => {
         contentLabel="Image Modal"
         className="flex justify-center items-center"
         overlayClassName="fixed inset-0 bg-black bg-opacity-50 bg-blur"
-        style={customStyles}
+        style={modalStyles}
       >
         {selectedImage && (
           <div className=" relative p-4">
