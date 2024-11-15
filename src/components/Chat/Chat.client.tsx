@@ -9,6 +9,7 @@ import { IChat } from '@/db/models/Chat';
 
 function ChatComponent({ user, entity, available }: any) {
   const [newMessage, setNewMessage] = useState('');
+  const [sending , setSending] = useState(false);
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
 
   const { data, error, mutate } = useSWR<IChat>(
@@ -19,8 +20,10 @@ function ChatComponent({ user, entity, available }: any) {
   const messages = data?.messages || [];
 
   const handleSendMessage = async () => {
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim()) return; 
+    setSending(true);
 
+    try{
     const messageData = { message: newMessage };
     const response = await fetch(`/api/groups/${entity.groupId}/chats/${entity.chat}/messages`, {
       method: 'POST',
@@ -50,6 +53,11 @@ function ChatComponent({ user, entity, available }: any) {
       );
 
       setNewMessage('');
+    }
+    }catch(error){
+      console.error('Failed to send message', error);
+    } finally {
+      setSending(false);
     }
   };
 
@@ -92,7 +100,7 @@ function ChatComponent({ user, entity, available }: any) {
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
             />
-            <Button onClick={handleSendMessage}>
+            <Button onClick={handleSendMessage} disabled={sending}>
               <Send size={20} />
             </Button>
           </div>
