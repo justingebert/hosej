@@ -32,3 +32,10 @@ export enum QuestionType {
   Rating = "rating",
   ImageSelectOne = "image-select-one"
 }
+
+export interface IResult {
+  option: string;
+  count: number;
+  percentage: number;
+  users: string[];
+}
