@@ -1,66 +1,78 @@
-import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/dbConnect';
-import Question from '@/db/models/Question';
-import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import Group from '@/db/models/Group';
-import { isUserInGroup } from '@/lib/groupAuth';
-import { generateSignedUrl } from '@/lib/question/questionOptions';
-
-const s3 = new S3Client({
-    region: process.env.AWS_REGION,
-});
+import { NextRequest, NextResponse } from "next/server";
+import dbConnect from "@/lib/dbConnect";
+import Question from "@/db/models/Question";
+import { isUserInGroup } from "@/lib/groupAuth";
+import { generateSignedUrl } from "@/lib/question/questionOptions";
+import Group from "@/db/models/Group";
+import User from "@/db/models/user";
 
 export const revalidate = 0;
 
-export async function GET(req: NextRequest, { params }: { params: { groupId: string, questionId: string } }) {
+export async function GET(req: NextRequest, { params }: { params: { groupId: string; questionId: string } }) {
     const { groupId, questionId } = params;
-    const userId = req.headers.get('x-user-id') as string;
+    const userId = req.headers.get("x-user-id") as string;
 
     try {
         const authCheck = await isUserInGroup(userId, groupId);
         if (!authCheck.isAuthorized) {
-          return NextResponse.json({ message: authCheck.message }, { status: authCheck.status });
+            return NextResponse.json({ message: authCheck.message }, { status: authCheck.status });
         }
+
         await dbConnect();
 
-        const question = await Question.findOne({ groupId, _id: questionId });
+        const question = await Question.findById(questionId).populate({
+            path: "answers.user",
+            model: User,
+        });
+
         if (!question) {
             return NextResponse.json({ message: "Question not found" }, { status: 404 });
         }
 
-        const voteCounts = question.answers.reduce((acc: any, answer: any) => {
-            acc[answer.response] = (acc[answer.response] || 0) + 1;
+        const group = await Group.findById(groupId);
+        const totalUsers = group.members.length;
+
+        // Total votes count across all options
+        const totalVotes = question.answers.length || 0;
+
+        // Group answers by response with usernames
+        const voteDetails = question.answers.reduce((acc: any, answer: any) => {
+            const responses = Array.isArray(answer.response) ? answer.response : [answer.response];
+            responses.forEach((response: any) => {
+                if (!acc[response]) {
+                    acc[response] = { count: 0, users: [] };
+                }
+                acc[response].count += 1;
+                acc[response].users.push(answer.user.username);
+            });
             return acc;
         }, {});
 
-        const group =  await Group.findById(groupId)
-        const totalUsers = group.members.length;
-        const totalVotes = question.answers.length;
+        // Calculate results with percentages
+        const results = await Promise.all(
+            Object.entries(voteDetails).map(async ([option, { count, users }]: any) => {
+                const percentage = Math.round((count / totalVotes) * 100);
+                let signedOption = option;
 
-        // Calculate the results with percentages
-        const results = Object.entries(voteCounts).map(([option, votes]: [any, any]) => {
-            const percentage = Math.round((votes / totalVotes) * 100);
-            return { option, votes, percentage };
-        });
+                // Generate signed URLs for image responses
+                if (question.questionType.startsWith("image")) {
+                    const { url } = await generateSignedUrl(option);
+                    signedOption = url;
+                }
 
-        results.sort((a, b) => b.votes - a.votes);
+                return { option: signedOption, count, percentage, users };
+            })
+        );
 
-        // If the question type starts with "image", generate pre-signed URLs for options
-        if (question.questionType.startsWith("image")) {
-            const resultsWithImages = await Promise.all(
-                results.map(async (result) => {
-                    const { url } = await generateSignedUrl(result.option);
-                    return { ...result, option: url };
-                })
-            );
+        // Sort results by the number of votes (descending)
+        results.sort((a, b) => b.count - a.count);
 
-            return NextResponse.json({ results: resultsWithImages, totalVotes, totalUsers });
-        }
-
-        return NextResponse.json({ results, totalVotes, totalUsers }, { status: 200 });
+        return NextResponse.json(
+            { results, totalVotes, totalUsers, questionType: question.questionType },
+            { status: 200 }
+        );
     } catch (error) {
-        console.error('Error fetching question results:', questionId,  error);
-        return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+        console.error("Error fetching question results:", questionId, error);
+        return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
     }
 }

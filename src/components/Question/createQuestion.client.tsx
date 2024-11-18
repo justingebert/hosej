@@ -212,10 +212,13 @@ const CreateQuestion = () => {
           </SelectTrigger>
           <SelectContent className="absolute z-50">
             <SelectItem value="users-select-one">Vote One User</SelectItem>
+            <SelectItem value="users-select-multiple">Vote Multiple Users</SelectItem>
             <SelectItem value="custom-select-one">Vote One Custom Option</SelectItem>
+            <SelectItem value="custom-select-multiple">Vote Multiple Custom Options</SelectItem>
             <SelectItem value="text">Text Reply</SelectItem>
             <SelectItem value="rating">Rating (1-10)</SelectItem>
             <SelectItem value="image-select-one">Vote One Custom Image</SelectItem>
+            <SelectItem value="image-select-mutiple">Vote Multiple Custom Images</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -242,7 +245,7 @@ const CreateQuestion = () => {
         className="mt-4 px-4 overflow-y-auto"
         style={{ maxHeight: availableHeight ? `${availableHeight}px` : "auto" }}
       >
-        {questionType === "custom-select-one" && (
+        {questionType === "custom-select-one" || questionType === "custom-select-multiple" && (
           <>
             <AnimatePresence>
               {options.map((option, index) => (
@@ -280,7 +283,7 @@ const CreateQuestion = () => {
           </>
         )}
 
-        {questionType === "image-select-one" && (
+        {questionType === "image-select-one" || questionType === "image-select-multiple" && (
           <>
             <AnimatePresence>
               {options.map((_, index) => (
