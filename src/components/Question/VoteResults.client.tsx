@@ -35,7 +35,7 @@ const VoteResults = ({ user, question, available, returnTo }: VoteResultsProps) 
   if (error) return <div className="text-red-500">Failed to load results</div>;
   if (!data) return (
     <div className="flex justify-center">
-      <Skeleton className="w-full h-20"/>
+      <Skeleton className="w-full h-40 "/>
     </div>
   );
 

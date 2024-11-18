@@ -6,7 +6,6 @@ import { generateSignedUrl } from "@/lib/question/questionOptions";
 import Group from "@/db/models/Group";
 import User from "@/db/models/user";
 
-
 export const revalidate = 0;
 
 export async function GET(req: NextRequest, { params }: { params: { groupId: string; questionId: string } }) {
@@ -32,16 +31,20 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
 
         const group = await Group.findById(groupId);
         const totalUsers = group.members.length;
-        const totalVotes = question.answers.length;
+
+        // Total votes count across all options
+        const totalVotes = question.answers.length || 0;
 
         // Group answers by response with usernames
         const voteDetails = question.answers.reduce((acc: any, answer: any) => {
-            const response = answer.response;
-            if (!acc[response]) {
-                acc[response] = { count: 0, users: [] };
-            }
-            acc[response].count += 1;
-            acc[response].users.push(answer.user.username);
+            const responses = Array.isArray(answer.response) ? answer.response : [answer.response];
+            responses.forEach((response: any) => {
+                if (!acc[response]) {
+                    acc[response] = { count: 0, users: [] };
+                }
+                acc[response].count += 1;
+                acc[response].users.push(answer.user.username);
+            });
             return acc;
         }, {});
 

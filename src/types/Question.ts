@@ -25,12 +25,15 @@ export interface IQuestion extends mongoose.Document {
 
 export enum QuestionType {
   UsersSelectOne = "users-select-one",
-//   UsersSelectMultiple = "users-select-multiple",
+  UsersSelectMultiple = "users-select-multiple",
   CustomSelectOne = "custom-select-one",
-//   CustomSelectMultiple = "custom-select-multiple",
+  CustomSelectMultiple = "custom-select-multiple",
   Text = "text",
   Rating = "rating",
-  ImageSelectOne = "image-select-one"
+  ImageSelectOne = "image-select-one",
+  ImageSelectMultiple = "image-select-multiple",
+  CollectAndVoteOne = "collect-and-vote-one",
+  CollectAndVoteMultiple = "collect-and-vote-multiple",
 }
 
 export interface IResult {
