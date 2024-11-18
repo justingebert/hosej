@@ -4,8 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import User from "@/db/models/user";
 import Group from "@/db/models/Group";
 import { isUserInGroup } from "@/lib/groupAuth";
-
-const POINTS = 1;
+import { VOTED_RALLY_POINTS } from "@/db/POINT_CONFIG";
 
 //vote on a submission
 export async function POST(req: NextRequest, { params }: { params: { groupId: string, rallyId:string, submissionId:string } }){
@@ -38,7 +37,7 @@ export async function POST(req: NextRequest, { params }: { params: { groupId: st
         
         await rally.save();
 
-        await group.addPoints(user._id, POINTS);
+        await group.addPoints(user._id, VOTED_RALLY_POINTS);
        
         return NextResponse.json("Vote added successfully")
     }catch (error) {

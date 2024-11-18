@@ -6,8 +6,7 @@ import { sendNotification } from "@/utils/sendNotification";
 import Chat from "@/db/models/Chat";
 import Group from "@/db/models/Group";
 import { isUserInGroup } from "@/lib/groupAuth";
-
-const POINTS = 3;
+import { CREATED_RALLY_POINTS } from "@/db/POINT_CONFIG";
 
 export const revalidate = 0;
 
@@ -139,7 +138,7 @@ export async function POST(req: NextRequest, { params }: { params: { groupId: st
     newRally.chat = newChat._id;
     await newRally.save();
 
-    await group.addPoints(submittingUser._id, POINTS);
+    await group.addPoints(submittingUser._id, CREATED_RALLY_POINTS);
 
     return NextResponse.json({ message: "Rally created successfully" });
   } catch (error: any) {

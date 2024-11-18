@@ -5,6 +5,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import Chat from "@/db/models/Chat";
 import Group, { IGroup } from "@/db/models/Group";
 import { isUserInGroup } from "@/lib/groupAuth";
+import { CREATED_QUESTION_POINTS } from "@/db/POINT_CONFIG";
 
 const POINTS = 3;
 
@@ -67,7 +68,7 @@ export async function POST(req: NextRequest, { params }: { params: { groupId: st
     //TODO pass from context
     const group = await Group.findById(groupId);
     const submittingUser = await User.findById(submittedBy);
-    await group.addPoints(submittingUser._id, POINTS);
+    await group.addPoints(submittingUser._id, CREATED_QUESTION_POINTS);
    
     return NextResponse.json({ newQuestion },{ status: 201 });
   } catch (error) {

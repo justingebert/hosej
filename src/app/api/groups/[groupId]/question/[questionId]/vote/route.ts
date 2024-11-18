@@ -4,8 +4,7 @@ import { NextResponse } from 'next/server'
 import User from "@/db/models/user";
 import Group from "@/db/models/Group";
 import { isUserInGroup } from "@/lib/groupAuth";
-
-const POINTS = 1;
+import { VOTED_QUESTION_POINTS } from "@/db/POINT_CONFIG";
 
 export const revalidate = 0
 
@@ -44,7 +43,7 @@ export async function POST(req: Request, { params }: { params: { groupId: string
     );
 
     const group = await Group.findById(groupId)
-    await group.addPoints(user._id, POINTS);
+    await group.addPoints(user._id, VOTED_QUESTION_POINTS);
 
     return NextResponse.json({ message: "Vote submitted" }, { status: 200 });
   } catch (error) {

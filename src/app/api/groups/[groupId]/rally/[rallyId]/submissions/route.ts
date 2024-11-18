@@ -6,6 +6,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { NextRequest, NextResponse } from 'next/server'
 import Group from "@/db/models/Group";
 import { isUserInGroup } from "@/lib/groupAuth";
+import { SUBMITTED_RALLY_POINTS } from "@/db/POINT_CONFIG";
 
 const s3 = new S3Client({
     region: process.env.AWS_REGION,
@@ -72,7 +73,6 @@ export async function GET(req: NextRequest, { params }: { params: { groupId:stri
     }
 }
 
-const POINTS = 2
 
 //create submission 
 export async function POST(req: NextRequest, { params }: { params: { groupId: string, rallyId:string } }) {
@@ -108,7 +108,7 @@ export async function POST(req: NextRequest, { params }: { params: { groupId: st
       return Response.json({ message: "Rally not found" });
     }
 
-    await group.addPoints(sendUser._id, POINTS);
+    await group.addPoints(sendUser._id, SUBMITTED_RALLY_POINTS);
 
     return NextResponse.json({
       message: "Picture submission added successfully",
