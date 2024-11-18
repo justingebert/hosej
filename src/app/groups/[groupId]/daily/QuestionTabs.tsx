@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import VoteOptions from "@/components/Question/VotingOptions.client";
 import VoteResults from "@/components/Question/VoteResults.client";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,7 @@ export default function QuestionsTabs({
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [ratings, setRatings] = useState<any>({});
   const searchParams = useSearchParams();
+  const router = useRouter();
   const defaultTab =
     searchParams.get("returnTo") ||
     (questions.length > 0 ? questions[0]._id : undefined);
@@ -76,8 +77,13 @@ export default function QuestionsTabs({
     setDrawerOpen(!drawerOpen);
   };
 
+  const handleTabChange = (tabValue: string) => {
+    console.log("[handleTabChange] Switching to tab:", tabValue);
+    router.push(`/groups/${groupId}/daily?returnTo=${tabValue}`);
+  };
+
   return (
-    <Tabs defaultValue={defaultTab}>
+    <Tabs defaultValue={defaultTab} onValueChange={handleTabChange}>
       <TabsList
         className="grid w-full mb-10"
         style={{
