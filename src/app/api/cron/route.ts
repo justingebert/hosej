@@ -14,8 +14,13 @@ async function selectDailyQuestions(groupId:string, limit: number): Promise<IQue
 
     const currentQuestions = await Question.find({groupId: groupId, category: "Daily", active: true});
     for (const question of currentQuestions) {
-      question.active = false;
-      await question.save();
+      //TODO imrprove this might lead to enexpected behaviour when group is inactive 
+      if(question.questionType === "CollectAndVoteOne" || question.questionType === "CollectAndVoteMultiple"){
+        if(question.answers.length === 0) continue; //keep active when options have been collected 
+      } else {
+        question.active = false;
+        await question.save();
+      }
     }
 
     questions = await Question.find({
