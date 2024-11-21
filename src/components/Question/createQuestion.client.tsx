@@ -245,7 +245,7 @@ const CreateQuestion = () => {
         className="mt-4 px-4 overflow-y-auto"
         style={{ maxHeight: availableHeight ? `${availableHeight}px` : "auto" }}
       >
-        {questionType === "custom-select-one" || questionType === "custom-select-multiple" && (
+        {(questionType == "custom-select-one" || questionType === "custom-select-multiple") && (
           <>
             <AnimatePresence>
               {options.map((option, index) => (
