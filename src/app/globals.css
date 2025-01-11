@@ -40,11 +40,17 @@
 
       --radius: 0.5rem;
 
-      --chart-1: 12 76% 61%;
-      --chart-2: 173 58% 39%;
-      --chart-3: 197 37% 24%;
-      --chart-4: 43 74% 66%;
-      --chart-5: 27 87% 67%;
+      --chart-1: 220 55% 60%; /* Cooler blue */
+      --chart-2: 160 50% 50%; /* Softer green */
+      --chart-3: 30 70% 55%;  /* Warm orange */
+      --chart-4: 280 50% 65%; /* Muted violet */
+      --chart-5: 340 65% 60%; /* Gentle pink */
+      --chart-6: 200 50% 65%; /* Cool cyan */
+      --chart-7: 120 45% 50%; /* Forest green */
+      --chart-8: 40 75% 60%;  /* Golden yellow */
+      --chart-9: 250 45% 60%; /* Light purple */
+      --chart-10: 10 60% 60%; /* Coral red */
+      
 
       --shine-color: rgba(0, 0, 0, 0); /* Default shine color for light mode */
       --shine-highlight: rgba(40, 40, 40, 0.4); /* Shine highlight for light mode */
@@ -89,6 +95,12 @@
       --chart-3: 30 80% 55%;
       --chart-4: 280 65% 60%;
       --chart-5: 340 75% 55%;
+      --chart-6: 200 75% 50%; /* Added */
+      --chart-7: 120 55% 40%; /* Added */
+      --chart-8: 40 85% 50%; /* Added */
+      --chart-9: 250 60% 55%; /* Added */
+      --chart-10: 10 70% 55%; /* Added */
+      
 
       --shine-color: rgba(255, 255, 255, .4);
       --shine-highlight: rgba(255, 255, 255, 1);
