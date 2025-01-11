@@ -18,6 +18,8 @@ export interface IGroup extends mongoose.Document {
   lastQuestionDate: Date;
   rallyCount: number;
   rallyGapDays: number;
+  jukebox: boolean;
+  jukeboxFrequency: number; // days
   createdAt: Date;
   addPoints(userId: string, points: number): Promise<void>;
 }
@@ -38,6 +40,8 @@ const groupSchema = new mongoose.Schema({
     lastQuestionDate: { type: Date, default: null },
     rallyCount: { type: Number, default: 1 },
     rallyGapDays: { type: Number, default: 14 },
+    jukebox: { type: Boolean, default: false },
+    jukeboxFrequency: { type: Number, default: 1 },
     createdAt: { type: Date, default: Date.now },
 });
 

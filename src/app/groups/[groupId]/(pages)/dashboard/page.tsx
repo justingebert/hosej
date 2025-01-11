@@ -117,6 +117,7 @@ export default function Dashboard() {
         <CompletionChart completion={completion} />
       </div> 
     </Card>
+    <Button onClick={() => {router.push(`/groups/${groupId}//jukebox`)}}>📻</Button>
   </div>
     <Button
       className="w-full h-12 font-bold"
