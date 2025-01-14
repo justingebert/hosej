@@ -26,7 +26,8 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
 
     const questionsByType = await Question.aggregate([
       { $match: { groupId: (new Types.ObjectId(groupId) )} },
-      { $group: { _id: "$questionType", count: { $sum: 1 } } }
+      { $group: { _id: "$questionType", count: { $sum: 1 } } },
+      { $sort: { count: -1 } }
     ]);
 
     const questionsByUser = await Question.aggregate([
