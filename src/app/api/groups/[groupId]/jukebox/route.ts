@@ -27,7 +27,7 @@ export async function GET(req: Request, { params }: { params: { groupId: string 
 
     const query: any = { groupId };
     if (url.searchParams.has("isActive")) {
-      query.isActive = isActive;
+      query.active = isActive;
     }
 
     // Pagination options

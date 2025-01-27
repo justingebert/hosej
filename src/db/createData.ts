@@ -1,10 +1,11 @@
 import mongoose from "mongoose";
-import Question from "./models/Question";
-import User from "./models/user";
-import Rally from "./models/rally";
+// import Question from "./models/Question";
+// import User from "./models/user";
+// import Rally from "./models/rally";
+import Jukebox from "./models/Jukebox";
 require('dotenv').config({ path: '../../.env.local' });
 
-const MONGODB_URI = process.env.MONGODB_URI;
+const MONGODB_URI = "mongodb://localhost:27017/hosej";
 
 if (!MONGODB_URI) {
   throw new Error(
@@ -82,56 +83,57 @@ const createData = async () => {
     await user.deleteMany({});
     await user.insertMany(users); */
 
-    const rallies = [
-      {
-        task: "Take a photo of the sunset",
-        startTime: new Date(),
-        endTime: new Date(new Date().getTime() + 24 * 60 * 60 * 1000),
-        resultsShown: false,
-        used: false,
-        active: true,
-        submissions: [],
-      },
-      {
-        task: "Capture the essence of spring",
-        startTime: new Date(),
-        endTime: new Date(new Date().getTime() + 24 * 60 * 60 * 1000),
-        resultsShown: false,
-        used: false,
-        active: false,
-        submissions: [],
-      },
-      {
-        task: "Photograph your favorite food",
-        startTime: new Date(),
-        endTime: new Date(new Date().getTime() + 24 * 60 * 60 * 1000),
-        resultsShown: false,
-        used: false,
-        active: false,
-        submissions: [],
-      },
-      {
-        task: "Showcase a local landmark",
-        startTime: new Date(),
-        endTime: new Date(new Date().getTime() + 24 * 60 * 60 * 1000),
-        resultsShown: false,
-        used: false,
-        active: false,
-        submissions: [],
-      },
-      {
-        task: "Find beauty in the mundane",
-        startTime: new Date(),
-        endTime: new Date(new Date().getTime() + 24 * 60 * 60 * 1000),
-        resultsShown: false,
-        used: false,
-        active: false,
-        submissions: [],
-      },
-    ];
+    // const rallies = [
+    //   {
+    //     task: "Take a photo of the sunset",
+    //     startTime: new Date(),
+    //     endTime: new Date(new Date().getTime() + 24 * 60 * 60 * 1000),
+    //     resultsShown: false,
+    //     used: false,
+    //     active: true,
+    //     submissions: [],
+    //   },
+    //   {
+    //     task: "Capture the essence of spring",
+    //     startTime: new Date(),
+    //     endTime: new Date(new Date().getTime() + 24 * 60 * 60 * 1000),
+    //     resultsShown: false,
+    //     used: false,
+    //     active: false,
+    //     submissions: [],
+    //   },
+    //   {
+    //     task: "Photograph your favorite food",
+    //     startTime: new Date(),
+    //     endTime: new Date(new Date().getTime() + 24 * 60 * 60 * 1000),
+    //     resultsShown: false,
+    //     used: false,
+    //     active: false,
+    //     submissions: [],
+    //   },
+    //   {
+    //     task: "Showcase a local landmark",
+    //     startTime: new Date(),
+    //     endTime: new Date(new Date().getTime() + 24 * 60 * 60 * 1000),
+    //     resultsShown: false,
+    //     used: false,
+    //     active: false,
+    //     submissions: [],
+    //   },
+    //   {
+    //     task: "Find beauty in the mundane",
+    //     startTime: new Date(),
+    //     endTime: new Date(new Date().getTime() + 24 * 60 * 60 * 1000),
+    //     resultsShown: false,
+    //     used: false,
+    //     active: false,
+    //     submissions: [],
+    //   },
+    // ];
   
-    await Rally.deleteMany({});
-    await Rally.insertMany(rallies);
+    // await Rally.deleteMany({});
+    // await Rally.insertMany(rallies);
+    await new Jukebox({groupId: "66c9f1307cfaf063db4777e3", active: true, date: new Date(), songs: []}).save();
 }
 
 createData().then(() => {
