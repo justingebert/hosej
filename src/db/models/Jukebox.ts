@@ -12,7 +12,7 @@ export interface ISong extends mongoose.Document {
     artist: string,
     album: string,
     coverImageUrl: string,
-    submittedBy: string,
+    submittedBy: string | mongoose.Types.ObjectId,
     ratings: IRating[],
 }
 
@@ -34,7 +34,7 @@ const RatingSchema = new mongoose.Schema({
       type: Number,
       required: true,
       min: 1,
-      max: 10,
+      max: 100,
     },
   });
   

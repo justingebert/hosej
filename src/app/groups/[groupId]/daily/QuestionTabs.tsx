@@ -149,7 +149,7 @@ function RatingDrawer(
   rateQuestion: (questionId: string, rating: string) => Promise<void>
 ) {
   return (
-    <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+    <Drawer open={drawerOpen} onOpenChange={setDrawerOpen} >
       <DrawerTrigger className="w-full">
         <Card className=" bg-foreground text-center">
           <h2 className="font-bold p-6 text-secondary">{question.question}</h2>
