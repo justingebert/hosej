@@ -37,7 +37,19 @@ export async function GET(req: Request, { params }: { params: { groupId: string 
       .sort({ createdAt: -1 }) 
       .skip(skip)
       .limit(limit)
+      .populate({
+        path: "songs.submittedBy", 
+        model: "User",
+        select: "_id username",
+      })
+      .populate({
+        path: "songs.ratings.userId",
+        model: "User", 
+        select: "_id username",
+      })
       .lean();
+
+      
 
 
     const total = await Jukebox.countDocuments(query);

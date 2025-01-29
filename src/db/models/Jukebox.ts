@@ -1,8 +1,9 @@
 import mongoose from "mongoose";
+import { IUser } from "./user";
 
 
 export interface IRating extends mongoose.Document {
-    userId: string,
+    userId: string | mongoose.Types.ObjectId | IUser,
     rating: number,
 }
 
@@ -12,7 +13,7 @@ export interface ISong extends mongoose.Document {
     artist: string,
     album: string,
     coverImageUrl: string,
-    submittedBy: string | mongoose.Types.ObjectId,
+    submittedBy: string | mongoose.Types.ObjectId | IUser,
     ratings: IRating[],
 }
 

@@ -5,8 +5,8 @@ import { NextResponse } from "next/server";
 
 export const revalidate = 0;
 
-export async function POST(req: Request, { params }: { params: { groupId: string } }) {
-  const { groupId } = params;
+export async function POST(req: Request, { params }: { params: { groupId: string, jukeboxId: string} }) {
+  const { groupId, jukeboxId } = params;
   const userId = req.headers.get("x-user-id") as string;
 
   try {
@@ -20,9 +20,9 @@ export async function POST(req: Request, { params }: { params: { groupId: string
 
     
     const body = await req.json();
-    const { jukeboxId, spotifyTrackId, title, artist, album, coverImageUrl } = body;
+    const { spotifyTrackId, title, artist, album, coverImageUrl } = body;
 
-    if (!jukeboxId || !spotifyTrackId || !title || !artist) {
+    if (!spotifyTrackId || !title || !artist) {
       return NextResponse.json(
         { message: "jukeboxId, spotifyTrackId, title, and artist are required" },
         { status: 400 }
