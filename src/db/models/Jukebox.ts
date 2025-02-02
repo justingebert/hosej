@@ -13,7 +13,7 @@ export interface ISong extends mongoose.Document {
     artist: string,
     album: string,
     coverImageUrl: string,
-    submittedBy: string | mongoose.Types.ObjectId | IUser,
+    submittedBy:  IUser | string | mongoose.Types.ObjectId,
     ratings: IRating[],
 }
 

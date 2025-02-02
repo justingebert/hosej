@@ -16,31 +16,30 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { IUser } from "@/db/models/user";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { Slider } from "@/components/ui/slider";
-import { ListCollapse } from "lucide-react";
+import { FoldVertical, ListCollapse, UnfoldVertical } from "lucide-react";
+import { IJukeboxProcessed, IProcessedSong } from "./types";
 
 //TODO submission doesnt refresh
 //TODO manual expanded dont switch
 //TODO sort by rating
 
+
 const JukeboxPage = () => {
-  const { session, user } = useAuthRedirect();
+  const { user } = useAuthRedirect();
   const { groupId } = useParams<{ groupId: string }>();
   const { toast } = useToast();
   const [userHasSubmitted, setUserHasSubmitted] = useState(false);
   
-  const { data, error, isLoading } = useSWR<{ data: IJukebox[] }>(
-    user ? `/api/groups/${groupId}/jukebox?isActive=true` : null,
+  const { data, error, isLoading } = useSWR<{ data: IJukeboxProcessed[] }>(
+    user ? `/api/groups/${groupId}/jukebox?isActive=true&processed=true` : null,
     fetcher
   );
   
   useEffect(() => {
+    console.log(data)
     if (data?.data[0]) {
-      console.log(data)
       setUserHasSubmitted(
-        data.data[0].songs.some((song) => 
-          typeof song.submittedBy === "object" && "_id" in song.submittedBy && 
-          song.submittedBy._id === user?._id
-        )
+        data.data[0].userHasSubmitted
       );
     }
   }, [data, user]);
@@ -211,27 +210,30 @@ function JukeboxSearch({jukebox, user, toast, setUserHasSubmitted}: {jukebox: IJ
   );
 }
 
-function JukeboxSubmissions({ jukebox, user, toast }: { jukebox: IJukebox; user: IUser; toast: any }) {
-  const [userHasRated, setUserHasRated] = useState<{ [key: string]: boolean }>({});
-  const [selectedSong, setSelectedSong] = useState<ISong | null>(null);
+function JukeboxSubmissions({ jukebox, user, toast }: { jukebox: IJukeboxProcessed; user: IUser; toast: any }) {
+  const [selectedSong, setSelectedSong] = useState<IProcessedSong | null>(null);
   const [ratingValue, setRatingValue] = useState(50);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [expandedSongs, setExpandedSongs] = useState<{ [key: string]: boolean }>({});
   const [expandAll, setExpandAll] = useState(false);
 
-  useEffect(() => {
-    const ratedSongs = jukebox.songs.reduce((acc, song) => {
-      acc[song.spotifyTrackId] = song.ratings.some((rating) => 
-        typeof rating.userId === "object" && "_id" in rating.userId && rating.userId._id === user._id);
-      return acc;
-    }, {} as { [key: string]: boolean });
+  // ✅ Expand/Collapse all songs when clicking "Expand All"
+  const handleExpandAll = () => {
+    setExpandAll((prevExpandAll) => {
+      const newExpandAll = !prevExpandAll;
+      setExpandedSongs(
+        newExpandAll
+          ? Object.fromEntries(jukebox.songs.map((song) => [song.spotifyTrackId, true])) // Expand all
+          : {} // Collapse all
+      );
+      return newExpandAll;
+    });
+  };
 
-    setUserHasRated(ratedSongs);
-  }, [jukebox.songs, user]);
-
-  const handleSongClick = (song: ISong) => {
-    if (!userHasRated[song.spotifyTrackId]) {
+  // ✅ Clicking a single song only affects its state, NOT expandAll
+  const handleSongClick = (song: IProcessedSong) => {
+    if (!song.userHasRated) {
       setSelectedSong(song);
       setDrawerOpen(true);
     } else {
@@ -242,20 +244,20 @@ function JukeboxSubmissions({ jukebox, user, toast }: { jukebox: IJukebox; user:
     }
   };
 
+  // ✅ Handle Rating Submission
   const handleRateSubmit = async () => {
     if (!selectedSong) return;
     setIsSubmitting(true);
-  
-    // Optimistically update the UI
+
+    // Optimistically update UI with new rating
     const newRating = { userId: { _id: user._id, username: user.username }, rating: ratingValue };
-    
+
     mutate(
-      `/api/groups/${jukebox.groupId}/jukebox?isActive=true`,  // Key for SWR cache update
-      (currentData: { data: IJukebox[] } | undefined) => {
+      `/api/groups/${jukebox.groupId}/jukebox?isActive=true`,
+      (currentData: { data: IJukeboxProcessed[] } | undefined) => {
         if (!currentData) return currentData;
   
         return {
-          ...currentData,
           data: currentData.data.map((j) =>
             j._id === jukebox._id
               ? {
@@ -271,11 +273,12 @@ function JukeboxSubmissions({ jukebox, user, toast }: { jukebox: IJukebox; user:
                 }
               : j
           ),
-        };
+        } as { data: IJukeboxProcessed[] }; // Ensure returned type matches SWR cache
       },
       false // Don't re-fetch yet, just update cache
     );
   
+
     try {
       const response = await fetch(
         `/api/groups/${jukebox.groupId}/jukebox/${jukebox._id}/song/${selectedSong.spotifyTrackId}/rate`,
@@ -288,50 +291,45 @@ function JukeboxSubmissions({ jukebox, user, toast }: { jukebox: IJukebox; user:
           body: JSON.stringify({ rating: ratingValue }),
         }
       );
-  
+
       if (!response.ok) {
         throw new Error("Failed to submit rating");
       }
-  
-      setUserHasRated((prev) => ({
-        ...prev,
-        [selectedSong.spotifyTrackId]: true,
-      }));
-  
+
       // Revalidate SWR cache to get fresh data from the backend
-      mutate(`/api/groups/${jukebox.groupId}/jukebox?isActive=true`);
-  
+      mutate(`/api/groups/${jukebox.groupId}/jukebox?isActive=true&processed=true`);
+
       setDrawerOpen(false);
       setRatingValue(50);
     } catch (error) {
       console.error("Error submitting rating:", error);
       toast({ title: "Error", description: "Something went wrong", variant: "destructive" });
-  
+
       // Rollback UI changes if API call fails
-      mutate(`/api/groups/${jukebox.groupId}/jukebox?isActive=true`);
+      mutate(`/api/groups/${jukebox.groupId}/jukebox?isActive=true&processed=true`);
     } finally {
       setIsSubmitting(false);
     }
   };
-  
 
   return (
     <div>
       <div className="flex justify-between mb-4">
         <h2 className="text-lg font-bold mb-4 text-center">Playlist</h2>
-        <ListCollapse onClick={() => setExpandAll((prev) => !prev)}/>
+        <Button onClick={handleExpandAll}>
+          {expandAll ? <FoldVertical /> : <UnfoldVertical />}
+        </Button>
       </div>
 
       <div className="space-y-4">
         {jukebox.songs.map((song) => {
-          const hasRated = userHasRated[song.spotifyTrackId];
-          const isExpanded = expandAll || expandedSongs[song.spotifyTrackId];
+          const isExpanded = expandedSongs[song.spotifyTrackId] || false;
 
           return (
             <div key={song.spotifyTrackId} className="rounded-md shadow-md bg-secondary">
               {/* Clickable Song Card */}
               <div
-                className={`flex items-center gap-4 cursor-pointer p-4 rounded-md`}
+                className="flex items-center gap-4 cursor-pointer p-4 rounded-md"
                 onClick={() => handleSongClick(song)}
               >
                 <div className="flex-1 flex items-center gap-4">
@@ -343,24 +341,20 @@ function JukeboxSubmissions({ jukebox, user, toast }: { jukebox: IJukebox; user:
                   </div>
                 </div>
 
-                {hasRated && (
+                {song.userHasRated && (
                   <div className="flex items-center space-x-2">
                     <div className="flex flex-col justify-center items-center h-12 w-16">
-                      <p className="text-sm font-bold">
-                        {song.ratings.length > 0
-                          ? (song.ratings.reduce((acc, rating) => acc + rating.rating, 0) / song.ratings.length).toFixed(1)
-                          : "N/A"}
-                      </p>
+                      <p className="text-sm font-bold">{song.avgRating ? song.avgRating.toFixed(1) : "N/A"}</p>
                       <p className="text-xs text-gray-400">{song.ratings.length} votes</p>
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* Ratings Section (Shown Only If Clicked & Rated) */}
-              {isExpanded && hasRated && (
+              {/* Ratings Section */}
+              {isExpanded && song.userHasRated && (
                 <div className="mt-2 p-3 bg-muted rounded-md">
-                  {song.ratings.map((rating:any) => (
+                  {song.ratings.map((rating) => (
                     <div key={rating.userId._id} className="flex justify-between text-sm p-1 border-b border-gray-300">
                       <span>{rating.userId.username}:</span>
                       <span>{rating.rating}</span>
@@ -373,6 +367,7 @@ function JukeboxSubmissions({ jukebox, user, toast }: { jukebox: IJukebox; user:
         })}
       </div>
 
+      {/* Rating Drawer */}
       <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
         <DrawerContent className="p-4">
           {selectedSong && (
@@ -403,6 +398,7 @@ function JukeboxSubmissions({ jukebox, user, toast }: { jukebox: IJukebox; user:
     </div>
   );
 }
+
 
 
 

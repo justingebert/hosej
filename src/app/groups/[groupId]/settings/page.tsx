@@ -26,6 +26,10 @@ import BackLink from "@/components/ui/custom/BackLink";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
 
+interface IGroupProcessed extends IGroup {
+  userIsAdmin: boolean;
+}
+
 export default function GroupPage() {
   const { groupId } = useParams<{ groupId: string }>();
   const { session, status, user } = useAuthRedirect();
@@ -35,7 +39,7 @@ export default function GroupPage() {
   const [memberToKick, setMemberToKick] = useState<string | null>(null);
   const router = useRouter();
 
-  const { data: group, error, mutate } = useSWR<IGroup>(`/api/groups/${groupId}`, fetcher, {});
+  const { data: group, error, mutate } = useSWR<IGroupProcessed>(`/api/groups/${groupId}`, fetcher, {});
 
   useEffect(() => {
     if (group) {
@@ -51,7 +55,7 @@ export default function GroupPage() {
   const loading = !group;
 
   const userIsAdmin =
-    !loading && group?.admin && user?._id && group.admin.toString() === user._id.toString();
+    !loading && group.userIsAdmin
 
   const adminName = group?.admin
     ? group.members.find((member) => member.user.toString() === group.admin.toString())?.name || "N/A"
