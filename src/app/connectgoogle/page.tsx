@@ -14,10 +14,10 @@ export default function GoogleCallbackPage() {
 
   useEffect(() => {
     const mergeGoogleAccount = async () => {
-
       const deviceId = localStorage.getItem('deviceId');
-
-      if (deviceId && status === 'authenticated' && user?.googleId) {
+      console.log('Device ID:', deviceId);
+      console.log(user)
+      if (deviceId && status === 'authenticated') {
         try {
           const response = await fetch('/api/auth/google/connect', {
             method: 'POST',
@@ -26,6 +26,7 @@ export default function GoogleCallbackPage() {
           });
 
           const result = await response.json();
+          console.log('Google account link response:', result);
 
           if (response.ok) {
             console.log('Google account linked successfully.');

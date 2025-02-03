@@ -3,7 +3,7 @@ import { useSession, signIn } from "next-auth/react";
 import { IUser } from '@/db/models/user';
 
 export function useAuthRedirect() {
-  const { data: session, status } = useSession();;
+  const { data: session, status, update } = useSession();;
 
   useEffect(() => {
     if (status === 'loading') return; // Do nothing while loading
@@ -12,5 +12,5 @@ export function useAuthRedirect() {
 
   const user = session?.user as IUser 
 
-  return { session, status, user };
+  return { session, status, user, update };
 }

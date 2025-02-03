@@ -23,7 +23,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import BackLink from "@/components/ui/custom/BackLink";
 
 export default function SettingsPage() {
-  const { status, user } = useAuthRedirect();
+  const { session, status, user, update } = useAuthRedirect();
   const router = useRouter();
   const { toast } = useToast();
 
@@ -31,8 +31,9 @@ export default function SettingsPage() {
   const [googleConnected, setGoogleConnected] = useState(false)
 
   useEffect(() => {
+    console.log(session, user)
     if (status === "authenticated" && user) {
-      setGoogleConnected(!!user.googleId);
+      setGoogleConnected(user.googleConnected);
     const notificationSetting =
       localStorage.getItem("notificationsEnabled") === "true" || !!user.fcmToken;
     setNotificationsEnabled(notificationSetting);
@@ -100,6 +101,24 @@ export default function SettingsPage() {
     localStorage.setItem("notificationsEnabled", notificationsEnabled.toString());
   };
 
+  const handleSpotifyDisconnect = async () => {
+    const confirmation = window.confirm(
+      "You will disconnect Spotify from your Account. Do you wish to continue?"
+    );
+    if (!confirmation) return;
+      const response = await fetch("/api/auth/spotify/disconnect", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
+      if(!response.ok){
+        toast({ title: "Failed to unlink Spotify account!", variant: "destructive"});
+      }else{
+        toast({ title: "Spotify account unlinked!" });
+      }
+  }
+
+
+
   return (
     <div className="flex flex-col h-[100dvh]">
       <Header leftComponent={<BackLink href={`/groups/`}/>} title="Settings" rightComponent={<ThemeSelector />} />
@@ -115,6 +134,12 @@ export default function SettingsPage() {
           onDisconnect={handlegoogleDisconnect}
           className="mt-4"
         />
+        <SpotifyConnectButton
+          spotifyConnected={user.spotifyConnected}
+          onDisconnect={handleSpotifyDisconnect}
+          update={update}
+          className="mt-4"
+          />
       </div>
       <div className="mt-auto mb-14">
         <Button onClick={handleLogout} variant="destructive" className="w-full">
@@ -167,13 +192,31 @@ function GoogleConnectButton({ googleConnected, onDisconnect, className }:{googl
           Disconnect Google
         </Button>
       ) : (
-        <Button onClick={async ()  => {await signIn("google", { callbackUrl: `/connectgoogle` });}} className="w-full">
+        <Button onClick={async ()  => {await signIn("google", { callbackUrl: `/connectgoogle`,  }, {userId: "XXX"});}} className="w-full">
           <FaGoogle className="mr-2" />
           Connect with Google
         </Button>
       )}
     </div>
   )
+}
+
+function SpotifyConnectButton({ spotifyConnected, onDisconnect, className, update }:{spotifyConnected:boolean, onDisconnect:()=>void, className:string, update:()=>void}) {
+  return (
+    <div className={className}>
+      {spotifyConnected ? (
+        <Button onClick={onDisconnect} className="w-full" variant="destructive">
+          Disconnect Spotify
+        </Button>
+      ) : (
+        <Button onClick={async () => {
+          await signIn("spotify", { callbackUrl: `/settings`, userId: "XXX" });
+          }} className="w-full">
+          Connect with Spotify
+        </Button>
+      )}
+    </div>
+  );
 }
 
 function SettingsSkeleton() {

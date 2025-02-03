@@ -5,7 +5,12 @@ export interface IUser extends Document {
   _id: string;
   deviceId?: string; 
   fcmToken?: string;
+  googleConnected: boolean;
   googleId?: string;
+  spotifyConnected: boolean;
+  spotifyAccessToken?: string;
+  spotifyRefreshToken?: string;
+  spotifyTokenExpiresAt?: number;
   email?: string;
   username: string;
   groups: IGroup[];
@@ -23,11 +28,22 @@ const UserSchema = new Schema({
     unique: true,
     sparse: true,
   },
+  googleConnected: {
+    type: Boolean,
+    default: false
+  },
   googleId: {
     type: String,
     unique: true,
     sparse: true,
   },
+  spotifyConnected:{
+    type: Boolean,
+    default: false
+  },  
+  spotifyAccessToken: String,
+  spotifyRefreshToken: String,
+  spotifyTokenExpiresAt: Number,
   email: {
     type: String,
     unique: true,
