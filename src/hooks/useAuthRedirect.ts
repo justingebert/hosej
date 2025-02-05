@@ -6,7 +6,7 @@ export function useAuthRedirect() {
   const { data: session, status, update } = useSession();;
 
   useEffect(() => {
-    if (status === 'loading') return; // Do nothing while loading
+    if (status === 'loading') return; 
     if (!session) signIn();
   }, [status, session]);
 

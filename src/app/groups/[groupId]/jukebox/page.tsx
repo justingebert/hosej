@@ -36,7 +36,6 @@ const JukeboxPage = () => {
   );
   
   useEffect(() => {
-    console.log(data)
     if (data?.data[0]) {
       setUserHasSubmitted(
         data.data[0].userHasSubmitted
@@ -125,6 +124,9 @@ function JukeboxSearch({jukebox, user, toast, setUserHasSubmitted}: {jukebox: IJ
         setSelectedTrack(null);
         setSearchResults(null);
         setUserHasSubmitted(true);
+        mutate(`/api/groups/${groupId}/jukebox?isActive=true&processed=true`,
+        
+        )
       } else {
         const errorData = await response.json();
         toast({ title: "Error", description: errorData.message || "Failed to submit the song." });

@@ -3,7 +3,6 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import SpotifyProvider from "next-auth/providers/spotify";
 import dbConnect from '@/lib/dbConnect';
 import User from '@/db/models/user';
-import Group from '@/db/models/Group';
 
 export const authOptions = 
 {
@@ -54,16 +53,14 @@ export const authOptions =
     }),
   ],
   callbacks: {
-    async jwt({ token, user, account, userId }:any) {
-      
-      let currentToken = token;
-      console.log(userId)
+    async jwt({ token, user, account }:any) {
       if (account?.provider === 'google') {
         await dbConnect();
         const existingUser = await User.findOne({ googleId: account.providerAccountId });
         if (!existingUser) {
           const newUser = new User({
             googleId: account.providerAccountId,
+            googleConnected: true,
             username: user.name || '',
           });
           await newUser.save();
@@ -72,9 +69,22 @@ export const authOptions =
           token.userId = existingUser._id.toString();
         }
       } else if(account?.provider === "spotify"){
-        console.log(token, account)
-        console.log(currentToken)
-        await updateSpotifyCredentials(token.userId, account);
+        await dbConnect();
+        const existingUser = await User.findOne({ spotifyUsername: account.providerAccountId });
+        if (!existingUser) {
+          const newUser = new User({
+            spotifyUsername: account.providerAccountId,
+            spotifyAccessToken: account.access_token,
+            spotifyRefreshToken: account.refresh_token,
+            spotifyTokenExpiresAt: account.expires_at,
+            spotifyConnected: true,
+            username: user.name || '',
+          });
+          await newUser.save();
+          token.userId = newUser._id.toString();
+        } else {
+          token.userId = existingUser._id.toString();
+        }
       }else if (user) {
         token.userId = user._id.toString();
         
@@ -84,9 +94,7 @@ export const authOptions =
     async session({ session, token }:any) {
       session.userId = token.userId;
       await dbConnect();
-      const user = await User.findById(token.userId).select(
-        "_id username googleConnected spotifyConnected groups createdAt"
-      );
+      const user = await User.findById(token.userId).select('-googleId -spotifyAccessToken -spotifyRefreshToken -spotifyTokenExpiresAt -spotifyUsername -deviceId');
       
       session.user = user; // Include the full user object in the session
       return session;
@@ -96,17 +104,4 @@ export const authOptions =
     signIn: '/',
   },
   secret: process.env.NEXTAUTH_SECRET,
-}
-
-async function updateSpotifyCredentials(userId: string, account: any) {
-  await dbConnect();
-  const user = await User.findById(userId);
-  console.log(user)
-  if (!user) return;
-  user.spotifyConnected = true;
-  user.spotifyAccessToken = account.access_token;
-  user.spotifyRefreshToken = account.refresh_token;
-  user.spotifyTokenExpiresAt = Date.now() + account.expires_at * 1000;
-  await user.save();
-  console.log(user)
 }

@@ -1,5 +1,6 @@
 import mongoose, { Schema, Document } from "mongoose";
 import { IGroup } from "./Group";
+import Spotify from "next-auth/providers/spotify";
 
 export interface IUser extends Document {
   _id: string;
@@ -8,6 +9,7 @@ export interface IUser extends Document {
   googleConnected: boolean;
   googleId?: string;
   spotifyConnected: boolean;
+  spotifyUsername?: string;
   spotifyAccessToken?: string;
   spotifyRefreshToken?: string;
   spotifyTokenExpiresAt?: number;
@@ -41,9 +43,22 @@ const UserSchema = new Schema({
     type: Boolean,
     default: false
   },  
-  spotifyAccessToken: String,
-  spotifyRefreshToken: String,
-  spotifyTokenExpiresAt: Number,
+  spotifyUsername: {
+    type: String,
+    requried: false
+  },
+  spotifyAccessToken: {
+    type:String,
+    requried: false
+  },
+  spotifyRefreshToken: {
+    type: String,
+    requried: false
+  },
+  spotifyTokenExpiresAt: {
+    type: Number,
+    requried: false
+  },
   email: {
     type: String,
     unique: true,

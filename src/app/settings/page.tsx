@@ -17,10 +17,12 @@ import {
   TableCell,
   TableRow,
 } from "@/components/ui/table";
-import { FaGoogle } from "react-icons/fa";
+import { FaGoogle, FaSpotify } from "react-icons/fa";
 import { IUser } from "@/db/models/user";
 import { Skeleton } from "@/components/ui/skeleton";
 import BackLink from "@/components/ui/custom/BackLink";
+import Cookies from "js-cookie";
+import { set } from "mongoose";
 
 export default function SettingsPage() {
   const { session, status, user, update } = useAuthRedirect();
@@ -29,11 +31,12 @@ export default function SettingsPage() {
 
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [googleConnected, setGoogleConnected] = useState(false)
+  const [spotifyConnected, setSpotifyConnected] = useState(false)
 
   useEffect(() => {
-    console.log(session, user)
     if (status === "authenticated" && user) {
       setGoogleConnected(user.googleConnected);
+      setSpotifyConnected(user.spotifyConnected);
     const notificationSetting =
       localStorage.getItem("notificationsEnabled") === "true" || !!user.fcmToken;
     setNotificationsEnabled(notificationSetting);
@@ -110,10 +113,11 @@ export default function SettingsPage() {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
       });
-      if(!response.ok){
-        toast({ title: "Failed to unlink Spotify account!", variant: "destructive"});
-      }else{
+      if(response.ok){
         toast({ title: "Spotify account unlinked!" });
+        setSpotifyConnected(false);
+      }else{
+        toast({ title: "Failed to unlink Spotify account!", variant: "destructive"});
       }
   }
 
@@ -135,9 +139,9 @@ export default function SettingsPage() {
           className="mt-4"
         />
         <SpotifyConnectButton
-          spotifyConnected={user.spotifyConnected}
+          spotifyConnected={spotifyConnected}
           onDisconnect={handleSpotifyDisconnect}
-          update={update}
+          user={user}
           className="mt-4"
           />
       </div>
@@ -192,7 +196,7 @@ function GoogleConnectButton({ googleConnected, onDisconnect, className }:{googl
           Disconnect Google
         </Button>
       ) : (
-        <Button onClick={async ()  => {await signIn("google", { callbackUrl: `/connectgoogle`,  }, {userId: "XXX"});}} className="w-full">
+        <Button onClick={async ()  => {await signIn("google", { callbackUrl: `/connectgoogle`,  });}} className="w-full">
           <FaGoogle className="mr-2" />
           Connect with Google
         </Button>
@@ -201,17 +205,24 @@ function GoogleConnectButton({ googleConnected, onDisconnect, className }:{googl
   )
 }
 
-function SpotifyConnectButton({ spotifyConnected, onDisconnect, className, update }:{spotifyConnected:boolean, onDisconnect:()=>void, className:string, update:()=>void}) {
+function SpotifyConnectButton({ spotifyConnected, onDisconnect, className, user }:{spotifyConnected:boolean, onDisconnect:()=>void, className:string, user:IUser}) {
   return (
     <div className={className}>
       {spotifyConnected ? (
         <Button onClick={onDisconnect} className="w-full" variant="destructive">
+          <FaSpotify className="mr-2" />
           Disconnect Spotify
         </Button>
       ) : (
         <Button onClick={async () => {
-          await signIn("spotify", { callbackUrl: `/settings`, userId: "XXX" });
+          if (user?._id) {
+            // Store the user id in a cookie for linking later
+            Cookies.set("originalUserId", user?._id, { expires: 1/24 }); // expires in 1 hour (or shorter)
+            await signIn("spotify", { callbackUrl: `/connectspotify`});
+          }
+          
           }} className="w-full">
+            <FaSpotify className="mr-2" />
           Connect with Spotify
         </Button>
       )}
