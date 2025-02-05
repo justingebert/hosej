@@ -20,6 +20,7 @@ export interface IGroup extends mongoose.Document {
   rallyGapDays: number;
   jukebox: boolean;
   jukeboxFrequency: number; // days
+  spotifyConnected: boolean;
   createdAt: Date;
   addPoints(userId: string, points: number): Promise<void>;
 }
