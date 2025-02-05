@@ -5,7 +5,7 @@ const questionSchema = new mongoose.Schema({
   groupId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Group",
-    required: false,
+    required: true,
   },
   category: { type: String },
   questionType: {

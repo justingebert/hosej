@@ -18,6 +18,9 @@ export interface IGroup extends mongoose.Document {
   lastQuestionDate: Date;
   rallyCount: number;
   rallyGapDays: number;
+  jukebox: boolean;
+  jukeboxFrequency: number; // days
+  spotifyConnected: boolean;
   createdAt: Date;
   addPoints(userId: string, points: number): Promise<void>;
 }
@@ -38,6 +41,9 @@ const groupSchema = new mongoose.Schema({
     lastQuestionDate: { type: Date, default: null },
     rallyCount: { type: Number, default: 1 },
     rallyGapDays: { type: Number, default: 14 },
+    jukebox: { type: Boolean, default: false },
+    jukeboxFrequency: { type: Number, default: 30 },
+    spotifyConneceted: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now },
 });
 

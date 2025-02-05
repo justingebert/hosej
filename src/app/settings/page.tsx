@@ -17,22 +17,26 @@ import {
   TableCell,
   TableRow,
 } from "@/components/ui/table";
-import { FaGoogle } from "react-icons/fa";
+import { FaGoogle, FaSpotify } from "react-icons/fa";
 import { IUser } from "@/db/models/user";
 import { Skeleton } from "@/components/ui/skeleton";
 import BackLink from "@/components/ui/custom/BackLink";
+import Cookies from "js-cookie";
+import { set } from "mongoose";
 
 export default function SettingsPage() {
-  const { status, user } = useAuthRedirect();
+  const { session, status, user, update } = useAuthRedirect();
   const router = useRouter();
   const { toast } = useToast();
 
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [googleConnected, setGoogleConnected] = useState(false)
+  const [spotifyConnected, setSpotifyConnected] = useState(false)
 
   useEffect(() => {
     if (status === "authenticated" && user) {
-      setGoogleConnected(!!user.googleId);
+      setGoogleConnected(user.googleConnected);
+      setSpotifyConnected(user.spotifyConnected);
     const notificationSetting =
       localStorage.getItem("notificationsEnabled") === "true" || !!user.fcmToken;
     setNotificationsEnabled(notificationSetting);
@@ -100,6 +104,25 @@ export default function SettingsPage() {
     localStorage.setItem("notificationsEnabled", notificationsEnabled.toString());
   };
 
+  const handleSpotifyDisconnect = async () => {
+    const confirmation = window.confirm(
+      "You will disconnect Spotify from your Account. Do you wish to continue?"
+    );
+    if (!confirmation) return;
+      const response = await fetch("/api/auth/spotify/disconnect", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
+      if(response.ok){
+        toast({ title: "Spotify account unlinked!" });
+        setSpotifyConnected(false);
+      }else{
+        toast({ title: "Failed to unlink Spotify account!", variant: "destructive"});
+      }
+  }
+
+
+
   return (
     <div className="flex flex-col h-[100dvh]">
       <Header leftComponent={<BackLink href={`/groups/`}/>} title="Settings" rightComponent={<ThemeSelector />} />
@@ -115,6 +138,12 @@ export default function SettingsPage() {
           onDisconnect={handlegoogleDisconnect}
           className="mt-4"
         />
+        {/* <SpotifyConnectButton
+          spotifyConnected={spotifyConnected}
+          onDisconnect={handleSpotifyDisconnect}
+          user={user}
+          className="mt-4"
+          /> */}
       </div>
       <div className="mt-auto mb-14">
         <Button onClick={handleLogout} variant="destructive" className="w-full">
@@ -167,13 +196,38 @@ function GoogleConnectButton({ googleConnected, onDisconnect, className }:{googl
           Disconnect Google
         </Button>
       ) : (
-        <Button onClick={async ()  => {await signIn("google", { callbackUrl: `/connectgoogle` });}} className="w-full">
+        <Button onClick={async ()  => {await signIn("google", { callbackUrl: `/connectgoogle`,  });}} className="w-full">
           <FaGoogle className="mr-2" />
           Connect with Google
         </Button>
       )}
     </div>
   )
+}
+
+function SpotifyConnectButton({ spotifyConnected, onDisconnect, className, user }:{spotifyConnected:boolean, onDisconnect:()=>void, className:string, user:IUser}) {
+  return (
+    <div className={className}>
+      {spotifyConnected ? (
+        <Button onClick={onDisconnect} className="w-full" variant="destructive">
+          <FaSpotify className="mr-2" />
+          Disconnect Spotify
+        </Button>
+      ) : (
+        <Button onClick={async () => {
+          if (user?._id) {
+            // Store the user id in a cookie for linking later
+            Cookies.set("originalUserId", user?._id, { expires: 1/24 }); // expires in 1 hour (or shorter)
+            await signIn("spotify", { callbackUrl: `/connectspotify`});
+          }
+          
+          }} className="w-full">
+            <FaSpotify className="mr-2" />
+          Connect with Spotify
+        </Button>
+      )}
+    </div>
+  );
 }
 
 function SettingsSkeleton() {

@@ -26,6 +26,7 @@ export async function POST(req: Request) {
     await User.deleteOne({ _id: googleUserId });
 
     deviceUser.googleId = googleId;
+    deviceUser.googleConnected = true;
     deviceUser.deviceId = undefined;
     await deviceUser.save();
     

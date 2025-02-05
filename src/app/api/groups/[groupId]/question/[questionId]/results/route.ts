@@ -23,6 +23,7 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
         const question = await Question.findById(questionId).populate({
             path: "answers.user",
             model: User,
+            select: "-googleId -spotifyAccessToken -spotifyRefreshToken -spotifyTokenExpiresAt -deviceId"
         });
 
         if (!question) {

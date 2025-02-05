@@ -18,7 +18,10 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
       return NextResponse.json({ message: authCheck.message }, { status: authCheck.status });
     }
 
-    const group = await Group.findById(groupId)
+    let group = await Group.findById(groupId)
+    const userIsAdmin = group.admin.equals(userId);
+    group = group.toObject();    
+    group.userIsAdmin = userIsAdmin;
 
     return NextResponse.json(group, { status: 200 });
   }

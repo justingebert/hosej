@@ -117,6 +117,28 @@ export default function Dashboard() {
         <CompletionChart completion={completion} />
       </div> 
     </Card>
+    
+    {group && group.jukebox && (
+        <Card
+        className="relative bg-primary-foreground w-full px-6 py-4 flex items-center justify-between"
+        onClick={() => {
+          router.push(`/groups/${groupId}/jukebox`)
+        }}
+      >
+        {/* <div className="absolute -top-3 -right-3">
+          <Badge>{questions.length}</Badge>
+        </div> */}
+        <div className="flex flex-col justify-center">
+          <div className="font-bold text-2xl">Jukebox</div>
+          <div className="text-sm text-primary/30">Listen now!</div>
+          <div className="text-lg">Active</div>
+        </div>
+        <div className="w-24 h-24 flex items-center justify-center text-6xl">
+          📻
+        </div> 
+      </Card>
+    )}
+    
   </div>
     <Button
       className="w-full h-12 font-bold"

@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Settings, CircleHelp, Copy } from "lucide-react";
+import { Settings, CircleHelp, Copy, User } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -125,7 +125,7 @@ function Header({ router }: { router: ReturnType<typeof useRouter> }) {
       </Button>
       <h1 className="text-4xl font-bold">HoseJ</h1>
       <Button variant="outline" size="icon" onClick={() => router.push(`/settings`)}>
-        <Settings />
+        <User />
       </Button>
     </div>
   );

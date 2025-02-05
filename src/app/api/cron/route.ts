@@ -4,6 +4,7 @@ import { IQuestion } from "@/types/Question";
 import { NextResponse } from "next/server";
 import { sendNotification } from "@/utils/sendNotification";
 import Group from "@/db/models/Group";
+import Jukebox from "@/db/models/Jukebox";
 
 export const revalidate = 0;
 //deactives current questions and activates new ones
@@ -47,6 +48,7 @@ export async function GET(req: Request) {
     const groups = await Group.find({});
     //TODO this sends multiple notifications to one user this is wrong
     for(const group of groups){
+      
         const questions = await selectDailyQuestions(group._id, group.questionCount);
         if(questions.length === 0){
           await sendNotification('🥗DA HABEN WIR DEN SALAT🥗', `${group.name} HAT KEINE FRAGEN MEHR, AN DIE ARBEIT!!`, group._id);
@@ -55,6 +57,17 @@ export async function GET(req: Request) {
           await sendNotification(`🚨Neue ${group.name} Fragen!!🚨`, '🚨JETZT VOTEN DU FISCH🚨', group._id);
           group.lastQuestionDate = new Date();
           await group.save();
+        }
+
+        //jukebox logic
+        if(group.jukebox){
+          const today = new Date();
+          const monthName = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(today);
+          if(today.getDate() === 6){
+            await new Jukebox({groupId: group._id, date: today, active: true}).save();
+            await Jukebox.findOneAndUpdate({active: true, groupId: group._id}, {active: false});
+            await sendNotification(`🎶JUKEBOX - ${monthName} 🎶`, '🎶JETZT SONG ADDEN DU EI🎶', group._id);
+          }
         }
     }
 

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/db/models/user';
 
+//TODO only user should be able to unlink their own account
 export async function POST(req: Request) {
   try {
     const body = await req.json(); 
@@ -19,6 +20,7 @@ export async function POST(req: Request) {
 
     googleUser.deviceId = deviceId;
     googleUser.googleId = undefined;
+    googleUser.googleConnected = false;
     await googleUser.save();
     
     return NextResponse.json({ message: 'Google account successfully unlinked.' }, { status: 200 });
