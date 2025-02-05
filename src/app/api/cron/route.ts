@@ -60,13 +60,14 @@ export async function GET(req: Request) {
         }
 
         //jukebox logic
-
-        const today = new Date();
-        const monthName = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(today);
-        if(today.getDate() === 6){
-          await new Jukebox({groupId: group._id, date: today, active: true}).save();
-          await Jukebox.findOneAndUpdate({active: true, groupId: group._id}, {active: false});
-          await sendNotification(`🎶JUKEBOX - ${monthName} 🎶`, '🎶JETZT SONG ADDEN DU EI🎶', group._id);
+        if(group.jukebox){
+          const today = new Date();
+          const monthName = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(today);
+          if(today.getDate() === 6){
+            await new Jukebox({groupId: group._id, date: today, active: true}).save();
+            await Jukebox.findOneAndUpdate({active: true, groupId: group._id}, {active: false});
+            await sendNotification(`🎶JUKEBOX - ${monthName} 🎶`, '🎶JETZT SONG ADDEN DU EI🎶', group._id);
+          }
         }
     }
 
