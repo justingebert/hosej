@@ -58,22 +58,38 @@ export async function GET(req: Request, { params }: { params: { groupId: string 
 
     if (processed) {
       jukeboxes = jukeboxes.map((jukebox) => {
-        const userHasSubmitted = jukebox.songs.some((song:ISong) => String((song.submittedBy as IUser)._id) === String(userId));
-
+        const userHasSubmitted = jukebox.songs.some(
+          (song: ISong) =>
+            String((song.submittedBy as IUser)._id) === String(userId)
+        );
+    
         return {
           ...jukebox,
           userHasSubmitted, // Moved to the top level
-          songs: jukebox.songs.map((song:ISong) => {
-            const avgRating = song.ratings.length > 0
-              ? song.ratings.reduce((acc, rating) => acc + rating.rating, 0) / song.ratings.length
-              : null;
-
-            return {
-              ...song,
-              avgRating, // Add average rating
-              userHasRated: song.ratings.some((rating) => String((rating.userId as IUser)._id) === String(userId)), // Add user rating status
-            };
-          }),
+          songs: jukebox.songs
+            .map((song: ISong) => {
+              // Sort the ratings array (highest rating first)
+              const sortedRatings = [...song.ratings].sort((a, b) => b.rating - a.rating);
+    
+              const avgRating =
+                sortedRatings.length > 0
+                  ? sortedRatings.reduce((acc, rating) => acc + rating.rating, 0) / sortedRatings.length
+                  : null;
+    
+              return {
+                ...song,
+                ratings: sortedRatings, // Sorted ratings array
+                avgRating, // Add average rating
+                userHasRated: sortedRatings.some(
+                  (rating) => String((rating.userId as IUser)._id) === String(userId)
+                ), // Add user rating status
+              };
+            })
+            .sort((a:any, b:any) => {
+              if (a.avgRating === null) return 1;
+              if (b.avgRating === null) return -1;
+              return b.avgRating - a.avgRating;
+            }),
         };
       });
     }

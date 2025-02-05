@@ -138,12 +138,12 @@ export default function SettingsPage() {
           onDisconnect={handlegoogleDisconnect}
           className="mt-4"
         />
-        <SpotifyConnectButton
+        {/* <SpotifyConnectButton
           spotifyConnected={spotifyConnected}
           onDisconnect={handleSpotifyDisconnect}
           user={user}
           className="mt-4"
-          />
+          /> */}
       </div>
       <div className="mt-auto mb-14">
         <Button onClick={handleLogout} variant="destructive" className="w-full">

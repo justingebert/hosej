@@ -1,6 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
 import { IGroup } from "./Group";
-import Spotify from "next-auth/providers/spotify";
 
 export interface IUser extends Document {
   _id: string;

@@ -16,13 +16,17 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { IUser } from "@/db/models/user";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { Slider } from "@/components/ui/slider";
-import { FoldVertical, ListCollapse, UnfoldVertical } from "lucide-react";
+import { FoldVertical, Loader, Search, UnfoldVertical } from "lucide-react";
 import { IJukeboxProcessed, IProcessedSong } from "./types";
+import { FaSpotify, FaYoutube } from "react-icons/fa";
+import Link from "next/link";
+import { SiApplemusic } from "react-icons/si";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { AnimatePresence, motion } from "framer-motion";
 
-//TODO submission doesnt refresh
-//TODO manual expanded dont switch
 //TODO sort by rating
-
+//TODO out animation not working
 
 const JukeboxPage = () => {
   const { user } = useAuthRedirect();
@@ -49,13 +53,23 @@ const JukeboxPage = () => {
     : null;
 
   return (
-    <div >
+    <>
       <Header
         leftComponent={<BackLink href={`/groups/${groupId}/dashboard`} />}
         title={`Jukebox`}
       />
       {isLoading || !data ? (
-        <Skeleton className="h-96" />
+        <div className="space-y-3 mt-12">
+         {[...Array(8)].map((_, index) => (
+              <Skeleton key={index} className="p-3 rounded-md flex items-center gap-4">
+                <Skeleton className="w-16 h-16 rounded-md bg-primary-foreground" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-3/4 bg-primary-foreground" />
+                  <Skeleton className="h-4 w-1/2 bg-primary-foreground" />
+                </div>
+              </Skeleton>
+            ))}
+        </div>
       ) :
         <>
           {userHasSubmitted ? (
@@ -66,7 +80,7 @@ const JukeboxPage = () => {
         </>
       }
       
-    </div>
+    </>
   );
 };
 
@@ -121,12 +135,36 @@ function JukeboxSearch({jukebox, user, toast, setUserHasSubmitted}: {jukebox: IJ
       });
 
       if (response.ok) {
+
+        const newSong = {
+          spotifyTrackId: selectedTrack.id,
+          title: selectedTrack.name,
+          artist: selectedTrack.artists.map((a: any) => a.name).join(", "),
+          album: selectedTrack.album.name,
+          coverImageUrl: selectedTrack.album.images[0]?.url || "",
+          submittedBy: user._id, 
+          ratings: [],
+        };
+        
+        mutate(
+          `/api/groups/${groupId}/jukebox?isActive=true&processed=true`,
+          (currentData: { data: IJukeboxProcessed[] } | undefined) => {
+            if (!currentData) return currentData;
+            return {
+              data: currentData.data.map((j) =>
+                j._id === jukebox._id
+                  ? { ...j, userHasSubmitted: true, songs: [...j.songs, newSong] }
+                  : j
+              ),
+            } as { data: IJukeboxProcessed[] };
+          },
+          false // Do not revalidate immediately
+        );
+
         setSelectedTrack(null);
         setSearchResults(null);
         setUserHasSubmitted(true);
-        mutate(`/api/groups/${groupId}/jukebox?isActive=true&processed=true`,
-        
-        )
+
       } else {
         const errorData = await response.json();
         toast({ title: "Error", description: errorData.message || "Failed to submit the song." });
@@ -141,15 +179,20 @@ function JukeboxSearch({jukebox, user, toast, setUserHasSubmitted}: {jukebox: IJ
 
   return (
     <>
-    <div className="mt-4">
+    <div className="relative w-full">
         <Input
           placeholder="Search for a song..."
-          className="w-full text-center"
+          className="w-full pl-10"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              searchSpotify();
+            }
+          }}
         />
-        <Button onClick={searchSpotify} className="w-full mt-2" disabled={isLoading}>
-          {isLoading ? "Searching..." : "Search"}
+        <Button onClick={searchSpotify} className="absolute left-0 top-1/2 transform -translate-y-1/2 p-2" disabled={isLoading} variant={"ghost"}>
+          {isLoading ? <Loader /> : <Search/>}
         </Button>
       </div>
       <div className="mt-4 pb-28">
@@ -220,7 +263,6 @@ function JukeboxSubmissions({ jukebox, user, toast }: { jukebox: IJukeboxProcess
   const [expandedSongs, setExpandedSongs] = useState<{ [key: string]: boolean }>({});
   const [expandAll, setExpandAll] = useState(false);
 
-  // ✅ Expand/Collapse all songs when clicking "Expand All"
   const handleExpandAll = () => {
     setExpandAll((prevExpandAll) => {
       const newExpandAll = !prevExpandAll;
@@ -233,7 +275,6 @@ function JukeboxSubmissions({ jukebox, user, toast }: { jukebox: IJukeboxProcess
     });
   };
 
-  // ✅ Clicking a single song only affects its state, NOT expandAll
   const handleSongClick = (song: IProcessedSong) => {
     if (!song.userHasRated) {
       setSelectedSong(song);
@@ -246,38 +287,48 @@ function JukeboxSubmissions({ jukebox, user, toast }: { jukebox: IJukeboxProcess
     }
   };
 
-  // ✅ Handle Rating Submission
   const handleRateSubmit = async () => {
     if (!selectedSong) return;
     setIsSubmitting(true);
 
-    // Optimistically update UI with new rating
     const newRating = { userId: { _id: user._id, username: user.username }, rating: ratingValue };
 
     mutate(
-      `/api/groups/${jukebox.groupId}/jukebox?isActive=true`,
+      `/api/groups/${jukebox.groupId}/jukebox?isActive=true&processed=true`,
       (currentData: { data: IJukeboxProcessed[] } | undefined) => {
         if (!currentData) return currentData;
-  
+    
         return {
-          data: currentData.data.map((j) =>
-            j._id === jukebox._id
-              ? {
-                  ...j,
-                  songs: j.songs.map((song) =>
-                    song.spotifyTrackId === selectedSong.spotifyTrackId
-                      ? {
-                          ...song,
-                          ratings: [...song.ratings, newRating], // Add new rating
-                        }
-                      : song
-                  ),
+          data: currentData.data.map((j) => {
+            if (j._id === jukebox._id) {
+              const updatedSongs = j.songs.map((song) => {
+                if (song.spotifyTrackId === selectedSong.spotifyTrackId) {
+                  // Append the new rating and then sort the ratings array
+                  const newRatings = [...song.ratings, newRating].sort((a, b) => b.rating - a.rating);
+                  const avgRating =
+                    newRatings.length > 0
+                      ? newRatings.reduce((acc, r) => acc + r.rating, 0) / newRatings.length
+                      : null;
+                  return { ...song, ratings: newRatings, avgRating };
                 }
-              : j
-          ),
-        } as { data: IJukeboxProcessed[] }; // Ensure returned type matches SWR cache
+                return song;
+              });
+    
+              // Re-sort the songs array by average rating (highest first)
+              updatedSongs.sort((a, b) => {
+                if (a.avgRating === null && b.avgRating === null) return 0;
+                if (a.avgRating === null) return 1;
+                if (b.avgRating === null) return -1;
+                return b.avgRating - a.avgRating;
+              });
+    
+              return { ...j, songs: updatedSongs };
+            }
+            return j;
+          }),
+        } as { data: IJukeboxProcessed[] };
       },
-      false // Don't re-fetch yet, just update cache
+      false // Avoid immediate revalidation
     );
   
 
@@ -314,22 +365,30 @@ function JukeboxSubmissions({ jukebox, user, toast }: { jukebox: IJukeboxProcess
     }
   };
 
+  const rollOutVariants = {
+    hidden: { opacity: 0, y: -30 },
+    visible: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -30 },
+  };
+
   return (
-    <div>
-      <div className="flex justify-between mb-4">
-        <h2 className="text-lg font-bold mb-4 text-center">Playlist</h2>
-        <Button onClick={handleExpandAll}>
-          {expandAll ? <FoldVertical /> : <UnfoldVertical />}
+    <div className="pb-20">
+      <div className="flex justify-end mb-2 -mt-4">
+        <Button onClick={handleExpandAll} variant={"ghost"}>
+          {expandAll ? <FoldVertical size={20}/> : <UnfoldVertical size={20}/>}
         </Button>
       </div>
 
       <div className="space-y-4">
         {jukebox.songs.map((song) => {
           const isExpanded = expandedSongs[song.spotifyTrackId] || false;
-
+          const rating = song.avgRating || 0;
+          const ratingColor =
+            rating <= 33 ? "bg-red-500" : rating <= 66 ? "bg-orange-500" : "bg-green-500";
+          
           return (
+            <>
             <div key={song.spotifyTrackId} className="rounded-md shadow-md bg-secondary">
-              {/* Clickable Song Card */}
               <div
                 className="flex items-center gap-4 cursor-pointer p-4 rounded-md"
                 onClick={() => handleSongClick(song)}
@@ -339,37 +398,50 @@ function JukeboxSubmissions({ jukebox, user, toast }: { jukebox: IJukeboxProcess
                   <div>
                     <p className="text-sm font-bold">{song.title}</p>
                     <p className="text-xs text-secondary-foreground">{song.artist}</p>
-                    <p className="text-xs text-gray-400">{song.album}</p>
+                    <p className="text-xs text-muted-foreground">{song.album}</p>
                   </div>
                 </div>
 
                 {song.userHasRated && (
                   <div className="flex items-center space-x-2">
-                    <div className="flex flex-col justify-center items-center h-12 w-16">
-                      <p className="text-sm font-bold">{song.avgRating ? song.avgRating.toFixed(1) : "N/A"}</p>
-                      <p className="text-xs text-gray-400">{song.ratings.length} votes</p>
+                    <div className="flex flex-col justify-center items-center">
+                      <Badge className={`text-sm font-bold ${ratingColor}`}>{song.avgRating ? song.avgRating.toFixed(1) : "N/A"}</Badge>
+                      {/* <p className="text-xs text-gray-400">{song.ratings.length} votes</p> */}
                     </div>
                   </div>
                 )}
               </div>
-
-              {/* Ratings Section */}
-              {isExpanded && song.userHasRated && (
-                <div className="mt-2 p-3 bg-muted rounded-md">
-                  {song.ratings.map((rating) => (
-                    <div key={rating.userId._id} className="flex justify-between text-sm p-1 border-b border-gray-300">
-                      <span>{rating.userId.username}:</span>
-                      <span>{rating.rating}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
+            {isExpanded && song.userHasRated && (
+              <div className="px-2">
+                <AnimatePresence>
+                  {song.ratings.map((rating) => {
+                    const ratingColorText =
+                    rating.rating <= 33 ? "text-red-500" : rating.rating <= 66 ? "text-orange-500" : "text-green-500";
+                    return(
+                      <motion.div
+                      key={rating.userId._id}
+                      initial="hidden"
+                      animate="visible"
+                      exit="exit"
+                      variants={rollOutVariants}
+                      transition={{ duration: 0.3 }}
+                      className="mb-2 rounded-md bg-secondarydark px-4 py-2 shadow-md"
+                    >
+                        <div className="flex justify-between text-sm">
+                          <span>{rating.userId.username}</span>
+                          <span className={`font-bold ${ratingColorText}`}>{rating.rating}</span>
+                        </div>
+                      </motion.div>
+                  )})}
+                </AnimatePresence>
+              </div>
+            )}
+            </>
           );
         })}
       </div>
 
-      {/* Rating Drawer */}
       <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
         <DrawerContent className="p-4">
           {selectedSong && (
@@ -382,14 +454,24 @@ function JukeboxSubmissions({ jukebox, user, toast }: { jukebox: IJukeboxProcess
                 <p className="text-sm font-bold mt-2">{selectedSong.artist}</p>
                 <p className="text-xs text-secondary-foreground">{selectedSong.album}</p>
               </div>
-
+              <div className="flex flex-row justify-center gap-8 my-4">
+                  <Link href={`https://music.apple.com/us/search?term=${encodeURIComponent(selectedSong.title + " " + selectedSong.artist)}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-black">
+                    <SiApplemusic  size={32} color="#FF4E6B"/> 
+                  </Link>
+                  <Link href={`https://open.spotify.com/track/${selectedSong.spotifyTrackId}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-green-500">
+                    <FaSpotify size={32} />
+                  </Link>
+                  <Link href={`https://www.youtube.com/results?search_query=${encodeURIComponent(selectedSong.title + " " + selectedSong.artist)}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-red-600">
+                    <FaYoutube size={32} />
+                  </Link>
+                </div>
               <div className="my-6">
                 <Slider defaultValue={[50]} max={100} step={1} onValueChange={(value) => setRatingValue(value[0])} />
-                <p className="text-center mt-4">{ratingValue}</p>
+                <p className="text-center text-xl font-bold mt-4">{ratingValue}</p>
               </div>
 
               <div>
-                <Button onClick={handleRateSubmit} className="w-full" disabled={isSubmitting}>
+                <Button onClick={handleRateSubmit} className="w-full text-lg font-bold" disabled={isSubmitting}>
                   {isSubmitting ? "Submitting..." : "Submit"}
                 </Button>
               </div>
@@ -400,8 +482,6 @@ function JukeboxSubmissions({ jukebox, user, toast }: { jukebox: IJukeboxProcess
     </div>
   );
 }
-
-
 
 
 export default JukeboxPage;

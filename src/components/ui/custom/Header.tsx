@@ -11,7 +11,7 @@ const Header = ({
   title?: string | null; 
   rightComponent?: React.ReactNode;
 }) => (
-  <div className="flex items-center justify-between mb-5">
+  <div className="flex items-center justify-between mb-4">
     <div className="flex items-center">
       {leftComponent ? leftComponent : <div className="w-6"></div>}
     </div>
