@@ -45,7 +45,7 @@ const chatSchema = new mongoose.Schema({
     entityModel: {
         type: String,
         required: true,
-        enum: ['Question', 'Rally'] //other entities that the chat can be attached to
+        enum: ['Question', 'Rally', 'Jukebox'] //other entities that the chat can be attached to
     },
     createdAt: {
         type: Date,

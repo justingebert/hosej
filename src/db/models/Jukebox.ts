@@ -22,6 +22,7 @@ export interface IJukebox extends mongoose.Document {
     active: boolean,
     date: Date,
     songs: ISong[],
+    chat: string | mongoose.Types.ObjectId,
     createdAt: Date,
 }
 
@@ -71,6 +72,7 @@ const jukeBoxSchema = new mongoose.Schema({
     active: { type: Boolean, default: false },
     date: { type: Date, required: true },
     songs: [SongSchema],
+    chat: { type: mongoose.Schema.Types.ObjectId, ref: "Chat" },
     createdAt: { type: Date, default: Date.now },
 });
 

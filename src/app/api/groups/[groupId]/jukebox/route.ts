@@ -2,7 +2,7 @@ import dbConnect from "@/lib/dbConnect";
 import { isUserInGroup } from "@/lib/groupAuth";
 import { NextResponse } from "next/server";
 import Jukebox, { ISong } from "@/db/models/Jukebox";
-import { IUser } from "@/db/models/user";
+import User, { IUser } from "@/db/models/user";
 
 export const revalidate = 0;
 
@@ -41,12 +41,12 @@ export async function GET(req: Request, { params }: { params: { groupId: string 
       .limit(limit)
       .populate({
         path: "songs.submittedBy", 
-        model: "User",
+        model: User,
         select: "_id username",
       })
       .populate({
         path: "songs.ratings.userId",
-        model: "User", 
+        model: User, 
         select: "_id username",
       })
       .lean();
@@ -56,6 +56,8 @@ export async function GET(req: Request, { params }: { params: { groupId: string 
 
     const total = await Jukebox.countDocuments(query);
 
+
+    //TODO refactor this - this is terrible
     if (processed) {
       jukeboxes = jukeboxes.map((jukebox) => {
         const userHasSubmitted = jukebox.songs.some(
@@ -65,34 +67,45 @@ export async function GET(req: Request, { params }: { params: { groupId: string 
     
         return {
           ...jukebox,
-          userHasSubmitted, // Moved to the top level
+          userHasSubmitted,
           songs: jukebox.songs
             .map((song: ISong) => {
-              // Sort the ratings array (highest rating first)
+              // First, sort the ratings array for each song (highest first)
               const sortedRatings = [...song.ratings].sort((a, b) => b.rating - a.rating);
-    
+        
+              // Compute average rating, if any
               const avgRating =
                 sortedRatings.length > 0
                   ? sortedRatings.reduce((acc, rating) => acc + rating.rating, 0) / sortedRatings.length
                   : null;
-    
+        
+              // Determine whether the user has rated this song
+              const hasRated = sortedRatings.some(
+                (rating) => String((rating.userId as IUser)._id) === String(userId)
+              );
+        
               return {
                 ...song,
-                ratings: sortedRatings, // Sorted ratings array
-                avgRating, // Add average rating
-                userHasRated: sortedRatings.some(
-                  (rating) => String((rating.userId as IUser)._id) === String(userId)
-                ), // Add user rating status
+                ratings: sortedRatings,
+                avgRating,
+                // For sorting purposes, treat songs submitted by the user as if they are rated
+                userHasRated: String((song.submittedBy as IUser)._id) === String(userId) ? true : hasRated,
               };
             })
-            .sort((a:any, b:any) => {
-              if (a.avgRating === null) return 1;
-              if (b.avgRating === null) return -1;
+            .sort((a: any, b: any) => {
+              // First, songs NOT rated by the current user come first.
+              if (!a.userHasRated && b.userHasRated) return -1;
+              if (a.userHasRated && !b.userHasRated) return 1;
+              // Then, for songs in the same category, sort by average rating (highest first)
+              if (a.avgRating === null && b.avgRating !== null) return 1;
+              if (a.avgRating !== null && b.avgRating === null) return -1;
+              if (a.avgRating === null && b.avgRating === null) return 0;
               return b.avgRating - a.avgRating;
             }),
         };
       });
     }
+    
 
 
     return NextResponse.json({

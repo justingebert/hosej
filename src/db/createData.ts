@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 // import User from "./models/user";
 // import Rally from "./models/rally";
 import Jukebox from "./models/Jukebox";
+import Chat from "./models/Chat";
 require('dotenv').config({ path: '../../.env.local' });
 
 const MONGODB_URI = "mongodb://localhost:27017/hosej";
@@ -17,6 +18,7 @@ mongoose.connect(MONGODB_URI, {
 });
 
 const createData = async () => {
+    await new Chat({group: "66c9f1307cfaf063db4777e3", entityModel: "Jukebox", entity: "67a43500544942ea5304ebed"}).save();
     /* const questions = [
         {
         category: "Daily",
@@ -133,7 +135,7 @@ const createData = async () => {
   
     // await Rally.deleteMany({});
     // await Rally.insertMany(rallies);
-    await new Jukebox({groupId: "66c9f1307cfaf063db4777e3", active: true, date: new Date(), songs: []}).save();
+    
 }
 
 createData().then(() => {

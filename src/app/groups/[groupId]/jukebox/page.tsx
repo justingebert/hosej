@@ -24,8 +24,8 @@ import { SiApplemusic } from "react-icons/si";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { AnimatePresence, motion } from "framer-motion";
+import ChatComponent from "@/components/Chat/Chat.client";
 
-//TODO sort by rating
 //TODO out animation not working
 
 const JukeboxPage = () => {
@@ -40,7 +40,7 @@ const JukeboxPage = () => {
   );
   
   useEffect(() => {
-    if (data?.data[0]) {
+    if (data && data?.data[0]) {
       setUserHasSubmitted(
         data.data[0].userHasSubmitted
       );
@@ -263,6 +263,7 @@ function JukeboxSubmissions({ jukebox, user, toast }: { jukebox: IJukeboxProcess
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [expandedSongs, setExpandedSongs] = useState<{ [key: string]: boolean }>({});
   const [expandAll, setExpandAll] = useState(false);
+  const [sliderMoved, setSliderMoved] = useState(false);
 
   const handleExpandAll = () => {
     setExpandAll((prevExpandAll) => {
@@ -294,43 +295,49 @@ function JukeboxSubmissions({ jukebox, user, toast }: { jukebox: IJukeboxProcess
 
     const newRating = { userId: { _id: user._id, username: user.username }, rating: ratingValue };
 
+    //todo refactor this is terrible
     mutate(
       `/api/groups/${jukebox.groupId}/jukebox?isActive=true&processed=true`,
       (currentData: { data: IJukeboxProcessed[] } | undefined) => {
         if (!currentData) return currentData;
-    
         return {
           data: currentData.data.map((j) => {
             if (j._id === jukebox._id) {
               const updatedSongs = j.songs.map((song) => {
                 if (song.spotifyTrackId === selectedSong.spotifyTrackId) {
-                  // Append the new rating and then sort the ratings array
                   const newRatings = [...song.ratings, newRating].sort((a, b) => b.rating - a.rating);
                   const avgRating =
                     newRatings.length > 0
                       ? newRatings.reduce((acc, r) => acc + r.rating, 0) / newRatings.length
                       : null;
-                  return { ...song, ratings: newRatings, avgRating };
+                  // Treat songs submitted by the user as if they are rated
+                  const effectiveUserHasRated =
+                    String((song.submittedBy as IUser)._id) === String(user._id)
+                      ? true
+                      : newRatings.some((r) => String((r.userId as IUser)._id) === String(user._id));
+                  return { ...song, ratings: newRatings, avgRating, userHasRated: effectiveUserHasRated };
                 }
                 return song;
               });
-    
-              // Re-sort the songs array by average rating (highest first)
+      
               updatedSongs.sort((a, b) => {
+                if (!a.userHasRated && b.userHasRated) return -1;
+                if (a.userHasRated && !b.userHasRated) return 1;
                 if (a.avgRating === null && b.avgRating === null) return 0;
                 if (a.avgRating === null) return 1;
                 if (b.avgRating === null) return -1;
                 return b.avgRating - a.avgRating;
               });
-    
+      
               return { ...j, songs: updatedSongs };
             }
             return j;
           }),
         } as { data: IJukeboxProcessed[] };
       },
-      false // Avoid immediate revalidation
+      false
     );
+    
   
 
     try {
@@ -363,6 +370,7 @@ function JukeboxSubmissions({ jukebox, user, toast }: { jukebox: IJukeboxProcess
       mutate(`/api/groups/${jukebox.groupId}/jukebox?isActive=true&processed=true`);
     } finally {
       setIsSubmitting(false);
+      setSliderMoved(false);
     }
   };
 
@@ -458,7 +466,10 @@ function JukeboxSubmissions({ jukebox, user, toast }: { jukebox: IJukeboxProcess
             </>
           );
         })}
+        <Separator/>
+        <ChatComponent user={user} entity={jukebox} available={true} />
       </div>
+      
 
       <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
         <DrawerContent className="p-4">
@@ -483,13 +494,17 @@ function JukeboxSubmissions({ jukebox, user, toast }: { jukebox: IJukeboxProcess
                     <FaYoutube size={32} />
                   </Link>
                 </div>
-              <div className="my-6">
-                <p className="text-center text-xl font-bold mt-4">{ratingValue}</p>
-                <Slider defaultValue={[50]} max={100} step={1} onValueChange={(value) => setRatingValue(value[0])} />
+              <div className="my-10">
+                <p className="text-center text-xl font-bold mb-10">{ratingValue}</p>
+                <Slider defaultValue={[50]} max={100} step={1} onValueChange={
+                  (value) => {
+                    setRatingValue(value[0])
+                    setSliderMoved(true)
+                    }} />
               </div>
 
               <div>
-                <Button onClick={handleRateSubmit} className="w-full text-lg font-bold" disabled={isSubmitting}>
+                <Button onClick={handleRateSubmit} className="w-full h-12 text-lg font-bold" disabled={isSubmitting || !sliderMoved}>
                   {isSubmitting ? "Submitting..." : "Submit"}
                 </Button>
               </div>
