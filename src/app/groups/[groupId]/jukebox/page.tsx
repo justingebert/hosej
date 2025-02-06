@@ -123,7 +123,7 @@ function JukeboxSearch({jukebox, user, toast, setUserHasSubmitted}: {jukebox: IJ
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-user-id": user.id || "",
+          "x-user-id": user._id || "",
         },
         body: JSON.stringify({
           spotifyTrackId: selectedTrack.id,
@@ -133,7 +133,7 @@ function JukeboxSearch({jukebox, user, toast, setUserHasSubmitted}: {jukebox: IJ
           coverImageUrl: selectedTrack.album.images[0]?.url || "",
         }),
       });
-
+      console.log("HERE")
       if (response.ok) {
 
         const newSong = {
@@ -171,7 +171,7 @@ function JukeboxSearch({jukebox, user, toast, setUserHasSubmitted}: {jukebox: IJ
       }
     } catch (error) {
       console.error("Error submitting song:", error);
-      toast({ title: "Error", description: "An error occurred while submitting the song." });
+      toast({ title: "Error", description: "An error occurred while submitting the song.", variant: "destructive" });
     } finally {
       setIsSubmitting(false);
     }
