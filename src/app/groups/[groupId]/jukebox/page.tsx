@@ -134,7 +134,7 @@ function JukeboxSearch({jukebox, user, toast, setUserHasSubmitted}: {jukebox: IJ
           coverImageUrl: selectedTrack.album.images[0]?.url || "",
         }),
       });
-      
+
       if (response.ok) {
 
         const newSong = {
@@ -277,7 +277,7 @@ function JukeboxSubmissions({ jukebox, user, toast }: { jukebox: IJukeboxProcess
   };
 
   const handleSongClick = (song: IProcessedSong) => {
-    if (!song.userHasRated) {
+    if (!song.userHasRated && song.submittedBy._id !== user._id) {
       setSelectedSong(song);
       setDrawerOpen(true);
     } else {
@@ -416,6 +416,10 @@ function JukeboxSubmissions({ jukebox, user, toast }: { jukebox: IJukeboxProcess
             {isExpanded && song.userHasRated && (
               <div className="px-2">
                 <AnimatePresence>
+                <div className="flex justify-between rounded-md bg-secondarydark px-4 py-2 shadow-md mb-2">
+                    <span>submitted by</span>
+                    <span>{song.submittedBy.username}</span>
+                </div>
                   {song.ratings.map((rating) => {
                     const ratingColorText =
                     rating.rating <= 33 ? "text-red-500" : rating.rating <= 66 ? "text-orange-500" : "text-green-500";
