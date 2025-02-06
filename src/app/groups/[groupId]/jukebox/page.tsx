@@ -413,7 +413,7 @@ function JukeboxSubmissions({ jukebox, user, toast }: { jukebox: IJukeboxProcess
                 )}
               </div>
             </div>
-            {isExpanded && song.userHasRated && (
+            {isExpanded && (song.userHasRated || song.submittedBy._id === user._id) && (
               <div className="px-2">
                 <AnimatePresence>
                 <div className="flex justify-between rounded-md bg-secondarydark px-4 py-2 shadow-md mb-2">
