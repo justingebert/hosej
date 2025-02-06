@@ -7,6 +7,7 @@
 - Groups
 - Daily Questions with voting and results
 - Photo Rallies (tasks for taking a photo) with voting and results
+- Jukebox (with Spotify integration)
 - Chats
 - History
 - Statistics
