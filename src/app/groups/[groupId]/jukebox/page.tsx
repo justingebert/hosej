@@ -403,7 +403,7 @@ function JukeboxSubmissions({ jukebox, user, toast }: { jukebox: IJukeboxProcess
                   </div>
                 </div>
 
-                {song.userHasRated && (
+                {(song.userHasRated || song.submittedBy._id === user._id) && (
                   <div className="flex items-center space-x-2">
                     <div className="flex flex-col justify-center items-center">
                       <Badge className={`text-sm font-bold ${ratingColor}`}>{song.avgRating ? song.avgRating.toFixed(1) : "N/A"}</Badge>
