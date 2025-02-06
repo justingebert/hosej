@@ -416,9 +416,22 @@ function JukeboxSubmissions({ jukebox, user, toast }: { jukebox: IJukeboxProcess
             {isExpanded && (song.userHasRated || (user && song.submittedBy._id === user._id)) && (
               <div className="px-2">
                 <AnimatePresence>
-                <div className="flex justify-between rounded-md bg-secondarydark px-4 py-2 shadow-md mb-2">
-                    <span>submitted by</span>
+                <div className="flex justify-between items-center rounded-md bg-secondarydark px-4 py-2 shadow-md mb-2">
+                  <div className="">
+                    {/* <span>submitted by: </span> */}
                     <span>{song.submittedBy.username}</span>
+                  </div>
+                  <div className="flex flex-row space-x-2">
+                    <Link href={`https://music.apple.com/de/search?term=${encodeURIComponent(song.title + " " + song.artist)}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-black">
+                      <SiApplemusic  size={32} color="#FF4E6B"/> 
+                    </Link>
+                    <Link href={`https://open.spotify.com/track/${song.spotifyTrackId}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-green-500">
+                      <FaSpotify size={32} />
+                    </Link>
+                    <Link href={`https://www.youtube.com/results?search_query=${encodeURIComponent(song.title + " " + song.artist)}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-red-600">
+                      <FaYoutube size={32} />
+                    </Link>
+                  </div>
                 </div>
                   {song.ratings.map((rating) => {
                     const ratingColorText =
@@ -460,7 +473,7 @@ function JukeboxSubmissions({ jukebox, user, toast }: { jukebox: IJukeboxProcess
                 <p className="text-xs text-secondary-foreground">{selectedSong.album}</p>
               </div>
               <div className="flex flex-row justify-center gap-8 my-4">
-                  <Link href={`https://music.apple.com/us/search?term=${encodeURIComponent(selectedSong.title + " " + selectedSong.artist)}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-black">
+                  <Link href={`https://music.apple.com/de/search?term=${encodeURIComponent(selectedSong.title + " " + selectedSong.artist)}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-black">
                     <SiApplemusic  size={32} color="#FF4E6B"/> 
                   </Link>
                   <Link href={`https://open.spotify.com/track/${selectedSong.spotifyTrackId}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-green-500">
