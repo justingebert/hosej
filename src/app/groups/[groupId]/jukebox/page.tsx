@@ -118,6 +118,11 @@ function JukeboxSearch({jukebox, user, toast, setUserHasSubmitted}: {jukebox: IJ
     }
 
     setIsSubmitting(true);
+
+    if (!user?._id || !jukebox?._id) {
+      toast({ title: "Missing data", description: "User or jukebox information is missing." });
+      return;
+    }
     try {
       const response = await fetch(`/api/groups/${groupId}/jukebox/${jukebox._id}/song`, {
         method: "POST",
