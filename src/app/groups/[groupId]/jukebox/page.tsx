@@ -403,7 +403,7 @@ function JukeboxSubmissions({ jukebox, user, toast }: { jukebox: IJukeboxProcess
                   </div>
                 </div>
 
-                {(song.userHasRated || song.submittedBy._id === user._id) && (
+                {(song.userHasRated || (user && song.submittedBy._id === user._id)) && (
                   <div className="flex items-center space-x-2">
                     <div className="flex flex-col justify-center items-center">
                       <Badge className={`text-sm font-bold ${ratingColor}`}>{song.avgRating ? song.avgRating.toFixed(1) : "N/A"}</Badge>
@@ -413,7 +413,7 @@ function JukeboxSubmissions({ jukebox, user, toast }: { jukebox: IJukeboxProcess
                 )}
               </div>
             </div>
-            {isExpanded && (song.userHasRated || song.submittedBy._id === user._id) && (
+            {isExpanded && (song.userHasRated || (user && song.submittedBy._id === user._id)) && (
               <div className="px-2">
                 <AnimatePresence>
                 <div className="flex justify-between rounded-md bg-secondarydark px-4 py-2 shadow-md mb-2">
@@ -471,8 +471,8 @@ function JukeboxSubmissions({ jukebox, user, toast }: { jukebox: IJukeboxProcess
                   </Link>
                 </div>
               <div className="my-6">
-                <Slider defaultValue={[50]} max={100} step={1} onValueChange={(value) => setRatingValue(value[0])} />
                 <p className="text-center text-xl font-bold mt-4">{ratingValue}</p>
+                <Slider defaultValue={[50]} max={100} step={1} onValueChange={(value) => setRatingValue(value[0])} />
               </div>
 
               <div>
