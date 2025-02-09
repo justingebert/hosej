@@ -87,11 +87,13 @@ const CreateQuestion = () => {
 
     if (questionType.startsWith("custom") && options.length < 2) {
       toast({title: "Please add at least two options for custom selections.",variant: "destructive",});
+      setLoading(false);
       return;
     }
 
     if (questionType.startsWith("image-select") && options.length < 2) {
       toast({title: "Please add at least two options for image selections.", variant: "destructive",});
+      setLoading(false);
       return;
     }
 
@@ -114,7 +116,11 @@ const CreateQuestion = () => {
         body: JSON.stringify(questionData),
       });
 
-      if (!response.ok) throw new Error("Failed to create question");
+      if (!response.ok){
+        toast({ title: "Failed to create question", variant: "destructive" });
+        setLoading(false);
+        return
+      }
       const { newQuestion } = await response.json();
 
       // Upload the main image if there is one
@@ -139,7 +145,8 @@ const CreateQuestion = () => {
           if (!response.ok) throw new Error("Failed to attach image");
         }
       }
-      if (questionType === "image-select-one") {
+
+      if (questionType === "image-select-one" || questionType === "image-select-multiple") {
         // Upload option images and update the options array
         const compressedFiles = await compressImages(optionFiles.filter(Boolean) as File[]);
         const optionImageUrls = await handleImageUpload(
@@ -162,10 +169,12 @@ const CreateQuestion = () => {
           },
           body: JSON.stringify({ options: updatedOptions }),
         });
-        if (!res.ok) throw new Error("Failed to attach options");
+        if (res.ok) {toast({ title: "Question created successfully!" })}
+        else{
+          toast({ title: "Failed to create question", variant: "destructive" });
+        }
       }
 
-      toast({ title: "Question created successfully!" });
       resetForm();
     } catch (err: any) {
       toast({
