@@ -9,7 +9,7 @@
       { "src": "AppIcons/new/web/icon-512-maskable.png", "type": "image/png", "sizes": "512x512", "purpose": "maskable" }
     ],
     "start_url": "/",
-    "display": "standalone",
+    "display": "fullscreen",
     "orientation": "portrait",
     "id": "hosej"
   }
