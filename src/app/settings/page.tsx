@@ -17,7 +17,8 @@ import {
   TableCell,
   TableRow,
 } from "@/components/ui/table";
-import { FaGoogle, FaSpotify } from "react-icons/fa";
+import { FaSpotify } from "react-icons/fa";
+import { FcGoogle } from "react-icons/fc";
 import { IUser } from "@/db/models/user";
 import { Skeleton } from "@/components/ui/skeleton";
 import BackLink from "@/components/ui/custom/BackLink";
@@ -192,12 +193,12 @@ function GoogleConnectButton({ googleConnected, onDisconnect, className }:{googl
       <div className={className}>
         {googleConnected ? (
         <Button onClick={onDisconnect} className="w-full" variant="destructive">
-          <FaGoogle className="mr-2" />
+          <FcGoogle className="mr-2" size={24} />
           Disconnect Google
         </Button>
       ) : (
         <Button onClick={async ()  => {await signIn("google", { callbackUrl: `/connectgoogle`,  });}} className="w-full">
-          <FaGoogle className="mr-2" />
+          <FcGoogle className="mr-2" />
           Connect with Google
         </Button>
       )}

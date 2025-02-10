@@ -17,6 +17,8 @@ export async function middleware(req: NextRequest) {
     "/mainifest.json",
     "/api/cron",
     "/api/auth/callback/google",
+    "/terms",
+    "/privacy",
     '/',
   ];
   if (publicRoutes.includes(pathname)) {

@@ -87,11 +87,13 @@ const CreateQuestion = () => {
 
     if (questionType.startsWith("custom") && options.length < 2) {
       toast({title: "Please add at least two options for custom selections.",variant: "destructive",});
+      setLoading(false);
       return;
     }
 
     if (questionType.startsWith("image-select") && options.length < 2) {
       toast({title: "Please add at least two options for image selections.", variant: "destructive",});
+      setLoading(false);
       return;
     }
 
@@ -114,7 +116,11 @@ const CreateQuestion = () => {
         body: JSON.stringify(questionData),
       });
 
-      if (!response.ok) throw new Error("Failed to create question");
+      if (!response.ok){
+        toast({ title: "Failed to create question", variant: "destructive" });
+        setLoading(false);
+        return
+      }
       const { newQuestion } = await response.json();
 
       // Upload the main image if there is one
@@ -139,7 +145,8 @@ const CreateQuestion = () => {
           if (!response.ok) throw new Error("Failed to attach image");
         }
       }
-      if (questionType === "image-select-one") {
+
+      if (questionType === "image-select-one" || questionType === "image-select-multiple") {
         // Upload option images and update the options array
         const compressedFiles = await compressImages(optionFiles.filter(Boolean) as File[]);
         const optionImageUrls = await handleImageUpload(
@@ -162,10 +169,12 @@ const CreateQuestion = () => {
           },
           body: JSON.stringify({ options: updatedOptions }),
         });
-        if (!res.ok) throw new Error("Failed to attach options");
+        if (res.ok) {toast({ title: "Question created successfully!" })}
+        else{
+          toast({ title: "Failed to create question", variant: "destructive" });
+        }
       }
 
-      toast({ title: "Question created successfully!" });
       resetForm();
     } catch (err: any) {
       toast({
@@ -218,7 +227,7 @@ const CreateQuestion = () => {
             <SelectItem value="text">Text Reply</SelectItem>
             <SelectItem value="rating">Rating (1-10)</SelectItem>
             <SelectItem value="image-select-one">Vote One Custom Image</SelectItem>
-            <SelectItem value="image-select-mutiple">Vote Multiple Custom Images</SelectItem>
+            <SelectItem value="image-select-multiple">Vote Multiple Custom Images</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -245,7 +254,7 @@ const CreateQuestion = () => {
         className="mt-4 px-4 overflow-y-auto"
         style={{ maxHeight: availableHeight ? `${availableHeight}px` : "auto" }}
       >
-        {(questionType == "custom-select-one" || questionType === "custom-select-multiple") && (
+        {(questionType === "custom-select-one" || questionType === "custom-select-multiple") && (
           <>
             <AnimatePresence>
               {options.map((option, index) => (
@@ -283,7 +292,7 @@ const CreateQuestion = () => {
           </>
         )}
 
-        {questionType === "image-select-one" || questionType === "image-select-multiple" && (
+        {(questionType === "image-select-one" || questionType === "image-select-multiple") && (
           <>
             <AnimatePresence>
               {options.map((_, index) => (
