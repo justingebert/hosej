@@ -21,15 +21,16 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link rel="manifest" href="/manifest.json" />
-        <link rel="icon" href="AppIcons/favicon.ico" />
+        <link rel="apple-touch-icon" href="AppIcons/new/web/apple-touch-icon.png"/>
+        <link rel="icon" href="AppIcons/new/web/favicon.ico" sizes="any"/>
         <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"
+            name="viewport"
+            content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"
         />
-        <ThemeColorMeta />
+        <ThemeColorMeta/>
       </head>
       <body>
-        <div className="p-6 h-[100dvh]">
+      <div className="p-6 h-[100dvh]">
           <AppWrapper>
            {children}
           </AppWrapper>
