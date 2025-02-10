@@ -2,24 +2,14 @@
     "name": "HoseJ",
     "short_name": "HoseJ",
     "icons": [
-      {
-        "src": "AppIcons/icon-192-maskable.png",
-        "sizes": "192x192",
-        "type": "image/png",
-        "purpose": "any maskable"
-      },
-      {
-        "src": "AppIcons/icon-512-maskable.png",
-        "sizes": "512x512",
-        "type": "image/png"
-      },
-      {
-        "src": "AppIcons/icon-192-maskable.png",
-        "sizes": "192x192",
-        "type": "image/png"
-      }
+      { "src": "AppIcons/new/web/favicon.ico", "type": "image/x-icon", "sizes": "16x16 32x32" },
+      { "src": "AppIcons/new/web/icon-192.png", "type": "image/png", "sizes": "192x192" },
+      { "src": "AppIcons/new/web/icon-512.png", "type": "image/png", "sizes": "512x512" },
+      { "src": "AppIcons/new/web/icon-192-maskable.png", "type": "image/png", "sizes": "192x192", "purpose": "maskable" },
+      { "src": "AppIcons/new/web/icon-512-maskable.png", "type": "image/png", "sizes": "512x512", "purpose": "maskable" }
     ],
     "start_url": "/",
     "display": "standalone",
-    "orientation": "portrait"
+    "orientation": "portrait",
+    "id": "hosej"
   }
