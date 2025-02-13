@@ -37,7 +37,7 @@ const groupSchema = new mongoose.Schema({
         joinedAt: { type: Date, default: Date.now },
       }
     ],
-    questionCount: { type: Number, default: 2 },
+    questionCount: { type: Number, default: 1 },
     lastQuestionDate: { type: Date, default: null },
     rallyCount: { type: Number, default: 1 },
     rallyGapDays: { type: Number, default: 14 },
