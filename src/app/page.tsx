@@ -15,7 +15,7 @@ function StartPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/groups";
+  let callbackUrl = searchParams.get("callbackUrl") || "/groups";
   const { toast } = useToast();
   const [userName, setUserName] = useState("");
   const [loading, setLoading] = useState(true);
@@ -81,7 +81,12 @@ function StartPage() {
     if (status === "loading") return;
 
     if (session) {
+      const starredGroupId = localStorage.getItem("starredGroupId");
+      if (starredGroupId) {
+        callbackUrl = `/groups/${starredGroupId}/dashboard`;
+      }
       router.push(callbackUrl);
+
     } else {
       const deviceId = localStorage.getItem("deviceId");
       if (deviceId) handleSignIn("credentials", { deviceId });
