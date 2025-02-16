@@ -34,10 +34,10 @@ export async function POST(req: NextRequest, { params }: { params: { groupId: st
 
     // Populate options based on question type
     let options = data.options || [];
-    if (questionType.startsWith("users-")) {
+    if (questionType.startsWith("users-") && options.length === 0) {
       const group = await Group.findById(groupId);
       options = group.members.map((member:any) => member.name);
-    } else if (questionType.startsWith("rating")) {
+    } else if (questionType.startsWith("rating") && options.length === 0) {
       options = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
     }
 
