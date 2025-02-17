@@ -41,7 +41,7 @@ const CreatePage = ({ params }: { params: { groupId: string } }) => {
   
   return (
     <>
-      <Header leftComponent={<BackLink href={`/groups/${groupId}/dashboard`} />} title="Create"/>
+      <Header leftComponent={<BackLink href={`/groups/${groupId}/dashboard`} />} title="Create" />{/* rightComponent={<Button variant={"outline"} size={"icon"}><Info/></Button>}/> */}
       <div className="mt-4">
       <Tabs defaultValue="create-question" className="w-full">
         

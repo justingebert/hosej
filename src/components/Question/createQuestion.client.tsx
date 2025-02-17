@@ -194,7 +194,12 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
               body: JSON.stringify({ imageUrl: imageUrl[0].url }),
             }
           );
-          if (!response.ok) throw new Error("Failed to attach image");
+          if (!response.ok) {
+            toast({ title: "Failed to create question", variant: "destructive" });
+            //TODO delte question
+            setIsSubmitting(false);
+            return
+          };
         }
       }
 
@@ -221,9 +226,10 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
           },
           body: JSON.stringify({ options: updatedOptions }),
         });
-        if (res.ok) {toast({ title: "Question created successfully!" })}
-        else{
+        if (!res.ok) {
           toast({ title: "Failed to create question", variant: "destructive" });
+          setIsSubmitting(false);
+          return
         }
       }
 
