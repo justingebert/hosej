@@ -7,8 +7,9 @@ import ImageUploader from "@/components/ImageUploader";
 import { useImageUploader } from "@/hooks/useImageUploader";
 import { useParams } from "next/navigation";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
+import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
-import { CircleMinus, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createQuestionData } from "@/app/groups/[groupId]/create/page";
 import useSWR from "swr";
@@ -27,17 +28,6 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
   const [clearImageInput, setClearImageInput] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { uploading, compressImages, handleImageUpload } = useImageUploader();
-
-
-  let optionsMode: OptionsMode;
-  if (questionData.questionType.startsWith("custom")) {
-    optionsMode = "editable";
-  } else if (questionData.questionType.startsWith("image-select")) {
-    optionsMode = "image-editable";
-  } else {
-    optionsMode = "static";
-  }
-
 
   const { data:group, isLoading } = useSWR<IGroup>(
     user ? `/api/groups/${groupId}` : null, fetcher);
@@ -73,12 +63,10 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
   const buttonRef = useRef<HTMLDivElement>(null);  
 
   const handleTypeSelect = (value: string) => {
-    if(value.startsWith("users")){
+    if(value.startsWith("users-")){
       setQuestionData((prev) => ({ ...prev, questionType: value, options: group?.members.map((member) => member.name) || [] }));
-    }else if(value.startsWith("custom") || value.startsWith("image")){
-      setQuestionData((prev) => ({ ...prev, questionType: value, options: [""] }));
     }else{
-      setQuestionData((prev) => ({ ...prev, questionType: value, options: [] }));
+      setQuestionData((prev) => ({ ...prev, questionType: value, options: [""] }));
     }
   }
 
@@ -106,7 +94,7 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
     }));
   };
 
-  const handleOptionImageAdded = (file: File | null, index: number) => {
+  const handleOptionImageReady = (file: File | null, index: number) => {
     setQuestionData((prev) => {
       const updatedOptionFiles = [...prev.optionFiles];
       updatedOptionFiles[index] = file;
@@ -114,7 +102,7 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
     });
   };
 
-  const handleMainImageAdded = (file: File | null) => {
+  const handleImageReady = (file: File | null) => {
     setQuestionData((prev) => ({ ...prev, mainImageFile: file }));
   };
 
@@ -122,7 +110,7 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
     setQuestionData({
       question: "",
       questionType: "",
-      options: [],
+      options: [""],
       mainImageFile: null,
       optionFiles: [],
     });
@@ -133,17 +121,13 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
     setIsSubmitting(true);
     e.preventDefault();
 
-    const trimmedOptions = questionData.options
-    .map(option => option.trim())
-    .filter(option => option !== "");
-
-    if (questionData.questionType.startsWith("custom") && trimmedOptions.length < 2) {
+    if (questionData.questionType.startsWith("custom") && questionData.options.length < 2) {
       toast({title: "Please add at least two options for custom selections.",variant: "destructive",});
       setIsSubmitting(false);
       return;
     }
 
-    if (questionData.questionType.startsWith("image-select") && trimmedOptions.length < 2) {
+    if (questionData.questionType.startsWith("image-select") && questionData.options.length < 2) {
       toast({title: "Please add at least two options for image selections.", variant: "destructive",});
       setIsSubmitting(false);
       return;
@@ -154,7 +138,7 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
       category: "Daily",
       questionType: questionData.questionType,
       question: questionData.question,
-      options: questionData.questionType.startsWith("custom") ? trimmedOptions : [], 
+      options: questionData.questionType.startsWith("custom") ? questionData.options : [], 
       submittedBy: user._id,
     };
 
@@ -194,12 +178,7 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
               body: JSON.stringify({ imageUrl: imageUrl[0].url }),
             }
           );
-          if (!response.ok) {
-            toast({ title: "Failed to create question", variant: "destructive" });
-            //TODO delte question
-            setIsSubmitting(false);
-            return
-          };
+          if (!response.ok) throw new Error("Failed to attach image");
         }
       }
 
@@ -226,10 +205,9 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
           },
           body: JSON.stringify({ options: updatedOptions }),
         });
-        if (!res.ok) {
+        if (res.ok) {toast({ title: "Question created successfully!" })}
+        else{
           toast({ title: "Failed to create question", variant: "destructive" });
-          setIsSubmitting(false);
-          return
         }
       }
 
@@ -245,6 +223,11 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
     }
   };
 
+  const rollOutVariants = {
+    hidden: { opacity: 0, y: -30 },
+    visible: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -30 },
+  };
 
   return (
     <>
@@ -275,27 +258,94 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
           className="w-full"
         />
         <ImageUploader
-          onFileSelect={handleMainImageAdded}
+          onFileSelect={handleImageReady}
           clearInput={clearImageInput}
           showFilename={false}
           className="w-12 flex items-center justify-center"
           buttonstyle="flex items-center justify-between w-full p-3"
         />
       </div>
+      {/* Dynamically resizable options section */}
       <div
         ref={optionsContainerRef}
         className="mt-4 px-4 overflow-y-auto"
         style={{ maxHeight: availableHeight ? `${availableHeight}px` : "auto" }}
       >
-        <DisplayOptions
-          mode={optionsMode}
-          options={questionData.options}
-          clearInput={clearImageInput}
-          onOptionChange={handleOptionChange}
-          onOptionRemove={handleRemoveOption}
-          onOptionAdd={handleAddOption}
-          onOptionImageAdded={handleOptionImageAdded}
-        />
+        {(questionData.questionType === "custom-select-one" || questionData.questionType === "custom-select-multiple") && (
+          <>
+            <AnimatePresence>
+              {questionData.options.map((option, index) => (
+                <motion.div
+                  key={index}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  variants={rollOutVariants}
+                  transition={{ duration: 0.3 }}
+                  className="mt-2 flex w-full items-center gap-4"
+                >
+                  <Input
+                    type="text"
+                    placeholder={`Option ${index + 1}`}
+                    value={option}
+                    onChange={(e) => handleOptionChange(e.target.value, index)}
+                    className="w-full"
+                  />
+                  <Button
+                    className="w-14 p-2 flex items-center justify-center"
+                    variant="secondary"
+                    onClick={() => handleRemoveOption(index)}
+                  >
+                    <Image src="/AppIcons/trash-red.svg" alt="Delete" width={25} height={25} />
+                  </Button>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+            <div className="flex justify-end mt-2">
+              <Button variant="ghost" className="w-12 p-2" onClick={handleAddOption}>
+                <Plus size={25} />
+              </Button>
+            </div>
+          </>
+        )}
+
+        {(questionData.questionType === "image-select-one" || questionData.questionType === "image-select-multiple") && (
+          <>
+            <AnimatePresence>
+              {questionData.options.map((_, index) => (
+                <motion.div
+                  key={index}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  variants={rollOutVariants}
+                  transition={{ duration: 0.3 }}
+                  className="flex flex-row justify-between w-full items-center gap-4 mt-2"
+                >
+                  <ImageUploader
+                    onFileSelect={(file) => handleOptionImageReady(file, index)}
+                    clearInput={clearImageInput}
+                    className="w-full"
+                    showFilename={true}
+                    buttonstyle="flex items-center justify-between w-full p-3"
+                  />
+                  <Button
+                    className="w-14 p-2 flex items-center justify-center"
+                    variant="secondary"
+                    onClick={() => handleRemoveOption(index)}
+                  >
+                    <Image src="/AppIcons/trash-red.svg" alt="Delete" width={25} height={25} />
+                  </Button>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+            <div className="flex justify-end mt-2">
+              <Button variant="ghost" className="w-12 p-2" onClick={handleAddOption}>
+                <Plus size={25} />
+              </Button>
+            </div>
+          </>
+        )}
       </div>
       
       <div ref={buttonRef} className="flex justify-center fixed bottom-6 left-0 w-full p-6 bg-background">
@@ -307,115 +357,12 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
   );
 };
 
-export default CreateQuestion;
-
-export type OptionsMode = "editable" | "image-editable" | "static";
-
-interface DisplayOptionsProps {
-  mode: OptionsMode;
-  options: string[];
-  clearInput: boolean;
-  onOptionChange: (value: string, index: number) => void;
-  onOptionRemove: (index: number) => void;
-  onOptionAdd: () => void;
-  onOptionImageAdded: (file: File | null, index: number) => void;
+const DisplayOptions = () => {
+  return (
+        <>
+            
+    </>
+  )
 }
 
-const rollOutVariants = {
-  hidden: { opacity: 0, y: -30 },
-  visible: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -30 },
-};
-
-export const DisplayOptions = ({mode,options,clearInput,onOptionChange,onOptionRemove,onOptionAdd,onOptionImageAdded,}: DisplayOptionsProps) => {
-
-  const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
-
-
-  if (mode === "static") {
-    return (
-      <AnimatePresence>
-      {options.map((option, index) => (
-        <motion.div
-          key={index}
-          initial="hidden"
-          animate="visible"
-          exit="exit"
-          variants={rollOutVariants}
-          transition={{ duration: 0.3 }}
-          className="mt-2 flex w-full items-center gap-4"
-        >
-        <Input
-          value={option}
-          disabled={true}
-          className="w-full"
-        />
-        </motion.div>
-      ))}
-    </AnimatePresence>
-    );
-  }
-
-  return (
-    <>
-      <AnimatePresence>
-        {options.map((option, index) => (
-          <motion.div
-            key={index}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            variants={rollOutVariants}
-            transition={{ duration: 0.3 }}
-            className="mt-2 flex justify-between gap-4"
-          >
-            {mode === "editable" && (
-              <Input
-                type="text"
-                placeholder={`Option ${index + 1}`}
-                value={option}
-                onChange={(e) => onOptionChange(e.target.value, index)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    onOptionAdd();
-                    // Wait for the new option to render.
-                    setTimeout(() => {
-                      inputRefs.current[options.length]?.focus();
-                    }, 0);
-                  }
-                }}
-                // Assign a ref for focusing later.
-                ref={(el) => {
-                  inputRefs.current[index] = el;
-                }}
-                className="w-full"
-              />
-            )}
-            {mode === "image-editable" && (
-              <ImageUploader
-                onFileSelect={(file) => onOptionImageAdded(file, index)}
-                clearInput={clearInput}
-                className="flex-1 min-w-0"
-                showFilename={true}
-                buttonstyle="flex-1 items-center justify-between w-full p-3"
-              />
-            )}
-            <Button
-              className="p-2 flex items-center justify-center flex-shrink-0"
-              variant="secondary"
-              onClick={() => onOptionRemove(index)}
-            >
-              <CircleMinus color={"red"}/>
-            </Button>
-          </motion.div>
-        ))}
-      </AnimatePresence>
-      <div className="flex justify-end mt-2">
-        <Button variant="outline" size="icon" onClick={onOptionAdd}>
-          <Plus size={25} />
-        </Button>
-      </div>
-    </>
-  );
-};
+export default CreateQuestion;

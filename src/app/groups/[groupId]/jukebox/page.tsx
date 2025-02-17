@@ -147,20 +147,7 @@ function JukeboxSearch({jukebox, user, toast, setUserHasSubmitted}: {jukebox: IJ
           ratings: [],
         };
         
-        mutate(
-          `/api/groups/${groupId}/jukebox?isActive=true&processed=true`,
-          (currentData: { data: IJukeboxProcessed[] } | undefined) => {
-            if (!currentData) return currentData;
-            return {
-              data: currentData.data.map((j) =>
-                j._id === jukebox._id
-                  ? { ...j, userHasSubmitted: true, songs: [...j.songs, newSong] }
-                  : j
-              ),
-            } as { data: IJukeboxProcessed[] };
-          },
-          false // Do not revalidate immediately
-        );
+        mutate(`/api/groups/${groupId}/jukebox?isActive=true&processed=true`);
 
         setSelectedTrack(null);
         setSearchResults(null);
@@ -293,53 +280,8 @@ function JukeboxSubmissions({ jukebox, user, toast }: { jukebox: IJukeboxProcess
     if (!selectedSong) return;
     setIsSubmitting(true);
 
-    const newRating = { userId: { _id: user._id, username: user.username }, rating: ratingValue };
-
-    //todo refactor this is terrible
-    mutate(
-      `/api/groups/${jukebox.groupId}/jukebox?isActive=true&processed=true`,
-      (currentData: { data: IJukeboxProcessed[] } | undefined) => {
-        if (!currentData) return currentData;
-        return {
-          data: currentData.data.map((j) => {
-            if (j._id === jukebox._id) {
-              const updatedSongs = j.songs.map((song) => {
-                if (song.spotifyTrackId === selectedSong.spotifyTrackId) {
-                  const newRatings = [...song.ratings, newRating].sort((a, b) => b.rating - a.rating);
-                  const avgRating =
-                    newRatings.length > 0
-                      ? newRatings.reduce((acc, r) => acc + r.rating, 0) / newRatings.length
-                      : null;
-                  // Treat songs submitted by the user as if they are rated
-                  const effectiveUserHasRated =
-                    String((song.submittedBy as IUser)._id) === String(user._id)
-                      ? true
-                      : newRatings.some((r) => String((r.userId as IUser)._id) === String(user._id));
-                  return { ...song, ratings: newRatings, avgRating, userHasRated: effectiveUserHasRated };
-                }
-                return song;
-              });
-      
-              updatedSongs.sort((a, b) => {
-                if (!a.userHasRated && b.userHasRated) return -1;
-                if (a.userHasRated && !b.userHasRated) return 1;
-                if (a.avgRating === null && b.avgRating === null) return 0;
-                if (a.avgRating === null) return 1;
-                if (b.avgRating === null) return -1;
-                return b.avgRating - a.avgRating;
-              });
-      
-              return { ...j, songs: updatedSongs };
-            }
-            return j;
-          }),
-        } as { data: IJukeboxProcessed[] };
-      },
-      false
-    );
+    mutate(`/api/groups/${jukebox.groupId}/jukebox?isActive=true&processed=true`);
     
-  
-
     try {
       const response = await fetch(
         `/api/groups/${jukebox.groupId}/jukebox/${jukebox._id}/song/${selectedSong.spotifyTrackId}/rate`,
@@ -357,7 +299,6 @@ function JukeboxSubmissions({ jukebox, user, toast }: { jukebox: IJukeboxProcess
         throw new Error("Failed to submit rating");
       }
 
-      // Revalidate SWR cache to get fresh data from the backend
       mutate(`/api/groups/${jukebox.groupId}/jukebox?isActive=true&processed=true`);
 
       setDrawerOpen(false);

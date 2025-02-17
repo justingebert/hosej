@@ -43,6 +43,7 @@ const DailyQuestionPage = () => {
         return acc;
       }, {});
       setSelectedRating(ratings);
+      data.questions = [];
     }
   }, [data, user]);
 
@@ -73,7 +74,7 @@ const DailyQuestionPage = () => {
         <div className="flex flex-grow justify-center items-center">
           <Card className="w-full">
             <CardContent className="flex flex-col justify-center">
-              <h2 className="font-bold p-6 text-center text-xl">No questions available :(</h2>
+              <h2 className="font-bold p-6 text-center text-xl text-nowrap">{"No questions available :("}</h2>
               <Button onClick={() => router.push(`/groups/${groupId}/create`)}>
                 Create Questions
               </Button>

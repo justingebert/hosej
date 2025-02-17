@@ -41,26 +41,36 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onFileSelect, clearInput,
 
   return (
     <div className={className}>
-      <Button 
-        onClick={() => {
-          if (selectedFileName) {
-            handleRemoveFile();
-          } else {
-            fileInputRef.current?.click();
-          }
-        }}
-        className={buttonstyle} // Set the button to take full width
-        variant={"secondary"}
-      >
-        {selectedFileName ? (
-          <>
-            {showFilename && <span>{selectedFileName}</span>}
-            <X color="red"/> {/* Icon to remove the file */}
-          </>
+    <Button 
+      onClick={() => {
+        if (selectedFileName) {
+          handleRemoveFile();
+        } else {
+          fileInputRef.current?.click();
+        }
+      }}
+      className={buttonstyle} 
+      variant={"secondary"}
+    >
+      {selectedFileName ? (
+        showFilename ? (
+          <div className="flex items-center w-full min-w-0">
+            <span className="flex-1 truncate min-w-0">
+              {selectedFileName}
+            </span>
+            <div className="flex-shrink-0 ml-2">
+              <X color="red" />
+            </div>
+          </div>
         ) : (
-          <ImagePlus />
-        )}
-      </Button>
+          <div className="flex items-center justify-center w-full">
+            <X color="red" />
+          </div>
+        )
+      ) : (
+        <ImagePlus />
+      )}
+    </Button>
       <Input
         ref={fileInputRef}
         type="file"

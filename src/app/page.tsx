@@ -1,8 +1,8 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useState } from "react";
+import {Suspense, useCallback, useEffect, useState} from "react";
 import { Button } from "@/components/ui/button";
-import { FaGoogle } from "react-icons/fa";
+import { FcGoogle } from "react-icons/fc";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
@@ -11,15 +11,14 @@ import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { HoseJLoader } from "../components/ui/custom/HoseJLoader";
 
-
-function Home() {
+function StartPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/groups";
+  let callbackUrl = searchParams.get("callbackUrl") || "/groups";
   const { toast } = useToast();
   const [userName, setUserName] = useState("");
-  const [loading, setLoading] = useState(true); 
+  const [loading, setLoading] = useState(true);
 
   const handleSignIn = useCallback(async (provider:string, options = {}) => {
     try {
@@ -60,7 +59,7 @@ function Home() {
       });
 
       if (response.ok) {
-        await localStorage.setItem("deviceId", deviceId);
+        localStorage.setItem("deviceId", deviceId);
         console.log("User created successfully");
       } else {
         console.error("Failed to create user:", await response.text());
@@ -70,11 +69,24 @@ function Home() {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    if (userName) {
+      localStorage.setItem("userName", userName);
+    }
+
+    await handleSignIn("google", { callbackUrl });
+  }
+
   useEffect(() => {
     if (status === "loading") return;
 
     if (session) {
+      const starredGroupId = localStorage.getItem("starredGroupId");
+      if (starredGroupId) {
+        callbackUrl = `/groups/${starredGroupId}/dashboard`;
+      }
       router.push(callbackUrl);
+
     } else {
       const deviceId = localStorage.getItem("deviceId");
       if (deviceId) handleSignIn("credentials", { deviceId });
@@ -88,14 +100,13 @@ function Home() {
   }
 
   return (
-    <div className="flex flex-col justify-between min-h-screen ">
+    <div className="flex flex-col justify-between min-h-screen">
       <Header />
 
       <main className="flex flex-col items-center justify-center flex-grow space-y-6">
         <Input
-          style={{ fontSize: '16px' }}
           type="text"
-          placeholder="What's your name?"
+          placeholder="What do your friends call you?"
           value={userName}
           onChange={(e) => setUserName(e.target.value)}
           className="w-full max-w-sm text-center"
@@ -103,7 +114,7 @@ function Home() {
 
         <SignInButtons
           onStartWithoutAccount={handleStartWithoutAccount}
-          onGoogleSignIn={() => handleSignIn("google", { callbackUrl })}
+          onGoogleSignIn={handleGoogleSignIn}
         />
       </main>
       <Footer/>
@@ -114,7 +125,7 @@ function Home() {
 export default function HomeWithSuspense(){
   return (
     <Suspense fallback={<HoseJLoader />}>
-      <Home />
+      <StartPage />
     </Suspense>
   );
 }
@@ -126,7 +137,7 @@ function SignInButtons({ onStartWithoutAccount, onGoogleSignIn }:{onStartWithout
         Start without Account
       </Button>
       <Button onClick={onGoogleSignIn} className="w-full">
-        <FaGoogle className="mr-2"/>
+        <FcGoogle className="mr-2" size={24}/>
         Continue with Google
       </Button>
     </div>
@@ -136,15 +147,15 @@ function SignInButtons({ onStartWithoutAccount, onGoogleSignIn }:{onStartWithout
 
 function Footer() {
   return <footer className="text-center p-4">
-    <p className="text-sm text-muted">
+    <p className="text-sm text-muted-foreground">
       By continuing, you agree to our{" "}
-      <a href="/terms" className="underline">
+      <Link href="/terms" className="underline">
         Terms of Service
-      </a>{" "}
+      </Link>{" "}
       and{" "}
-      <a href="/privacy" className="underline">
+      <Link href="/privacy" className="underline">
         Privacy Policy
-      </a>
+      </Link>
       .
     </p>
   </footer>;

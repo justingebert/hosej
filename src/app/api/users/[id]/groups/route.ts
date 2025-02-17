@@ -5,7 +5,7 @@ import Group from '@/db/models/Group';
 
 export const revalidate = 0
 //get user by id
-export async function GET(req: NextRequest,  { params }: { params: { userId: string } }){
+export async function GET(req: NextRequest){
     const userId = req.headers.get('x-user-id');
     try{
         await dbConnect();
