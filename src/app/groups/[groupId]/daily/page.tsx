@@ -20,7 +20,6 @@ const DailyQuestionPage = () => {
   const [userHasVoted, setUserHasVoted] = useState<any>({});
   const [selectedRating, setSelectedRating] = useState<any>({});
 
-  // Fetch questions data using SWR
   const { data, error, isLoading } = useSWR<{ questions: IQuestion[] }>(
     user ? `/api/groups/${groupId}/question/daily` : null, fetcher);
 
@@ -43,9 +42,8 @@ const DailyQuestionPage = () => {
         return acc;
       }, {});
       setSelectedRating(ratings);
-      data.questions = [];
     }
-  }, [data, user]);
+  }, [data, user, isLoading]);
 
   if (error) return <p className="text-red-500">Failed to load questions</p>;
 
