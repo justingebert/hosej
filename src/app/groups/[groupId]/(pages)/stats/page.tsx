@@ -63,82 +63,119 @@ const StatsPage = () => {
 
   return (
     <div>
-      <Header title="Statistics" />
-      <Separator className="my-6" />
-      <h2 className="text-xl font-bold mb-4 text-center">Questions</h2>
-      <Table className="w-full max-w-md">
-        <TableBody>
-          <TableRow>
-            <TableCell className="font-medium">Questions Used</TableCell>
-            <TableCell>{stats.questionsUsedCount}</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell className="font-medium">Questions Left</TableCell>
-            <TableCell>{stats.questionsLeftCount}</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell className="font-medium">Total Questions</TableCell>
-            <TableCell>{totalQuestions}</TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
-      <div className="my-6">
-        <QuestionsByUser data={stats.questionsByUser} />
-      </div>
-      <div className="my-6">
-        <QuestionsByType data={stats.questionsByType} />
-      </div>
+  <Header title="Statistics" />
+  <Separator className="my-6" />
 
-      <Separator className="my-6" />
+  <h2 className="text-xl font-bold mb-4 text-center">Questions</h2>
+  <Table className="w-full max-w-md mx-auto">
+    <TableBody>
+      <TableRow>
+        <TableCell className="font-medium px-4 py-2 text-left">
+          Questions Used
+        </TableCell>
+        <TableCell className="px-4 py-2 text-right">
+          {stats.questionsUsedCount}
+        </TableCell>
+      </TableRow>
+      <TableRow>
+        <TableCell className="font-medium px-4 py-2 text-left">
+          Questions Left
+        </TableCell>
+        <TableCell className="px-4 py-2 text-right">
+          {stats.questionsLeftCount}
+        </TableCell>
+      </TableRow>
+      <TableRow>
+        <TableCell className="font-medium px-4 py-2 text-left">
+          Total Questions
+        </TableCell>
+        <TableCell className="px-4 py-2 text-right">
+          {totalQuestions}
+        </TableCell>
+      </TableRow>
+    </TableBody>
+  </Table>
 
-      <h2 className="text-xl font-bold text-center">Rallies</h2>
-      <Table className="w-full max-w-md">
-        <TableBody>
-          <TableRow>
-            <TableCell className="font-medium">Rally Gap in Days</TableCell>
-            <TableCell>{stats.group.rallyGapDays}</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell className="font-medium">Rallies Used</TableCell>
-            <TableCell>{stats.RalliesUsedCount}</TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell className="font-medium">Rallies Left</TableCell>
-            <TableCell>{stats.RalliesLeftCount}</TableCell>
-          </TableRow>
-                    <TableRow>
-            <TableCell className="font-medium">Total Rallies</TableCell>
-            <TableCell>{totalRallies}</TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
+  <div className="my-6">
+    <QuestionsByUser data={stats.questionsByUser} />
+  </div>
+  <div className="my-6">
+    <QuestionsByType data={stats.questionsByType} />
+  </div>
 
-      <Separator className="my-6" />
+  <Separator className="my-6" />
 
-      <h2 className="text-xl font-bold text-center">Users</h2>
-      <Table className="w-full max-w-md">
-        <TableBody>
-          <TableRow>
-            <TableCell className="font-medium">User Count</TableCell>
-            <TableCell>{stats.group.members.length}</TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
+  <h2 className="text-xl font-bold text-center">Rallies</h2>
+  <Table className="w-full max-w-md mx-auto">
+    <TableBody>
+      <TableRow>
+        <TableCell className="font-medium px-4 py-2 text-left">
+          Rally Gap in Days
+        </TableCell>
+        <TableCell className="px-4 py-2 text-right">
+          {stats.group.rallyGapDays}
+        </TableCell>
+      </TableRow>
+      <TableRow>
+        <TableCell className="font-medium px-4 py-2 text-left">
+          Rallies Used
+        </TableCell>
+        <TableCell className="px-4 py-2 text-right">
+          {stats.RalliesUsedCount}
+        </TableCell>
+      </TableRow>
+      <TableRow>
+        <TableCell className="font-medium px-4 py-2 text-left">
+          Rallies Left
+        </TableCell>
+        <TableCell className="px-4 py-2 text-right">
+          {stats.RalliesLeftCount}
+        </TableCell>
+      </TableRow>
+      <TableRow>
+        <TableCell className="font-medium px-4 py-2 text-left">
+          Total Rallies
+        </TableCell>
+        <TableCell className="px-4 py-2 text-right">
+          {totalRallies}
+        </TableCell>
+      </TableRow>
+    </TableBody>
+  </Table>
 
-      
-  
-      <Separator className="my-6" />
+  <Separator className="my-6" />
 
-      <h2 className="text-xl font-bold mb-4 text-center">Messages</h2>
-      <Table className="w-full max-w-md mb-6">
-        <TableBody>
-          <TableRow>
-            <TableCell className="font-medium">Message Count</TableCell>
-            <TableCell>{stats.messagesCount}</TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
-    </div>
+  <h2 className="text-xl font-bold text-center">Users</h2>
+  <Table className="w-full max-w-md mx-auto">
+    <TableBody>
+      <TableRow>
+        <TableCell className="font-medium px-4 py-2 text-left">
+          User Count
+        </TableCell>
+        <TableCell className="px-4 py-2 text-right">
+          {stats.group.members.length}
+        </TableCell>
+      </TableRow>
+    </TableBody>
+  </Table>
+
+  <Separator className="my-6" />
+
+  <h2 className="text-xl font-bold mb-4 text-center">Messages</h2>
+  <Table className="w-full max-w-md mx-auto mb-6">
+    <TableBody>
+      <TableRow>
+        <TableCell className="font-medium px-4 py-2 text-left">
+          Message Count
+        </TableCell>
+        <TableCell className="px-4 py-2 text-right">
+          {stats.messagesCount}
+        </TableCell>
+      </TableRow>
+    </TableBody>
+  </Table>
+</div>
+
   );
   
 };

@@ -22,7 +22,14 @@ export async function DELETE(req: NextRequest, { params }: { params: { groupId: 
       return NextResponse.json({ message: "You are not the admin of this group" }, { status: 403 });
     }
 
+
     group.members = group.members.filter((member:IGroup["members"][number]) => member.user.toString() !== memberId);
+
+    //if admin left group, find another admin that joined first
+    if(group.admin.equals(user._id)){
+      const newAdmin = group.members.sort((a:IGroup["members"][number], b:IGroup["members"][number]) => a.joinedAt.getTime() - b.joinedAt.getTime())[0];
+      group.admin = newAdmin.user;
+    }
     await group.save();
 
     member.groups = member.groups.filter((group: string) => group !== groupId);

@@ -7,7 +7,7 @@ import {
     DrawerTitle,
     DrawerTrigger,
 } from "@/components/ui/drawer";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -19,7 +19,6 @@ export function CreateGroupDrawer() {
     const [groupName, setGroupName] = useState("");
     const { toast } = useToast();
     const {user} = useAuthRedirect();
-
 
     const createGroup = async () => {
         try {
@@ -54,6 +53,7 @@ export function CreateGroupDrawer() {
                 <div className="mx-auto w-full max-w-sm">
                     <div className="p-4 pb-0">
                         <Input
+                            autoFocus
                             id="groupName"
                             placeholder="Group Name"
                             value={groupName}
