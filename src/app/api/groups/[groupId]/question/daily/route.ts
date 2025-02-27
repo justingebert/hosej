@@ -5,6 +5,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { NextResponse } from 'next/server';
 import { isUserInGroup } from "@/lib/groupAuth";
 import { generateSignedUrl } from "@/lib/question/questionOptions";
+import Group from "@/db/models/Group";
 
 const s3 = new S3Client({
     region: process.env.AWS_REGION,
@@ -34,6 +35,12 @@ export async function GET(req: Request, { params }: { params: { groupId: string 
         if (!questions || questions.length === 0) {
             return NextResponse.json({ questions: [], message: "No questions available" });
         }
+        
+
+        const group = await Group.findById(groupId);
+        const userCount = group.members.length;
+        const totalVotes = questions.reduce((acc, question) => acc + (question.answers?.length || 0), 0);
+        const completionPercentage = (totalVotes / (questions.length * userCount)) * 100;
 
         // Map over questions and conditionally add pre-signed image URLs if an image is present
         const questionsWithImages = await Promise.all(
@@ -62,7 +69,7 @@ export async function GET(req: Request, { params }: { params: { groupId: string 
             })
         );
 
-        return NextResponse.json({ questions: questionsWithImages });
+        return NextResponse.json({ questions: questionsWithImages, completionPercentage });
     } catch (error:any) {
         console.error(error);
         return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });

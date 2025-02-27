@@ -2,9 +2,10 @@
 
 import { useParams, usePathname } from "next/navigation";
 import Link from "next/link";
-import { PieChart, History, Home } from "lucide-react";
+import { PieChart, History, Home, Plus } from "lucide-react";
 import { motion } from "framer-motion";
 import { useEffect, useState, useRef } from "react";
+import { Button } from "@/components/ui/button";
 
 export default function TabsLayout({ children }: { children: React.ReactNode }) {
   const { groupId } = useParams<{ groupId: string }>();
@@ -13,6 +14,7 @@ export default function TabsLayout({ children }: { children: React.ReactNode }) 
   // To store refs for each link
   const dashboardRef = useRef<HTMLAnchorElement>(null);
   const leaderboardRef = useRef<HTMLAnchorElement>(null);
+  const createRef = useRef<HTMLAnchorElement>(null);
   const historyRef = useRef<HTMLAnchorElement>(null);
   const statsRef = useRef<HTMLAnchorElement>(null);
 
@@ -26,6 +28,8 @@ export default function TabsLayout({ children }: { children: React.ReactNode }) 
         return dashboardRef;
       case `/groups/${groupId}/leaderboard`:
         return leaderboardRef;
+      case `/groups/${groupId}/create`:
+        return createRef;
       case `/groups/${groupId}/history`:
         return historyRef;
       case `/groups/${groupId}/stats`:
@@ -61,6 +65,11 @@ export default function TabsLayout({ children }: { children: React.ReactNode }) 
         </Link>
         <Link ref={leaderboardRef} href={`/groups/${groupId}/leaderboard`} className="flex items-center justify-center w-14 h-14 p-4 z-10">
           <span className="text-xl">👖</span>
+        </Link>
+        <Link ref={createRef} href={`/groups/${groupId}/create`} className="z-10">
+          <Button className="flex items-center justify-center p-2 rounded-full bg-primary">
+            <Plus />
+          </Button>
         </Link>
         <Link ref={historyRef} href={`/groups/${groupId}/history`} className="p-4 z-10">
           <History />
