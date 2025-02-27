@@ -1,13 +1,13 @@
 # hosej
 
-- Question/Rally app for me and my friends
+- Social Hub app for me and my friends
 
 # Features
 
 - Groups
-- Daily Questions with voting and results
-- Photo Rallies (tasks for taking a photo) with voting and results
-- Jukebox (with Spotify integration)
+- Daily Questions with voting + results
+- Photo Rallies (tasks for taking a photo) with voting + results
+- Jukebox (with Spotify integration) submit and rate most songs
 - Chats
 - History
 - Statistics
