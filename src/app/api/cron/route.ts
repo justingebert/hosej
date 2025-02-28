@@ -25,7 +25,9 @@ async function selectDailyQuestions(groupId:string, limit: number): Promise<IQue
       category: "Daily",
       used: false,
       active: false,
-    }).limit(limit);
+    })
+    .sort({ createdAt: 1 })
+    .limit(limit);
 
     for (const question of questions) {
       question.active = true;
