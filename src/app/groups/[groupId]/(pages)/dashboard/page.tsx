@@ -2,8 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import {  BarChartBig, Menu, ScanSearch, MousePointerClick, CircleSlash, Settings, CirclePlus} from 'lucide-react';
-import { Card } from "@/components/ui/card";
+import {  BarChartBig, Menu, ScanSearch, MousePointerClick, CircleSlash, Settings} from 'lucide-react';
 import { CompletionChart } from "@/components/Charts/CompletionChart";
 import confetti from "canvas-confetti";
 import { Badge } from "@/components/ui/badge";
@@ -39,7 +38,18 @@ export default function Dashboard() {
   };
 
   const DailyCompletion = questionsData ? questionsData.completionPercentage : 0;
-  if(DailyCompletion === 100) triggerConfetti();
+  if(DailyCompletion === 100){
+    const lastConfetti = localStorage.getItem('confetti');
+    if(lastConfetti){
+      const lastConfettiDate = new Date(lastConfetti);
+      const now = new Date();
+      if(now.getDate() === lastConfettiDate.getDate() && now.getMonth() === lastConfettiDate.getMonth() && now.getFullYear() === lastConfettiDate.getFullYear()){
+        return;
+      }
+    triggerConfetti();
+    localStorage.setItem('confetti', new Date().toISOString()); 
+    }
+  }
 
   const titleClass = group?.name && group.name.length > 15 ? "text-2xl" : "text-4xl";
 
@@ -63,9 +73,9 @@ export default function Dashboard() {
 
     {groupLoading || questionLoading || rallyLoading ? (
       <>
-        <Skeleton className="col-span-2 h-28"/>
-        <Skeleton className="h-36"/>
-        <Skeleton className="h-36"/>
+        <Skeleton className="col-span-2 h-32"/>
+        <Skeleton className="h-40"/>
+        <Skeleton className="h-40"/>
       </>
     ) : (
       <>
@@ -81,7 +91,7 @@ export default function Dashboard() {
             <Badge>{questions.length}</Badge>
           </div>
         )}
-        <div className="flex flex-col justify-center">
+        <div className="flex flex-col justify-end">
           <div className="font-bold text-2xl">Daily</div>
         </div>
         <div className="w-24 h-24 rounded-lg">
@@ -125,6 +135,9 @@ export default function Dashboard() {
           className="relative bg-primary-foreground px-6 py-4 flex items-center justify-between rounded-lg"
           onClick={() => router.push(`/groups/${groupId}/jukebox`)}
         >
+          <div className="absolute -top-3 -right-3">
+            <Badge>1</Badge>
+          </div>
           <div className="flex flex-col justify-center">
             <div className="w-24 h-24 flex items-center justify-center text-6xl">
               📻

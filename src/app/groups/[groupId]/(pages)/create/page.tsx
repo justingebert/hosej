@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/tabs";
 import CreateQuestion from "@/components/Question/createQuestion.client";
 import CreateRally from "@/components/Rally/createRally.client";
-import BackLink from "@/components/ui/custom/BackLink";
 import Header from "@/components/ui/custom/Header";
 import { useState } from "react";
 

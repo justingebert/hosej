@@ -69,12 +69,12 @@ export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>)
   </div>
 
       <div className="flex justify-between items-center">
-        <Button size="sm" variant="outline" className="h-8">
+        <Button size="sm" className="h-8">
           <div className="text-sm">{table.getFilteredRowModel().rows.length} Results</div>
         </Button>
-          <Button disabled={!isFiltered} variant="outline" onClick={() => table.resetColumnFilters()} className="h-8 px-2 lg:px-3">
+          <Button disabled={!isFiltered}  onClick={() => table.resetColumnFilters()} className="h-8 px-2 lg:px-3">
             Reset
-            <X />
+            <X className="-mr-1"/>
           </Button>
       </div>
     </div>
