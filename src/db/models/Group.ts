@@ -41,7 +41,7 @@ const groupSchema = new mongoose.Schema({
     lastQuestionDate: { type: Date, default: null },
     rallyCount: { type: Number, default: 1 },
     rallyGapDays: { type: Number, default: 14 },
-    jukebox: { type: Boolean, default: false },
+    jukebox: { type: Boolean, default: true },
     jukeboxFrequency: { type: Number, default: 30 },
     spotifyConneceted: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now },
