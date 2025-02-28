@@ -5,7 +5,6 @@ import { useParams } from 'next/navigation';
 import useSWR from "swr";
 import VoteResults from "@/components/Question/VoteResults.client";
 import BackLink from "@/components/ui/custom/BackLink";
-import SpinningLoader from "@/components/ui/custom/SpinningLoader";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import Image from "next/image";
 import fetcher from "@/lib/fetcher";

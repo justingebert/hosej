@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/tabs";
 import CreateQuestion from "@/components/Question/createQuestion.client";
 import CreateRally from "@/components/Rally/createRally.client";
-import BackLink from "@/components/ui/custom/BackLink";
 import Header from "@/components/ui/custom/Header";
 import { useState } from "react";
 
@@ -41,7 +40,7 @@ const CreatePage = ({ params }: { params: { groupId: string } }) => {
   
   return (
     <>
-      <Header leftComponent={<BackLink href={`/groups/${groupId}/dashboard`} />} title="Create" />{/* rightComponent={<Button variant={"outline"} size={"icon"}><Info/></Button>}/> */}
+      <Header title="Create" />{/* rightComponent={<Button variant={"outline"} size={"icon"}><Info/></Button>}/> */}
       <div className="mt-4">
       <Tabs defaultValue="create-question" className="w-full">
         
@@ -56,7 +55,6 @@ const CreatePage = ({ params }: { params: { groupId: string } }) => {
         <TabsContent value="create-rally">
           <CreateRally rallyData={rallyData} setRallyData={setRallyData}/>
         </TabsContent>
-
       </Tabs>
       </div>
     </>

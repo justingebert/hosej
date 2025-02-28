@@ -17,33 +17,9 @@ const DailyQuestionPage = () => {
   const { session, user } = useAuthRedirect();
   const { groupId } = useParams<{ groupId: string }>();
   const router = useRouter();
-  const [userHasVoted, setUserHasVoted] = useState<any>({});
-  const [selectedRating, setSelectedRating] = useState<any>({});
 
   const { data, error, isLoading } = useSWR<{ questions: IQuestion[] }>(
     user ? `/api/groups/${groupId}/question/daily` : null, fetcher);
-
-  useEffect(() => {
-    if (data?.questions?.length && user) {
-      // Calculate user votes
-      const votes = data.questions.reduce((acc: any, question: any) => {
-        acc[question._id] = question.answers.some(
-          (answer: any) => answer.user === user._id
-        );
-        return acc;
-      }, {});
-      setUserHasVoted(votes);
-
-      // Calculate user ratings
-      const ratings = data.questions.reduce((acc: any, question: any) => {
-        if (question.rating.good.includes(user._id)) acc[question._id] = "good";
-        else if (question.rating.ok.includes(user._id)) acc[question._id] = "ok";
-        else if (question.rating.bad.includes(user._id)) acc[question._id] = "bad";
-        return acc;
-      }, {});
-      setSelectedRating(ratings);
-    }
-  }, [data, user, isLoading]);
 
   if (error) return <p className="text-red-500">Failed to load questions</p>;
 
@@ -63,10 +39,6 @@ const DailyQuestionPage = () => {
           user={user}
           groupId={groupId}
           questions={data.questions}
-          userHasVoted={userHasVoted}
-          setUserHasVoted={setUserHasVoted}
-          selectedRating={selectedRating}
-          setSelectedRating={setSelectedRating}
         />
       ) : (
         <div className="flex flex-grow justify-center items-center">

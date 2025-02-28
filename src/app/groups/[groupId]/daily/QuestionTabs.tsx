@@ -17,35 +17,20 @@ import {
 } from "@/components/ui/drawer";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
+import { mutate } from "swr";
+import { CheckCheck } from "lucide-react";
 
 export default function QuestionsTabs({
   user,
   groupId,
   questions,
-  userHasVoted,
-  setUserHasVoted,
-  selectedRating,
-  setSelectedRating,
 }: any) {
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [ratings, setRatings] = useState<any>({});
   const searchParams = useSearchParams();
   const router = useRouter();
   const defaultTab =
     searchParams.get("returnTo") ||
     (questions.length > 0 ? questions[0]._id : undefined);
-
-  useEffect(() => {
-    const initialRatings = questions.reduce((acc: any, question: any) => {
-      acc[question._id] = {
-        bad: question.rating.bad || [],
-        ok: question.rating.ok || [],
-        good: question.rating.good || [],
-      };
-      return acc;
-    }, {});
-    setRatings(initialRatings);
-  }, [questions]);
 
   const rateQuestion = async (questionId: string, rating: string) => {
     await fetch(`/api/groups/${groupId}/question/${questionId}/rate`, {
@@ -54,23 +39,8 @@ export default function QuestionsTabs({
       body: JSON.stringify({ rating: rating }),
     });
 
-    setSelectedRating((prevState: any) => ({
-      ...prevState,
-      [questionId]: rating,
-    }));
-
-    setRatings((prevRatings: any) => {
-      const updatedQuestionRatings = { ...prevRatings[questionId] };
-      updatedQuestionRatings[rating] = [
-        ...(updatedQuestionRatings[rating] || []),
-        user._id,
-      ];
-
-      return {
-        ...prevRatings,
-        [questionId]: updatedQuestionRatings,
-      };
-    });
+    mutate(`/api/groups/${groupId}/question/daily`);
+    handleDrawer();
   };
 
   const handleDrawer = () => {
@@ -102,8 +72,6 @@ export default function QuestionsTabs({
             drawerOpen,
             setDrawerOpen,
             question,
-            ratings,
-            selectedRating,
             rateQuestion
           )}
 
@@ -117,7 +85,7 @@ export default function QuestionsTabs({
             />
           )}
           <div className="mt-10">
-            {userHasVoted[question._id] ? (
+            {question.userHasVoted ? (
               <VoteResults
                 user={user}
                 question={question}
@@ -128,7 +96,7 @@ export default function QuestionsTabs({
               <VoteOptions
                 question={question}
                 onVote={() => {
-                  setUserHasVoted({ ...userHasVoted, [question._id]: true });
+                  mutate(`/api/groups/${groupId}/question/daily`);
                   handleDrawer();
                 }}
               />
@@ -144,60 +112,92 @@ function RatingDrawer(
   drawerOpen: boolean,
   setDrawerOpen: React.Dispatch<React.SetStateAction<boolean>>,
   question: any,
-  ratings: any,
-  selectedRating: any,
   rateQuestion: (questionId: string, rating: string) => Promise<void>
 ) {
   return (
-    <Drawer open={drawerOpen} onOpenChange={setDrawerOpen} >
-      <DrawerTrigger className="w-full">
-        <Card className=" bg-foreground text-center">
-          <h2 className="font-bold p-6 text-secondary">{question.question}</h2>
-        </Card>
-      </DrawerTrigger>
-      <DrawerContent>
-        <DrawerHeader>
-          <DrawerTitle>Kann die Frage was?</DrawerTitle>
-          <DrawerDescription></DrawerDescription>
-        </DrawerHeader>
-        <div className="flex flex-row justify-center space-x-4">
-          <Badge>🐟{ratings[question._id]?.bad?.length || 0}</Badge>
-          <Badge>👍{ratings[question._id]?.ok?.length || 0}</Badge>
-          <Badge>🐐{ratings[question._id]?.good?.length || 0}</Badge>
+    <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+  <DrawerTrigger className="w-full">
+  <Card className="relative bg-foreground text-center">
+    <h2 className="font-bold p-6 text-secondary">{question.question}</h2>
+    {question.questionType.includes("multiple") && (
+      <CheckCheck className="absolute bottom-2 right-2 text-secondary w-4 h-4" />
+    )}
+  </Card>
+  </DrawerTrigger>
+  <DrawerContent className="p-4 max-h-[80vh] flex flex-col">
+    <DrawerHeader>
+      <DrawerTitle>Rate the Question</DrawerTitle>
+      <DrawerDescription></DrawerDescription>
+    </DrawerHeader>
+    <div className="overflow-y-auto">
+      {!question.questionType.startsWith("text") && (
+        <div className="grid grid-cols-2 gap-4 mb-10">
+          {question.questionType.startsWith("image") &&
+            question.options &&
+            question.options.map((option: any, index: number) => (
+              <div
+                key={index}
+                className="text-primary-foreground rounded-lg w-full max-w-md h-40"
+              >
+                <Image
+                  src={option.url}
+                  alt={`Option ${index + 1}`}
+                  className="object-cover w-full h-full rounded-lg"
+                  width={300}
+                  height={300}
+                  priority={index === 0}
+                />
+              </div>
+            ))}
+          {!question.questionType.startsWith("image") &&
+            question.options &&
+            question.options.map((option: any, index: number) => (
+              <div
+                key={index}
+                className="text-sm p-2 bg-secondary rounded-lg max-w-md text-center flex items-center justify-center overflow-hidden" // fixed height for text options
+              >
+                <span className="line-clamp-3">{option}</span>
+              </div>
+            ))}
         </div>
-        <div className="flex flex-row space-x-4 p-4">
-          <Button
-            className="text-3xl flex-1 py-8 h-full"
-            variant={
-              selectedRating[question._id] === "bad" ? "default" : "secondary"
-            }
-            onClick={() => rateQuestion(question._id, "bad")}
-            disabled={Boolean(selectedRating[question._id])} // Disable if already rated
-          >
-            🐟
-          </Button>
-          <Button
-            className="text-3xl flex-1 py-8 h-full"
-            variant={
-              selectedRating[question._id] === "ok" ? "default" : "secondary"
-            }
-            onClick={() => rateQuestion(question._id, "ok")}
-            disabled={Boolean(selectedRating[question._id])} // Disable if already rated
-          >
-            👍
-          </Button>
-          <Button
-            className="text-3xl flex-1 py-8 h-full"
-            variant={
-              selectedRating[question._id] === "good" ? "default" : "secondary"
-            }
-            onClick={() => rateQuestion(question._id, "good")}
-            disabled={Boolean(selectedRating[question._id])} // Disable if already rated
-          >
-            🐐
-          </Button>
-        </div>
-      </DrawerContent>
-    </Drawer>
+      )}
+    </div>
+    <div className="mt-4">
+      <div className="flex flex-row justify-center space-x-4">
+        <Badge>🐟{question.rating.bad.length || 0}</Badge>
+        <Badge>👍{question.rating.ok.length || 0}</Badge>
+        <Badge>🐐{question.rating.good.length || 0}</Badge>
+      </div>
+      <div className="flex flex-row space-x-4 p-4">
+        <Button
+          className="text-3xl flex-1 py-8"
+          variant={question.userRating === "bad" ? "default" : "secondary"}
+          onClick={() => rateQuestion(question._id, "bad")}
+          disabled={Boolean(question.userRating)}
+        >
+          🐟
+        </Button>
+        <Button
+          className="text-3xl flex-1 py-8"
+          variant={question.userRating === "ok" ? "default" : "secondary"}
+          onClick={() => rateQuestion(question._id, "ok")}
+          disabled={Boolean(question.userRating)}
+        >
+          👍
+        </Button>
+        <Button
+          className="text-3xl flex-1 py-8"
+          variant={question.userRating === "good" ? "default" : "secondary"}
+          onClick={() => rateQuestion(question._id, "good")}
+          disabled={Boolean(question.userRating)}
+        >
+          🐐
+        </Button>
+      </div>
+    </div>
+  </DrawerContent>
+</Drawer>
+
+
   );
 }

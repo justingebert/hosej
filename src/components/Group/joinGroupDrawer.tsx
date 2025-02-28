@@ -56,6 +56,7 @@ export function JoinGroupDrawer() {
                 <div className="mx-auto w-full max-w-sm">
                     <div className="p-4 pb-0">
                         <Input
+                            autoFocus
                             id="groupId"
                             placeholder="Group ID"
                             value={groupId}
