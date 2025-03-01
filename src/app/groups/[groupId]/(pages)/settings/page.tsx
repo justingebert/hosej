@@ -32,14 +32,14 @@ interface IGroupProcessed extends IGroup {
 
 export default function GroupPage() {
   const { groupId } = useParams<{ groupId: string }>();
-  const { session, status, user } = useAuthRedirect();
+  const { user } = useAuthRedirect();
   const { toast } = useToast();
   const [settings, setSettings] = useState<any>({});
   const [deleteInput, setDeleteInput] = useState("");
   const [memberToKick, setMemberToKick] = useState<string | null>(null);
   const router = useRouter();
 
-  const { data: group, error, mutate } = useSWR<IGroupProcessed>(`/api/groups/${groupId}`, fetcher, {});
+  const { data: group, isLoading, error, mutate } = useSWR<IGroupProcessed>(`/api/groups/${groupId}`, fetcher, {});
 
   useEffect(() => {
     if (group) {
@@ -52,10 +52,9 @@ export default function GroupPage() {
   }, [group]);
 
   if (error) return <p className="text-red-500">Failed to load group data</p>;
-  const loading = !group;
 
   const userIsAdmin =
-    !loading && group.userIsAdmin
+    group && group.userIsAdmin
 
   const adminName = group?.admin
     ? group.members.find((member) => member.user.toString() === group.admin.toString())?.name || "N/A"
@@ -132,16 +131,13 @@ export default function GroupPage() {
   return (
     <>
       <Suspense fallback={<Skeleton className="h-8 w-40 mx-auto mb-4" />}>
-        <Header leftComponent={<BackLink href={`/groups/${groupId}/dashboard`}/>} title={group?.name || null} />
+        <Header title={group?.name || null} />
       </Suspense>
 
-      {loading ? (
-        <div>
-          <Skeleton className="h-8 w-1/2 mb-4" />
-          <Skeleton className="h-4 w-3/4 mb-2" />
-          <Skeleton className="h-4 w-full mb-2" />
-          <Skeleton className="h-4 w-2/3" />
-        </div>
+      {isLoading || !user ? (
+          [...Array(10)].map((_, i) => (
+              <Skeleton className="h-12 mb-4 mt" key={i}/>
+          ))        
       ) : group ? (
         <>
           <Table className="mb-6">

@@ -2,7 +2,7 @@
 
 import { useParams, usePathname } from "next/navigation";
 import Link from "next/link";
-import { PieChart, History, Home, Plus } from "lucide-react";
+import { PieChart, History, Home, Plus, Settings } from "lucide-react";
 import { motion } from "framer-motion";
 import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ export default function TabsLayout({ children }: { children: React.ReactNode }) 
 
   // To store refs for each link
   const dashboardRef = useRef<HTMLAnchorElement>(null);
-  const leaderboardRef = useRef<HTMLAnchorElement>(null);
+  const settingsRef = useRef<HTMLAnchorElement>(null);
   const createRef = useRef<HTMLAnchorElement>(null);
   const historyRef = useRef<HTMLAnchorElement>(null);
   const statsRef = useRef<HTMLAnchorElement>(null);
@@ -26,8 +26,8 @@ export default function TabsLayout({ children }: { children: React.ReactNode }) 
     switch (currentPath) {
       case `/groups/${groupId}/dashboard`:
         return dashboardRef;
-      case `/groups/${groupId}/leaderboard`:
-        return leaderboardRef;
+      case `/groups/${groupId}/settings`:
+        return settingsRef;
       case `/groups/${groupId}/create`:
         return createRef;
       case `/groups/${groupId}/history`:
@@ -63,19 +63,19 @@ export default function TabsLayout({ children }: { children: React.ReactNode }) 
         <Link ref={dashboardRef} href={`/groups/${groupId}/dashboard`} className="p-4 z-10">
           <Home />
         </Link>
-        <Link ref={leaderboardRef} href={`/groups/${groupId}/leaderboard`} className="flex items-center justify-center w-14 h-14 p-4 z-10">
-          <span className="text-xl">👖</span>
+        <Link ref={historyRef} href={`/groups/${groupId}/history`} className="p-4 z-10">
+          <History />
         </Link>
         <Link ref={createRef} href={`/groups/${groupId}/create`} className="z-10">
           <Button className="flex items-center justify-center p-2 rounded-full bg-primary">
             <Plus />
           </Button>
         </Link>
-        <Link ref={historyRef} href={`/groups/${groupId}/history`} className="p-4 z-10">
-          <History />
-        </Link>
         <Link ref={statsRef} href={`/groups/${groupId}/stats`} className="p-4 z-10">
           <PieChart />
+        </Link>
+        <Link ref={settingsRef} href={`/groups/${groupId}/settings`} className="p-4 z-10">
+          <Settings />
         </Link>
 
       </footer>

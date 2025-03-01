@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import {  BarChartBig, Menu, ScanSearch, MousePointerClick, CircleSlash, Settings} from 'lucide-react';
+import {  BarChartBig, Menu, ScanSearch, MousePointerClick, CircleSlash, Settings, Info} from 'lucide-react';
 import { CompletionChart } from "@/components/Charts/CompletionChart";
 import confetti from "canvas-confetti";
 import { Badge } from "@/components/ui/badge";
@@ -55,20 +55,20 @@ export default function Dashboard() {
 
   return (
     <>
-    <div className="flex justify-between items-center my-4">
+    <div className="flex justify-between items-center">
       <Button variant="outline" size="icon" onClick={() => router.push(`/groups`)}>
         <Menu />
       </Button>
       <h1 className={`flex-grow ${titleClass} font-bold text-center break-words`}>
         {group?.name}
       </h1>
-      <Link href={`/groups/${groupId}/settings`}>
+      {/* <Link href={`/groups/${groupId}/settings`}> */}
         <Button variant="outline" size="icon">
-          <Settings />
+          <Info />
         </Button>
-      </Link>
+      {/* </Link> */}
     </div>
-  <div className="flex flex-col h-[75vh] justify-center">
+  <div className="flex flex-col h-[80vh] justify-center">
     <div className="grid grid-cols-2 gap-8 items-center">
 
     {groupLoading || questionLoading || rallyLoading ? (
