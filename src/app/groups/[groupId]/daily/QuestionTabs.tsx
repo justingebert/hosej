@@ -130,8 +130,9 @@ function RatingDrawer(
       <DrawerTitle>Rate the Question</DrawerTitle>
       <DrawerDescription></DrawerDescription>
     </DrawerHeader>
-    <div className="overflow-y-auto">
       {!question.questionType.startsWith("text") && (
+        <>
+    <div className="overflow-y-auto">
         <div className="grid grid-cols-2 gap-4">
           {question.questionType.startsWith("image") &&
             question.options &&
@@ -161,9 +162,10 @@ function RatingDrawer(
               </div>
             ))}
         </div>
-      )}
     </div>
     <Separator className="my-6"/>
+      </>
+      )}
     <div>
       <div className="flex flex-row justify-center space-x-4">
         <Badge>🐟{question.rating.bad.length || 0}</Badge>
