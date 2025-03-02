@@ -19,6 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
 import { mutate } from "swr";
 import { CheckCheck } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
 export default function QuestionsTabs({
   user,
@@ -131,7 +132,7 @@ function RatingDrawer(
     </DrawerHeader>
     <div className="overflow-y-auto">
       {!question.questionType.startsWith("text") && (
-        <div className="grid grid-cols-2 gap-4 mb-10">
+        <div className="grid grid-cols-2 gap-4">
           {question.questionType.startsWith("image") &&
             question.options &&
             question.options.map((option: any, index: number) => (
@@ -162,13 +163,14 @@ function RatingDrawer(
         </div>
       )}
     </div>
-    <div className="mt-4">
+    <Separator className="my-6"/>
+    <div>
       <div className="flex flex-row justify-center space-x-4">
         <Badge>🐟{question.rating.bad.length || 0}</Badge>
         <Badge>👍{question.rating.ok.length || 0}</Badge>
         <Badge>🐐{question.rating.good.length || 0}</Badge>
       </div>
-      <div className="flex flex-row space-x-4 p-4">
+      <div className="flex flex-row space-x-4 py-4">
         <Button
           className="text-3xl flex-1 py-8"
           variant={question.userRating === "bad" ? "default" : "secondary"}
