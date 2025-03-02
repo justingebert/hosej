@@ -80,7 +80,7 @@ export default function SettingsPage() {
     if (!notificationsEnabled) {
       const token = await requestPermissionReturnToken();
       if (token) {
-        await fetch(`/api/users/${user._id}/register-push`, {
+        await fetch(`/api/users/register-push`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ token }),
@@ -91,12 +91,11 @@ export default function SettingsPage() {
     } else {
       const token = localStorage.getItem("lastSentFcmToken");
       if (token) {
-        await fetch(`/api/users/${user._id}/unregister-push`, {
+        await fetch(`/api/users/unregister-push`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ token }),
         });
-        console.log("FCM token unregistered successfully.");
         localStorage.removeItem("lastSentFcmToken");
       }
     }

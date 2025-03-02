@@ -5,7 +5,6 @@ export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   
   const publicRoutes = [
-    '/api/users/create', 
     '/api/auth/session', 
     '/api/auth/providers', 
     '/api/auth/csrf', 
@@ -21,7 +20,7 @@ export async function middleware(req: NextRequest) {
     "/privacy",
     '/',
   ];
-  if (publicRoutes.includes(pathname)) {
+  if (publicRoutes.includes(pathname) || (pathname === '/api/users' && req.method === 'POST')) {
     return NextResponse.next();
   }
 
