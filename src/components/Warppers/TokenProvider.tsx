@@ -6,7 +6,7 @@ import { useSession } from "next-auth/react";
 
 const sendTokenToServer = async (token: string, userId: string) => {
   try {
-    const response = await fetch(`/api/users/${userId}/register-push`, {
+    const response = await fetch(`/api/users/register-push`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

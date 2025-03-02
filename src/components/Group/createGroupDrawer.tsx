@@ -34,7 +34,7 @@ export function CreateGroupDrawer() {
                 return;
             }
 
-            mutate(`/api/users/${user._id}/groups`);
+            mutate(`/api/groups`);
         } catch (error) {
             console.error("Failed to create group: ", error);
             toast({ title: "Failed to create group!", variant: "destructive" });

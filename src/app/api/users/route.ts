@@ -31,3 +31,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: 'Internal Server error' }, { status: 500 });
   }
 }
+
+export async function PUT(req: NextRequest) {
+  const userId = req.headers.get('x-user-id') as string;
+  await dbConnect();
+  console.log('userId', userId);
+  try {
+   const { ...data} = await req.json();
+
+   const updatedUser = await User.findByIdAndUpdate(userId, data, { new: true });
+   if (!updatedUser) {
+    return NextResponse.json({ message: 'User not found' }, { status: 404 });
+  }
+
+    return NextResponse.json(updatedUser, { status: 200 });
+  } catch (error) {
+    console.error('Error updating user:', error);
+    return NextResponse.json({ message: 'Internal Server error' }, { status: 500 });
+  }
+}

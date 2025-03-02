@@ -52,7 +52,7 @@ function StartPage() {
 
   const createUserByDeviceId = async (deviceId:string, userName:string) => {
     try {
-      const response = await fetch("/api/users/create", {
+      const response = await fetch("/api/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ deviceId, userName }),
@@ -106,7 +106,7 @@ function StartPage() {
       <main className="flex flex-col items-center justify-center flex-grow space-y-6">
         <Input
           type="text"
-          placeholder="What do your friends call you?"
+          placeholder="What's do your friends call you?"
           value={userName}
           onChange={(e) => setUserName(e.target.value)}
           className="w-full max-w-sm text-center"

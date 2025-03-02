@@ -58,6 +58,16 @@ function GroupsList({router,copyFn,user}: {router: ReturnType<typeof useRouter>;
     if (stored) {
       setStarredGroupId(stored);
     }
+
+    const userName = localStorage.getItem("userName");
+    if(userName){
+      fetch("/api/users", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: userName }),
+      });
+      localStorage.removeItem("userName");
+    }
   }, []);
 
   const handleStar = (groupId: string, e: React.MouseEvent) => {
@@ -71,7 +81,7 @@ function GroupsList({router,copyFn,user}: {router: ReturnType<typeof useRouter>;
     }
   };
   
-  const { data, isLoading } = useSWR<{ groups: IGroup[] }>(user ? `/api/users/${user._id}/groups` : null, fetcher);
+  const { data, isLoading } = useSWR<{ groups: IGroup[] }>(user ? `/api/groups` : null, fetcher);
     const groups = data?.groups || [];
 
     return (

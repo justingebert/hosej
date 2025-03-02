@@ -2,10 +2,9 @@ import { NextResponse } from 'next/server';
 import dbConnect from "@/lib/dbConnect";
 import User from '@/db/models/user';
 
-export async function POST(req: any, { params }: { params: { id: string } }) {
+export async function POST(req: any) {
+  const userId = req.headers.get('x-user-id') as string;
   await dbConnect();
-
-  const { id: userId } = params;
   const data = await req.json();
   const token = data.token;
 
