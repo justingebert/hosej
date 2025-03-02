@@ -70,70 +70,74 @@ export default function Dashboard() {
     </div>
   <div className="flex flex-col h-[80vh] justify-center">
     <div className="grid grid-cols-2 gap-8 items-center">
-
-    {groupLoading || questionLoading || rallyLoading ? (
-      <>
-        <Skeleton className="col-span-2 h-32"/>
-        <Skeleton className="h-40"/>
-        <Skeleton className="h-40"/>
-      </>
+    
+    {!questionLoading && questionsData ? (
+       <div
+       className="col-span-2 relative bg-primary-foreground px-6 py-4 flex items-center justify-between rounded-lg"
+       onClick={() => {
+         mutate(`/api/groups/${groupId}/question/daily`)
+         router.push(`/groups/${groupId}/daily`)
+       }}
+     >
+       {questions.length > 0 && (
+         <div className="absolute -top-3 -right-3">
+           <Badge>{questions.length}</Badge>
+         </div>
+       )}
+       <div className="flex flex-col justify-end">
+         <div className="font-bold text-2xl">Daily</div>
+       </div>
+       <div className="w-24 h-24 rounded-lg">
+         <CompletionChart completion={DailyCompletion} />
+       </div>
+     </div>
     ) : (
+        <Skeleton className="col-span-2 h-32"/>
+      )
+    }
+
+    {!rallyLoading && ralliesData ? (
+      <div
+      className="relative bg-primary-foreground px-6 py-4 flex items-center justify-between rounded-lg"
+      onClick={() => router.push(`/groups/${groupId}/rally`)}
+    >
+      {rallies.length > 0 && (
+        <div className="absolute -top-3 -right-3">
+          <Badge>{rallies.length}</Badge>
+        </div>
+      )}
+      <div className="flex flex-col justify-center">
+        <div className="w-24 h-24 rounded-lg flex items-center justify-center">
+          {/* Rally icons */}
+          {rallies.length > 0 && rallies[0].votingOpen && (
+            <MousePointerClick className="w-full h-full p-4" />
+          )}
+          {rallies.length > 0 && rallies[0].resultsShowing && (
+            <BarChartBig className="w-full h-full p-4" />
+          )}
+          {rallies.length > 0 &&
+            !rallies[0].votingOpen &&
+            !rallies[0].resultsShowing && (
+              <ScanSearch className="w-full h-full p-4" />
+            )}
+          {rallies.length === 0 && (
+            <CircleSlash className="w-full h-full p-4 text-secondary" />
+          )}
+        </div>
+        <div className="font-bold text-2xl">Rally</div>
+      </div>
+    </div>
+    ) : (
+      <Skeleton className="h-40"/>
+    )  
+    }
+
+{!groupLoading || group ? (
       <>
-      <div
-        className="col-span-2 relative bg-primary-foreground px-6 py-4 flex items-center justify-between rounded-lg"
-        onClick={() => {
-          mutate(`/api/groups/${groupId}/question/daily`)
-          router.push(`/groups/${groupId}/daily`)
-        }}
-      >
-        {questions.length > 0 && (
-          <div className="absolute -top-3 -right-3">
-            <Badge>{questions.length}</Badge>
-          </div>
-        )}
-        <div className="flex flex-col justify-end">
-          <div className="font-bold text-2xl">Daily</div>
-        </div>
-        <div className="w-24 h-24 rounded-lg">
-          <CompletionChart completion={DailyCompletion} />
-        </div>
-      </div>
-
-      <div
-        className="relative bg-primary-foreground px-6 py-4 flex items-center justify-between rounded-lg"
-        onClick={() => router.push(`/groups/${groupId}/rally`)}
-      >
-        {rallies.length > 0 && (
-          <div className="absolute -top-3 -right-3">
-            <Badge>{rallies.length}</Badge>
-          </div>
-        )}
-        <div className="flex flex-col justify-center">
-          <div className="w-24 h-24 rounded-lg flex items-center justify-center">
-            {/* Rally icons */}
-            {rallies.length > 0 && rallies[0].votingOpen && (
-              <MousePointerClick className="w-full h-full p-4" />
-            )}
-            {rallies.length > 0 && rallies[0].resultsShowing && (
-              <BarChartBig className="w-full h-full p-4" />
-            )}
-            {rallies.length > 0 &&
-              !rallies[0].votingOpen &&
-              !rallies[0].resultsShowing && (
-                <ScanSearch className="w-full h-full p-4" />
-              )}
-            {rallies.length === 0 && (
-              <CircleSlash className="w-full h-full p-4 text-secondary" />
-            )}
-          </div>
-          <div className="font-bold text-2xl">Rally</div>
-        </div>
-      </div>
-
       {group?.jukebox && (
         <div
-          className="relative bg-primary-foreground px-6 py-4 flex items-center justify-between rounded-lg"
-          onClick={() => router.push(`/groups/${groupId}/jukebox`)}
+        className="relative bg-primary-foreground px-6 py-4 flex items-center justify-between rounded-lg"
+        onClick={() => router.push(`/groups/${groupId}/jukebox`)}
         >
           <div className="absolute -top-3 -right-3">
             <Badge>1</Badge>
@@ -147,7 +151,11 @@ export default function Dashboard() {
         </div>
       )}
       </>
+    ) : (
+      <Skeleton className="h-40"/>
     )}
+
+
     </div>
   </div>
 </>
