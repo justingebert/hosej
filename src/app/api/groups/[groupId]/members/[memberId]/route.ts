@@ -1,49 +1,59 @@
-import Group, { IGroup } from "@/db/models/Group";
+import Group from "@/db/models/Group";
+import { IGroup } from "@/types/models/group";
 import User from "@/db/models/user";
 import dbConnect from "@/lib/dbConnect";
 import { isUserInGroup } from "@/lib/groupAuth";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function DELETE(req: NextRequest, { params }: { params: { groupId: string, memberId: string } }) {
-  const userId = req.headers.get('x-user-id') as string;
-  try {
-    const { groupId, memberId } = params;
+export async function DELETE(
+    req: NextRequest,
+    { params }: { params: { groupId: string; memberId: string } }
+) {
+    const userId = req.headers.get("x-user-id") as string;
+    try {
+        const { groupId, memberId } = params;
 
-    await dbConnect();
+        await dbConnect();
 
-    const authCheck = await isUserInGroup(userId, groupId);
-    if (!authCheck.isAuthorized) {
-      return NextResponse.json({ message: authCheck.message }, { status: authCheck.status });
+        const authCheck = await isUserInGroup(userId, groupId);
+        if (!authCheck.isAuthorized) {
+            return NextResponse.json({ message: authCheck.message }, { status: authCheck.status });
+        }
+        const member = await User.findById(memberId);
+        const user = await User.findById(userId);
+        const group = await Group.findById(groupId);
+        if (!group.admin.equals(user._id) || userId !== memberId) {
+            return NextResponse.json(
+                { message: "You are not the admin of this group" },
+                { status: 403 }
+            );
+        }
+
+        group.members = group.members.filter(
+            (member: IGroup["members"][number]) => member.user.toString() !== memberId
+        );
+
+        //if admin left group, find another admin that joined first
+        if (group.admin.equals(user._id)) {
+            const newAdmin = group.members.sort(
+                (a: IGroup["members"][number], b: IGroup["members"][number]) =>
+                    a.joinedAt.getTime() - b.joinedAt.getTime()
+            )[0];
+            group.admin = newAdmin.user;
+        }
+        await group.save();
+
+        member.groups = member.groups.filter((group: string) => group !== groupId);
+        await member.save();
+
+        if (group.members.length === 0) {
+            await Group.findByIdAndDelete(groupId);
+            return NextResponse.json({ message: "Group deleted" }, { status: 200 });
+        }
+
+        return NextResponse.json(group, { status: 200 });
+    } catch (error) {
+        console.error("Error kicking member", error);
+        return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
     }
-    const member = await User.findById(memberId);
-    const user = await User.findById(userId);
-    const group = await Group.findById(groupId);
-    if(!group.admin.equals(user._id) || userId !== memberId){
-      return NextResponse.json({ message: "You are not the admin of this group" }, { status: 403 });
-    }
-
-
-    group.members = group.members.filter((member:IGroup["members"][number]) => member.user.toString() !== memberId);
-
-    //if admin left group, find another admin that joined first
-    if(group.admin.equals(user._id)){
-      const newAdmin = group.members.sort((a:IGroup["members"][number], b:IGroup["members"][number]) => a.joinedAt.getTime() - b.joinedAt.getTime())[0];
-      group.admin = newAdmin.user;
-    }
-    await group.save();
-
-    member.groups = member.groups.filter((group: string) => group !== groupId);
-    await member.save();
-
-    if(group.members.length === 0) {
-      await Group.findByIdAndDelete(groupId);
-      return NextResponse.json({ message: "Group deleted" }, { status: 200 });
-    }
-
-    return NextResponse.json(group, { status: 200 });
-  }
-  catch (error) {
-    console.error("Error kicking member", error);
-    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
-  }
 }

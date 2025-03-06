@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { CircleHelp, Copy, Star, User } from "lucide-react";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
-import { IGroup } from "@/db/models/Group";
+import { IGroup } from "@/types/models/group";
 import { JoinGroupDrawer } from "@/components/Group/joinGroupDrawer";
 import { CreateGroupDrawer } from "../../components/Group/createGroupDrawer";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -11,13 +11,13 @@ import useSWR, { mutate } from "swr";
 import fetcher from "@/lib/fetcher";
 import { useToast } from "@/hooks/use-toast";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
-import { IUser } from "@/db/models/user";
+import { IUser } from "@/types/models/user";
 import { useEffect, useState } from "react";
 
 export default function GroupsPage() {
     const { toast } = useToast();
     const router = useRouter();
-    const {user} = useAuthRedirect();
+    const { user } = useAuthRedirect();
 
     function copyToClipboard(text: string) {
         navigator.clipboard
@@ -35,58 +35,65 @@ export default function GroupsPage() {
         <div className="relative min-h-screen flex flex-col">
             <Header router={router} />
 
-            <GroupsList router={router} copyFn={copyToClipboard} user={user}/>
+            <GroupsList router={router} copyFn={copyToClipboard} user={user} />
 
             <div className="fixed bottom-0 left-0 w-full backdrop-blur-sm p-8 flex space-x-4">
-              <div className="w-1/2">
-                  <CreateGroupDrawer />
-              </div>
-              <div className="w-1/2">
-                  <JoinGroupDrawer/>
-              </div>
-          </div>
+                <div className="w-1/2">
+                    <CreateGroupDrawer />
+                </div>
+                <div className="w-1/2">
+                    <JoinGroupDrawer />
+                </div>
+            </div>
         </div>
     );
 }
 
-function GroupsList({router,copyFn,user}: {router: ReturnType<typeof useRouter>; copyFn: (text: string) => void; user: IUser}) {
-  
-  const [starredGroupId, setStarredGroupId] = useState<string | null>(null);
+function GroupsList({
+    router,
+    copyFn,
+    user,
+}: {
+    router: ReturnType<typeof useRouter>;
+    copyFn: (text: string) => void;
+    user: IUser;
+}) {
+    const [starredGroupId, setStarredGroupId] = useState<string | null>(null);
 
-  useEffect(() => {
-    const stored = localStorage.getItem("starredGroupId");
-    if (stored) {
-      setStarredGroupId(stored);
-    }
+    useEffect(() => {
+        const stored = localStorage.getItem("starredGroupId");
+        if (stored) {
+            setStarredGroupId(stored);
+        }
 
-    const userName = localStorage.getItem("userName");
-    if(userName){
-      fetch("/api/users", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: userName }),
-      });
-      localStorage.removeItem("userName");
-    }
-  }, []);
+        const userName = localStorage.getItem("userName");
+        if (userName) {
+            fetch("/api/users", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username: userName }),
+            });
+            localStorage.removeItem("userName");
+        }
+    }, []);
 
-  const handleStar = (groupId: string, e: React.MouseEvent) => {
-    e.stopPropagation(); 
-    if (starredGroupId === groupId) {
-      localStorage.removeItem("starredGroupId");
-      setStarredGroupId(null);
-    } else {
-      localStorage.setItem("starredGroupId", groupId);
-      setStarredGroupId(groupId);
-    }
-  };
-  
-  const { data, isLoading } = useSWR<{ groups: IGroup[] }>(user ? `/api/groups` : null, fetcher);
+    const handleStar = (groupId: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (starredGroupId === groupId) {
+            localStorage.removeItem("starredGroupId");
+            setStarredGroupId(null);
+        } else {
+            localStorage.setItem("starredGroupId", groupId);
+            setStarredGroupId(groupId);
+        }
+    };
+
+    const { data, isLoading } = useSWR<{ groups: IGroup[] }>(user ? `/api/groups` : null, fetcher);
     const groups = data?.groups || [];
 
     return (
         <>
-            {(isLoading || !user )? (
+            {isLoading || !user ? (
                 <GroupListSkeleton />
             ) : (
                 <div className="flex-grow overflow-y-auto py-6">
@@ -98,35 +105,36 @@ function GroupsList({router,copyFn,user}: {router: ReturnType<typeof useRouter>;
                                 onClick={() => router.push(`/groups/${group._id}/dashboard`)}
                             >
                                 <CardContent className="flex justify-between items-center p-4">
-                                  <div>
-                                    <CardTitle>{group.name}</CardTitle>
-                                    <CardDescription>Go Vote Now!</CardDescription>
-                                  </div>
-                                  <div className="flex items-center space-x-2">
-                
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      onClick={(e) => handleStar(group._id, e)}
-                                    >
-                                      <Star
-                                        className="w-4 h-4"
-                                        color={starredGroupId === group._id ? "gold" : "gray"}
-                                      />
-                                    </Button>
+                                    <div>
+                                        <CardTitle>{group.name}</CardTitle>
+                                        <CardDescription>Go Vote Now!</CardDescription>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={(e) => handleStar(group._id, e)}
+                                        >
+                                            <Star
+                                                className="w-4 h-4"
+                                                color={
+                                                    starredGroupId === group._id ? "gold" : "gray"
+                                                }
+                                            />
+                                        </Button>
 
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        copyFn(`${group._id}`);
-                                      }}
-                                    >
-                                      <Copy className="w-4 h-4" />
-                                    </Button>
-                                  </div>
-                              </CardContent>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                copyFn(`${group._id}`);
+                                            }}
+                                        >
+                                            <Copy className="w-4 h-4" />
+                                        </Button>
+                                    </div>
+                                </CardContent>
                             </Card>
                         ))}
                     </div>
