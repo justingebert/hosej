@@ -1,4 +1,5 @@
 import { Types } from "mongoose";
+import { AsJson } from "../common";
 
 export interface IGroupMember{
     user: Types.ObjectId;
@@ -23,3 +24,5 @@ export interface IGroup extends Document {
     createdAt: Date;
     addPoints(userId: Types.ObjectId, points: number): Promise<void>;
 }
+
+export type IGroupJson = AsJson<IGroup>;

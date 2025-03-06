@@ -1,4 +1,5 @@
 import { Types, Document } from "mongoose";
+import { AsJson } from "../common";
 
 export interface IAnswer {
   user: Types.ObjectId;
@@ -19,12 +20,12 @@ export enum QuestionType {
   // CollectAndVoteMultiple = "collect-and-vote-multiple",
 }
 
-export interface IResult {
-  option: string;
-  count: number;
-  percentage: number;
-  users: string[];
-}
+// export interface IResult {
+//   option: string;
+//   count: number;
+//   percentage: number;
+//   users: string[];
+// }
 
 export interface IQuestion extends Document {
   groupId: Types.ObjectId;
@@ -32,7 +33,7 @@ export interface IQuestion extends Document {
   questionType: QuestionType;
   question: string;
   image?: string;
-  
+
   options?: any;
   answers: IAnswer[];
   rating: {
@@ -50,3 +51,4 @@ export interface IQuestion extends Document {
   createdAt: Date;
 }
 
+export type IQuestionJson = AsJson<IQuestion>;

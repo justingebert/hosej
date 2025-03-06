@@ -1,4 +1,5 @@
 import { Types, Document } from "mongoose";
+import { AsJson } from "../common";
 
 export interface IPictureSubmission {
     userId: Types.ObjectId;
@@ -27,3 +28,5 @@ export interface IRally extends Document {
     chat: Types.ObjectId;
     createdAt: Date;
 }
+
+export type IRallyJson = AsJson<IRally>;

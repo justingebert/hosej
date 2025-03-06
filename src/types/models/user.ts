@@ -1,4 +1,5 @@
 import { Document, Types } from "mongoose";
+import { AsJson } from "../common";
 
 export interface IUser extends Document {
     username: string;
@@ -17,3 +18,5 @@ export interface IUser extends Document {
 
     createdAt: Date;
 }
+
+export type IUserJson = AsJson<IUser>; 

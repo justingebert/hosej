@@ -1,4 +1,5 @@
 import { Types } from "mongoose";
+import { AsJson } from "../common";
 
 export interface IRating{
     userId: Types.ObjectId;
@@ -23,3 +24,5 @@ export interface IJukebox extends Document {
     chat: Types.ObjectId;
     createdAt: Date;
 }
+
+export type IJukeboxJson = AsJson<IJukebox>;
