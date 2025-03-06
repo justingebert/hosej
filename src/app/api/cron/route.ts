@@ -71,9 +71,10 @@ export async function GET(req: Request) {
               { active: true, groupId: group._id },
               { active: false }
             );
-            const newChat = await new Chat({groupId: group._id, entityModel: "Jukebox"}).save();
-            const newJukebox = await new Jukebox({groupId: group._id, date: today, active: true, chat: newChat._id}).save();
-            newChat.entity = newJukebox._id;
+            const newJukebox = await new Jukebox({groupId: group._id, date: today, active: true}).save();
+            const newChat = await new Chat({groupId: group._id, entityModel: "Jukebox", entity: newJukebox._id}).save();
+            newJukebox.chat = newChat._id;
+            await newJukebox.save();
             await newChat.save();
 
             await sendNotification(`🎶JUKEBOX - ${monthName} 🎶`, '🎶JETZT SONG ADDEN DU EI🎶', group._id);
