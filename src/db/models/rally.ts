@@ -7,8 +7,8 @@ const pictureSubmissionSchema = new mongoose.Schema({
     imageUrl: { type: String, required: true },
     votes: [
         {
-            user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-            time: { type: Date },
+          user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+          time: { type: Date },
         },
     ],
 });

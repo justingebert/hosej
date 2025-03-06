@@ -10,7 +10,7 @@ import Image from "next/image";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
 import { Skeleton } from "../ui/skeleton";
-import { IQuestion } from "@/types/Question";
+import { IQuestion } from "@/types/models/Question";
 import { IUser } from "@/types/models/user";
 
 type VoteResultsProps = {
@@ -22,10 +22,7 @@ type VoteResultsProps = {
 
 const VoteResults = ({ user, question, available, returnTo }: VoteResultsProps) => {
     const [animationTriggered, setAnimationTriggered] = useState(false);
-    const { data, error } = useSWR<any>(
-        `/api/groups/${question.groupId}/question/${question._id}/results/`,
-        fetcher
-    );
+    const { data, error } = useSWR<any>(`/api/groups/${question.groupId}/question/${question._id}/results/`, fetcher);
 
     useEffect(() => {
         if (data) setAnimationTriggered(true);

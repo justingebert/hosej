@@ -6,7 +6,7 @@ import { Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DataTableFacetedFilter } from "./data-table-faceted-filter";
-import { QuestionType } from "@/types/Question";
+import { QuestionType } from "@/types/models/Question";
 import { useParams } from "next/navigation";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
@@ -39,9 +39,7 @@ export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>)
             <div className="relative w-full">
                 <Input
                     value={(table.getColumn("question")?.getFilterValue() as string) ?? ""}
-                    onChange={(event) =>
-                        table.getColumn("question")?.setFilterValue(event.target.value)
-                    }
+                    onChange={(event) => table.getColumn("question")?.setFilterValue(event.target.value)}
                     className="w-full pr-10"
                 />
                 <Search className="absolute right-3 top-1/2 transform -translate-y-1/2" />
@@ -73,11 +71,7 @@ export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>)
                 <Button size="sm" className="h-8">
                     <div className="text-sm">{table.getFilteredRowModel().rows.length} Results</div>
                 </Button>
-                <Button
-                    disabled={!isFiltered}
-                    onClick={() => table.resetColumnFilters()}
-                    className="h-8 px-2 lg:px-3"
-                >
+                <Button disabled={!isFiltered} onClick={() => table.resetColumnFilters()} className="h-8 px-2 lg:px-3">
                     Reset
                     <X className="-mr-1" />
                 </Button>

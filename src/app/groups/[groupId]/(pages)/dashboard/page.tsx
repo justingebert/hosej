@@ -2,15 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import {
-    BarChartBig,
-    Menu,
-    ScanSearch,
-    MousePointerClick,
-    CircleSlash,
-    Settings,
-    Info,
-} from "lucide-react";
+import { BarChartBig, Menu, ScanSearch, MousePointerClick, CircleSlash, Settings, Info } from "lucide-react";
 import { CompletionChart } from "@/components/Charts/CompletionChart";
 import confetti from "canvas-confetti";
 import { Badge } from "@/components/ui/badge";
@@ -18,7 +10,7 @@ import Link from "next/link";
 import useSWR, { useSWRConfig } from "swr";
 import fetcher from "@/lib/fetcher";
 import { IGroup } from "@/types/models/group";
-import { IQuestion } from "@/types/Question";
+import { IQuestion } from "@/types/models/Question";
 import { IRally } from "@/types/models/rally";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -26,10 +18,7 @@ export default function Dashboard() {
     const router = useRouter();
     const { mutate } = useSWRConfig();
     const { groupId } = useParams<{ groupId: string }>();
-    const { data: group, isLoading: groupLoading } = useSWR<IGroup>(
-        `/api/groups/${groupId}`,
-        fetcher
-    );
+    const { data: group, isLoading: groupLoading } = useSWR<IGroup>(`/api/groups/${groupId}`, fetcher);
     const { data: questionsData, isLoading: questionLoading } = useSWR<{
         questions: IQuestion[];
         completionPercentage: number;
@@ -80,9 +69,7 @@ export default function Dashboard() {
                 <Button variant="outline" size="icon" onClick={() => router.push(`/groups`)}>
                     <Menu />
                 </Button>
-                <h1 className={`flex-grow ${titleClass} font-bold text-center break-words`}>
-                    {group?.name}
-                </h1>
+                <h1 className={`flex-grow ${titleClass} font-bold text-center break-words`}>{group?.name}</h1>
                 {/* <Link href={`/groups/${groupId}/settings`}> */}
                 <Button variant="outline" size="icon">
                     <Info />
@@ -134,11 +121,9 @@ export default function Dashboard() {
                                     {rallies.length > 0 && rallies[0].resultsShowing && (
                                         <BarChartBig className="w-full h-full p-4" />
                                     )}
-                                    {rallies.length > 0 &&
-                                        !rallies[0].votingOpen &&
-                                        !rallies[0].resultsShowing && (
-                                            <ScanSearch className="w-full h-full p-4" />
-                                        )}
+                                    {rallies.length > 0 && !rallies[0].votingOpen && !rallies[0].resultsShowing && (
+                                        <ScanSearch className="w-full h-full p-4" />
+                                    )}
                                     {rallies.length === 0 && (
                                         <CircleSlash className="w-full h-full p-4 text-secondary" />
                                     )}
@@ -161,9 +146,7 @@ export default function Dashboard() {
                                         <Badge>1</Badge>
                                     </div>
                                     <div className="flex flex-col justify-center">
-                                        <div className="w-24 h-24 flex items-center justify-center text-6xl">
-                                            📻
-                                        </div>
+                                        <div className="w-24 h-24 flex items-center justify-center text-6xl">📻</div>
                                         <div className="font-bold text-2xl">Jukebox</div>
                                     </div>
                                 </div>

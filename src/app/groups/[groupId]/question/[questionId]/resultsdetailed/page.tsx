@@ -7,28 +7,30 @@ import Image from "next/image";
 import BackLink from "@/components/ui/custom/BackLink";
 import fetcher from "@/lib/fetcher";
 import { Skeleton } from "@/components/ui/skeleton";
-import { IResult } from "@/types/Question";
+import { IResult } from "@/types/models/Question";
 import { Separator } from "@/components/ui/separator";
 
-export default function ResultsDetailPage({ params, searchParams }: { params: { groupId: string, questionId: string }, searchParams?: { [key: string]: string | string[] | undefined } }) {
+export default function ResultsDetailPage({
+    params,
+    searchParams,
+}: {
+    params: { groupId: string; questionId: string };
+    searchParams?: { [key: string]: string | string[] | undefined };
+}) {
     const { questionId, groupId } = params;
     const { returnTo } = searchParams || {};
 
-    const { data, isLoading } = useSWR<any>(
-        `/api/groups/${groupId}/question/${questionId}/results`,
-        fetcher
-    );
+    const { data, isLoading } = useSWR<any>(`/api/groups/${groupId}/question/${questionId}/results`, fetcher);
 
-    if (isLoading) return (
-      <>
-        <Header leftComponent={<BackLink href={`/groups/${groupId}/${returnTo}`} />} title={" "} />
-        {
-          [...Array(10)].map((_, i) => (
-                <Skeleton key={i} className=" h-36 mb-6" />
-          ))
-        }
-      </>
-    )
+    if (isLoading)
+        return (
+            <>
+                <Header leftComponent={<BackLink href={`/groups/${groupId}/${returnTo}`} />} title={" "} />
+                {[...Array(10)].map((_, i) => (
+                    <Skeleton key={i} className=" h-36 mb-6" />
+                ))}
+            </>
+        );
 
     const { results, questionType } = data;
 
@@ -36,7 +38,7 @@ export default function ResultsDetailPage({ params, searchParams }: { params: { 
         <>
             <Header leftComponent={<BackLink href={`/groups/${groupId}/${returnTo}`} />} title={" "} />
             <div className="grid grid-cols-1 gap-5 pb-20">
-              {results.map((result:IResult, index:number) => (
+                {results.map((result: IResult, index: number) => (
                     <Card className="w-full max-w-md mx-auto text-center" key={index}>
                         <CardHeader>
                             <CardTitle>

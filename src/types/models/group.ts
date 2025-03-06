@@ -1,6 +1,6 @@
 import { Types } from "mongoose";
 
-export interface IGroupMember extends Document {
+export interface IGroupMember{
     user: Types.ObjectId;
     name: string;
     points: number;

@@ -1,6 +1,6 @@
 import { Document, Types } from "mongoose";
 
-export interface IMessage extends Document {
+export interface IMessage{
     user: Types.ObjectId; 
     message: string;
     createdAt: Date;

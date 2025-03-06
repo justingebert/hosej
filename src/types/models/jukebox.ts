@@ -1,11 +1,11 @@
 import { Types } from "mongoose";
 
-export interface IRating extends Document {
+export interface IRating{
     userId: Types.ObjectId;
     rating: number;
 }
 
-export interface ISong extends Document {
+export interface ISong{
     spotifyTrackId: string;
     title: string;
     artist: string;

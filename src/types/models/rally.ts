@@ -1,6 +1,6 @@
 import { Types, Document } from "mongoose";
 
-export interface IPictureSubmission extends Document {
+export interface IPictureSubmission {
     userId: Types.ObjectId;
     username: string;
     imageUrl: string;
