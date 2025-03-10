@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import BackLink from "@/components/ui/custom/BackLink";
 import Header from "@/components/ui/custom/Header";
 import { Input } from "@/components/ui/input";
-import { IJukebox, ISong } from "@/types/models/jukebox";
+import { IJukeboxJson } from "@/types/models/jukebox";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import fetcher from "@/lib/fetcher";
 import { useParams } from "next/navigation";
@@ -13,13 +13,12 @@ import useSWR, { mutate } from "swr";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
-import { IUser } from "@/types/models/user";
+import { IUserJson } from "@/types/models/user";
 import {
     Drawer,
     DrawerContent,
     DrawerHeader,
     DrawerTitle,
-    DrawerTrigger,
 } from "@/components/ui/drawer";
 import { Slider } from "@/components/ui/slider";
 import { FoldVertical, Loader, Search, UnfoldVertical } from "lucide-react";
@@ -36,11 +35,12 @@ import ChatComponent from "@/components/Chat/Chat.client";
 
 const JukeboxPage = () => {
     const { user } = useAuthRedirect();
-    const { groupId } = useParams<{ groupId: string }>();
+    const params = useParams<{ groupId: string }>();
+    const groupId = params? params.groupId : "";
     const { toast } = useToast();
     const [userHasSubmitted, setUserHasSubmitted] = useState(false);
 
-    const { data, error, isLoading } = useSWR<{ data: IJukeboxProcessed[] }>(
+    const { data, isLoading } = useSWR<{ data: IJukeboxProcessed[] }>(
         user ? `/api/groups/${groupId}/jukebox?isActive=true&processed=true` : null,
         fetcher
     );
@@ -96,12 +96,13 @@ function JukeboxSearch({
     toast,
     setUserHasSubmitted,
 }: {
-    jukebox: IJukebox;
-    user: IUser;
+    jukebox: IJukeboxProcessed;
+    user: IUserJson;
     toast: any;
     setUserHasSubmitted: React.SetStateAction<any>;
 }) {
-    const { groupId } = useParams<{ groupId: string }>();
+    const params = useParams<{ groupId: string }>();
+    const groupId = params? params.groupId : "";
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResults, setSearchResults] = useState<any[] | null>(null); // Null for no search yet
     const [isLoading, setIsLoading] = useState(false);
@@ -145,7 +146,6 @@ function JukeboxSearch({
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "x-user-id": user._id || "",
                 },
                 body: JSON.stringify({
                     spotifyTrackId: selectedTrack.id,
@@ -282,7 +282,7 @@ function JukeboxSubmissions({
     toast,
 }: {
     jukebox: IJukeboxProcessed;
-    user: IUser;
+    user: IUserJson;
     toast: any;
 }) {
     const [selectedSong, setSelectedSong] = useState<IProcessedSong | null>(null);

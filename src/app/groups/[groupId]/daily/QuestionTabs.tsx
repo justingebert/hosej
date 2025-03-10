@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import VoteOptions from "@/components/Question/VotingOptions.client";
 import VoteResults from "@/components/Question/VoteResults.client";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -30,7 +30,7 @@ export default function QuestionsTabs({
   const searchParams = useSearchParams();
   const router = useRouter();
   const defaultTab =
-    searchParams.get("returnTo") ||
+    searchParams?.get("returnTo") ||
     (questions.length > 0 ? questions[0]._id : undefined);
 
   const rateQuestion = async (questionId: string, rating: string) => {

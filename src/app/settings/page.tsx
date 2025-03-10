@@ -14,11 +14,10 @@ import { requestPermissionReturnToken } from "@/hooks/useFcmToken";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { FaSpotify } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
-import { IUser } from "@/types/models/user";
+import { IUserJson } from "@/types/models/user";
 import { Skeleton } from "@/components/ui/skeleton";
 import BackLink from "@/components/ui/custom/BackLink";
 import Cookies from "js-cookie";
-import { set } from "mongoose";
 
 export default function SettingsPage() {
     const { session, status, user, update } = useAuthRedirect();
@@ -154,7 +153,7 @@ export default function SettingsPage() {
     );
 }
 
-function UserDataTable({ user, googleConnected }: { user: IUser; googleConnected: boolean }) {
+function UserDataTable({ user, googleConnected }: { user: IUserJson; googleConnected: boolean }) {
     const formattedDate = new Date(user.createdAt).toLocaleDateString(undefined, {
         year: "numeric",
         month: "numeric",
@@ -227,7 +226,7 @@ function SpotifyConnectButton({
     spotifyConnected: boolean;
     onDisconnect: () => void;
     className: string;
-    user: IUser;
+    user: IUserJson;
 }) {
     return (
         <div className={className}>

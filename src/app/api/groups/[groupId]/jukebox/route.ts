@@ -4,7 +4,6 @@ import { NextResponse } from "next/server";
 import Jukebox from "@/db/models/Jukebox";
 import { ISong } from "@/types/models/jukebox";
 import User from "@/db/models/user";
-import { IUser } from "@/types/models/user";
 
 export const revalidate = 0;
 
@@ -58,7 +57,7 @@ export async function GET(req: Request, { params }: { params: { groupId: string 
         if (processed) {
             jukeboxes = jukeboxes.map((jukebox) => {
                 const userHasSubmitted = jukebox.songs.some(
-                    (song: ISong) => String((song.submittedBy as IUser)._id) === String(userId)
+                    (song: ISong) => String(song.submittedBy?._id) === String(userId)
                 );
 
                 return {
@@ -82,7 +81,7 @@ export async function GET(req: Request, { params }: { params: { groupId: string 
 
                             // Determine whether the user has rated this song
                             const hasRated = sortedRatings.some(
-                                (rating) => String((rating.userId as IUser)._id) === String(userId)
+                                (rating) => String(rating.userId._id) === String(userId)
                             );
 
                             return {
@@ -91,7 +90,7 @@ export async function GET(req: Request, { params }: { params: { groupId: string 
                                 avgRating,
                                 // For sorting purposes, treat songs submitted by the user as if they are rated
                                 userHasRated:
-                                    String((song.submittedBy as IUser)._id) === String(userId)
+                                    String(song.submittedBy?._id) === String(userId)
                                         ? true
                                         : hasRated,
                             };

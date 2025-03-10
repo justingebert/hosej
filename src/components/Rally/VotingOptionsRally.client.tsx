@@ -16,7 +16,7 @@ import Modal from "react-modal";
 import { X } from "lucide-react";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
-import { IPictureSubmission } from "@/types/models/rally";
+import { IPictureSubmissionJson } from "@/types/models/rally";
 
 const RallyVoteCarousel = ({ user, rally, onVote }: any) => {
     const [selectedSubmission, setSelectedSubmission] = useState<string>("");
@@ -25,7 +25,7 @@ const RallyVoteCarousel = ({ user, rally, onVote }: any) => {
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-    const { data, isLoading } = useSWR<{ submissions: IPictureSubmission[] }>(
+    const { data, isLoading } = useSWR<{ submissions: IPictureSubmissionJson[] }>(
         `/api/groups/${rally.groupId}/rally/${rally._id}/submissions`,
         fetcher
     );

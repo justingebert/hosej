@@ -1,12 +1,12 @@
-import { Types } from "mongoose";
+import { Types, Document } from "mongoose";
 import { AsJson } from "../common";
 
-export interface IRating{
+export interface IRating {
     userId: Types.ObjectId;
     rating: number;
 }
 
-export interface ISong{
+export interface ISong {
     spotifyTrackId: string;
     title: string;
     artist: string;
@@ -24,5 +24,6 @@ export interface IJukebox extends Document {
     chat: Types.ObjectId;
     createdAt: Date;
 }
-
+export type IRatingJson = AsJson<IRating>;
+export type ISongJson = AsJson<ISong>;
 export type IJukeboxJson = AsJson<IJukebox>;

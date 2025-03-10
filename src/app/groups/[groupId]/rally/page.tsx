@@ -2,16 +2,15 @@
 
 import { useParams, useRouter } from "next/navigation";
 import useSWR from "swr";
-import SpinningLoader from "@/components/ui/custom/SpinningLoader";
 import Header from "@/components/ui/custom/Header";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { Card } from "@/components/ui/card";
 import BackLink from "@/components/ui/custom/BackLink";
 import { RallyTabs } from "./RallyTabs";
 import fetcher from "@/lib/fetcher";
-import { IRally } from "@/types/models/rally";
+import { IRallyJson } from "@/types/models/rally";
 import { useEffect, useMemo, useState } from "react";
-import { IGroup } from "@/types/models/group";
+import { IGroupJson } from "@/types/models/group";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -22,8 +21,8 @@ const RallyPage = () => {
     const [userHasVoted, setUserHasVoted] = useState<Record<string, boolean>>({});
     const [userHasUploaded, setUserHasUploaded] = useState<Record<string, boolean>>({});
 
-    const { data: group, error, mutate } = useSWR<IGroup>(`/api/groups/${groupId}`, fetcher, {});
-    const { data, isLoading } = useSWR<{ rallies: IRally[] }>(
+    const { data: group} = useSWR<IGroupJson>(`/api/groups/${groupId}`, fetcher, {});
+    const { data, isLoading } = useSWR<{ rallies: IRallyJson[] }>(
         user ? `/api/groups/${groupId}/rally` : null,
         fetcher
     );

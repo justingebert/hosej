@@ -20,12 +20,12 @@ export enum QuestionType {
   // CollectAndVoteMultiple = "collect-and-vote-multiple",
 }
 
-// export interface IResult {
-//   option: string;
-//   count: number;
-//   percentage: number;
-//   users: string[];
-// }
+export interface IResult {
+  option: string;
+  count: number;
+  percentage: number;
+  users: string[];
+}
 
 export interface IQuestion extends Document {
   groupId: Types.ObjectId;
@@ -49,6 +49,8 @@ export interface IQuestion extends Document {
   
   chat?: Types.ObjectId;
   createdAt: Date;
+
+  imageUrl?: string;
 }
 
 export type IQuestionJson = AsJson<IQuestion>;

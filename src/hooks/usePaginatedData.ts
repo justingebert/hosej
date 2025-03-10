@@ -1,5 +1,5 @@
+import { IQuestionJson } from "@/types/models/Question";
 import useSWRInfinite from "swr/infinite";
-import { PartialIQuestion } from "@/app/groups/[groupId]/(pages)/history/columns";
 
 interface UsePaginatedDataProps {
   groupId: string;
@@ -10,7 +10,7 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export function usePaginatedData({ groupId, limit = 1000 }: UsePaginatedDataProps) {
   // Define the SWR key generator for each page of data
-  const getKey = (pageIndex: number, previousPageData: { questions: PartialIQuestion[] }) => {
+  const getKey = (pageIndex: number, previousPageData: { questions: IQuestionJson[] }) => {
     // If no more data to fetch, return null to stop the pagination
     if (previousPageData && previousPageData.questions.length === 0) return null;
 

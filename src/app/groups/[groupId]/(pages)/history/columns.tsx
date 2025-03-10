@@ -1,13 +1,11 @@
 "use client";
 
-import { IQuestion } from "@/types/models/Question";
+import { IQuestionJson } from "@/types/models/Question";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
-export type PartialIQuestion = Partial<IQuestion>;
-
-export const columns: ColumnDef<PartialIQuestion>[] = [
+export const columns: ColumnDef<IQuestionJson>[] = [
     {
         accessorKey: "question",
         header: "Question",

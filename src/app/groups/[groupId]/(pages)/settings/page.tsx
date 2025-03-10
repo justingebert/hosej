@@ -12,7 +12,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { IGroup } from "@/types/models/group";
+import { IGroupJson } from "@/types/models/group";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { useParams, useRouter } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
@@ -29,16 +29,16 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import BackLink from "@/components/ui/custom/BackLink";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
 
-interface IGroupProcessed extends IGroup {
+interface IGroupProcessed extends IGroupJson {
     userIsAdmin: boolean;
 }
 
 export default function GroupPage() {
-    const { groupId } = useParams<{ groupId: string }>();
+    const params = useParams<{ groupId: string }>();
+    const groupId = params? params.groupId : "";
     const { user } = useAuthRedirect();
     const { toast } = useToast();
     const [settings, setSettings] = useState<any>({});

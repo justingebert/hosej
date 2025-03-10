@@ -2,14 +2,13 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { BarChartBig, Menu, ScanSearch, MousePointerClick, CircleSlash, Settings, Info } from "lucide-react";
+import { BarChartBig, Menu, ScanSearch, MousePointerClick, CircleSlash, Info } from "lucide-react";
 import { CompletionChart } from "@/components/Charts/CompletionChart";
 import confetti from "canvas-confetti";
 import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
 import useSWR, { useSWRConfig } from "swr";
 import fetcher from "@/lib/fetcher";
-import { IGroup } from "@/types/models/group";
+import { IGroupJson } from "@/types/models/group";
 import { IQuestion } from "@/types/models/Question";
 import { IRally } from "@/types/models/rally";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,8 +16,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function Dashboard() {
     const router = useRouter();
     const { mutate } = useSWRConfig();
-    const { groupId } = useParams<{ groupId: string }>();
-    const { data: group, isLoading: groupLoading } = useSWR<IGroup>(`/api/groups/${groupId}`, fetcher);
+    const params = useParams<{ groupId: string }>();
+    const groupId = params?.groupId;
+    const { data: group, isLoading: groupLoading } = useSWR<IGroupJson>(groupId ? `/api/groups/${groupId}` : null, fetcher);
     const { data: questionsData, isLoading: questionLoading } = useSWR<{
         questions: IQuestion[];
         completionPercentage: number;
@@ -76,6 +76,7 @@ export default function Dashboard() {
                 </Button>
                 {/* </Link> */}
             </div>
+            
             <div className="flex flex-col h-[80vh] justify-center">
                 <div className="grid grid-cols-2 gap-8 items-center">
                     {!questionLoading && questionsData ? (

@@ -9,13 +9,13 @@ import { Separator } from "../ui/separator";
 import ChatComponent from "../Chat/Chat.client";
 import { RallyVotesChart } from "../Charts/RallyResultsChart";
 import useSWR from "swr";
-import { IPictureSubmission } from "@/types/models/rally";
+import { IPictureSubmissionJson } from "@/types/models/rally";
 import fetcher from "@/lib/fetcher";
 
 const RallyResults = ({ user, rally }: any) => {
     const [loadedImages, setLoadedImages] = useState<{ [key: number]: boolean }>({});
 
-    const { data, isLoading } = useSWR<{ submissions: IPictureSubmission[] }>(
+    const { data, isLoading } = useSWR<{ submissions: IPictureSubmissionJson[] }>(
         `/api/groups/${rally.groupId}/rally/${rally._id}/submissions`,
         fetcher
     );

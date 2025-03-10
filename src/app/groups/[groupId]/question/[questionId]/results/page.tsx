@@ -8,19 +8,21 @@ import BackLink from "@/components/ui/custom/BackLink";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import Image from "next/image";
 import fetcher from "@/lib/fetcher";
-import { IQuestion } from "@/types/models/Question";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { IQuestionJson } from "@/types/models/Question";
 
 const ResultsPage = () => {
     const { user } = useAuthRedirect();
-    const { groupId, questionId } = useParams<{ groupId: string; questionId: string }>();
+    const params = useParams<{ groupId: string; questionId: string }>();
+    const groupId = params? params.groupId : "";
+    const questionId = params? params.questionId: "";
 
     const {
         data: question,
         error,
         isLoading,
-    } = useSWR<IQuestion>(questionId ? `/api/groups/${groupId}/question/${questionId}` : null, fetcher);
+    } = useSWR<IQuestionJson>(questionId ? `/api/groups/${groupId}/question/${questionId}` : null, fetcher);
 
     if (isLoading) return <Loading />;
     if (error) return <div className="text-red-500">Failed to load question data.</div>;

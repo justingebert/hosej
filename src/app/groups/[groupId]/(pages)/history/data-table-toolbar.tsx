@@ -2,7 +2,6 @@
 
 import { Table } from "@tanstack/react-table";
 import { Search, X } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DataTableFacetedFilter } from "./data-table-faceted-filter";
@@ -10,7 +9,7 @@ import { QuestionType } from "@/types/models/Question";
 import { useParams } from "next/navigation";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
-import { IGroup } from "@/types/models/group";
+import { IGroupJson } from "@/types/models/group";
 
 interface DataTableToolbarProps<TData> {
     table: Table<TData>;
@@ -22,8 +21,9 @@ const questionTypesOptions = Object.values(QuestionType).map((type) => ({
 }));
 
 export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>) {
-    const { groupId } = useParams<{ groupId: string }>();
-    const { data: users } = useSWR<IGroup["members"]>(`/api/groups/${groupId}/members`, fetcher);
+    const params = useParams<{ groupId: string }>();
+    const groupId = params? params.groupId : "";
+    const { data: users } = useSWR<IGroupJson["members"]>(`/api/groups/${groupId}/members`, fetcher);
 
     const groupMembers = users
         ? users.map((user: any) => ({

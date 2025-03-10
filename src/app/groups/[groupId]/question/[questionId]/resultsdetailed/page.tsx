@@ -8,7 +8,6 @@ import BackLink from "@/components/ui/custom/BackLink";
 import fetcher from "@/lib/fetcher";
 import { Skeleton } from "@/components/ui/skeleton";
 import { IResult } from "@/types/models/Question";
-import { Separator } from "@/components/ui/separator";
 
 export default function ResultsDetailPage({
     params,

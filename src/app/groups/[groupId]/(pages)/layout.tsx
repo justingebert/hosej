@@ -8,7 +8,8 @@ import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 
 export default function TabsLayout({ children }: { children: React.ReactNode }) {
-  const { groupId } = useParams<{ groupId: string }>();
+  const params = useParams<{ groupId: string }>();
+  const groupId = params? params.groupId : "";
   const currentPath = usePathname();
 
   // To store refs for each link

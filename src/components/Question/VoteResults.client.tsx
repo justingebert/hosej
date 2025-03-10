@@ -10,12 +10,12 @@ import Image from "next/image";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
 import { Skeleton } from "../ui/skeleton";
-import { IQuestion } from "@/types/models/Question";
-import { IUser } from "@/types/models/user";
+import { IQuestionJson } from "@/types/models/Question";
+import { IUserJson } from "@/types/models/user";
 
 type VoteResultsProps = {
-    user: IUser;
-    question: IQuestion;
+    user: IUserJson;
+    question: IQuestionJson;
     available: boolean;
     returnTo?: string;
 };

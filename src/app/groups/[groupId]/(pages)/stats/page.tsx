@@ -16,7 +16,7 @@ import { Separator } from "@/components/ui/separator";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
 import { Skeleton } from "@/components/ui/skeleton";
-import { IGroup } from "@/types/models/group";
+import { IGroupJson } from "@/types/models/group";
 
 type Statistics = {
     group: any;
@@ -31,13 +31,14 @@ type Statistics = {
 };
 
 const StatsPage = () => {
-    const { groupId } = useParams<{ groupId: string }>();
+    const params = useParams<{ groupId: string }>();
+    const groupId = params? params.groupId : "";
 
     const { data: stats, isLoading: statsLoading } = useSWR<Statistics>(
         `/api/groups/${groupId}/stats`,
         fetcher
     );
-    const { data, isLoading: groupLoading } = useSWR<IGroup>(`/api/groups/${groupId}/`, fetcher);
+    const { data, isLoading: groupLoading } = useSWR<IGroupJson>(`/api/groups/${groupId}/`, fetcher);
 
     const sortedUsers = data?.members.sort((a, b) => b.points - a.points) || [];
 
