@@ -3,11 +3,11 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { CircleHelp, Copy, Star, User } from "lucide-react";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
-import { IGroup } from "@/types/models/group";
+import { IGroupJson } from "@/types/models/group";
 import { JoinGroupDrawer } from "@/components/Group/joinGroupDrawer";
 import { CreateGroupDrawer } from "../../components/Group/createGroupDrawer";
 import { Skeleton } from "@/components/ui/skeleton";
-import useSWR, { mutate } from "swr";
+import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
 import { useToast } from "@/hooks/use-toast";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
@@ -88,7 +88,7 @@ function GroupsList({
         }
     };
 
-    const { data, isLoading } = useSWR<{ groups: IGroup[] }>(user ? `/api/groups` : null, fetcher);
+    const { data, isLoading } = useSWR<{ groups: IGroupJson[] }>(user ? `/api/groups` : null, fetcher);
     const groups = data?.groups || [];
 
     return (
@@ -110,16 +110,10 @@ function GroupsList({
                                         <CardDescription>Go Vote Now!</CardDescription>
                                     </div>
                                     <div className="flex items-center space-x-2">
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={(e) => handleStar(group._id, e)}
-                                        >
+                                        <Button variant="ghost" size="icon" onClick={(e) => handleStar(group._id, e)}>
                                             <Star
                                                 className="w-4 h-4"
-                                                color={
-                                                    starredGroupId === group._id ? "gold" : "gray"
-                                                }
+                                                color={starredGroupId === group._id ? "gold" : "gray"}
                                             />
                                         </Button>
 
