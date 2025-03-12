@@ -18,7 +18,7 @@ import { CircleMinus, Plus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createQuestionData } from "@/app/groups/[groupId]/(pages)/create/page";
 import useSWR from "swr";
-import { IGroup } from "@/db/models/Group";
+import { IGroupJson } from "@/types/models/group";
 import fetcher from "@/lib/fetcher";
 
 interface CreateQuestionProps {
@@ -27,7 +27,8 @@ interface CreateQuestionProps {
 }
 
 const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) => {
-    const { groupId } = useParams<{ groupId: string }>();
+    const params = useParams<{ groupId: string }>();
+    const groupId = params? params.groupId : "";
     const { user } = useAuthRedirect();
     const { toast } = useToast();
     const [clearImageInput, setClearImageInput] = useState(false);
@@ -43,7 +44,7 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
         optionsMode = "static";
     }
 
-    const { data: group, isLoading } = useSWR<IGroup>(
+    const { data: group, isLoading } = useSWR<IGroupJson>(
         user ? `/api/groups/${groupId}` : null,
         fetcher
     );

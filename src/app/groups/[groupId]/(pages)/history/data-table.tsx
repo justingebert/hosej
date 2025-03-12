@@ -7,7 +7,6 @@ import {
   getFilteredRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-
 import {
   Table,
   TableBody,
@@ -18,7 +17,6 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { DataTableToolbar } from "./data-table-toolbar";
-import { ClipLoader } from "react-spinners"; // Import the ClipLoader component
 import { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 

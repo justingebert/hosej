@@ -1,71 +1,46 @@
 import mongoose from "mongoose";
-import { IUser } from "./user";
-
-
-export interface IRating extends mongoose.Document {
-    userId: string | mongoose.Types.ObjectId | IUser,
-    rating: number,
-}
-
-export interface ISong extends mongoose.Document {
-    spotifyTrackId: string,
-    title: string,
-    artist: string,
-    album: string,
-    coverImageUrl: string,
-    submittedBy:  IUser | string | mongoose.Types.ObjectId,
-    ratings: IRating[],
-}
-
-export interface IJukebox extends mongoose.Document {
-    groupId: string,
-    active: boolean,
-    date: Date,
-    songs: ISong[],
-    chat: string | mongoose.Types.ObjectId,
-    createdAt: Date,
-}
+import { IJukebox } from "@/types/models/jukebox";
 
 const RatingSchema = new mongoose.Schema({
     userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
     },
     rating: {
-      type: Number,
-      required: true,
-      min: 1,
-      max: 100,
+        type: Number,
+        required: true,
+        min: 1,
+        max: 100,
     },
-  });
-  
-  const SongSchema = new mongoose.Schema({
+});
+
+const SongSchema = new mongoose.Schema({
     spotifyTrackId: {
-      type: String, 
-      required: true,
+        type: String,
+        required: true,
     },
     title: {
-      type: String, 
-      required: true,
+        type: String,
+        required: true,
     },
     artist: {
-      type: String, 
-      required: true,
+        type: String,
+        required: true,
     },
     album: {
-      type: String,
+        type: String,
     },
     coverImageUrl: {
-      type: String,
+        type: String,
     },
     submittedBy: {
-      type: mongoose.Schema.Types.ObjectId, 
-      ref: 'User',
-      required: true,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
     },
     ratings: [RatingSchema],
-  });
+});
 
 const jukeBoxSchema = new mongoose.Schema({
     groupId: { type: mongoose.Schema.Types.ObjectId, ref: "Group", required: true },

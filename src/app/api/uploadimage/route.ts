@@ -1,7 +1,7 @@
 import { createPresignedPost } from '@aws-sdk/s3-presigned-post'
 import { S3Client } from '@aws-sdk/client-s3'
 import { v4 as uuidv4 } from 'uuid'
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 // create a presigned URL for uploading images to S3
 export async function POST(request: NextRequest) {
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
       },
       Expires: 600, // Seconds before the presigned post expires. 3600 by default.
     })
-    return Response.json({ url, fields })
+    return NextResponse.json({ url, fields }, { status: 200 })
   } catch (error:any) {
     console.error('Error uploading image', error)
     return Response.json({ message: "Internal Server Error" }, { status: 500 })

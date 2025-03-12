@@ -7,18 +7,16 @@ import {
     DrawerTitle,
     DrawerTrigger,
 } from "@/components/ui/drawer";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { IGroup } from "@/db/models/Group";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { mutate } from "swr";
 
 export function CreateGroupDrawer() {
     const [groupName, setGroupName] = useState("");
     const { toast } = useToast();
-    const {user} = useAuthRedirect();
 
     const createGroup = async () => {
         try {
@@ -62,7 +60,11 @@ export function CreateGroupDrawer() {
                     </div>
                     <DrawerFooter>
                         <DrawerClose asChild>
-                            <Button onClick={createGroup} disabled={!groupName} className="mb-6 w-full h-12 text-lg font-bold">
+                            <Button
+                                onClick={createGroup}
+                                disabled={!groupName}
+                                className="mb-6 w-full h-12 text-lg font-bold"
+                            >
                                 Create
                             </Button>
                         </DrawerClose>

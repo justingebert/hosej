@@ -37,7 +37,6 @@ export async function POST(req: NextRequest) {
   }
 }
 
-//get user by id
 export async function GET(req: NextRequest){
     const userId = req.headers.get('x-user-id');
     try{

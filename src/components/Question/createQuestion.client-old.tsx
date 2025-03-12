@@ -19,7 +19,7 @@ import { Plus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createQuestionData } from "@/app/groups/[groupId]/(pages)/create/page";
 import useSWR from "swr";
-import { IGroup } from "@/db/models/Group";
+import { IGroup } from "@/types/models/group";
 import fetcher from "@/lib/fetcher";
 
 interface CreateQuestionProps {

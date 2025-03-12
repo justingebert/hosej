@@ -14,7 +14,8 @@ interface CreateRallyProps {
 
 const CreateRally = ({ rallyData, setRallyData }: CreateRallyProps) => {
     const [loading, setLoading] = useState(false);
-    const { groupId } = useParams<{ groupId: string }>();
+    const params = useParams<{ groupId: string }>();
+    const groupId = params?.groupId;
     const { toast } = useToast();
 
     const lengthInputRef = useRef<HTMLInputElement>(null);

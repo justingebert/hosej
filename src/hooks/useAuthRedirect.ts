@@ -1,16 +1,16 @@
-import { useEffect } from 'react';
+import { useEffect } from "react";
 import { useSession, signIn } from "next-auth/react";
-import { IUser } from '@/db/models/user';
+import { IUserJson } from "@/types/models/user";
 
 export function useAuthRedirect() {
-  const { data: session, status, update } = useSession();;
+    const { data: session, status, update } = useSession();
 
-  useEffect(() => {
-    if (status === 'loading') return; 
-    if (!session) signIn();
-  }, [status, session]);
+    useEffect(() => {
+        if (status === "loading") return;
+        if (!session) signIn();
+    }, [status, session]);
 
-  const user = session?.user as IUser 
+    const user = session?.user as IUserJson;
 
-  return { session, status, user, update };
+    return { session, status, user, update };
 }

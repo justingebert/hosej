@@ -10,7 +10,8 @@ import { DataTable } from "./data-table";
 import { columns } from "./columns";
 
 const QuestionHistoryPage = () => {
-  const { groupId } = useParams<{ groupId: string }>();
+  const params = useParams<{ groupId: string }>();
+  const groupId = params? params.groupId : "";
   const { data, loading, hasMore, loadMore } = usePaginatedData({ groupId });
   const [showGoTop, setShowGoTop] = useState(false); 
   const [showGoBottom, setShowGoBottom] = useState(true); 

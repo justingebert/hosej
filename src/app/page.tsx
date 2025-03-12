@@ -15,7 +15,7 @@ function StartPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
-  let callbackUrl = searchParams.get("callbackUrl") || "/groups";
+  let callbackUrl = searchParams?.get("callbackUrl") || "/groups";
   const { toast } = useToast();
   const [userName, setUserName] = useState("");
   const [loading, setLoading] = useState(true);
