@@ -2,11 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/db/models/user';
 
-interface CreateUserRequest {
-  deviceId: string;
-  userName: string;
-}
-
 export async function POST(req: NextRequest) {
   await dbConnect();
 

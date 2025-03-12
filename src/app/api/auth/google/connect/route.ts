@@ -1,39 +1,32 @@
-import { NextResponse } from 'next/server';
-import dbConnect from '@/lib/dbConnect';
-import User from '@/db/models/user';
+import dbConnect from "@/lib/dbConnect";
+import { User } from "@/db/models";
+import { withErrorHandling } from "@/lib/apiErrorHandling";
 
-export async function POST(req: Request) {
-  try {
-    const body = await req.json(); 
-    const { deviceId, googleUserId } = body;
+async function connectHandler(req: Request): Promise<Response> {
+    const userId = req.headers.get("x-user-id") as string;
+    const { deviceId } = await req.json();
     if (!deviceId) {
-      return NextResponse.json({message: 'No deviceId provided' }, { status: 400 });
+        return Response.json({ message: "No deviceId provided" }, { status: 400 });
     }
 
     await dbConnect();
 
-    const googleUser = await User.findById(googleUserId);
-    if (!googleUser) {
-      return NextResponse.json({ message: 'Google user not found' }, { status: 404 });
-    }
-
     const deviceUser = await User.findOne({ deviceId });
     if (!deviceUser) {
-      return NextResponse.json({message: 'User with deviceId not found' }, { status: 404 });
+        return Response.json({ message: "User with deviceId not found" }, { status: 404 });
     }
 
+    const googleUser = await User.findById(userId);
+
     const googleId = googleUser.googleId;
-    await User.deleteOne({ _id: googleUserId });
+    await User.deleteOne({ _id: userId });
 
     deviceUser.googleId = googleId;
     deviceUser.googleConnected = true;
     deviceUser.deviceId = undefined;
     await deviceUser.save();
-    
-    return NextResponse.json({ message: 'Google account linked successfully.' }, { status: 200 });
 
-  } catch (error) {
-    console.error('Error merging accounts:', error);
-    return NextResponse.json({message: 'Internal Server Error' }, { status: 500 });
-  }
+    return Response.json({ message: "Google account linked successfully." }, { status: 200 });
 }
+
+export const POST = withErrorHandling(connectHandler);

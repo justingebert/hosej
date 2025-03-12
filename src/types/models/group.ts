@@ -1,7 +1,7 @@
 import { Types, Document } from "mongoose";
 import { AsJson } from "../common";
 
-export interface IGroupMember{
+export interface IGroupMember {
     user: Types.ObjectId;
     name: string;
     points: number;
@@ -11,8 +11,9 @@ export interface IGroupMember{
 }
 
 export interface IGroup extends Document {
+    _id: Types.ObjectId;
     name: string;
-    admin: Types.ObjectId
+    admin: Types.ObjectId;
     members: IGroupMember[];
     questionCount: number;
     lastQuestionDate: Date | null;
@@ -24,5 +25,6 @@ export interface IGroup extends Document {
     createdAt: Date;
     addPoints(userId: Types.ObjectId, points: number): Promise<void>;
 }
+
 
 export type IGroupJson = AsJson<IGroup>;

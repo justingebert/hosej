@@ -17,6 +17,7 @@ export interface ISong {
 }
 
 export interface IJukebox extends Document {
+    _id: Types.ObjectId;
     groupId: Types.ObjectId;
     active: boolean;
     date: Date;

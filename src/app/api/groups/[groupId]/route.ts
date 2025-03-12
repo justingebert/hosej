@@ -3,7 +3,6 @@ import dbConnect from "@/lib/dbConnect";
 import { isUserInGroup } from "@/lib/groupAuth";
 import Group from "@/db/models/Group";
 import User from "@/db/models/user";
-import { IUser } from "@/types/models/user";
 
 export const revalidate = 0;
 

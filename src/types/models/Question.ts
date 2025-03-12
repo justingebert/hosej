@@ -28,6 +28,7 @@ export interface IResult {
 }
 
 export interface IQuestion extends Document {
+  _id: Types.ObjectId;
   groupId: Types.ObjectId;
   category: string;
   questionType: QuestionType;

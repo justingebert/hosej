@@ -14,6 +14,7 @@ enum EntityModel {
 }
 
 export interface IChat extends Document {
+    _id: Types.ObjectId;
     group: Types.ObjectId;
     messages: IMessage[];
     entity: Types.ObjectId;
