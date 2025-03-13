@@ -26,7 +26,7 @@ const groupSchema = new mongoose.Schema<IGroup>({
     createdAt: { type: Date, default: Date.now },
 });
 
-groupSchema.methods.addPoints = async function (userId:Types.ObjectId, points: number) {
+groupSchema.methods.addPoints = async function (userId: Types.ObjectId | string, points: number) {
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Standardize to the start of the day
 
@@ -74,6 +74,6 @@ groupSchema.methods.addPoints = async function (userId:Types.ObjectId, points: n
 
 groupSchema.index({ name: 1 });
 
-const Group = mongoose.models.Group || mongoose.model<IGroup>("Group", groupSchema);
+const Group = mongoose.models.Group as mongoose.Model<IGroup> || mongoose.model<IGroup>("Group", groupSchema);
 
 export default Group;

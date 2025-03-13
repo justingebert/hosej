@@ -30,7 +30,7 @@ const RallyVoteCarousel = ({ user, rally, onVote }: any) => {
         fetcher
     );
 
-    const submissions = useMemo(() => rallyData?.submissions || [], [data]);
+    const submissions = useMemo(() => rallyData?.submissions || [], [rallyData]);
 
     useEffect(() => {
         if (submissions.length > 0) {
@@ -78,12 +78,13 @@ const RallyVoteCarousel = ({ user, rally, onVote }: any) => {
         }
 
         await fetch(
-            `/api/groups/${rally.groupId}/rally/${rally._id}/submissions/${selectedSubmission}/vote`,
+            `/api/groups/${rally.groupId}/rally/${rally._id}/vote`,
             {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
+                body: JSON.stringify({submissionId: selectedSubmission})
             }
         );
 
