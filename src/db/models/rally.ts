@@ -13,7 +13,7 @@ const pictureSubmissionSchema = new mongoose.Schema({
     ],
 });
 
-const rallySchema = new mongoose.Schema({
+const rallySchema = new mongoose.Schema<IRally>({
     groupId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Group",

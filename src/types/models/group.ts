@@ -15,8 +15,10 @@ export interface IGroup extends Document {
     name: string;
     admin: Types.ObjectId;
     members: IGroupMember[];
+    question: boolean;
     questionCount: number;
     lastQuestionDate: Date | null;
+    rally: boolean;
     rallyCount: number;
     rallyGapDays: number;
     jukebox: boolean;

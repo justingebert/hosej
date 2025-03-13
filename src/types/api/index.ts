@@ -1,4 +1,7 @@
 export * from './groups/types';
+export * from './groups/[groupId]/types';
+export * from './groups/[groupId]/stats/types';
+export * from './groups/[groupId]/members/types';
 export * from './users/types';
 export * from './rallies/types';
 export * from './questions/types';

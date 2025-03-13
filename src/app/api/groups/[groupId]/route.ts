@@ -1,98 +1,79 @@
-import { NextRequest, NextResponse } from "next/server";
+import { Group, User } from "@/db/models";
+import { withErrorHandling } from "@/lib/apiErrorHandling";
 import dbConnect from "@/lib/dbConnect";
-import { isUserInGroup } from "@/lib/groupAuth";
-import Group from "@/db/models/Group";
-import User from "@/db/models/user";
+import { isUserGroupAdmin, isUserInGroup } from "@/lib/groupAuth";
 
 export const revalidate = 0;
 
-//get group
-export async function GET(req: NextRequest, { params }: { params: { groupId: string } }) {
+async function getGroupHandler(req: Request, { params }: { params: { groupId: string } }) {
     const userId = req.headers.get("x-user-id") as string;
-    try {
-        const { groupId } = params;
-        await dbConnect();
-
-        const authCheck = await isUserInGroup(userId, groupId);
-        if (!authCheck.isAuthorized) {
-            return NextResponse.json({ message: authCheck.message }, { status: authCheck.status });
-        }
-
-        let group = await Group.findById(groupId);
-        const userIsAdmin = group.admin.equals(userId);
-        group = group.toObject();
-        group.userIsAdmin = userIsAdmin;
-
-        return NextResponse.json(group, { status: 200 });
-    } catch (error) {
-        console.error("Error fetching group", error);
-        return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
+    const { groupId } = params;
+    await dbConnect();
+    
+    const group = await Group.findById(groupId);
+    if (!group) {
+        return Response.json({ message: "Group not found" }, { status: 404 });
     }
+    const authCheck = await isUserInGroup(userId, groupId);
+    if (!authCheck.isAuthorized) {
+        return Response.json({ message: authCheck.message }, { status: authCheck.status });
+    }
+
+    const userIsAdmin = group.admin.equals(userId);
+
+    return Response.json({group:group, userIsAdmin: userIsAdmin}, { status: 200 });
 }
 
-//update group
-export async function PUT(req: NextRequest, { params }: { params: { groupId: string } }) {
+export async function updateGroupHandler(req: Request, { params }: { params: { groupId: string } }) {
     const userId = req.headers.get("x-user-id") as string;
-    try {
-        const { groupId } = params;
+    const { groupId } = params;
 
-        const data = await req.json();
-        await dbConnect();
+    const data = await req.json();
+    await dbConnect();
 
-        const authCheck = await isUserInGroup(userId, groupId);
-        if (!authCheck.isAuthorized) {
-            return NextResponse.json({ message: authCheck.message }, { status: authCheck.status });
-        }
-        const user = await User.findById(userId);
-        const group = await Group.findById(groupId);
-        if (!group.admin.equals(user._id)) {
-            return NextResponse.json(
-                { message: "You are not the admin of this group" },
-                { status: 403 }
-            );
-        }
-        group.set(data);
-        await group.save();
-
-        return NextResponse.json(group, { status: 200 });
-    } catch (error) {
-        console.error("Error updating group", error);
-        return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
+    const group = await Group.findById(groupId);
+    if(!group) {
+        return Response.json({ message: "Group not found" }, { status: 404 });
     }
+
+    const adminCheck = await isUserGroupAdmin(userId, groupId);
+    if (!adminCheck.isAuthorized) {
+        return Response.json({ message: adminCheck.message }, { status: adminCheck.status });
+    }
+
+    group.set(data);
+    await group.save();
+
+    return Response.json(group, { status: 200 });
 }
 
-//delete group
-export async function DELETE(req: NextRequest, { params }: { params: { groupId: string } }) {
+async function deleteGroupHandler(req: Request, { params }: { params: { groupId: string } }) {
     const userId = req.headers.get("x-user-id") as string;
-    try {
-        const { groupId } = params;
+    const { groupId } = params;
 
-        await dbConnect();
+    await dbConnect();
 
-        const authCheck = await isUserInGroup(userId, groupId);
-        if (!authCheck.isAuthorized) {
-            return NextResponse.json({ message: authCheck.message }, { status: authCheck.status });
-        }
-        const user = await User.findById(userId);
-        const group = await Group.findById(groupId);
-        if (!group.admin.equals(user._id)) {
-            return NextResponse.json(
-                { message: "You are not the admin of this group" },
-                { status: 403 }
-            );
-        }
-
-        for (const member of group.members) {
-            const user = await User.findById(member.user);
-            user.groups = user.groups.filter((group: string) => group !== groupId);
-            await user.save();
-        }
-
-        await Group.findByIdAndDelete(groupId);
-
-        return NextResponse.json({ message: "Group deleted" }, { status: 200 });
-    } catch (error) {
-        console.error("Error deleting group", error);
-        return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
+    const group = await Group.findById(groupId);
+    if (!group) {
+        return Response.json({ message: "Group not found" }, { status: 404 });
     }
+
+    const adminCheck = await isUserGroupAdmin(userId, groupId);
+    if (!adminCheck.isAuthorized) {
+        return Response.json({ message: adminCheck.message }, { status: adminCheck.status });
+    }
+    
+    for (const member of group.members) {
+        const user = await User.findById(member.user);
+        user.groups = user.groups.filter((group: string) => group !== groupId);
+        await user.save();
+    }
+
+    await Group.findByIdAndDelete(groupId);
+
+    return Response.json({ message: "Group deleted" }, { status: 200 });
 }
+
+export const GET = withErrorHandling(getGroupHandler);
+export const PUT = withErrorHandling(updateGroupHandler);
+export const DELETE = withErrorHandling(deleteGroupHandler);

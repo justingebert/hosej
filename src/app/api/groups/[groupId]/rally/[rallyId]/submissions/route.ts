@@ -1,12 +1,10 @@
 import dbConnect from "@/lib/dbConnect";
-import Rally from "@/db/models/rally";
-import User from "@/db/models/user";
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { NextRequest, NextResponse } from 'next/server'
-import Group from "@/db/models/Group";
 import { isUserInGroup } from "@/lib/groupAuth";
 import { SUBMITTED_RALLY_POINTS } from "@/db/POINT_CONFIG";
+import { Group, Rally, User } from "@/db/models";
 
 const s3 = new S3Client({
     region: process.env.AWS_REGION,
@@ -119,3 +117,4 @@ export async function POST(req: NextRequest, { params }: { params: { groupId: st
     return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
 }
+

@@ -1,41 +1,41 @@
 import dbConnect from "@/lib/dbConnect";
-import Rally from "@/db/models/rally";
-import { NextRequest, NextResponse } from "next/server";
-import Group from "@/db/models/Group";
-import { isUserAdmin, isUserInGroup } from "@/lib/groupAuth";
+import { isUserGroupAdmin } from "@/lib/groupAuth";
+import { withErrorHandling } from "@/lib/apiErrorHandling";
+import { Group, Rally } from "@/db/models";
+import { sendNotification } from "@/utils/sendNotification";
 
-//get current rally and set state
-export async function POST(req: NextRequest,{ params }: { params: { groupId: string } }) {
-  const { groupId } = params;
-  const userId = req.headers.get('x-user-id') as string;
+async function activateRalliesHandler(req: Request, { params }: { params: { groupId: string } }) {
+    const { groupId } = params;
+    const userId = req.headers.get("x-user-id") as string;
 
-  try {
-    const authCheck = await isUserAdmin(userId, groupId);
+    const authCheck = await isUserGroupAdmin(userId, groupId);
     if (!authCheck.isAuthorized) {
-      return NextResponse.json({ message: authCheck.message }, { status: authCheck.status });
+        return Response.json({ message: authCheck.message }, { status: authCheck.status });
     }
 
     await dbConnect();
     const group = await Group.findById(groupId);
-
-    const activeRallies = await Rally.find({ groupId: groupId, active: true })
-    if(activeRallies.length >= group.rallyCount){
-        return NextResponse.json({ message: "rallies already active", rallies: activeRallies }, { status: 200 });
+    if (!group) {
+        return Response.json({ message: "Group not found" }, { status: 404 });
     }
-    const countToActivate = group.rallyCount - activeRallies.length;
 
-    const rallies = await Rally.find({ groupId: groupId, active: false, used: false }).limit(countToActivate);
+    const rallies = await Rally.find({ groupId: groupId, active: false, used: false }).limit(group.rallyCount);
     const currentTime = new Date();
-    for(let rally of rallies){
+    for (let rally of rallies) {
         rally.active = true;
+        rally.used = true
         rally.startTime = new Date(currentTime.getTime());
         rally.endTime = new Date(rally.startTime.getTime() + rally.lengthInDays * 24 * 60 * 60 * 1000);
         await rally.save();
     }
 
-    return NextResponse.json({ message: "Activated rallies", rallies: rallies }, { status: 200 });
-  }catch (error: any) {
-    console.error(error);
-    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
-  }
+    await sendNotification(
+        `📷 New ${group.name} Rally Started! 📷`,
+        "📷 PARTICIPATE NOW! 📷",
+        group._id.toString()
+    );
+
+    return Response.json({ message: "Activated rallies", rallies: rallies }, { status: 200 });
 }
+
+export const POST = withErrorHandling(activateRalliesHandler);

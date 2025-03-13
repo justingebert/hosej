@@ -1,7 +1,7 @@
 import { IGroupJson } from "@/types/models/group";
 
 export interface QuestionTypeCount {
-  _id: string;  // Question type
+  _id: string; 
   count: number;
 }
 
@@ -10,16 +10,18 @@ export interface UserQuestionCount {
   count: number;
 }
 
-export interface IGroupStatsResponse {
+export interface getStatisticsResponse {
   group: IGroupJson;
   
+  questionCount: number;
   questionsUsedCount: number;
   questionsLeftCount: number;
   questionsByType: QuestionTypeCount[];
   questionsByUser: UserQuestionCount[];
   
-  RalliesUsedCount: number;
-  RalliesLeftCount: number;
+  rallyCount: number;
+  ralliesUsedCount: number;
+  ralliesLeftCount: number;
   
   messagesCount: number;
 }

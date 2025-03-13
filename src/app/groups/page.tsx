@@ -3,7 +3,6 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { CircleHelp, Copy, Star, User } from "lucide-react";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
-import { IGroupJson } from "@/types/models/group";
 import { JoinGroupDrawer } from "@/components/Group/joinGroupDrawer";
 import { CreateGroupDrawer } from "../../components/Group/createGroupDrawer";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -13,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { IUserJson } from "@/types/models/user";
 import { useEffect, useState } from "react";
+import { getGroupsResponse } from "@/types/api";
 
 export default function GroupsPage() {
     const { toast } = useToast();
@@ -88,7 +88,7 @@ function GroupsList({
         }
     };
 
-    const { data, isLoading } = useSWR<{ groups: IGroupJson[] }>(user ? `/api/groups` : null, fetcher);
+    const { data, isLoading } = useSWR<getGroupsResponse>(user ? `/api/groups` : null, fetcher);
     const groups = data?.groups || [];
 
     return (
