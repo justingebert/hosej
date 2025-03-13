@@ -10,9 +10,9 @@ import { RallyTabs } from "./RallyTabs";
 import fetcher from "@/lib/fetcher";
 import { IRallyJson } from "@/types/models/rally";
 import { useEffect, useMemo, useState } from "react";
-import { IGroupJson } from "@/types/models/group";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getGroupResponse } from "@/types/api";
 
 const RallyPage = () => {
     const { user } = useAuthRedirect();
@@ -21,7 +21,7 @@ const RallyPage = () => {
     const [userHasVoted, setUserHasVoted] = useState<Record<string, boolean>>({});
     const [userHasUploaded, setUserHasUploaded] = useState<Record<string, boolean>>({});
 
-    const { data: group} = useSWR<IGroupJson>(`/api/groups/${groupId}`, fetcher, {});
+    const { data: groupData} = useSWR<getGroupResponse>(`/api/groups/${groupId}`, fetcher, {});
     const { data, isLoading } = useSWR<{ rallies: IRallyJson[] }>(
         user ? `/api/groups/${groupId}/rally` : null,
         fetcher
@@ -29,8 +29,7 @@ const RallyPage = () => {
 
     const rallies = useMemo(() => data?.rallies || [], [data]);
 
-    const userIsAdmin =
-        group && group?.admin && user?._id && group.admin.toString() === user._id.toString();
+    const userIsAdmin = groupData && groupData?.userIsAdmin
 
     // Calculate user vote and upload status based on the fetched data
     useEffect(() => {

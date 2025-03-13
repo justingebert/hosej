@@ -2,6 +2,7 @@ import { Document, Types } from "mongoose";
 import { AsJson } from "../common";
 
 export interface IUser extends Document {
+    _id: Types.ObjectId;
     username: string;
     groups: Types.ObjectId[];
 

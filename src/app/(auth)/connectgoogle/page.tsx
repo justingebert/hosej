@@ -22,7 +22,7 @@ export default function GoogleCallbackPage() {
           const response = await fetch('/api/auth/google/connect', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ deviceId: deviceId, googleUserId: user._id }),
+            body: JSON.stringify({ deviceId: deviceId}),
           });
 
           const result = await response.json();

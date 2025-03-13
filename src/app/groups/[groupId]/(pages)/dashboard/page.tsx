@@ -1,5 +1,4 @@
 "use client";
-
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { BarChartBig, Menu, ScanSearch, MousePointerClick, CircleSlash, Info } from "lucide-react";
@@ -8,23 +7,21 @@ import confetti from "canvas-confetti";
 import { Badge } from "@/components/ui/badge";
 import useSWR, { useSWRConfig } from "swr";
 import fetcher from "@/lib/fetcher";
-import { IGroupJson } from "@/types/models/group";
-import { IQuestion } from "@/types/models/Question";
-import { IRally } from "@/types/models/rally";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getGroupResponse } from "@/types/api";
 
 export default function Dashboard() {
     const router = useRouter();
     const { mutate } = useSWRConfig();
     const params = useParams<{ groupId: string }>();
     const groupId = params?.groupId;
-    const { data: group, isLoading: groupLoading } = useSWR<IGroupJson>(groupId ? `/api/groups/${groupId}` : null, fetcher);
+    const { data: groupData, isLoading: groupLoading } = useSWR<getGroupResponse>(groupId ? `/api/groups/${groupId}` : null, fetcher);
     const { data: questionsData, isLoading: questionLoading } = useSWR<{
         questions: IQuestion[];
         completionPercentage: number;
-    }>(group ? `/api/groups/${groupId}/question/daily` : null, fetcher);
+    }>(groupId ? `/api/groups/${groupId}/question/daily` : null, fetcher);
     const { data: ralliesData, isLoading: rallyLoading } = useSWR<{ rallies: IRally[] }>(
-        group ? `/api/groups/${groupId}/rally` : null,
+        groupId ? `/api/groups/${groupId}/rally` : null,
         fetcher
     );
 
@@ -61,7 +58,7 @@ export default function Dashboard() {
         }
     }
 
-    const titleClass = group?.name && group.name.length > 15 ? "text-2xl" : "text-4xl";
+    const titleClass = groupData?.group && groupData.group.name.length > 15 ? "text-2xl" : "text-4xl";
 
     return (
         <>
@@ -69,7 +66,7 @@ export default function Dashboard() {
                 <Button variant="outline" size="icon" onClick={() => router.push(`/groups`)}>
                     <Menu />
                 </Button>
-                <h1 className={`flex-grow ${titleClass} font-bold text-center break-words`}>{group?.name}</h1>
+                <h1 className={`flex-grow ${titleClass} font-bold text-center break-words`}>{groupData?.group.name}</h1>
                 {/* <Link href={`/groups/${groupId}/settings`}> */}
                 <Button variant="outline" size="icon">
                     <Info />
@@ -136,9 +133,9 @@ export default function Dashboard() {
                         <Skeleton className="h-40" />
                     )}
 
-                    {!groupLoading || group ? (
+                    {!groupLoading || groupData ? (
                         <>
-                            {group?.jukebox && (
+                            {groupData?.group.jukebox && (
                                 <div
                                     className="relative bg-primary-foreground px-6 py-4 flex items-center justify-between rounded-lg"
                                     onClick={() => router.push(`/groups/${groupId}/jukebox`)}

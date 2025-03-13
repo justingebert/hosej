@@ -16,36 +16,22 @@ import { Separator } from "@/components/ui/separator";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
 import { Skeleton } from "@/components/ui/skeleton";
-import { IGroupJson } from "@/types/models/group";
-
-type Statistics = {
-    group: any;
-    userCount: number;
-    questionsUsedCount: number;
-    questionsLeftCount: number;
-    questionsByType: { _id: string; count: number }[];
-    questionsByUser: { _id: string; count: number }[];
-    messagesCount: number;
-    RalliesUsedCount: number;
-    RalliesLeftCount: number;
-};
+import { getGroupResponse, getStatisticsResponse } from "@/types/api";
 
 const StatsPage = () => {
     const params = useParams<{ groupId: string }>();
     const groupId = params? params.groupId : "";
 
-    const { data: stats, isLoading: statsLoading } = useSWR<Statistics>(
+    const { data: stats, isLoading: statsLoading } = useSWR<getStatisticsResponse>(
         `/api/groups/${groupId}/stats`,
         fetcher
     );
-    const { data, isLoading: groupLoading } = useSWR<IGroupJson>(`/api/groups/${groupId}/`, fetcher);
+    const { data: groupData, isLoading: groupLoading } = useSWR<getGroupResponse>(`/api/groups/${groupId}/`, fetcher);
 
-    const sortedUsers = data?.members.sort((a, b) => b.points - a.points) || [];
+    const sortedUsers = groupData?.group.members.sort((a, b) => b.points - a.points) || [];
 
     let chartDataQuestions = [];
-    let totalQuestions = 0;
     let chartDataRallies = [];
-    let totalRallies = 0;
 
     if (stats) {
         chartDataQuestions = [
@@ -54,15 +40,13 @@ const StatsPage = () => {
                 questionsLeftCount: stats.questionsLeftCount,
             },
         ];
-        totalQuestions = stats.questionsUsedCount + stats.questionsLeftCount;
 
         chartDataRallies = [
             {
-                RalliesUsedCount: stats.RalliesUsedCount,
-                RalliesLeftCount: stats.RalliesLeftCount,
+                ralliesUsedCount: stats.ralliesUsedCount,
+                ralliesLeftCount: stats.ralliesLeftCount,
             },
         ];
-        totalRallies = stats.RalliesUsedCount + stats.RalliesLeftCount;
     }
 
     return (
@@ -137,7 +121,7 @@ const StatsPage = () => {
                                     Total Questions
                                 </TableCell>
                                 <TableCell className="px-4 py-2 text-right">
-                                    {totalQuestions}
+                                    {stats.questionCount}
                                 </TableCell>
                             </TableRow>
                         </TableBody>
@@ -168,7 +152,7 @@ const StatsPage = () => {
                                     Rallies Used
                                 </TableCell>
                                 <TableCell className="px-4 py-2 text-right">
-                                    {stats.RalliesUsedCount}
+                                    {stats.ralliesUsedCount}
                                 </TableCell>
                             </TableRow>
                             <TableRow>
@@ -176,7 +160,7 @@ const StatsPage = () => {
                                     Rallies Left
                                 </TableCell>
                                 <TableCell className="px-4 py-2 text-right">
-                                    {stats.RalliesLeftCount}
+                                    {stats.ralliesLeftCount}
                                 </TableCell>
                             </TableRow>
                             <TableRow>
@@ -184,7 +168,7 @@ const StatsPage = () => {
                                     Total Rallies
                                 </TableCell>
                                 <TableCell className="px-4 py-2 text-right">
-                                    {totalRallies}
+                                    {stats.rallyCount}
                                 </TableCell>
                             </TableRow>
                         </TableBody>
