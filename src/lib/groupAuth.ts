@@ -15,7 +15,7 @@ export async function isUserInGroup(userId: string, groupId: string) {
         return { isAuthorized: false, status: 403, message: "You are not a member of this group" };
     }
 
-    return { isAuthorized: true };
+    return { isAuthorized: true, message: "OK", status: 200 };
 }
 
 export async function isUserGroupAdmin(userId: string, groupId: string) {
@@ -31,5 +31,5 @@ export async function isUserGroupAdmin(userId: string, groupId: string) {
         return { isAuthorized: false, status: 403, message: "You are not an admin of this group" };
     }
 
-    return { isAuthorized: true };
+    return { isAuthorized: true, message:"OK", status: 200 };
 }

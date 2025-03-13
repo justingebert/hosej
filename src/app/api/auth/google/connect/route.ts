@@ -1,6 +1,6 @@
 import dbConnect from "@/lib/dbConnect";
 import { User } from "@/db/models";
-import { withErrorHandling } from "@/lib/apiErrorHandling";
+import { withErrorHandling } from "@/lib/apiMiddleware";
 
 async function connectHandler(req: Request): Promise<Response> {
     const userId = req.headers.get("x-user-id") as string;

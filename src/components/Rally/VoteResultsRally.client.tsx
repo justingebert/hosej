@@ -9,18 +9,18 @@ import { Separator } from "../ui/separator";
 import ChatComponent from "../Chat/Chat.client";
 import { RallyVotesChart } from "../Charts/RallyResultsChart";
 import useSWR from "swr";
-import { IPictureSubmissionJson } from "@/types/models/rally";
 import fetcher from "@/lib/fetcher";
+import { IRallyJson } from "@/types/models";
 
 const RallyResults = ({ user, rally }: any) => {
     const [loadedImages, setLoadedImages] = useState<{ [key: number]: boolean }>({});
 
-    const { data, isLoading } = useSWR<{ submissions: IPictureSubmissionJson[] }>(
-        `/api/groups/${rally.groupId}/rally/${rally._id}/submissions`,
+    const { data: rallyData, } = useSWR<IRallyJson>(
+        `/api/groups/${rally.groupId}/rally/${rally._id}`,
         fetcher
     );
 
-    const submissions = useMemo(() => data?.submissions || [], [data]);
+    const submissions = useMemo(() => rallyData?.submissions || [], [rallyData]);
 
     const handleImageLoad = (id: number) => {
         setLoadedImages((prev) => ({ ...prev, [id]: true }));

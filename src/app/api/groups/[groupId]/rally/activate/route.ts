@@ -1,6 +1,6 @@
 import dbConnect from "@/lib/dbConnect";
 import { isUserGroupAdmin } from "@/lib/groupAuth";
-import { withErrorHandling } from "@/lib/apiErrorHandling";
+import { withErrorHandling } from "@/lib/apiMiddleware";
 import { Group, Rally } from "@/db/models";
 import { sendNotification } from "@/utils/sendNotification";
 
@@ -23,17 +23,13 @@ async function activateRalliesHandler(req: Request, { params }: { params: { grou
     const currentTime = new Date();
     for (let rally of rallies) {
         rally.active = true;
-        rally.used = true
+        rally.used = true;
         rally.startTime = new Date(currentTime.getTime());
         rally.endTime = new Date(rally.startTime.getTime() + rally.lengthInDays * 24 * 60 * 60 * 1000);
         await rally.save();
     }
 
-    await sendNotification(
-        `📷 New ${group.name} Rally Started! 📷`,
-        "📷 PARTICIPATE NOW! 📷",
-        group._id.toString()
-    );
+    await sendNotification(`📷 New ${group.name} Rally Started! 📷`, "📷 PARTICIPATE NOW! 📷", group._id.toString());
 
     return Response.json({ message: "Activated rallies", rallies: rallies }, { status: 200 });
 }

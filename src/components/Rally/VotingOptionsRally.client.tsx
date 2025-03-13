@@ -16,7 +16,7 @@ import Modal from "react-modal";
 import { X } from "lucide-react";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
-import { IPictureSubmissionJson } from "@/types/models/rally";
+import { IRallyJson } from "@/types/models/rally";
 
 const RallyVoteCarousel = ({ user, rally, onVote }: any) => {
     const [selectedSubmission, setSelectedSubmission] = useState<string>("");
@@ -25,12 +25,12 @@ const RallyVoteCarousel = ({ user, rally, onVote }: any) => {
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-    const { data, isLoading } = useSWR<{ submissions: IPictureSubmissionJson[] }>(
-        `/api/groups/${rally.groupId}/rally/${rally._id}/submissions`,
+    const { data: rallyData } = useSWR<IRallyJson>(
+        `/api/groups/${rally.groupId}/rally/${rally._id}/`,
         fetcher
     );
 
-    const submissions = useMemo(() => data?.submissions || [], [data]);
+    const submissions = useMemo(() => rallyData?.submissions || [], [data]);
 
     useEffect(() => {
         if (submissions.length > 0) {

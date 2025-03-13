@@ -1,19 +1,19 @@
 import dbConnect from "@/lib/dbConnect";
-import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { isUserInGroup } from "@/lib/groupAuth";
-import { Rally } from "@/db/models";
-import { withErrorHandling } from "@/lib/apiErrorHandling";
-
-const s3 = new S3Client({
-    region: process.env.AWS_REGION,
-});
+import { Group, Rally } from "@/db/models";
+import { withErrorHandling } from "@/lib/apiMiddleware";
+import { generateSignedUrl } from "@/lib/question/questionOptions";
 
 export const revalidate = 0;
 
 async function getRallyHandler(req: Request, { params }: { params: { groupId: string; rallyId: string } }) {
     const userId = req.headers.get("x-user-id") as string;
     const { groupId, rallyId } = params;
+
+    const group = await Group.findById(groupId);
+    if (!group) {
+        return Response.json({ message: "Group not found" }, { status: 404 });
+    }
 
     const authCheck = await isUserInGroup(userId, groupId);
     if (!authCheck.isAuthorized) {
@@ -28,27 +28,7 @@ async function getRallyHandler(req: Request, { params }: { params: { groupId: st
 
     const submissions = await Promise.all(
         rally.submissions.map(async (submission: any) => {
-            const urlObject = new URL(submission.imageUrl);
-            let s3Key = urlObject.pathname;
-            if (s3Key.startsWith("/")) {
-                s3Key = s3Key.substring(2); // Remove leading '//'
-            }
-
-            const command = new GetObjectCommand({
-                Bucket: process.env.AWS_BUCKET_NAME,
-                Key: s3Key,
-                ResponseCacheControl: "max-age=86400, public",
-            });
-
-            let url;
-            try {
-                //@ts-ignore
-                url = await getSignedUrl(s3, command, { expiresIn: 300 }); // URL expiration time in seconds
-            } catch (s3Error: any) {
-                console.error(`Failed to generate pre-signed URL for ${submission.imageUrl}`, s3Error);
-                throw new Error(`Failed to generate pre-signed URL: ${s3Error.message}`);
-            }
-
+            const { url } = await generateSignedUrl(new URL(submission.imageUrl).pathname);
             return {
                 ...submission.toObject(),
                 imageUrl: url,
@@ -58,7 +38,7 @@ async function getRallyHandler(req: Request, { params }: { params: { groupId: st
 
     rally.submissions = submissions.sort((a, b) => b.votes.length - a.votes.length);
 
-    return Response.json(rally);
+    return Response.json(rally, { status: 200 });
 }
 
 export const GET = withErrorHandling(getRallyHandler);

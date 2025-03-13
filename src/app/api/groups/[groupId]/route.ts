@@ -1,5 +1,5 @@
 import { Group, User } from "@/db/models";
-import { withErrorHandling } from "@/lib/apiErrorHandling";
+import { withErrorHandling } from "@/lib/apiMiddleware";
 import dbConnect from "@/lib/dbConnect";
 import { isUserGroupAdmin, isUserInGroup } from "@/lib/groupAuth";
 
@@ -9,7 +9,7 @@ async function getGroupHandler(req: Request, { params }: { params: { groupId: st
     const userId = req.headers.get("x-user-id") as string;
     const { groupId } = params;
     await dbConnect();
-    
+
     const group = await Group.findById(groupId);
     if (!group) {
         return Response.json({ message: "Group not found" }, { status: 404 });
@@ -21,7 +21,7 @@ async function getGroupHandler(req: Request, { params }: { params: { groupId: st
 
     const userIsAdmin = group.admin.equals(userId);
 
-    return Response.json({group:group, userIsAdmin: userIsAdmin}, { status: 200 });
+    return Response.json({ group: group, userIsAdmin: userIsAdmin }, { status: 200 });
 }
 
 export async function updateGroupHandler(req: Request, { params }: { params: { groupId: string } }) {
@@ -32,7 +32,7 @@ export async function updateGroupHandler(req: Request, { params }: { params: { g
     await dbConnect();
 
     const group = await Group.findById(groupId);
-    if(!group) {
+    if (!group) {
         return Response.json({ message: "Group not found" }, { status: 404 });
     }
 
@@ -62,7 +62,7 @@ async function deleteGroupHandler(req: Request, { params }: { params: { groupId:
     if (!adminCheck.isAuthorized) {
         return Response.json({ message: adminCheck.message }, { status: adminCheck.status });
     }
-    
+
     for (const member of group.members) {
         const user = await User.findById(member.user);
         user.groups = user.groups.filter((group: string) => group !== groupId);

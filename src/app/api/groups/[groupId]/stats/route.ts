@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 import dbConnect from "@/lib/dbConnect";
 import { isUserInGroup } from "@/lib/groupAuth";
-import { withErrorHandling } from "@/lib/apiErrorHandling";
+import { withErrorHandling } from "@/lib/apiMiddleware";
 import { Chat, Group, Question, Rally } from "@/db/models";
 
 export const revalidate = 0;
@@ -15,7 +15,7 @@ async function getStatisticsHandler(req: Request, { params }: { params: { groupI
     if (!group) {
         return Response.json({ message: "Group not found" }, { status: 404 });
     }
-    
+
     const authCheck = await isUserInGroup(userId, groupId);
     if (!authCheck.isAuthorized) {
         return Response.json({ message: authCheck.message }, { status: authCheck.status });
@@ -83,7 +83,7 @@ async function getStatisticsHandler(req: Request, { params }: { params: { groupI
     const ralliesLeftCount = rallyCount - ralliesUsedCount;
 
     const messages = await Chat.aggregate([
-        { $match: { group: new Types.ObjectId(groupId) } }, 
+        { $match: { group: new Types.ObjectId(groupId) } },
         { $unwind: "$messages" }, // Deconstruct the messages array
         { $count: "messagesCount" }, // Count the number of messages
     ]);

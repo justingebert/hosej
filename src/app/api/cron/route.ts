@@ -1,6 +1,6 @@
 import dbConnect from "@/lib/dbConnect";
 import { sendNotification } from "@/utils/sendNotification";
-import { withErrorHandling } from "@/lib/apiErrorHandling";
+import { withErrorHandling } from "@/lib/apiMiddleware";
 import { Group, Question, Chat, Jukebox, Rally } from "@/db/models";
 import { IGroup, IQuestion, IRally } from "@/types/models";
 

@@ -1,5 +1,5 @@
 import dbConnect from "@/lib/dbConnect";
-import { withErrorHandling } from "@/lib/apiErrorHandling";
+import { withErrorHandling } from "@/lib/apiMiddleware";
 import { Group, User } from "@/db/models";
 
 export const revalidate = 0;
@@ -25,7 +25,7 @@ async function createGroupHandler(req: Request) {
     user.groups.push(newGroup._id);
     await user.save();
 
-    return Response.json({newGroup: newGroup}, { status: 201 });
+    return Response.json({ newGroup: newGroup }, { status: 201 });
 }
 
 async function getGroupsHandler(req: Request) {
@@ -33,7 +33,7 @@ async function getGroupsHandler(req: Request) {
     await dbConnect();
 
     const user = await User.findById(userId).populate({ path: "groups", model: Group });
-    
+
     return Response.json({ groups: user.groups }, { status: 200 });
 }
 

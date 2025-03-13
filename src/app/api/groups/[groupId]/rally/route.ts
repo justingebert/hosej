@@ -1,7 +1,7 @@
 import dbConnect from "@/lib/dbConnect";
 import { isUserInGroup } from "@/lib/groupAuth";
 import { CREATED_RALLY_POINTS } from "@/db/POINT_CONFIG";
-import { withErrorHandling } from "@/lib/apiErrorHandling";
+import { withErrorHandling } from "@/lib/apiMiddleware";
 import { Chat, Group, Rally, User } from "@/db/models";
 
 export const revalidate = 0;

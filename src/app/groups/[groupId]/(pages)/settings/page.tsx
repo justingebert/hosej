@@ -125,10 +125,15 @@ export default function GroupPage() {
     };
 
     const deleteGroup = async () => {
-        if (!userIsAdmin || deleteInput !== groupData?.name) return;
+        if (!userIsAdmin || deleteInput !== groupData?.group.name) return;
         try {
-            await fetch(`/api/groups/${groupId}`, { method: "DELETE" });
-            toast({ title: "Group deleted successfully" });
+            const res = await fetch(`/api/groups/${groupId}`, { method: "DELETE" });
+            if(res.ok){
+                toast({ title: "Group deleted successfully" });
+            }else{
+                const data = await res.json();
+                toast({ title: data.message, variant: "destructive" });
+            }
             router.push("/groups");
         } catch (error) {
             console.error("Failed to delete group:", error);
@@ -139,7 +144,7 @@ export default function GroupPage() {
     return (
         <>
             <Suspense fallback={<Skeleton className="h-8 w-40 mx-auto mb-4" />}>
-                <Header title={groupData?.name || null} />
+                <Header title={groupData?.group.name || null} />
             </Suspense>
 
             {isLoading || !user ? (
@@ -169,15 +174,15 @@ export default function GroupPage() {
                                             className="w-11 text-center"
                                         />
                                     ) : (
-                                        groupData.questionCount
+                                        groupData.group.questionCount
                                     )}
                                 </TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell>Last Question Date</TableCell>
                                 <TableCell className="text-right">
-                                    {groupData.lastQuestionDate
-                                        ? new Date(groupData.lastQuestionDate).toLocaleDateString()
+                                    {groupData.group.lastQuestionDate
+                                        ? new Date(groupData.group.lastQuestionDate).toLocaleDateString()
                                         : "N/A"}
                                 </TableCell>
                             </TableRow>
@@ -194,7 +199,7 @@ export default function GroupPage() {
                                             className="w-11 text-center"
                                         />
                                     ) : (
-                                        groupData.rallyCount
+                                        groupData.group.rallyCount
                                     )}
                                 </TableCell>
                             </TableRow>
@@ -211,20 +216,20 @@ export default function GroupPage() {
                                             className="w-11 text-center"
                                         />
                                     ) : (
-                                        groupData.rallyGapDays
+                                        groupData.group.rallyGapDays
                                     )}
                                 </TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell>Created At</TableCell>
                                 <TableCell className="text-right">
-                                    {new Date(groupData.createdAt).toLocaleDateString()}
+                                    {new Date(groupData.group.createdAt).toLocaleDateString()}
                                 </TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell>Admin</TableCell>
                                 <TableCell className="text-right">
-                                    {groupData.admin ? `${adminName}` : "N/A"}
+                                    {groupData.group.admin ? `${adminName}` : "N/A"}
                                 </TableCell>
                             </TableRow>
                         </TableBody>
@@ -247,7 +252,7 @@ export default function GroupPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {groupData.members.map((member) => (
+                            {groupData.group.members.map((member) => (
                                 <TableRow key={member.user.toString()}>
                                     <TableCell className="font-medium">
                                         {member.name || "N/A"}
@@ -329,8 +334,8 @@ export default function GroupPage() {
                         </AlertDialog>
                     </Button>
 
-                    {userIsAdmin && (
-                        <AlertDialog>
+                    
+                       {userIsAdmin && (<AlertDialog>
                             <AlertDialogTrigger asChild>
                                 <Button variant="destructive" className="w-full my-10">
                                     Delete Group
@@ -343,7 +348,7 @@ export default function GroupPage() {
                                     </AlertDialogTitle>
                                     <AlertDialogDescription>
                                         This action is permanent and cannot be undone. Type{" "}
-                                        <strong>{groupData.name}</strong> to confirm.
+                                        <strong>{groupData.group.name}</strong> to confirm.
                                     </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <Input
@@ -355,7 +360,7 @@ export default function GroupPage() {
                                 <AlertDialogFooter>
                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                                     <AlertDialogAction
-                                        disabled={deleteInput !== groupData.name}
+                                        disabled={deleteInput !== groupData.group.name}
                                         onClick={deleteGroup}
                                         className="bg-destructive"
                                     >
@@ -365,6 +370,7 @@ export default function GroupPage() {
                             </AlertDialogContent>
                         </AlertDialog>
                     )}
+                    
                 </>
             ) : (
                 <p>Group not found.</p>
