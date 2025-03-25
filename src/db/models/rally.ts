@@ -35,6 +35,6 @@ const rallySchema = new mongoose.Schema<IRally>({
 
 rallySchema.index({ groupId: 1 });
 
-const Rally = mongoose.models.Rally || mongoose.model<IRally>("Rally", rallySchema);
+const Rally = mongoose.models.Rally as mongoose.Model<IRally> || mongoose.model<IRally>("Rally", rallySchema);
 
 export default Rally;

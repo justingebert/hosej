@@ -15,6 +15,7 @@ export interface IPictureSubmission{
 }
 
 export interface IRally extends Document {
+    _id: Types.ObjectId;
     groupId: Types.ObjectId;
     task: string;
     submissions: IPictureSubmission[];

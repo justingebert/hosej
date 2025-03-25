@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/dbConnect";
 import Question from "@/db/models/Question";
 import { isUserInGroup } from "@/lib/groupAuth";
-import { generateSignedUrl } from "@/lib/question/questionOptions";
+import { generateSignedUrl } from "@/lib/question/generateSignedUrl";
 import Group from "@/db/models/Group";
 import User from "@/db/models/user";
 
@@ -23,7 +23,7 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
         const question = await Question.findById(questionId).populate({
             path: "answers.user",
             model: User,
-            select: "-googleId -spotifyAccessToken -spotifyRefreshToken -spotifyTokenExpiresAt -deviceId"
+            select: "-googleId -spotifyAccessToken -spotifyRefreshToken -spotifyTokenExpiresAt -deviceId",
         });
 
         if (!question) {

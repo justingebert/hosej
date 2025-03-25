@@ -25,7 +25,7 @@ export interface IGroup extends Document {
     jukeboxFrequency: number; //days not implemented yet
     spotifyConnected: boolean;
     createdAt: Date;
-    addPoints(userId: Types.ObjectId, points: number): Promise<void>;
+    addPoints(userId: Types.ObjectId | string, points: number): Promise<void>;
 }
 
 

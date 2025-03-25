@@ -20,7 +20,7 @@ const DailyQuestionPage = () => {
     const router = useRouter();
 
     const { data, error, isLoading } = useSWR<{ questions: IQuestionJson[] }>(
-        user ? `/api/groups/${groupId}/question/daily` : null,
+        user ? `/api/groups/${groupId}/question` : null,
         fetcher
     );
 

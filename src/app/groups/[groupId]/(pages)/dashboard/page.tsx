@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import useSWR, { useSWRConfig } from "swr";
 import fetcher from "@/lib/fetcher";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getGroupResponse } from "@/types/api";
+import { getGroupResponse, getRalliesResponse } from "@/types/api";
 
 export default function Dashboard() {
     const router = useRouter();
@@ -19,14 +19,13 @@ export default function Dashboard() {
     const { data: questionsData, isLoading: questionLoading } = useSWR<{
         questions: IQuestion[];
         completionPercentage: number;
-    }>(groupId ? `/api/groups/${groupId}/question/daily` : null, fetcher);
-    const { data: ralliesData, isLoading: rallyLoading } = useSWR<{ rallies: IRally[] }>(
+    }>(groupId ? `/api/groups/${groupId}/question` : null, fetcher);
+    const { data: rallies, isLoading: rallyLoading } = useSWR<getRalliesResponse>(
         groupId ? `/api/groups/${groupId}/rally` : null,
         fetcher
     );
 
     const questions = questionsData?.questions || [];
-    const rallies = ralliesData?.rallies || [];
 
     const triggerConfetti = () => {
         const scalar = 2;
@@ -80,7 +79,7 @@ export default function Dashboard() {
                         <div
                             className="col-span-2 relative bg-primary-foreground px-6 py-4 flex items-center justify-between rounded-lg"
                             onClick={() => {
-                                mutate(`/api/groups/${groupId}/question/daily`);
+                                mutate(`/api/groups/${groupId}/question`);
                                 router.push(`/groups/${groupId}/daily`);
                             }}
                         >
@@ -100,7 +99,7 @@ export default function Dashboard() {
                         <Skeleton className="col-span-2 h-32" />
                     )}
 
-                    {!rallyLoading && ralliesData ? (
+                    {!rallyLoading && rallies ? (
                         <div
                             className="relative bg-primary-foreground px-6 py-4 flex items-center justify-between rounded-lg"
                             onClick={() => router.push(`/groups/${groupId}/rally`)}

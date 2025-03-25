@@ -41,14 +41,12 @@ async function createRallySubmissionHandler(
         { new: true, runValidators: true }
     );
     if (!updatedRally) {
-        return Response.json({ message: "Rally not found" },{ status: 400 });
+        return Response.json({ message: "Rally not found" }, { status: 400 });
     }
 
     await group.addPoints(sendUser._id, SUBMITTED_RALLY_POINTS);
 
-    return Response.json({rally: updatedRally,
-        message: "Picture submission added successfully",
-    });
+    return Response.json({ message: "Picture submission added successfully" });
 }
 
 export const POST = withErrorHandling(createRallySubmissionHandler);

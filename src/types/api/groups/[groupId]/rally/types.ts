@@ -1,8 +1,11 @@
 import { IRallyJson } from "@/types/models";
 
-export interface getRallieRepsonse {
-    rallies: IRallyJson[];
+export interface RallyWithUserState extends IRallyJson {
+    userHasVoted: boolean;
+    userHasUploaded: boolean;
 }
+
+export type getRalliesResponse = RallyWithUserState[];
 
 export interface createRallyRequest {
     task: string;

@@ -8,56 +8,24 @@ import { Card } from "@/components/ui/card";
 import BackLink from "@/components/ui/custom/BackLink";
 import { RallyTabs } from "./RallyTabs";
 import fetcher from "@/lib/fetcher";
-import { IRallyJson } from "@/types/models/rally";
-import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getGroupResponse } from "@/types/api";
+import { getGroupResponse, getRalliesResponse } from "@/types/api";
 
 const RallyPage = () => {
     const { user } = useAuthRedirect();
     const { groupId } = useParams<{ groupId: string }>();
     const router = useRouter();
-    const [userHasVoted, setUserHasVoted] = useState<Record<string, boolean>>({});
-    const [userHasUploaded, setUserHasUploaded] = useState<Record<string, boolean>>({});
 
-    const { data: groupData} = useSWR<getGroupResponse>(`/api/groups/${groupId}`, fetcher, {});
-    const { data, isLoading } = useSWR<{ rallies: IRallyJson[] }>(
+    const { data: rallies, isLoading } = useSWR<getRalliesResponse>(
         user ? `/api/groups/${groupId}/rally` : null,
         fetcher
     );
 
-    const rallies = useMemo(() => data?.rallies || [], [data]);
-
-    const userIsAdmin = groupData && groupData?.userIsAdmin
-
-    // Calculate user vote and upload status based on the fetched data
-    useEffect(() => {
-        const HasVoted = rallies.reduce((acc: Record<string, boolean>, rally) => {
-            const rallyId = rally._id.toString(); // Ensure _id is a string
-            acc[rallyId] = rally.submissions.some((submission) =>
-                submission.votes.some((vote: any) => vote.user === user._id)
-            );
-            return acc;
-        }, {});
-        setUserHasVoted(HasVoted);
-        const HasUploaded = rallies.reduce((acc: Record<string, boolean>, rally) => {
-            const rallyId = rally._id.toString(); // Ensure _id is a string
-            acc[rallyId] = rally.submissions.some(
-                (submission) => submission.username === user.username
-            );
-            return acc;
-        }, {});
-        setUserHasUploaded(HasUploaded);
-    }, [rallies, user]);
-
-    if (isLoading || !data) {
+    if (isLoading) {
         return (
             <div>
-                <Header
-                    leftComponent={<BackLink href={`/groups/${groupId}/dashboard`} />}
-                    title="Rallies"
-                />
+                <Header leftComponent={<BackLink href={`/groups/${groupId}/dashboard`} />} title="Rallies" />
                 <div>
                     <Skeleton className="w-full h-10 mb-4" />
                     <Skeleton className="w-full h-20 mb-20" />
@@ -71,16 +39,13 @@ const RallyPage = () => {
     if (rallies && rallies.length === 0) {
         return (
             <div className="flex flex-col h-[100dvh]">
-                <Header
-                    leftComponent={<BackLink href={`/groups/${groupId}/dashboard`} />}
-                    title="Rallies"
-                />
+                <Header leftComponent={<BackLink href={`/groups/${groupId}/dashboard`} />} title="Rallies" />
                 <div className="flex flex-grow justify-center items-center">
                     <div className="flex flex-col gap-y-4">
                         <Card className="text-center p-6 ">
                             <h2 className="font-bold">No active rallies</h2>
                         </Card>
-                        {userIsAdmin && (
+                        {/* {userIsAdmin && (
                             <Button
                                 onClick={() => {
                                     fetch(`/api/groups/${groupId}/rally/activate`, {
@@ -91,7 +56,7 @@ const RallyPage = () => {
                             >
                                 Activate Rally
                             </Button>
-                        )}
+                        )} */}
                     </div>
                 </div>
             </div>
@@ -100,31 +65,8 @@ const RallyPage = () => {
 
     return (
         <div>
-            <Header
-                leftComponent={<BackLink href={`/groups/${groupId}/dashboard`} />}
-                title="Rallies"
-            />
-            <RallyTabs
-                groupId={groupId}
-                user={user}
-                rallies={rallies}
-                userHasVoted={userHasVoted}
-                userHasUploaded={userHasUploaded}
-                setUserHasVoted={(newStatus: boolean) => {
-                    if (rallies.length > 0) {
-                        const rallyId = rallies[0]._id.toString();
-                        userHasVoted[rallyId] = newStatus;
-                        router.refresh();
-                    }
-                }}
-                setUserHasUploaded={(newStatus: boolean) => {
-                    if (rallies.length > 0) {
-                        const rallyId = rallies[0]._id.toString();
-                        userHasUploaded[rallyId] = newStatus;
-                        router.refresh();
-                    }
-                }}
-            />
+            <Header leftComponent={<BackLink href={`/groups/${groupId}/dashboard`} />} title="Rallies" />
+            <RallyTabs groupId={groupId} user={user} rallies={rallies} />
         </div>
     );
 };

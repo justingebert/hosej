@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -8,19 +8,11 @@ import { Badge } from "../ui/badge";
 import { Separator } from "../ui/separator";
 import ChatComponent from "../Chat/Chat.client";
 import { RallyVotesChart } from "../Charts/RallyResultsChart";
-import useSWR from "swr";
-import fetcher from "@/lib/fetcher";
-import { IRallyJson } from "@/types/models";
+import { IUserJson } from "@/types/models";
+import { RallyWithUserState } from "@/types/api";
 
-const RallyResults = ({ user, rally }: any) => {
+const RallyResults = ({ user, rally }: { user: IUserJson; rally: RallyWithUserState }) => {
     const [loadedImages, setLoadedImages] = useState<{ [key: number]: boolean }>({});
-
-    const { data: rallyData, } = useSWR<IRallyJson>(
-        `/api/groups/${rally.groupId}/rally/${rally._id}`,
-        fetcher
-    );
-
-    const submissions = useMemo(() => rallyData?.submissions || [], [rallyData]);
 
     const handleImageLoad = (id: number) => {
         setLoadedImages((prev) => ({ ...prev, [id]: true }));
@@ -29,10 +21,10 @@ const RallyResults = ({ user, rally }: any) => {
     return (
         <div>
             <div className="mb-6">
-                <RallyVotesChart submissions={submissions} />
+                <RallyVotesChart submissions={rally.submissions} />
             </div>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-5">
-                {submissions.map((submission, index) => (
+                {rally.submissions.map((submission, index) => (
                     <Card key={submission._id.toString()} className="overflow-hidden">
                         <CardHeader className="flex flex-row items-center justify-between p-5">
                             <div className="flex items-center gap-4">
@@ -45,15 +37,7 @@ const RallyResults = ({ user, rally }: any) => {
                                 </div>
                             </div>
                             {index < 3 && (
-                                <Badge
-                                    variant={
-                                        index === 0
-                                            ? "default"
-                                            : index === 1
-                                            ? "secondary"
-                                            : "outline"
-                                    }
-                                >
+                                <Badge variant={index === 0 ? "default" : index === 1 ? "secondary" : "outline"}>
                                     {index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉"}
                                 </Badge>
                             )}
@@ -74,9 +58,7 @@ const RallyResults = ({ user, rally }: any) => {
                         </CardContent>
                         <CardFooter className="flex justify-between items-center p-5">
                             <div className="flex items-center gap-2">
-                                <span className="text-2xl font-bold">
-                                    {submission.votes.length}
-                                </span>
+                                <span className="text-2xl font-bold">{submission.votes.length}</span>
                                 <span className="text-m ">votes</span>
                             </div>
                             <Badge variant="outline">Rank #{index + 1}</Badge>

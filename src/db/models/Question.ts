@@ -1,5 +1,5 @@
 import { QuestionType, IQuestion } from "@/types/models/Question";
-import mongoose from "mongoose";
+import mongoose, { mongo } from "mongoose";
 
 const answerSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
@@ -8,7 +8,7 @@ const answerSchema = new mongoose.Schema({
 });
 
 
-const questionSchema = new mongoose.Schema({
+const questionSchema = new mongoose.Schema<IQuestion>({
     groupId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Group",
@@ -39,6 +39,6 @@ const questionSchema = new mongoose.Schema({
 
 questionSchema.index({ groupId: 1 });
 
-const Question = mongoose.models.Question || mongoose.model<IQuestion>("Question", questionSchema);
+const Question = mongoose.models.Question as mongoose.Model<IQuestion> || mongoose.model<IQuestion>("Question", questionSchema);
 
 export default Question;

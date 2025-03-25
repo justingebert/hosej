@@ -3,6 +3,7 @@ import { isUserInGroup } from "@/lib/groupAuth";
 import { CREATED_RALLY_POINTS } from "@/db/POINT_CONFIG";
 import { withErrorHandling } from "@/lib/apiMiddleware";
 import { Chat, Group, Rally, User } from "@/db/models";
+import { generateSignedUrl } from "@/lib/question/generateSignedUrl";
 
 export const revalidate = 0;
 
@@ -17,8 +18,45 @@ async function getRalliesHandler(req: Request, { params }: { params: { groupId: 
     await dbConnect();
 
     const rallies = await Rally.find({ groupId: groupId, active: true, used: true });
+    const processedRallies = await Promise.all(
+        rallies.map(async (rally) => {
+            const plainRally = rally.toObject();
+            const needsImages = rally.votingOpen || rally.resultsShowing;
 
-    return Response.json({ rallies: rallies }, { status: 200 });
+            const userHasVoted = rally.submissions?.some((s) => s.votes?.some((v) => v.user.toString() === userId));
+            const userHasUploaded = rally.submissions?.some((s) => s.userId.toString() === userId);
+
+            const processedRally = {
+                ...plainRally,
+                userHasVoted: userHasVoted,
+                userHasUploaded: userHasUploaded,
+            };
+
+            if (needsImages && rally.submissions?.length > 0) {
+                processedRally.submissions = await Promise.all(rally.submissions.map(processSubmission));
+            }
+
+            if (userHasVoted) {
+                processedRally.submissions.sort((a, b) => (b.votes?.length || 0) - (a.votes?.length || 0));
+            }
+
+            return processedRally;
+        })
+    );
+
+    return Response.json(processedRallies, { status: 200 });
+}
+
+async function processSubmission(submission: any) {
+    if (!submission.imageUrl) {
+        return submission.toObject();
+    }
+
+    const { url } = await generateSignedUrl(new URL(submission.imageUrl).pathname);
+    return {
+        ...submission.toObject(),
+        imageUrl: url,
+    };
 }
 
 async function createRallyHandler(req: Request, { params }: { params: { groupId: string } }) {
