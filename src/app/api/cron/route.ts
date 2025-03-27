@@ -68,7 +68,7 @@ export async function GET(req: Request) {
             if (group.jukebox) {
                 const today = new Date();
                 const monthName = new Intl.DateTimeFormat("en-US", { month: "long" }).format(today);
-                if (today.getDate() === 6) {
+                if (today.getDate() === 1) {
                     await Jukebox.updateMany({ active: true, groupId: group._id }, { active: false });
                     const newJukebox = await new Jukebox({ groupId: group._id, date: today, active: true }).save();
                     const newChat = await new Chat({
