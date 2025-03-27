@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -14,42 +14,32 @@ import {
 import Image from "next/image";
 import Modal from "react-modal";
 import { X } from "lucide-react";
-import useSWR from "swr";
-import fetcher from "@/lib/fetcher";
-import { IPictureSubmissionJson } from "@/types/models/rally";
+import { mutate } from "swr";
+import { RallyWithUserState, voteRallyRequest } from "@/types/api";
+import { useToast } from "@/hooks/use-toast";
+import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 
-const RallyVoteCarousel = ({ user, rally, onVote }: any) => {
+const RallyVoteCarousel = ({ rally }: {rally:RallyWithUserState}) => {
+    const { user } = useAuthRedirect();
     const [selectedSubmission, setSelectedSubmission] = useState<string>("");
     const [api, setApi] = useState<CarouselApi | null>(null);
-    const [hasVoted, setHasVoted] = useState(false);
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
-
-    const { data, isLoading } = useSWR<{ submissions: IPictureSubmissionJson[] }>(
-        `/api/groups/${rally.groupId}/rally/${rally._id}/submissions`,
-        fetcher
-    );
-
-    const submissions = useMemo(() => data?.submissions || [], [data]);
+    const { toast } = useToast();
 
     useEffect(() => {
-        if (submissions.length > 0) {
-            setSelectedSubmission(submissions[0]._id.toString());
+        if (rally.submissions.length > 0) {
+            setSelectedSubmission(rally.submissions[0]._id.toString());
         }
-
-        const userHasVoted = submissions.some((submission: any) =>
-            submission.votes.some((vote: any) => vote.user === user._id)
-        );
-        setHasVoted(userHasVoted);
-    }, [submissions, user]);
+    }, [rally]);
 
     useEffect(() => {
-        if (!api || submissions.length === 0) return;
+        if (!api || rally.submissions.length === 0) return;
 
         const onSelect = () => {
             const selectedIndex = api.selectedScrollSnap();
-            if (selectedIndex >= 0 && selectedIndex < submissions.length) {
-                setSelectedSubmission(submissions[selectedIndex]._id.toString());
+            if (selectedIndex >= 0 && selectedIndex < rally.submissions.length) {
+                setSelectedSubmission(rally.submissions[selectedIndex]._id.toString());
             }
         };
 
@@ -59,7 +49,9 @@ const RallyVoteCarousel = ({ user, rally, onVote }: any) => {
         return () => {
             api.off("select", onSelect); // Clean up the event listener on unmount
         };
-    }, [api, submissions]);
+    }, [api, rally]);
+
+    const ownSubmission = rally.submissions.find((submission) => submission.userId === user._id)?._id.toString();
 
     const openModal = (imageUrl: string) => {
         setSelectedImage(imageUrl);
@@ -72,24 +64,30 @@ const RallyVoteCarousel = ({ user, rally, onVote }: any) => {
     };
 
     const submitVote = async () => {
-        if (!selectedSubmission) {
-            alert("Please select a submission to vote for.");
+        if (!selectedSubmission) return;
+        const req: voteRallyRequest = {
+            submissionId: selectedSubmission,
+        };
+
+        const res = await fetch(`/api/groups/${rally.groupId}/rally/${rally._id}/vote`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(req),
+        });
+        if(!res.ok){
+            const data = await res.json();
+            toast({
+                title: "Failed to vote",
+                description: data.message,
+                variant: "destructive",
+            });
             return;
         }
 
-        await fetch(
-            `/api/groups/${rally.groupId}/rally/${rally._id}/submissions/${selectedSubmission}/vote`,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            }
-        );
 
-        setHasVoted(true);
-
-        onVote();
+        mutate(`/api/groups/${rally.groupId}/rally`);
     };
 
     const modalStyles = {
@@ -114,7 +112,7 @@ const RallyVoteCarousel = ({ user, rally, onVote }: any) => {
         <div className="flex flex-col grow justify-between">
             <Carousel setApi={setApi} orientation="vertical" className="mt-20">
                 <CarouselContent className="w-full h-[50dvh]">
-                    {submissions.map((submission, index) => (
+                    {rally.submissions.map((submission, index) => (
                         <CarouselItem key={submission._id.toString()} className="h-[50dvh]">
                             <Card className="overflow-hidden rounded-md h-full">
                                 <CardContent className="h-full p-0">
@@ -141,9 +139,9 @@ const RallyVoteCarousel = ({ user, rally, onVote }: any) => {
                 <Button
                     onClick={submitVote}
                     className="mt-24 w-full h-12 text-lg font-bold"
-                    disabled={hasVoted || modalIsOpen}
+                    disabled={rally.userHasVoted || modalIsOpen || selectedSubmission === ownSubmission}
                 >
-                    Vote for this
+                   {selectedSubmission === ownSubmission ? "Your Submission" : "Vote for this"}
                 </Button>
             </div>
             <Modal
@@ -164,11 +162,7 @@ const RallyVoteCarousel = ({ user, rally, onVote }: any) => {
                             height={600}
                             className="rounded-md "
                         />
-                        <Button
-                            onClick={closeModal}
-                            className="absolute top-4 right-2"
-                            variant={"ghost"}
-                        >
+                        <Button onClick={closeModal} className="absolute top-4 right-2" variant={"ghost"}>
                             <X />
                         </Button>
                     </div>

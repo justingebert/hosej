@@ -40,7 +40,7 @@ export default function QuestionsTabs({
       body: JSON.stringify({ rating: rating }),
     });
 
-    mutate(`/api/groups/${groupId}/question/daily`);
+    mutate(`/api/groups/${groupId}/question`);
     handleDrawer();
   };
 
@@ -97,7 +97,7 @@ export default function QuestionsTabs({
               <VoteOptions
                 question={question}
                 onVote={() => {
-                  mutate(`/api/groups/${groupId}/question/daily`);
+                  mutate(`/api/groups/${groupId}/question`);
                   handleDrawer();
                 }}
               />

@@ -1,41 +1,43 @@
 import dbConnect from "@/lib/dbConnect";
-import Question from "@/db/models/Question";
-import { NextResponse, type NextRequest } from "next/server";
 import { isUserInGroup } from "@/lib/groupAuth";
+import { withErrorHandling } from "@/lib/apiMiddleware";
+import { Group, Question } from "@/db/models";
 
 export const revalidate = 0;
-export async function GET(req: NextRequest, { params }: { params: { groupId: string } }) {
-  const { groupId } = params;
-  const userId = req.headers.get('x-user-id') as string;
+async function getHistoryHandler(req: Request, { params }: { params: { groupId: string } }) {
+    const { groupId } = params;
+    const userId = req.headers.get("x-user-id") as string;
 
-  try {
+    const group = await Group.findById(groupId);
+    if (!group) {
+        return Response.json({ message: "Group not found" }, { status: 404 });
+    }
+
     const authCheck = await isUserInGroup(userId, groupId);
     if (!authCheck.isAuthorized) {
-      return NextResponse.json({ message: authCheck.message }, { status: authCheck.status });
+        return Response.json({ message: authCheck.message }, { status: authCheck.status });
     }
 
     await dbConnect();
 
-    const searchParams = req.nextUrl.searchParams;
-    const limit = searchParams.get("limit") as string;
-    const offset = searchParams.get("offset") as string;
+    const url = new URL(req.url);
+    const limit = url.searchParams.get("limit") || "10";
+    const offset = url.searchParams.get("offset") || "0";
 
     const questions = await Question.find({
-      groupId: groupId,
-      used: true,
-      active: false,
-      category: "Daily",
+        groupId: groupId,
+        used: true,
+        active: false,
+        category: "Daily",
     })
-      .skip(parseInt(offset))
-      .limit(parseInt(limit))
-      .sort({ createdAt: -1 });
+        .skip(parseInt(offset))
+        .limit(parseInt(limit))
+        .sort({ createdAt: -1 });
     if (!questions) {
-      return NextResponse.json({ message: "No questions available" });
+        return Response.json({ questions: [], message: "No questions found" });
     }
 
-    return NextResponse.json({ questions });
-  } catch (error) {
-    console.error("Error getting question history", error);
-    return NextResponse.json({ message: "Internal Sever Error" }, { status: 500 });
-  }
+    return Response.json({ questions }, { status: 200 });
 }
+
+export const GET = withErrorHandling(getHistoryHandler);
