@@ -3,6 +3,7 @@ import { isUserInGroup } from "@/lib/groupAuth";
 import { CREATED_QUESTION_POINTS } from "@/db/POINT_CONFIG";
 import { withErrorHandling } from "@/lib/apiMiddleware";
 import { Chat, Group, Question } from "@/db/models";
+import { generateSignedUrl } from "@/lib/generateSignedUrl";
 
 export const revalidate = 0;
 
@@ -11,7 +12,7 @@ export async function getQuestionsHandler(req: Request, { params }: { params: { 
     const userId = req.headers.get("x-user-id") as string;
 
     const group = await Group.findById(groupId);
-    if(!group){
+    if (!group) {
         return Response.json({ message: "Group not found" }, { status: 404 });
     }
 

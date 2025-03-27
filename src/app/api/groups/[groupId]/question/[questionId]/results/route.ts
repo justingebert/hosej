@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/dbConnect";
 import Question from "@/db/models/Question";
 import { isUserInGroup } from "@/lib/groupAuth";
-import { generateSignedUrl } from "@/lib/question/generateSignedUrl";
+import { generateSignedUrl } from "@/lib/generateSignedUrl";
 import Group from "@/db/models/Group";
 import User from "@/db/models/user";
 

@@ -2,7 +2,7 @@ import dbConnect from "@/lib/dbConnect";
 import { isUserInGroup } from "@/lib/groupAuth";
 import { Group, Rally } from "@/db/models";
 import { withErrorHandling } from "@/lib/apiMiddleware";
-import { generateSignedUrl } from "@/lib/question/generateSignedUrl";
+import { generateSignedUrl } from "@/lib/generateSignedUrl";
 
 export const revalidate = 0;
 

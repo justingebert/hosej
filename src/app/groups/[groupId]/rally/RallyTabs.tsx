@@ -3,17 +3,19 @@ import RallyVoteCarousel from "@/components/Rally/VotingOptionsRally.client";
 import SubmitRally from "@/components/Rally/submitImageRally.client";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { RallyWithUserState } from "@/types/api";
+import { IUserJson } from "@/types/models";
 import { useSearchParams } from "next/navigation";
 
-export function RallyTabs({ groupId, user, rallies }: any) {
+export function RallyTabs({ groupId, user, rallies }: { groupId: string; user: IUserJson; rallies: RallyWithUserState[] }) {
     const searchParams = useSearchParams();
-    const defaultTab = searchParams.get("returnTo") || (rallies.length > 0 ? rallies[0]._id : undefined);
+    const defaultTab = searchParams.get("returnTo") || (rallies && rallies.length > 0 ? rallies[0]._id : undefined);
 
     return (
         <Tabs defaultValue={defaultTab}>
             <TabsList
                 className="grid w-full"
-                style={{ gridTemplateColumns: `repeat(${rallies.length}, minmax(0, 1fr))` }}
+                style={{ gridTemplateColumns: `repeat(${(rallies ? rallies.length : 0)}, minmax(0, 1fr))` }}
             >
                 {rallies.map((rally: any, index: number) => (
                     <TabsTrigger key={rally._id} value={rally._id}>

@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 
 const pictureSubmissionSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    username: { type: String },
+    username: { type: String }, //todo remove
     imageUrl: { type: String, required: true },
     votes: [
         {

@@ -16,12 +16,16 @@ import Modal from "react-modal";
 import { X } from "lucide-react";
 import { mutate } from "swr";
 import { RallyWithUserState, voteRallyRequest } from "@/types/api";
+import { useToast } from "@/hooks/use-toast";
+import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 
 const RallyVoteCarousel = ({ rally }: {rally:RallyWithUserState}) => {
+    const { user } = useAuthRedirect();
     const [selectedSubmission, setSelectedSubmission] = useState<string>("");
     const [api, setApi] = useState<CarouselApi | null>(null);
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const { toast } = useToast();
 
     useEffect(() => {
         if (rally.submissions.length > 0) {
@@ -47,6 +51,8 @@ const RallyVoteCarousel = ({ rally }: {rally:RallyWithUserState}) => {
         };
     }, [api, rally]);
 
+    const ownSubmission = rally.submissions.find((submission) => submission.userId === user._id)?._id.toString();
+
     const openModal = (imageUrl: string) => {
         setSelectedImage(imageUrl);
         setModalIsOpen(true);
@@ -63,15 +69,25 @@ const RallyVoteCarousel = ({ rally }: {rally:RallyWithUserState}) => {
             submissionId: selectedSubmission,
         };
 
-        await fetch(`/api/groups/${rally.groupId}/rally/${rally._id}/vote`, {
+        const res = await fetch(`/api/groups/${rally.groupId}/rally/${rally._id}/vote`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify(req),
         });
+        if(!res.ok){
+            const data = await res.json();
+            toast({
+                title: "Failed to vote",
+                description: data.message,
+                variant: "destructive",
+            });
+            return;
+        }
 
-        mutate(`/api/groups/${rally.groupId}/rally/`);
+
+        mutate(`/api/groups/${rally.groupId}/rally`);
     };
 
     const modalStyles = {
@@ -123,9 +139,9 @@ const RallyVoteCarousel = ({ rally }: {rally:RallyWithUserState}) => {
                 <Button
                     onClick={submitVote}
                     className="mt-24 w-full h-12 text-lg font-bold"
-                    disabled={rally.userHasVoted || modalIsOpen}
+                    disabled={rally.userHasVoted || modalIsOpen || selectedSubmission === ownSubmission}
                 >
-                    Vote for this
+                   {selectedSubmission === ownSubmission ? "Your Submission" : "Vote for this"}
                 </Button>
             </div>
             <Modal

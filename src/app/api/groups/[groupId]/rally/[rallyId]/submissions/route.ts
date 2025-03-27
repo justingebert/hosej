@@ -26,23 +26,31 @@ async function createRallySubmissionHandler(
 
     await dbConnect();
 
+    const rally = await Rally.findById(rallyId);
+    if (!rally) {
+        return Response.json({ message: "Rally not found" }, { status: 404 });
+    }
+    
     const sendUser = await User.findById(userId);
+    const userAlreadySubmitted = rally.submissions.some(
+        (submission) => submission.userId.toString() === sendUser._id.toString()
+    );
+    if (userAlreadySubmitted) {
+        return Response.json({ message: "User already submitted" }, { status: 400 });
+    }
 
     const newSubmission = {
         userId: sendUser._id,
-        username: sendUser.username,
         imageUrl: imageUrl,
         time: Date.now(),
     };
 
-    const updatedRally = await Rally.findByIdAndUpdate(
+    await Rally.findByIdAndUpdate(
         rallyId,
         { $push: { submissions: newSubmission } },
         { new: true, runValidators: true }
     );
-    if (!updatedRally) {
-        return Response.json({ message: "Rally not found" }, { status: 400 });
-    }
+
 
     await group.addPoints(sendUser._id, SUBMITTED_RALLY_POINTS);
 

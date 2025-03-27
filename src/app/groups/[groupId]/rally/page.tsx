@@ -10,7 +10,7 @@ import { RallyTabs } from "./RallyTabs";
 import fetcher from "@/lib/fetcher";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getGroupResponse, getRalliesResponse } from "@/types/api";
+import { getRalliesResponse } from "@/types/api";
 
 const RallyPage = () => {
     const { user } = useAuthRedirect();
@@ -22,7 +22,7 @@ const RallyPage = () => {
         fetcher
     );
 
-    if (isLoading) {
+    if (isLoading || !rallies) {
         return (
             <div>
                 <Header leftComponent={<BackLink href={`/groups/${groupId}/dashboard`} />} title="Rallies" />
@@ -45,7 +45,7 @@ const RallyPage = () => {
                         <Card className="text-center p-6 ">
                             <h2 className="font-bold">No active rallies</h2>
                         </Card>
-                        {/* {userIsAdmin && (
+                        {/* {userIsAdmin && ( */}
                             <Button
                                 onClick={() => {
                                     fetch(`/api/groups/${groupId}/rally/activate`, {
@@ -56,7 +56,7 @@ const RallyPage = () => {
                             >
                                 Activate Rally
                             </Button>
-                        )} */}
+                        {/* )} */}
                     </div>
                 </div>
             </div>

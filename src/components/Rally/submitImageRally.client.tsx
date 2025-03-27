@@ -127,7 +127,7 @@ export default function SubmitRally({
             if (imageUrl && imageUrl.length > 0) {
                 await createRallySubmission(rally._id, rally.groupId, imageUrl[0].url);
             }
-            mutate(`/api/groups/${groupId}/rally/`);
+            mutate(`/api/groups/${groupId}/rally`);
         } catch (err: any) {
             toast({
                 title: "Error",

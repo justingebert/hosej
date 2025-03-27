@@ -86,7 +86,7 @@ async function getNewQuestions(groupId: string, limit: number): Promise<IQuestio
 async function handleJukebox(group: IGroup) {
     const today = new Date();
     const monthName = new Intl.DateTimeFormat("en-US", { month: "long" }).format(today);
-    if (today.getDate() === 6) {
+    if (today.getDate() === 1) {
         await Jukebox.updateMany({ active: true, groupId: group._id }, { active: false });
         const newJukebox = await new Jukebox({ groupId: group._id, date: today, active: true }).save();
         const newChat = await new Chat({
@@ -121,7 +121,12 @@ async function handleRally(group: IGroup) {
         return;
     }
 
-    const ralliesToStart = rallies.filter((rally) => !rally.used && currentDay >= new Date(rally.startTime).getTime());
+    const ralliesToStart = rallies.filter((rally) => {
+        if (!rally.used && rally.startTime) {
+            return currentDay >= new Date(rally.startTime).getTime();
+        }
+        return false;
+    });
     for (let rally of ralliesToStart) {
         rally.used = true;
         await rally.save();
@@ -132,9 +137,13 @@ async function handleRally(group: IGroup) {
         );
     }
 
-    const activeRalliesActionNeeded = rallies.filter(
-        (rally) => rally.used && currentDay > new Date(rally.endTime).getTime()
-    );
+    const activeRalliesActionNeeded = rallies.filter((rally) => {
+        if (rally.used && rally.endTime) {
+            return currentDay >= new Date(rally.endTime).getTime();
+        }
+        return false;
+    });
+
     for (let rally of activeRalliesActionNeeded) {
         // activate Voting phase
         if (!rally.votingOpen && !rally.resultsShowing) {
@@ -157,7 +166,7 @@ async function handleRally(group: IGroup) {
         else if (rally.resultsShowing) {
             rally.resultsShowing = false;
             rally.active = false;
-            rally.endTime = currentDay;
+            rally.endTime = new Date(currentDay);
             await rally.save();
 
             await activateRallies(group, 1);

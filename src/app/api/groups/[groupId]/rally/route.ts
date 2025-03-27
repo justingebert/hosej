@@ -3,7 +3,7 @@ import { isUserInGroup } from "@/lib/groupAuth";
 import { CREATED_RALLY_POINTS } from "@/db/POINT_CONFIG";
 import { withErrorHandling } from "@/lib/apiMiddleware";
 import { Chat, Group, Rally, User } from "@/db/models";
-import { generateSignedUrl } from "@/lib/question/generateSignedUrl";
+import { generateSignedUrl } from "@/lib/generateSignedUrl";
 
 export const revalidate = 0;
 

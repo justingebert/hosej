@@ -31,6 +31,11 @@ export async function voteRallyHandler(req: Request, { params }: { params: { gro
     }
 
     const user = await User.findById(userId);
+    const usersOwnSubmission = submission.userId.toString() === user._id.toString();
+    if (usersOwnSubmission) {
+        return Response.json({ message: "User cannot vote for their own submission" }, { status: 400 });
+    }
+
     const userVoted = submission.votes.find(vote => vote.user === user._id);
     if (userVoted) {
         return Response.json({ message: "User already voted" }, { status: 304 });

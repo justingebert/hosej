@@ -1,4 +1,4 @@
-import { Types, Document, Schema } from "mongoose";
+import { Types, Document } from "mongoose";
 import { AsJson } from "../common";
 
 export interface IPictureSubmission{
