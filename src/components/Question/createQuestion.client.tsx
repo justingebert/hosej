@@ -144,9 +144,12 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
         setIsSubmitting(true);
         e.preventDefault();
 
+        console.log(questionData.options)
         const trimmedOptions = questionData.options
             .map((option) => option.trim())
             .filter((option) => option !== "");
+
+        const trimmedOptionsFiles = questionData.optionFiles.filter((file) => file !== null);
 
         if (questionData.questionType.startsWith("custom") && trimmedOptions.length < 2) {
             toast({
@@ -157,7 +160,7 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
             return;
         }
 
-        if (questionData.questionType.startsWith("image-select") && trimmedOptions.length < 2) {
+        if (questionData.questionType.startsWith("image-select") && trimmedOptionsFiles.length < 2) {
             toast({
                 title: "Please add at least two options for image selections.",
                 variant: "destructive",
