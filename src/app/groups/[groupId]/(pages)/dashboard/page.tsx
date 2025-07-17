@@ -12,10 +12,12 @@ import { IGroupJson } from "@/types/models/group";
 import { IQuestion } from "@/types/models/Question";
 import { IRally } from "@/types/models/rally";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useHaptic } from "use-haptic";
 
 export default function Dashboard() {
     const router = useRouter();
     const { mutate } = useSWRConfig();
+    const { triggerHaptic } = useHaptic();
     const params = useParams<{ groupId: string }>();
     const groupId = params?.groupId;
     const { data: group, isLoading: groupLoading } = useSWR<IGroupJson>(groupId ? `/api/groups/${groupId}` : null, fetcher);
@@ -83,6 +85,7 @@ export default function Dashboard() {
                         <div
                             className="col-span-2 relative bg-primary-foreground px-6 py-4 flex items-center justify-between rounded-lg"
                             onClick={() => {
+                                triggerHaptic();
                                 mutate(`/api/groups/${groupId}/question/daily`);
                                 router.push(`/groups/${groupId}/daily`);
                             }}
@@ -106,7 +109,10 @@ export default function Dashboard() {
                     {!rallyLoading && ralliesData ? (
                         <div
                             className="relative bg-primary-foreground px-6 py-4 flex items-center justify-between rounded-lg"
-                            onClick={() => router.push(`/groups/${groupId}/rally`)}
+                            onClick={() => {
+                                triggerHaptic();
+                                router.push(`/groups/${groupId}/rally`)
+                            }}
                         >
                             {rallies.length > 0 && (
                                 <div className="absolute -top-3 -right-3">
@@ -141,7 +147,10 @@ export default function Dashboard() {
                             {group?.jukebox && (
                                 <div
                                     className="relative bg-primary-foreground px-6 py-4 flex items-center justify-between rounded-lg"
-                                    onClick={() => router.push(`/groups/${groupId}/jukebox`)}
+                                    onClick={() => {
+                                        triggerHaptic();
+                                        router.push(`/groups/${groupId}/jukebox`)
+                                    }}
                                 >
                                     <div className="absolute -top-3 -right-3">
                                         <Badge>1</Badge>
