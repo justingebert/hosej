@@ -12,6 +12,8 @@ import fetcher from "@/lib/fetcher";
 import { Skeleton } from "../ui/skeleton";
 import { IQuestionJson } from "@/types/models/Question";
 import { IUserJson } from "@/types/models/user";
+import { on } from "events";
+import { useHaptic } from "use-haptic";
 
 type VoteResultsProps = {
     user: IUserJson;
@@ -22,6 +24,7 @@ type VoteResultsProps = {
 
 const VoteResults = ({ user, question, available, returnTo }: VoteResultsProps) => {
     const [animationTriggered, setAnimationTriggered] = useState(false);
+    const { triggerHaptic } = useHaptic();
     const { data, error } = useSWR<any>(`/api/groups/${question.groupId}/question/${question._id}/results/`, fetcher);
 
     useEffect(() => {
@@ -47,6 +50,7 @@ const VoteResults = ({ user, question, available, returnTo }: VoteResultsProps) 
                     <Link
                         key={index}
                         href={`/groups/${question.groupId}/question/${question._id}/resultsdetailed/?returnTo=${returnTo}`}
+                        onClick={triggerHaptic}
                     >
                         <div className="bg-secondary my-2 rounded-md relative">
                             <motion.div
