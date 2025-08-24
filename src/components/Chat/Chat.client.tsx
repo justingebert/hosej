@@ -111,6 +111,12 @@ function ChatComponent({ user, entity, available }: any) {
                             className="flex-grow p-2"
                             value={newMessage}
                             onChange={(e) => setNewMessage(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter" && !e.shiftKey) {
+                                    e.preventDefault();
+                                    handleSendMessage();
+                                }
+                            }}
                         />
                         <Button onClick={handleSendMessage} disabled={sending}>
                             <Send size={20} />

@@ -90,7 +90,7 @@ async function handleJukebox(group: IGroup) {
         await Jukebox.updateMany({ active: true, groupId: group._id }, { active: false });
         const newJukebox = await new Jukebox({ groupId: group._id, date: today, active: true }).save();
         const newChat = await new Chat({
-            groupId: group._id,
+            group: group._id,
             entityModel: "Jukebox",
             entity: newJukebox._id,
         }).save();

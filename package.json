@@ -61,6 +61,7 @@
     "swr": "^2.2.5",
     "tailwind-merge": "^2.2.2",
     "tailwindcss-animate": "^1.0.7",
+    "use-haptic": "^1.1.11",
     "uuid": "^9.0.1",
     "vaul": "^0.9.0"
   },

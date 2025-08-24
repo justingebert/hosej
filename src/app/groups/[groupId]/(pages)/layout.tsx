@@ -6,11 +6,14 @@ import { PieChart, History, Home, Plus, Settings } from "lucide-react";
 import { motion } from "framer-motion";
 import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
+import { useHaptic } from "use-haptic";
 
 export default function TabsLayout({ children }: { children: React.ReactNode }) {
   const params = useParams<{ groupId: string }>();
   const groupId = params? params.groupId : "";
   const currentPath = usePathname();
+  const { triggerHaptic } = useHaptic();
+
 
   // To store refs for each link
   const dashboardRef = useRef<HTMLAnchorElement>(null);
@@ -61,21 +64,21 @@ export default function TabsLayout({ children }: { children: React.ReactNode }) 
           style={{ top: "10%"}}
         />
 
-        <Link ref={dashboardRef} href={`/groups/${groupId}/dashboard`} className="p-4 z-10">
+        <Link ref={dashboardRef} href={`/groups/${groupId}/dashboard`} className="p-4 z-10" onClick={triggerHaptic}>
           <Home />
         </Link>
-        <Link ref={historyRef} href={`/groups/${groupId}/history`} className="p-4 z-10">
+        <Link ref={historyRef} href={`/groups/${groupId}/history`} className="p-4 z-10" onClick={triggerHaptic}>
           <History />
         </Link>
         <Link ref={createRef} href={`/groups/${groupId}/create`} className="z-10">
-          <Button className="flex items-center justify-center p-2 rounded-full bg-primary">
+          <Button className="flex items-center justify-center p-2 rounded-full bg-primary" onClick={triggerHaptic}>
             <Plus />
           </Button>
         </Link>
-        <Link ref={statsRef} href={`/groups/${groupId}/stats`} className="p-4 z-10">
+        <Link ref={statsRef} href={`/groups/${groupId}/stats`} className="p-4 z-10" onClick={triggerHaptic}>
           <PieChart />
         </Link>
-        <Link ref={settingsRef} href={`/groups/${groupId}/settings`} className="p-4 z-10">
+        <Link ref={settingsRef} href={`/groups/${groupId}/settings`} className="p-4 z-10" onClick={triggerHaptic}>
           <Settings />
         </Link>
 
