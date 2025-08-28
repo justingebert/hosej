@@ -30,3 +30,10 @@ async function connectHandler(req: Request): Promise<Response> {
 }
 
 export const POST = withErrorHandling(connectHandler);
+export interface connectGoogleRequest {
+    deviceId: string;
+}
+
+export interface connectGoogleResponse {
+    message: string;
+}

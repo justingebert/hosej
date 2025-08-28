@@ -10,6 +10,7 @@ import fetcher from "@/lib/fetcher";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useHaptic } from "use-haptic";
 import { getGroupResponse, getRalliesResponse } from "@/types/api";
+import { IQuestion } from "@/types/models";
 
 export default function Dashboard() {
     const router = useRouter();

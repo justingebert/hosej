@@ -6,7 +6,6 @@ import { TokenProvider } from "./TokenProvider";
 import { SessionProvider } from "next-auth/react";
 
 
-
 export const AppWrapper = ({ children }: { children: ReactNode }) => {
 
   return (

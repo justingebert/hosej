@@ -7,10 +7,11 @@ import { generateSignedUrl } from "@/lib/generateSignedUrl";
 
 export const revalidate = 0;
 
-export async function getQuestionsHandler(req: Request, { params }: { params: { groupId: string } }) {
+async function getQuestionsHandler(req: Request, { params }: { params: { groupId: string } }) {
     const { groupId } = params;
     const userId = req.headers.get("x-user-id") as string;
 
+    await dbConnect();
     const group = await Group.findById(groupId);
     if (!group) {
         return Response.json({ message: "Group not found" }, { status: 404 });
@@ -20,9 +21,8 @@ export async function getQuestionsHandler(req: Request, { params }: { params: { 
     if (!authCheck.isAuthorized) {
         return Response.json({ message: authCheck.message }, { status: authCheck.status });
     }
-    await dbConnect();
 
-    let questions = await Question.find({
+    const questions = await Question.find({
         groupId: groupId,
         category: "Daily",
         used: true,
@@ -37,20 +37,29 @@ export async function getQuestionsHandler(req: Request, { params }: { params: { 
     const totalVotes = questions.reduce((acc, question) => acc + (question.answers?.length || 0), 0);
     const completionPercentage = ((totalVotes / (questions.length * userCount)) * 100).toFixed(0);
 
-    questions = questions.map((question) => {
-        question.userHasVoted = question.answers.some((answer: { user: string }) => answer.user.toString() === userId);
-        question.userRating = question.rating.good.some((id) => id.toString() === userId)
+    const processedQuestions = questions.map((question) => {
+        const plainQuestion = question.toObject()
+
+        const userHasVoted = question.answers.some(answer => answer.user.toString() === userId);
+        const userRating = question.rating.good.some((id) => id.toString() === userId)
             ? "good"
-            : question.rating.ok.some((id: mongoose.Types.ObjectId) => id.toString() === userId)
+            : question.rating.ok.some(id => id.toString() === userId)
             ? "ok"
-            : question.rating.bad.some((id: mongoose.Types.ObjectId) => id.toString() === userId)
+            : question.rating.bad.some(id => id.toString() === userId)
             ? "bad"
             : null;
-        return question;
+
+        const processedQuestion = {
+            ...plainQuestion,
+            userHasVoted: userHasVoted,
+            userRating: userRating
+        }
+        
+        return processedQuestion;
     });
 
-    const questionsWithImages = await Promise.all(
-        questions.map(async (question) => {
+    const processedQuestionsWithImages = await Promise.all(
+        processedQuestions.map(async (question) => {
             if (question.image) {
                 const { url } = await generateSignedUrl(new URL(question.image).pathname);
                 question.imageUrl = url;
@@ -68,7 +77,7 @@ export async function getQuestionsHandler(req: Request, { params }: { params: { 
         })
     );
 
-    return Response.json({ questions: questionsWithImages, completionPercentage });
+    return Response.json({ questions: processedQuestionsWithImages, completionPercentage });
 }
 
 async function createQuestionHandler(req: Request, { params }: { params: { groupId: string } }) {

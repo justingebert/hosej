@@ -4,7 +4,7 @@ import { VOTED_RALLY_POINTS } from "@/db/POINT_CONFIG";
 import { withErrorHandling } from "@/lib/apiMiddleware";
 import { Group, Rally, User } from "@/db/models";
 
-export async function voteRallyHandler(req: Request, { params }: { params: { groupId: string; rallyId: string } }) {
+async function voteRallyHandler(req: Request, { params }: { params: { groupId: string; rallyId: string } }) {
     const { groupId, rallyId } = params;
     const userId = req.headers.get("x-user-id") as string;
     const { submissionId } = await req.json();
@@ -48,5 +48,5 @@ export async function voteRallyHandler(req: Request, { params }: { params: { gro
 
     return Response.json({ message: "Vote added successfully" }, { status: 200 });
 }
-
+ 
 export const POST = withErrorHandling(voteRallyHandler);

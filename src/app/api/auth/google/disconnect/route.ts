@@ -26,3 +26,10 @@ async function disconnectHandler(req: Request): Promise<Response> {
 }
 
 export const POST = withErrorHandling(disconnectHandler);
+export interface disconnectGoogleRequest {
+    deviceId: string;
+}
+
+export interface disconnectGoogleResponse {
+    message: string;
+}

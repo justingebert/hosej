@@ -6,6 +6,6 @@ export * from './users/types';
 export * from './groups/[groupId]/rally/types';
 export * from './groups/[groupId]/rally/vote/types';
 export * from './groups/[groupId]/rally/submissions/types';
-export * from './questions/types';
+export * from './groups/[groupId]/question/types';
 export * from './chats/types';
 export * from './messages/types';

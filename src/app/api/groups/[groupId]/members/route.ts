@@ -17,7 +17,9 @@ export async function GET(req: NextRequest,  { params }: { params: { groupId: st
         }
         await dbConnect();
         const group = await Group.findById(groupId).populate({path: 'members', model: User});
-
+        if(!group){
+            return NextResponse.json({ message: "Group not found" }, { status: 404})
+        }
         return NextResponse.json(group.members, {status: 200});
     }catch (error) {
         console.log(`Error getting members for group: ${groupId}`, error);

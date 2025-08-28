@@ -6,7 +6,7 @@ import Header from "@/components/ui/custom/Header";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { Card } from "@/components/ui/card";
 import BackLink from "@/components/ui/custom/BackLink";
-import { RallyTabs } from "./RallyTabs";
+import { RallyTabs } from "../../../../components/Rally/RallyTabs";
 import fetcher from "@/lib/fetcher";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";

@@ -24,7 +24,7 @@ async function getGroupHandler(req: Request, { params }: { params: { groupId: st
     return Response.json({ group: group, userIsAdmin: userIsAdmin }, { status: 200 });
 }
 
-export async function updateGroupHandler(req: Request, { params }: { params: { groupId: string } }) {
+async function updateGroupHandler(req: Request, { params }: { params: { groupId: string } }) {
     const userId = req.headers.get("x-user-id") as string;
     const { groupId } = params;
 

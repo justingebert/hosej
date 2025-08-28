@@ -22,6 +22,11 @@ export async function DELETE(
         const member = await User.findById(memberId);
         const user = await User.findById(userId);
         const group = await Group.findById(groupId);
+
+        if(!group){
+            return NextResponse.json({ message: "Group not found" }, { status: 404})
+        }
+
         if (!group.admin.equals(user._id) || userId !== memberId) {
             return NextResponse.json(
                 { message: "You are not the admin of this group" },
