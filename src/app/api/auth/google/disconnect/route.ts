@@ -1,32 +1,29 @@
-import { NextResponse } from 'next/server';
+import {NextRequest, NextResponse} from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/db/models/user';
+import {AuthedContext, withAuthAndErrors} from '@/lib/api/withAuth';
+import {NotFoundError, ValidationError} from '@/lib/api/errorHandling';
 
-//TODO only user should be able to unlink their own account
-export async function POST(req: Request) {
-  try {
-    const body = await req.json(); 
-    const { deviceId, userId } = body;
+// Only the authenticated user can unlink their own account
+export const POST = withAuthAndErrors(async (req: NextRequest, {userId}: AuthedContext) => {
+    const body = await req.json();
+    const {deviceId} = body;
+
     if (!deviceId) {
-      return NextResponse.json({message: 'No deviceId provided' }, { status: 400 });
+        throw new ValidationError('No deviceId provided');
     }
 
     await dbConnect();
 
     const googleUser = await User.findById(userId);
     if (!googleUser) {
-      return NextResponse.json({ message: 'Google user not found' }, { status: 404 });
+        throw new NotFoundError('User not found');
     }
 
     googleUser.deviceId = deviceId;
     googleUser.googleId = undefined;
     googleUser.googleConnected = false;
     await googleUser.save();
-    
-    return NextResponse.json({ message: 'Google account successfully unlinked.' }, { status: 200 });
 
-  } catch (error) {
-    console.error('Error merging accounts:', error);
-    return NextResponse.json({ success: false, message: 'Internal Server Error' }, { status: 500 });
-  }
-}
+    return NextResponse.json({message: 'Google account successfully unlinked.'}, {status: 200});
+});
