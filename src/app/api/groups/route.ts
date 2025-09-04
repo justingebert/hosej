@@ -1,15 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server';
+import {NextRequest, NextResponse} from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Group from '@/db/models/Group';
 import User from '@/db/models/user';
-import { withAuthAndErrors, AuthedContext } from "@/lib/api/withAuth";
-import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
+import {AuthedContext, withAuthAndErrors} from "@/lib/api/withAuth";
+import {NotFoundError, ValidationError} from "@/lib/api/errorHandling";
 
 export const revalidate = 0
 
-export const POST = withAuthAndErrors(async (req: NextRequest, { userId }: AuthedContext) => {
+export const POST = withAuthAndErrors(async (req: NextRequest, {userId}: AuthedContext) => {
     await dbConnect();
-    const { name } = await req.json();
+    const {name} = await req.json();
 
     if (!name) {
         throw new ValidationError("Group name is required");
@@ -34,14 +34,14 @@ export const POST = withAuthAndErrors(async (req: NextRequest, { userId }: Authe
     userAdmin.groups.push(newGroup._id);
     await userAdmin.save();
 
-    return NextResponse.json(newGroup, { status: 201 });
+    return NextResponse.json(newGroup, {status: 201});
 });
 
-export const GET = withAuthAndErrors(async (req: NextRequest, { userId }: AuthedContext) => {
+export const GET = withAuthAndErrors(async (req: NextRequest, {userId}: AuthedContext) => {
     await dbConnect();
-    const user = await User.findById(userId).populate({ path: 'groups', model: Group });
+    const user = await User.findById(userId).populate({path: 'groups', model: Group});
     if (!user) {
         throw new NotFoundError("User not found");
     }
-    return NextResponse.json({ groups: user.groups }, { status: 200 });
+    return NextResponse.json({groups: user.groups}, {status: 200});
 });

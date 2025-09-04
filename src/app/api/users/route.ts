@@ -2,7 +2,7 @@ import {NextRequest, NextResponse} from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/db/models/user';
 import {ConflictError, NotFoundError, ValidationError, withErrorHandling} from "@/lib/api/errorHandling";
-import {withAuthAndErrors, AuthedContext} from "@/lib/api/withAuth";
+import {AuthedContext, withAuthAndErrors} from "@/lib/api/withAuth";
 
 interface CreateUserRequest {
     deviceId: string;
