@@ -1,33 +1,33 @@
 import dbConnect from "@/lib/dbConnect";
 import Question from "@/db/models/Question";
 import User from "@/db/models/user";
-import { NextResponse, type NextRequest } from "next/server";
+import {type NextRequest, NextResponse} from "next/server";
 import Chat from "@/db/models/Chat";
 import Group from "@/db/models/Group";
-import { IGroup } from "@/types/models/group";
-import { isUserInGroup } from "@/lib/groupAuth";
-import { CREATED_QUESTION_POINTS } from "@/db/POINT_CONFIG";
-
-const POINTS = 3;
+import {isUserInGroup} from "@/lib/groupAuth";
+import {CREATED_QUESTION_POINTS} from "@/db/POINT_CONFIG";
+import {ForbiddenError, ValidationError} from "@/lib/api/errorHandling";
+import {withAuthAndErrors} from "@/lib/api/withAuth";
 
 export const revalidate = 0;
 
-// Function to handle question creation with populated options
-export async function POST(req: NextRequest, { params }: { params: { groupId: string } }) {
-    const { groupId } = params;
-    const userId = req.headers.get("x-user-id") as string;
+export const POST = withAuthAndErrors(
+    async (
+        req: NextRequest,
+        {params, userId}: { params: { groupId: string }; userId: string }
+    ) => {
+        const {groupId} = params;
 
-    try {
         const authCheck = await isUserInGroup(userId, groupId);
         if (!authCheck.isAuthorized) {
-            return NextResponse.json({ message: authCheck.message }, { status: authCheck.status });
+            throw new ForbiddenError(authCheck.message);
         }
         await dbConnect();
 
         const data = await req.json();
-        const { category, questionType, question, submittedBy, image } = data;
+        const {category, questionType, question, submittedBy, image} = data;
         if (!groupId || !category || !questionType || !question || !submittedBy) {
-            return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
+            throw new ValidationError("Missing required fields");
         }
 
         // Populate options based on question type
@@ -67,9 +67,6 @@ export async function POST(req: NextRequest, { params }: { params: { groupId: st
         const submittingUser = await User.findById(submittedBy);
         await group.addPoints(submittingUser._id, CREATED_QUESTION_POINTS);
 
-        return NextResponse.json({ newQuestion }, { status: 201 });
-    } catch (error) {
-        console.error("Error creating question:", error);
-        return NextResponse.json({ message: "Internal server error" }, { status: 500 });
+        return NextResponse.json({newQuestion}, {status: 201});
     }
-}
+);
