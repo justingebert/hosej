@@ -2,49 +2,46 @@ import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Group from '@/db/models/Group';
 import User from '@/db/models/user';
+import { withAuthAndErrors, AuthedContext } from "@/lib/api/withAuth";
+import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 
 export const revalidate = 0
 
-export async function POST(req: NextRequest) {
-  const userId = req.headers.get('x-user-id') as string;
-  try{
+export const POST = withAuthAndErrors(async (req: NextRequest, { userId }: AuthedContext) => {
     await dbConnect();
     const { name } = await req.json();
-    
+
+    if (!name) {
+        throw new ValidationError("Group name is required");
+    }
+
     const userAdmin = await User.findById(userId);
     if (!userAdmin) {
-      return NextResponse.json({ message: 'User not found' }, { status: 404 });
+        throw new NotFoundError("User not found");
     }
-    
+
     const member = {
-      user: userAdmin._id,
-      name: userAdmin.username,
+        user: userAdmin._id,
+        name: userAdmin.username,
     }
     const newGroup = new Group({
-      name: name,
-      admin: userAdmin._id,
-      members: [member],
+        name: name,
+        admin: userAdmin._id,
+        members: [member],
     });
     await newGroup.save();
-    
+
     userAdmin.groups.push(newGroup._id);
     await userAdmin.save();
 
     return NextResponse.json(newGroup, { status: 201 });
-  }catch (error) {
-    console.error("Failed to create group", error);
-    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
-  }
-}
+});
 
-export async function GET(req: NextRequest){
-    const userId = req.headers.get('x-user-id');
-    try{
-        await dbConnect();
-        const user = await User.findById(userId).populate({path: 'groups', model: Group});
-        return NextResponse.json({groups: user.groups}, {status: 200});
-    }catch (error) {
-        console.log(`Error getting groups for user: ${userId}`, error);
-        return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
+export const GET = withAuthAndErrors(async (req: NextRequest, { userId }: AuthedContext) => {
+    await dbConnect();
+    const user = await User.findById(userId).populate({ path: 'groups', model: Group });
+    if (!user) {
+        throw new NotFoundError("User not found");
     }
-}
+    return NextResponse.json({ groups: user.groups }, { status: 200 });
+});
