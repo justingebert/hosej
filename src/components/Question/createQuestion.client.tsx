@@ -18,8 +18,8 @@ import { CircleMinus, Plus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createQuestionData } from "@/app/groups/[groupId]/(pages)/create/page";
 import useSWR from "swr";
-import { IGroupJson } from "@/types/models/group";
 import fetcher from "@/lib/fetcher";
+import { getGroupResponse } from "@/types/api";
 
 interface CreateQuestionProps {
     questionData: createQuestionData;
@@ -44,7 +44,7 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
         optionsMode = "static";
     }
 
-    const { data: group, isLoading } = useSWR<IGroupJson>(
+    const { data: groupData } = useSWR<getGroupResponse>(
         user ? `/api/groups/${groupId}` : null,
         fetcher
     );
@@ -84,7 +84,7 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
             setQuestionData((prev) => ({
                 ...prev,
                 questionType: value,
-                options: group?.members.map((member) => member.name) || [],
+                options: groupData?.group.members.map((member) => member.name) || [],
             }));
         } else if (value.startsWith("custom") || value.startsWith("image")) {
             setQuestionData((prev) => ({ ...prev, questionType: value, options: [""] }));

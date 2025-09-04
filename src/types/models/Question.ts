@@ -7,6 +7,12 @@ export interface IAnswer {
   time: Date;
 }
 
+export enum QuestionRating {
+  good = "good",
+  ok = "ok",
+  bad = "bad"
+}
+
 export enum QuestionType {
   UsersSelectOne = "users-select-one",
   UsersSelectMultiple = "users-select-multiple",
@@ -28,6 +34,7 @@ export interface IResult {
 }
 
 export interface IQuestion extends Document {
+  _id: Types.ObjectId;
   groupId: Types.ObjectId;
   category: string;
   questionType: QuestionType;

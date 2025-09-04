@@ -15,7 +15,7 @@ export function usePaginatedData({ groupId, limit = 1000 }: UsePaginatedDataProp
     if (previousPageData && previousPageData.questions.length === 0) return null;
 
     // Otherwise, fetch the next page
-    return `/api/groups/${groupId}/question/history?limit=${limit}&offset=${pageIndex * limit}`;
+    return `/api/groups/${groupId}/history?limit=${limit}&offset=${pageIndex * limit}`;
   };
 
   const { data, error, isLoading, size, setSize } = useSWRInfinite(getKey, fetcher);

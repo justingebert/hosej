@@ -1,21 +1,20 @@
-import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/dbConnect";
 import Question from "@/db/models/Question";
 import { isUserInGroup } from "@/lib/groupAuth";
-import { generateSignedUrl } from "@/lib/question/questionOptions";
+import { generateSignedUrl } from "@/lib/generateSignedUrl";
 import Group from "@/db/models/Group";
 import User from "@/db/models/user";
 
 export const revalidate = 0;
 
-export async function GET(req: NextRequest, { params }: { params: { groupId: string; questionId: string } }) {
+export async function GET(req: Request, { params }: { params: { groupId: string; questionId: string } }) {
     const { groupId, questionId } = params;
     const userId = req.headers.get("x-user-id") as string;
 
     try {
         const authCheck = await isUserInGroup(userId, groupId);
         if (!authCheck.isAuthorized) {
-            return NextResponse.json({ message: authCheck.message }, { status: authCheck.status });
+            return Response.json({ message: authCheck.message }, { status: authCheck.status });
         }
 
         await dbConnect();
@@ -23,11 +22,11 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
         const question = await Question.findById(questionId).populate({
             path: "answers.user",
             model: User,
-            select: "-googleId -spotifyAccessToken -spotifyRefreshToken -spotifyTokenExpiresAt -deviceId"
+            select: "-googleId -spotifyAccessToken -spotifyRefreshToken -spotifyTokenExpiresAt -deviceId",
         });
 
         if (!question) {
-            return NextResponse.json({ message: "Question not found" }, { status: 404 });
+            return Response.json({ message: "Question not found" }, { status: 404 });
         }
 
         const group = await Group.findById(groupId);
@@ -68,12 +67,9 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
         // Sort results by the number of votes (descending)
         results.sort((a, b) => b.count - a.count);
 
-        return NextResponse.json(
-            { results, totalVotes, totalUsers, questionType: question.questionType },
-            { status: 200 }
-        );
+        return Response.json({ results, totalVotes, totalUsers, questionType: question.questionType }, { status: 200 });
     } catch (error) {
         console.error("Error fetching question results:", questionId, error);
-        return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
+        return Response.json({ message: "Internal Server Error" }, { status: 500 });
     }
 }

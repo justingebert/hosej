@@ -7,8 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json(); 
-    const { userId, spotifyUserId } = body;
+    const { userId, spotifyUserId }= await req.json(); 
     if (!userId || !spotifyUserId) {
       return NextResponse.json({message: 'No userId provided' }, { status: 400 });
     }
@@ -48,7 +47,6 @@ export async function POST(req: NextRequest) {
       { $set: { spotifyConneceted: true } }
     );
     
-
     const provider = originalUser.googleConnected ? 'google' : 'credentials';
     
     return NextResponse.json({ message: 'Spotify account linked successfully.', provider: provider}, { status: 200 });

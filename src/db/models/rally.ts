@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 
 const pictureSubmissionSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    username: { type: String },
+    username: { type: String }, //todo remove
     imageUrl: { type: String, required: true },
     votes: [
         {
@@ -13,7 +13,7 @@ const pictureSubmissionSchema = new mongoose.Schema({
     ],
 });
 
-const rallySchema = new mongoose.Schema({
+const rallySchema = new mongoose.Schema<IRally>({
     groupId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Group",
@@ -35,6 +35,6 @@ const rallySchema = new mongoose.Schema({
 
 rallySchema.index({ groupId: 1 });
 
-const Rally = mongoose.models.Rally || mongoose.model<IRally>("Rally", rallySchema);
+const Rally = mongoose.models.Rally as mongoose.Model<IRally> || mongoose.model<IRally>("Rally", rallySchema);
 
 export default Rally;

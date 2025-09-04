@@ -1,3 +1,4 @@
+import { IChat } from "@/types/models/chat";
 import mongoose from "mongoose";
 
 const messageSchema = new mongoose.Schema({
@@ -16,7 +17,7 @@ const messageSchema = new mongoose.Schema({
     },
 });
 
-const chatSchema = new mongoose.Schema({
+const chatSchema = new mongoose.Schema<IChat>({
     group: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Group",
@@ -39,6 +40,6 @@ const chatSchema = new mongoose.Schema({
     },
 });
 
-const Chat = mongoose.models.Chat || mongoose.model("Chat", chatSchema);
+const Chat = mongoose.models.Chat || mongoose.model<IChat>("Chat", chatSchema);
 
 export default Chat;

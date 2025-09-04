@@ -1,4 +1,4 @@
-import { Types, Document, Schema } from "mongoose";
+import { Types, Document } from "mongoose";
 import { AsJson } from "../common";
 
 export interface IPictureSubmission{
@@ -15,6 +15,7 @@ export interface IPictureSubmission{
 }
 
 export interface IRally extends Document {
+    _id: Types.ObjectId;
     groupId: Types.ObjectId;
     task: string;
     submissions: IPictureSubmission[];

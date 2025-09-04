@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { useParams, useRouter } from "next/navigation";
 import Header from "@/components/ui/custom/Header";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,8 +9,8 @@ import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import BackLink from "@/components/ui/custom/BackLink";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
-import { IQuestionJson } from "@/types/models/Question";
-import QuestionsTabs from "./QuestionTabs";
+import QuestionsTabs from "../../../../components/Question/QuestionTabs";
+import { getQuestionsResponse } from "@/types/api";
 
 const DailyQuestionPage = () => {
     const { user } = useAuthRedirect();
@@ -19,8 +18,8 @@ const DailyQuestionPage = () => {
     const groupId = params? params.groupId : "";
     const router = useRouter();
 
-    const { data, error, isLoading } = useSWR<{ questions: IQuestionJson[] }>(
-        user ? `/api/groups/${groupId}/question/daily` : null,
+    const { data, isLoading } = useSWR<getQuestionsResponse>(
+        user ? `/api/groups/${groupId}/question` : null,
         fetcher
     );
 
