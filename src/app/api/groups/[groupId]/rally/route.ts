@@ -8,7 +8,7 @@ import Group from "@/db/models/Group";
 import {isUserInGroup} from "@/lib/groupAuth";
 import {CREATED_RALLY_POINTS} from "@/db/POINT_CONFIG";
 import {AuthedContext, withAuthAndErrors} from "@/lib/api/withAuth";
-import {ForbiddenError, NotFoundError, ValidationError} from "@/lib/api/errorHandling";
+import {NotFoundError, ValidationError} from "@/lib/api/errorHandling";
 
 export const revalidate = 0;
 
@@ -18,13 +18,10 @@ export const GET = withAuthAndErrors(async (req: NextRequest, {params, userId}: 
 }>) => {
     const {groupId} = params;
 
-    const authCheck = await isUserInGroup(userId, groupId);
-    if (!authCheck.isAuthorized) {
-        if (authCheck.status === 404) throw new NotFoundError(authCheck.message || 'Group not found');
-        throw new ForbiddenError(authCheck.message || 'Forbidden');
-    }
-
     await dbConnect();
+    await isUserInGroup(userId, groupId);
+
+
     const group = await Group.findById(groupId);
     if (!group) throw new NotFoundError('Group not found');
 
@@ -106,13 +103,9 @@ export const POST = withAuthAndErrors(async (req: NextRequest, {params, userId}:
 }>) => {
     const {groupId} = params;
 
-    const authCheck = await isUserInGroup(userId, groupId);
-    if (!authCheck.isAuthorized) {
-        if (authCheck.status === 404) throw new NotFoundError(authCheck.message || 'Group not found');
-        throw new ForbiddenError(authCheck.message || 'Forbidden');
-    }
-
     await dbConnect();
+    await isUserInGroup(userId, groupId);
+
     const {task, lengthInDays} = await req.json();
     if (!task || !lengthInDays) {
         throw new ValidationError('task and lengthInDays are required');

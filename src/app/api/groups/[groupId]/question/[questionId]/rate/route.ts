@@ -3,7 +3,7 @@ import Question from "@/db/models/Question";
 import {type NextRequest, NextResponse} from 'next/server';
 import {isUserInGroup} from "@/lib/groupAuth";
 import {AuthedContext, withAuthAndErrors} from "@/lib/api/withAuth";
-import {ForbiddenError, NotFoundError, ValidationError} from "@/lib/api/errorHandling";
+import {NotFoundError, ValidationError} from "@/lib/api/errorHandling";
 
 export const revalidate = 0;
 
@@ -13,19 +13,16 @@ export const POST = withAuthAndErrors(async (req: NextRequest, {params, userId}:
 }>) => {
     const {groupId, questionId} = params;
 
-    const authCheck = await isUserInGroup(userId, groupId);
-    if (!authCheck.isAuthorized) {
-        if (authCheck.status === 404) throw new NotFoundError(authCheck.message || 'Group not found');
-        throw new ForbiddenError(authCheck.message || 'Forbidden');
-    }
+    await dbConnect();
+
+    await isUserInGroup(userId, groupId);
 
     const data = await req.json();
     const {rating} = data as { rating: 'good' | 'ok' | 'bad' };
     if (!['good', 'ok', 'bad'].includes(rating)) {
         throw new ValidationError('rating must be one of good | ok | bad');
-    }
 
-    await dbConnect();
+    }
 
     const question = await Question.findById(questionId);
     if (!question) {

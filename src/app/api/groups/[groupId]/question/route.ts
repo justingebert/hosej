@@ -6,9 +6,9 @@ import Chat from "@/db/models/Chat";
 import Group from "@/db/models/Group";
 import {isUserInGroup} from "@/lib/groupAuth";
 import {CREATED_QUESTION_POINTS} from "@/db/POINT_CONFIG";
-import {ForbiddenError, ValidationError} from "@/lib/api/errorHandling";
+import {ValidationError} from "@/lib/api/errorHandling";
 import {AuthedContext, withAuthAndErrors} from "@/lib/api/withAuth";
-import {generateSignedUrl} from "@/lib/question/questionOptions";
+import {generateSignedUrl} from "@/lib/generateSingledUrl";
 import mongoose from "mongoose";
 
 export const revalidate = 0;
@@ -20,11 +20,8 @@ export const POST = withAuthAndErrors(
     ) => {
         const {groupId} = params;
 
-        const authCheck = await isUserInGroup(userId, groupId);
-        if (!authCheck.isAuthorized) {
-            throw new ForbiddenError(authCheck.message);
-        }
         await dbConnect();
+        await isUserInGroup(userId, groupId);
 
         const data = await req.json();
         const {category, questionType, question, submittedBy, image} = data;
@@ -80,11 +77,8 @@ export const GET = withAuthAndErrors(async (req: NextRequest, {params, userId}: 
 }>) => {
     const {groupId} = params;
 
-    const authCheck = await isUserInGroup(userId, groupId);
-    if (!authCheck.isAuthorized) {
-        throw new ForbiddenError(authCheck.message || 'Forbidden');
-    }
     await dbConnect();
+    await isUserInGroup(userId, groupId);
 
     let questions = await Question.find({
         groupId: groupId,

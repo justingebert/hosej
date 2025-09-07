@@ -4,20 +4,17 @@ import {NextRequest, NextResponse} from "next/server";
 import Group from "@/db/models/Group";
 import {isUserAdmin} from "@/lib/groupAuth";
 import {AuthedContext, withAuthAndErrors} from "@/lib/api/withAuth";
-import {ForbiddenError, NotFoundError} from "@/lib/api/errorHandling";
+import {NotFoundError} from "@/lib/api/errorHandling";
 
 export const POST = withAuthAndErrors(async (req: NextRequest, {params, userId}: AuthedContext<{
     params: { groupId: string }
 }>) => {
     const {groupId} = params;
 
-    const authCheck = await isUserAdmin(userId, groupId);
-    if (!authCheck.isAuthorized) {
-        if (authCheck.status === 404) throw new NotFoundError(authCheck.message || 'Group not found');
-        throw new ForbiddenError(authCheck.message || 'Forbidden');
-    }
-
     await dbConnect();
+    await isUserAdmin(userId, groupId);
+
+
     const group = await Group.findById(groupId);
     if (!group) throw new NotFoundError('Group not found');
 

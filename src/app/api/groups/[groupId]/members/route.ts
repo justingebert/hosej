@@ -4,7 +4,7 @@ import User from '@/db/models/user';
 import Group from '@/db/models/Group';
 import {isUserInGroup} from '@/lib/groupAuth';
 import {AuthedContext, withAuthAndErrors} from '@/lib/api/withAuth';
-import {ConflictError, ForbiddenError, NotFoundError} from '@/lib/api/errorHandling';
+import {ConflictError, NotFoundError} from '@/lib/api/errorHandling';
 
 export const revalidate = 0
 //get user by id
@@ -13,12 +13,9 @@ export const GET = withAuthAndErrors(async (req: NextRequest, {params, userId}: 
 }>) => {
     const {groupId} = params;
 
-    const authCheck = await isUserInGroup(userId, groupId);
-    if (!authCheck.isAuthorized) {
-        if (authCheck.status === 404) throw new NotFoundError(authCheck.message || 'Group not found');
-        throw new ForbiddenError(authCheck.message || 'Forbidden');
-    }
     await dbConnect();
+    await isUserInGroup(userId, groupId);
+
     const group = await Group.findById(groupId).populate({path: 'members', model: User});
     if (!group) throw new NotFoundError('Group not found');
 

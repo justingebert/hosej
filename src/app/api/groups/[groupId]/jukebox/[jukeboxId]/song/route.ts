@@ -3,7 +3,7 @@ import {isUserInGroup} from "@/lib/groupAuth";
 import Jukebox from "@/db/models/Jukebox";
 import {NextRequest, NextResponse} from "next/server";
 import {AuthedContext, withAuthAndErrors} from "@/lib/api/withAuth";
-import {ForbiddenError, NotFoundError, ValidationError} from "@/lib/api/errorHandling";
+import {NotFoundError, ValidationError} from "@/lib/api/errorHandling";
 
 export const revalidate = 0;
 
@@ -12,11 +12,8 @@ export const POST = withAuthAndErrors(async (req: NextRequest, {params, userId}:
 }>) => {
     const {groupId, jukeboxId} = params;
 
-    const authCheck = await isUserInGroup(userId, groupId);
-    if (!authCheck.isAuthorized) {
-        if (authCheck.status === 404) throw new NotFoundError(authCheck.message || 'Group not found');
-        throw new ForbiddenError(authCheck.message || 'Forbidden');
-    }
+    await dbConnect();
+    await isUserInGroup(userId, groupId);
 
     const body = await req.json();
     const {spotifyTrackId, title, artist, album, coverImageUrl} = body;
@@ -25,7 +22,6 @@ export const POST = withAuthAndErrors(async (req: NextRequest, {params, userId}:
         throw new ValidationError("spotifyTrackId, title, and artist are required");
     }
 
-    await dbConnect();
 
     const jukebox = await Jukebox.findOne({_id: jukeboxId, groupId, active: true});
     if (!jukebox) {

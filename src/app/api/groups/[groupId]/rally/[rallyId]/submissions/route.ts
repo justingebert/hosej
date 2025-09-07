@@ -8,7 +8,7 @@ import Group from "@/db/models/Group";
 import {isUserInGroup} from "@/lib/groupAuth";
 import {SUBMITTED_RALLY_POINTS} from "@/db/POINT_CONFIG";
 import {AuthedContext, withAuthAndErrors} from "@/lib/api/withAuth";
-import {ForbiddenError, NotFoundError, ValidationError} from "@/lib/api/errorHandling";
+import {NotFoundError, ValidationError} from "@/lib/api/errorHandling";
 
 const s3 = new S3Client({
     region: process.env.AWS_REGION,
@@ -22,13 +22,10 @@ export const GET = withAuthAndErrors(async (req: NextRequest, {params, userId}: 
 }>) => {
     const {groupId, rallyId} = params;
 
-    const authCheck = await isUserInGroup(userId, groupId);
-    if (!authCheck.isAuthorized) {
-        if (authCheck.status === 404) throw new NotFoundError(authCheck.message || 'Group not found');
-        throw new ForbiddenError(authCheck.message || 'Forbidden');
-    }
-
     await dbConnect();
+    await isUserInGroup(userId, groupId);
+
+
     const rally = await Rally.findById(rallyId);
     if (!rally) {
         throw new NotFoundError("Rally not found");
@@ -76,18 +73,14 @@ export const POST = withAuthAndErrors(async (req: NextRequest, {params, userId}:
 }>) => {
     const {groupId, rallyId} = params;
 
-    const authCheck = await isUserInGroup(userId, groupId);
-    if (!authCheck.isAuthorized) {
-        if (authCheck.status === 404) throw new NotFoundError(authCheck.message || 'Group not found');
-        throw new ForbiddenError(authCheck.message || 'Forbidden');
-    }
+    await dbConnect();
+    await isUserInGroup(userId, groupId);
 
     const {imageUrl} = await req.json();
     if (!imageUrl) {
         throw new ValidationError('imageUrl is required');
     }
 
-    await dbConnect();
 
     const group = await Group.findById(groupId);
     const sendUser = await User.findById(userId);

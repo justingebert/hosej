@@ -5,7 +5,6 @@ import Jukebox from "@/db/models/Jukebox";
 import {ISong} from "@/types/models/jukebox";
 import User from "@/db/models/user";
 import {AuthedContext, withAuthAndErrors} from "@/lib/api/withAuth";
-import {ForbiddenError, NotFoundError} from "@/lib/api/errorHandling";
 
 export const revalidate = 0;
 
@@ -21,14 +20,9 @@ export const GET = withAuthAndErrors(
         const page = parseInt(url.searchParams.get("page") || "1", 10);
         const limit = parseInt(url.searchParams.get("limit") || "10", 10);
 
-        const authCheck = await isUserInGroup(userId, groupId);
-        if (!authCheck.isAuthorized) {
-            if (authCheck.status === 404)
-                throw new NotFoundError(authCheck.message || "Group not found");
-            throw new ForbiddenError(authCheck.message || "Forbidden");
-        }
-
         await dbConnect();
+
+        await isUserInGroup(userId, groupId);
 
         const query: any = {groupId};
         if (url.searchParams.has("isActive")) {
