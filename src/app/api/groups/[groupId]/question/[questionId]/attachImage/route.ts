@@ -1,33 +1,32 @@
-import { NextRequest, NextResponse } from 'next/server';
+import {NextRequest, NextResponse} from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import Question from '@/db/models/Question';
-import { isUserInGroup } from '@/lib/groupAuth';
+import {isUserInGroup} from '@/lib/groupAuth';
+import {AuthedContext, withAuthAndErrors} from '@/lib/api/withAuth';
+import {ForbiddenError, NotFoundError, ValidationError} from '@/lib/api/errorHandling';
 
-export async function POST(req: NextRequest, { params }: { params: { groupId: string, questionId: string } }) {
-  const { groupId, questionId } = params;
-  const userId = req.headers.get('x-user-id') as string;
-  
-  try {
+export const POST = withAuthAndErrors(async (req: NextRequest, {params, userId}: AuthedContext<{
+    params: { groupId: string, questionId: string }
+}>) => {
+    const {groupId, questionId} = params;
+
     const authCheck = await isUserInGroup(userId, groupId);
     if (!authCheck.isAuthorized) {
-      return NextResponse.json({ message: authCheck.message }, { status: authCheck.status });
+        if (authCheck.status === 404) throw new NotFoundError(authCheck.message || 'Group not found');
+        throw new ForbiddenError(authCheck.message || 'Forbidden');
     }
-    const { imageUrl } = await req.json();
+    const {imageUrl} = await req.json();
     if (!imageUrl) {
-      return NextResponse.json({ message: "Image URL is required" }, { status: 400 });
+        throw new ValidationError('Image URL is required');
     }
     await dbConnect();
-    const question = await Question.findOne({ groupId, _id: questionId });
+    const question = await Question.findOne({groupId, _id: questionId});
     if (!question) {
-      return NextResponse.json({ message: "Question not found" }, { status: 404 });
+        throw new NotFoundError('Question not found');
     }
 
     question.image = imageUrl;
     await question.save();
 
-    return NextResponse.json({ message: 'Image attached successfully' });
-  } catch (error) {
-    console.error('Error attaching image to question: ',questionId,  error);
-    return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
-  }
-}
+    return NextResponse.json({message: 'Image attached successfully'});
+});

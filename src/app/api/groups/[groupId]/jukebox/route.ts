@@ -1,31 +1,36 @@
 import dbConnect from "@/lib/dbConnect";
-import { isUserInGroup } from "@/lib/groupAuth";
-import { NextResponse } from "next/server";
+import {isUserInGroup} from "@/lib/groupAuth";
+import {NextRequest, NextResponse} from "next/server";
 import Jukebox from "@/db/models/Jukebox";
-import { ISong } from "@/types/models/jukebox";
+import {ISong} from "@/types/models/jukebox";
 import User from "@/db/models/user";
+import {AuthedContext, withAuthAndErrors} from "@/lib/api/withAuth";
+import {ForbiddenError, NotFoundError} from "@/lib/api/errorHandling";
 
 export const revalidate = 0;
 
-export async function GET(req: Request, { params }: { params: { groupId: string } }) {
-    const { groupId } = params;
-    const userId = req.headers.get("x-user-id") as string;
-    const url = new URL(req.url);
-    const isActive = url.searchParams.get("isActive") === "true";
-    const processed = url.searchParams.get("processed") === "true"; //process numbers of jukebox
-    const page = parseInt(url.searchParams.get("page") || "1", 10);
-    const limit = parseInt(url.searchParams.get("limit") || "10", 10);
+export const GET = withAuthAndErrors(
+    async (
+        req: NextRequest,
+        {params, userId}: AuthedContext<{ params: { groupId: string } }>
+    ) => {
+        const {groupId} = params;
+        const url = new URL(req.url);
+        const isActive = url.searchParams.get("isActive") === "true";
+        const processed = url.searchParams.get("processed") === "true"; //process numbers of jukebox
+        const page = parseInt(url.searchParams.get("page") || "1", 10);
+        const limit = parseInt(url.searchParams.get("limit") || "10", 10);
 
-    try {
-        // Auth check
         const authCheck = await isUserInGroup(userId, groupId);
         if (!authCheck.isAuthorized) {
-            return NextResponse.json({ message: authCheck.message }, { status: authCheck.status });
+            if (authCheck.status === 404)
+                throw new NotFoundError(authCheck.message || "Group not found");
+            throw new ForbiddenError(authCheck.message || "Forbidden");
         }
 
         await dbConnect();
 
-        const query: any = { groupId };
+        const query: any = {groupId};
         if (url.searchParams.has("isActive")) {
             query.active = isActive;
         }
@@ -34,7 +39,7 @@ export async function GET(req: Request, { params }: { params: { groupId: string 
         const skip = (page - 1) * limit;
 
         let jukeboxes = await Jukebox.find(query)
-            .sort({ createdAt: -1 })
+            .sort({createdAt: -1})
             .skip(skip)
             .limit(limit)
             .populate({
@@ -48,8 +53,6 @@ export async function GET(req: Request, { params }: { params: { groupId: string 
                 select: "_id username",
             })
             .lean();
-
-        //
 
         const total = await Jukebox.countDocuments(query);
 
@@ -74,9 +77,9 @@ export async function GET(req: Request, { params }: { params: { groupId: string 
                             const avgRating =
                                 sortedRatings.length > 0
                                     ? sortedRatings.reduce(
-                                          (acc, rating) => acc + rating.rating,
-                                          0
-                                      ) / sortedRatings.length
+                                    (acc, rating) => acc + rating.rating,
+                                    0
+                                ) / sortedRatings.length
                                     : null;
 
                             // Determine whether the user has rated this song
@@ -118,8 +121,5 @@ export async function GET(req: Request, { params }: { params: { groupId: string 
                 totalPages: Math.ceil(total / limit),
             },
         });
-    } catch (error: any) {
-        console.error(error);
-        return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
     }
-}
+);

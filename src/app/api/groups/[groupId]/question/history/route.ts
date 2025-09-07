@@ -1,41 +1,46 @@
 import dbConnect from "@/lib/dbConnect";
 import Question from "@/db/models/Question";
-import { NextResponse, type NextRequest } from "next/server";
-import { isUserInGroup } from "@/lib/groupAuth";
+import {type NextRequest, NextResponse} from "next/server";
+import {isUserInGroup} from "@/lib/groupAuth";
+import {AuthedContext, withAuthAndErrors} from "@/lib/api/withAuth";
+import {ForbiddenError, NotFoundError, ValidationError} from "@/lib/api/errorHandling";
 
 export const revalidate = 0;
-export async function GET(req: NextRequest, { params }: { params: { groupId: string } }) {
-  const { groupId } = params;
-  const userId = req.headers.get('x-user-id') as string;
+export const GET = withAuthAndErrors(async (req: NextRequest, {params, userId}: AuthedContext<{
+    params: { groupId: string }
+}>) => {
+    const {groupId} = params;
 
-  try {
     const authCheck = await isUserInGroup(userId, groupId);
     if (!authCheck.isAuthorized) {
-      return NextResponse.json({ message: authCheck.message }, { status: authCheck.status });
+        if (authCheck.status === 404) throw new NotFoundError(authCheck.message || 'Group not found');
+        throw new ForbiddenError(authCheck.message || 'Forbidden');
     }
 
     await dbConnect();
 
     const searchParams = req.nextUrl.searchParams;
-    const limit = searchParams.get("limit") as string;
-    const offset = searchParams.get("offset") as string;
+    const limitStr = searchParams.get("limit");
+    const offsetStr = searchParams.get("offset");
+    if (!limitStr || !offsetStr) {
+        throw new ValidationError('limit and offset are required');
+    }
+    const limit = parseInt(limitStr, 10);
+    const offset = parseInt(offsetStr, 10);
 
     const questions = await Question.find({
-      groupId: groupId,
-      used: true,
-      active: false,
-      category: "Daily",
+        groupId: groupId,
+        used: true,
+        active: false,
+        category: "Daily",
     })
-      .skip(parseInt(offset))
-      .limit(parseInt(limit))
-      .sort({ createdAt: -1 });
+        .skip(offset)
+        .limit(limit)
+        .sort({createdAt: -1});
+
     if (!questions) {
-      return NextResponse.json({ message: "No questions available" });
+        return NextResponse.json({message: "No questions available"});
     }
 
-    return NextResponse.json({ questions });
-  } catch (error) {
-    console.error("Error getting question history", error);
-    return NextResponse.json({ message: "Internal Sever Error" }, { status: 500 });
-  }
-}
+    return NextResponse.json({questions});
+});
