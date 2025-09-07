@@ -17,12 +17,7 @@ export const GET = withAuthAndErrors(
         const {groupId} = params;
         await dbConnect();
 
-        const authCheck = await isUserInGroup(userId, groupId);
-        if (!authCheck.isAuthorized) {
-            if (authCheck.status === 404)
-                throw new NotFoundError(authCheck.message || "Group not found");
-            throw new ForbiddenError(authCheck.message || "Forbidden");
-        }
+        await isUserInGroup(userId, groupId);
 
         const groupDoc = await Group.findById(groupId);
         if (!groupDoc) throw new NotFoundError("Group not found");
@@ -46,12 +41,8 @@ export const PUT = withAuthAndErrors(
         const data = await req.json();
         await dbConnect();
 
-        const authCheck = await isUserInGroup(userId, groupId);
-        if (!authCheck.isAuthorized) {
-            if (authCheck.status === 404)
-                throw new NotFoundError(authCheck.message || "Group not found");
-            throw new ForbiddenError(authCheck.message || "Forbidden");
-        }
+        await isUserInGroup(userId, groupId);
+
 
         const user = await User.findById(userId);
         const group = await Group.findById(groupId);
@@ -68,7 +59,7 @@ export const PUT = withAuthAndErrors(
     }
 );
 
-//delete group
+
 export const DELETE = withAuthAndErrors(
     async (
         req: NextRequest,
@@ -78,16 +69,10 @@ export const DELETE = withAuthAndErrors(
 
         await dbConnect();
 
-        const authCheck = await isUserInGroup(userId, groupId);
-        if (!authCheck.isAuthorized) {
-            if (authCheck.status === 404)
-                throw new NotFoundError(authCheck.message || "Group not found");
-            throw new ForbiddenError(authCheck.message || "Forbidden");
-        }
+        await isUserInGroup(userId, groupId);
 
         const user = await User.findById(userId);
         const group = await Group.findById(groupId);
-        if (!user || !group) throw new NotFoundError("User or group not found");
 
         if (!group.admin.equals(user._id)) {
             throw new ForbiddenError("You are not the admin of this group");

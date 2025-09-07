@@ -2,11 +2,11 @@ import {NextRequest, NextResponse} from "next/server";
 import dbConnect from "@/lib/dbConnect";
 import Question from "@/db/models/Question";
 import {isUserInGroup} from "@/lib/groupAuth";
-import {generateSignedUrl} from "@/lib/question/questionOptions";
+import {generateSignedUrl} from "@/lib/generateSingledUrl";
 import Group from "@/db/models/Group";
 import User from "@/db/models/user";
 import {AuthedContext, withAuthAndErrors} from "@/lib/api/withAuth";
-import {ForbiddenError, NotFoundError} from "@/lib/api/errorHandling";
+import {NotFoundError} from "@/lib/api/errorHandling";
 
 export const revalidate = 0;
 
@@ -17,13 +17,9 @@ export const GET = withAuthAndErrors(
     ) => {
         const {groupId, questionId} = params;
 
-        const authCheck = await isUserInGroup(userId, groupId);
-        if (!authCheck.isAuthorized) {
-            if (authCheck.status === 404) throw new NotFoundError(authCheck.message || "Group not found");
-            throw new ForbiddenError(authCheck.message || "Forbidden");
-        }
-
         await dbConnect();
+        await isUserInGroup(userId, groupId);
+
 
         const question = await Question.findById(questionId).populate({
             path: "answers.user",

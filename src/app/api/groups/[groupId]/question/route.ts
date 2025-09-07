@@ -6,8 +6,10 @@ import Chat from "@/db/models/Chat";
 import Group from "@/db/models/Group";
 import {isUserInGroup} from "@/lib/groupAuth";
 import {CREATED_QUESTION_POINTS} from "@/db/POINT_CONFIG";
-import {ForbiddenError, ValidationError} from "@/lib/api/errorHandling";
-import {withAuthAndErrors} from "@/lib/api/withAuth";
+import {ValidationError} from "@/lib/api/errorHandling";
+import {AuthedContext, withAuthAndErrors} from "@/lib/api/withAuth";
+import {generateSignedUrl} from "@/lib/generateSingledUrl";
+import mongoose from "mongoose";
 
 export const revalidate = 0;
 
@@ -18,11 +20,8 @@ export const POST = withAuthAndErrors(
     ) => {
         const {groupId} = params;
 
-        const authCheck = await isUserInGroup(userId, groupId);
-        if (!authCheck.isAuthorized) {
-            throw new ForbiddenError(authCheck.message);
-        }
         await dbConnect();
+        await isUserInGroup(userId, groupId);
 
         const data = await req.json();
         const {category, questionType, question, submittedBy, image} = data;
@@ -70,3 +69,69 @@ export const POST = withAuthAndErrors(
         return NextResponse.json({newQuestion}, {status: 201});
     }
 );
+
+
+// Return active daily questions
+export const GET = withAuthAndErrors(async (req: NextRequest, {params, userId}: AuthedContext<{
+    params: { groupId: string }
+}>) => {
+    const {groupId} = params;
+
+    await dbConnect();
+    await isUserInGroup(userId, groupId);
+
+    let questions = await Question.find({
+        groupId: groupId,
+        category: "Daily",
+        used: true,
+        active: true,
+    }).lean();
+
+    if (!questions || questions.length === 0) {
+        return NextResponse.json({questions: [], message: "No questions available"});
+    }
+
+    const group = await Group.findById(groupId);
+    const userCount = group.members.length;
+    const totalVotes = questions.reduce(
+        (acc, question) => acc + (question.answers?.length || 0),
+        0
+    );
+    const completionPercentage = ((totalVotes / (questions.length * userCount)) * 100).toFixed(
+        0
+    );
+
+    questions = questions.map((question) => {
+        question.userHasVoted = question.answers.some(
+            (answer: { user: string }) => answer.user.toString() === userId
+        );
+        question.userRating = question.rating.good.some((id: mongoose.Types.ObjectId) => id.toString() === userId)
+            ? "good"
+            : question.rating.ok.some((id: mongoose.Types.ObjectId) => id.toString() === userId)
+                ? "ok"
+                : question.rating.bad.some((id: mongoose.Types.ObjectId) => id.toString() === userId)
+                    ? "bad"
+                    : null;
+        return question;
+    });
+
+    const questionsWithImages = await Promise.all(
+        questions.map(async (question) => {
+            if (question.image) {
+                const {url} = await generateSignedUrl(new URL(question.image).pathname);
+                question.imageUrl = url;
+            }
+            if (question.questionType.startsWith("image")) {
+                question.options = await Promise.all(
+                    question.options.map(async (option: any) => {
+                        if (!option.key) throw new Error("Option is empty");
+                        return await generateSignedUrl(option.key, 60);
+                    })
+                );
+            }
+            return question;
+        })
+    );
+
+    return NextResponse.json({questions: questionsWithImages, completionPercentage});
+});

@@ -3,7 +3,7 @@ import Question from "@/db/models/Question";
 import {type NextRequest, NextResponse} from "next/server";
 import {isUserInGroup} from "@/lib/groupAuth";
 import {AuthedContext, withAuthAndErrors} from "@/lib/api/withAuth";
-import {ForbiddenError, NotFoundError, ValidationError} from "@/lib/api/errorHandling";
+import {ValidationError} from "@/lib/api/errorHandling";
 
 export const revalidate = 0;
 export const GET = withAuthAndErrors(async (req: NextRequest, {params, userId}: AuthedContext<{
@@ -11,13 +11,8 @@ export const GET = withAuthAndErrors(async (req: NextRequest, {params, userId}: 
 }>) => {
     const {groupId} = params;
 
-    const authCheck = await isUserInGroup(userId, groupId);
-    if (!authCheck.isAuthorized) {
-        if (authCheck.status === 404) throw new NotFoundError(authCheck.message || 'Group not found');
-        throw new ForbiddenError(authCheck.message || 'Forbidden');
-    }
-
     await dbConnect();
+    await isUserInGroup(userId, groupId);
 
     const searchParams = req.nextUrl.searchParams;
     const limitStr = searchParams.get("limit");

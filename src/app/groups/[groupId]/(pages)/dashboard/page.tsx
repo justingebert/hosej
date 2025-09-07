@@ -24,7 +24,7 @@ export default function Dashboard() {
     const { data: questionsData, isLoading: questionLoading } = useSWR<{
         questions: IQuestion[];
         completionPercentage: number;
-    }>(group ? `/api/groups/${groupId}/question/daily` : null, fetcher);
+    }>(group ? `/api/groups/${groupId}/question` : null, fetcher);
     const { data: ralliesData, isLoading: rallyLoading } = useSWR<{ rallies: IRally[] }>(
         group ? `/api/groups/${groupId}/rally` : null,
         fetcher
@@ -86,7 +86,7 @@ export default function Dashboard() {
                             className="col-span-2 relative bg-primary-foreground px-6 py-4 flex items-center justify-between rounded-lg"
                             onClick={() => {
                                 triggerHaptic();
-                                mutate(`/api/groups/${groupId}/question/daily`);
+                                mutate(`/api/groups/${groupId}/question`);
                                 router.push(`/groups/${groupId}/daily`);
                             }}
                         >

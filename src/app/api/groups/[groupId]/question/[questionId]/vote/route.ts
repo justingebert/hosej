@@ -6,7 +6,7 @@ import Group from "@/db/models/Group";
 import {isUserInGroup} from "@/lib/groupAuth";
 import {VOTED_QUESTION_POINTS} from "@/db/POINT_CONFIG";
 import {AuthedContext, withAuthAndErrors} from "@/lib/api/withAuth";
-import {ForbiddenError, NotFoundError, ValidationError} from "@/lib/api/errorHandling";
+import {NotFoundError, ValidationError} from "@/lib/api/errorHandling";
 
 export const revalidate = 0
 
@@ -16,11 +16,8 @@ export const POST = withAuthAndErrors(async (req: NextRequest, {params, userId}:
 }>) => {
     const {groupId, questionId} = params;
 
-    const authCheck = await isUserInGroup(userId, groupId);
-    if (!authCheck.isAuthorized) {
-        if (authCheck.status === 404) throw new NotFoundError(authCheck.message || 'Group not found');
-        throw new ForbiddenError(authCheck.message || 'Forbidden');
-    }
+    await dbConnect();
+    await isUserInGroup(userId, groupId);
 
     const data = await req.json();
     const {response} = data as { response: any };
@@ -28,7 +25,6 @@ export const POST = withAuthAndErrors(async (req: NextRequest, {params, userId}:
         throw new ValidationError('response is required');
     }
 
-    await dbConnect();
 
     const question = await Question.findById(questionId);
     if (!question) {

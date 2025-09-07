@@ -16,12 +16,7 @@ export const DELETE = withAuthAndErrors(
 
         await dbConnect();
 
-        const authCheck = await isUserInGroup(userId, groupId);
-        if (!authCheck.isAuthorized) {
-            if (authCheck.status === 404)
-                throw new NotFoundError(authCheck.message || "Group not found");
-            throw new ForbiddenError(authCheck.message || "Forbidden");
-        }
+        await isUserInGroup(userId, groupId);
 
         const member = await User.findById(memberId);
         const user = await User.findById(userId);

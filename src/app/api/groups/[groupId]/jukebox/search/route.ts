@@ -1,7 +1,8 @@
 import {isUserInGroup} from "@/lib/groupAuth";
 import {NextRequest, NextResponse} from "next/server";
 import {AuthedContext, withAuthAndErrors} from "@/lib/api/withAuth";
-import {ForbiddenError, NotFoundError, ValidationError} from "@/lib/api/errorHandling";
+import {ValidationError} from "@/lib/api/errorHandling";
+import dbConnect from "@/lib/dbConnect";
 
 const client_id = process.env.SPOTIFY_CLIENT_ID!;
 const client_secret = process.env.SPOTIFY_CLIENT_SECRET!;
@@ -47,11 +48,8 @@ export const GET = withAuthAndErrors(async (req: NextRequest, {params, userId}: 
         throw new ValidationError("Missing query parameter");
     }
 
-    const authCheck = await isUserInGroup(userId, groupId);
-    if (!authCheck.isAuthorized) {
-        if (authCheck.status === 404) throw new NotFoundError(authCheck.message || 'Group not found');
-        throw new ForbiddenError(authCheck.message || 'Forbidden');
-    }
+    await dbConnect();
+    await isUserInGroup(userId, groupId);
 
     const token = await getAccessToken();
     if (!token) {
