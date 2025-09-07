@@ -1,5 +1,7 @@
-import { isUserInGroup } from "@/lib/groupAuth";
-import { NextRequest, NextResponse } from "next/server";
+import {isUserInGroup} from "@/lib/groupAuth";
+import {NextRequest, NextResponse} from "next/server";
+import {AuthedContext, withAuthAndErrors} from "@/lib/api/withAuth";
+import {ForbiddenError, NotFoundError, ValidationError} from "@/lib/api/errorHandling";
 
 const client_id = process.env.SPOTIFY_CLIENT_ID!;
 const client_secret = process.env.SPOTIFY_CLIENT_SECRET!;
@@ -7,7 +9,7 @@ const client_secret = process.env.SPOTIFY_CLIENT_SECRET!;
 let accessToken: string | null = null;
 
 const getAccessToken = async (): Promise<string | null> => {
-	if (accessToken) return accessToken;
+    if (accessToken) return accessToken;
 
     const response = await fetch("https://accounts.spotify.com/api/token", {
         method: "POST",
@@ -34,58 +36,48 @@ const getAccessToken = async (): Promise<string | null> => {
     return accessToken;
 };
 
-export async function GET( req: NextRequest,{ params }: { params: { groupId: string } }) {
-    const { groupId } = params;
-    const userId = req.headers.get("x-user-id") as string;
-    const { searchParams } = new URL(req.url);
+export const GET = withAuthAndErrors(async (req: NextRequest, {params, userId}: AuthedContext<{
+    params: { groupId: string }
+}>) => {
+    const {groupId} = params;
+    const {searchParams} = new URL(req.url);
     const query = searchParams.get("q");
 
     if (!query) {
-        return NextResponse.json({ error: "Missing query parameter" },{ status: 400 });
+        throw new ValidationError("Missing query parameter");
     }
 
-    try {
+    const authCheck = await isUserInGroup(userId, groupId);
+    if (!authCheck.isAuthorized) {
+        if (authCheck.status === 404) throw new NotFoundError(authCheck.message || 'Group not found');
+        throw new ForbiddenError(authCheck.message || 'Forbidden');
+    }
 
-		const authCheck = await isUserInGroup(userId, groupId);
-		if (!authCheck.isAuthorized) {
-			return NextResponse.json(
-				{ message: authCheck.message },
-				{ status: authCheck.status }
-			);
-		}
-
-        const token = await getAccessToken();
-        if (!token) {
-            console.error("Failed to get access token");
-            return NextResponse.json(
-                { error: "Internal Server Error" },
-                { status: 500 }
-            );
-        }
-        const response = await fetch(
-            `https://api.spotify.com/v1/search?type=track&q=${encodeURIComponent(
-                query
-            )}`,
-            {
-                headers: { Authorization: `Bearer ${token}` },
-            }
-        );
-
-        if (!response.ok) {
-            console.error("Failed to fetch Spotify data:", response.statusText);
-            return NextResponse.json(
-                { error: "Failed to fetch Spotify data" },
-                { status: response.status }
-            );
-        }
-
-        const data = await response.json();
-        return NextResponse.json(data);
-    } catch (err) {
-        console.error("Error in Spotify API route:", err);
+    const token = await getAccessToken();
+    if (!token) {
+        console.error("Failed to get access token");
         return NextResponse.json(
-            { error: "Internal Server Error" },
-            { status: 500 }
+            {error: "Internal Server Error"},
+            {status: 500}
         );
     }
-}
+    const response = await fetch(
+        `https://api.spotify.com/v1/search?type=track&q=${encodeURIComponent(
+            query
+        )}`,
+        {
+            headers: {Authorization: `Bearer ${token}`},
+        }
+    );
+
+    if (!response.ok) {
+        console.error("Failed to fetch Spotify data:", response.statusText);
+        return NextResponse.json(
+            {error: "Failed to fetch Spotify data"},
+            {status: response.status}
+        );
+    }
+
+    const data = await response.json();
+    return NextResponse.json(data);
+});

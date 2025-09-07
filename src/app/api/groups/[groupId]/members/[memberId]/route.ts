@@ -1,32 +1,37 @@
 import Group from "@/db/models/Group";
-import { IGroup } from "@/types/models/group";
+import {IGroup} from "@/types/models/group";
 import User from "@/db/models/user";
 import dbConnect from "@/lib/dbConnect";
-import { isUserInGroup } from "@/lib/groupAuth";
-import { NextRequest, NextResponse } from "next/server";
+import {isUserInGroup} from "@/lib/groupAuth";
+import {NextRequest, NextResponse} from "next/server";
+import {AuthedContext, withAuthAndErrors} from "@/lib/api/withAuth";
+import {ForbiddenError, NotFoundError} from "@/lib/api/errorHandling";
 
-export async function DELETE(
-    req: NextRequest,
-    { params }: { params: { groupId: string; memberId: string } }
-) {
-    const userId = req.headers.get("x-user-id") as string;
-    try {
-        const { groupId, memberId } = params;
+export const DELETE = withAuthAndErrors(
+    async (
+        req: NextRequest,
+        {params, userId}: AuthedContext<{ params: { groupId: string; memberId: string } }>
+    ) => {
+        const {groupId, memberId} = params;
 
         await dbConnect();
 
         const authCheck = await isUserInGroup(userId, groupId);
         if (!authCheck.isAuthorized) {
-            return NextResponse.json({ message: authCheck.message }, { status: authCheck.status });
+            if (authCheck.status === 404)
+                throw new NotFoundError(authCheck.message || "Group not found");
+            throw new ForbiddenError(authCheck.message || "Forbidden");
         }
+
         const member = await User.findById(memberId);
         const user = await User.findById(userId);
         const group = await Group.findById(groupId);
+        if (!member || !user || !group) {
+            throw new NotFoundError("User or group not found");
+        }
+
         if (!group.admin.equals(user._id) || userId !== memberId) {
-            return NextResponse.json(
-                { message: "You are not the admin of this group" },
-                { status: 403 }
-            );
+            throw new ForbiddenError("You are not the admin of this group");
         }
 
         group.members = group.members.filter(
@@ -43,17 +48,14 @@ export async function DELETE(
         }
         await group.save();
 
-        member.groups = member.groups.filter((group: string) => group !== groupId);
+        member.groups = member.groups.filter((g: string) => g !== groupId);
         await member.save();
 
         if (group.members.length === 0) {
             await Group.findByIdAndDelete(groupId);
-            return NextResponse.json({ message: "Group deleted" }, { status: 200 });
+            return NextResponse.json({message: "Group deleted"}, {status: 200});
         }
 
-        return NextResponse.json(group, { status: 200 });
-    } catch (error) {
-        console.error("Error kicking member", error);
-        return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
+        return NextResponse.json(group, {status: 200});
     }
-}
+);

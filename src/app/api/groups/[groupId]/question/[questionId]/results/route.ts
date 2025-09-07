@@ -1,21 +1,26 @@
-import { NextRequest, NextResponse } from "next/server";
+import {NextRequest, NextResponse} from "next/server";
 import dbConnect from "@/lib/dbConnect";
 import Question from "@/db/models/Question";
-import { isUserInGroup } from "@/lib/groupAuth";
-import { generateSignedUrl } from "@/lib/question/questionOptions";
+import {isUserInGroup} from "@/lib/groupAuth";
+import {generateSignedUrl} from "@/lib/question/questionOptions";
 import Group from "@/db/models/Group";
 import User from "@/db/models/user";
+import {AuthedContext, withAuthAndErrors} from "@/lib/api/withAuth";
+import {ForbiddenError, NotFoundError} from "@/lib/api/errorHandling";
 
 export const revalidate = 0;
 
-export async function GET(req: NextRequest, { params }: { params: { groupId: string; questionId: string } }) {
-    const { groupId, questionId } = params;
-    const userId = req.headers.get("x-user-id") as string;
+export const GET = withAuthAndErrors(
+    async (
+        req: NextRequest,
+        {params, userId}: AuthedContext<{ params: { groupId: string; questionId: string } }>
+    ) => {
+        const {groupId, questionId} = params;
 
-    try {
         const authCheck = await isUserInGroup(userId, groupId);
         if (!authCheck.isAuthorized) {
-            return NextResponse.json({ message: authCheck.message }, { status: authCheck.status });
+            if (authCheck.status === 404) throw new NotFoundError(authCheck.message || "Group not found");
+            throw new ForbiddenError(authCheck.message || "Forbidden");
         }
 
         await dbConnect();
@@ -27,13 +32,12 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
         });
 
         if (!question) {
-            return NextResponse.json({ message: "Question not found" }, { status: 404 });
+            throw new NotFoundError("Question not found");
         }
 
         const group = await Group.findById(groupId);
         const totalUsers = group.members.length;
 
-        // Total votes count across all options
         const totalVotes = question.answers.length || 0;
 
         // Group answers by response with usernames
@@ -41,7 +45,7 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
             const responses = Array.isArray(answer.response) ? answer.response : [answer.response];
             responses.forEach((response: any) => {
                 if (!acc[response]) {
-                    acc[response] = { count: 0, users: [] };
+                    acc[response] = {count: 0, users: []};
                 }
                 acc[response].count += 1;
                 acc[response].users.push(answer.user.username);
@@ -51,17 +55,17 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
 
         // Calculate results with percentages
         const results = await Promise.all(
-            Object.entries(voteDetails).map(async ([option, { count, users }]: any) => {
+            Object.entries(voteDetails).map(async ([option, {count, users}]: any) => {
                 const percentage = Math.round((count / totalVotes) * 100);
                 let signedOption = option;
 
                 // Generate signed URLs for image responses
                 if (question.questionType.startsWith("image")) {
-                    const { url } = await generateSignedUrl(option);
+                    const {url} = await generateSignedUrl(option);
                     signedOption = url;
                 }
 
-                return { option: signedOption, count, percentage, users };
+                return {option: signedOption, count, percentage, users};
             })
         );
 
@@ -69,11 +73,7 @@ export async function GET(req: NextRequest, { params }: { params: { groupId: str
         results.sort((a, b) => b.count - a.count);
 
         return NextResponse.json(
-            { results, totalVotes, totalUsers, questionType: question.questionType },
-            { status: 200 }
+            {results, totalVotes, totalUsers, questionType: question.questionType},
+            {status: 200}
         );
-    } catch (error) {
-        console.error("Error fetching question results:", questionId, error);
-        return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
-    }
-}
+    })

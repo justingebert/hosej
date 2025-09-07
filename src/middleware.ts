@@ -13,33 +13,33 @@ export async function middleware(req: NextRequest) {
     '/api/auth/callback',
     '/api/auth/callback/credentials',
     "/deviceauth",
-    "/mainifest.json",
+    "/manifest.json",
     "/api/cron",
     "/api/auth/callback/google",
     "/terms",
     "/privacy",
     '/',
   ];
-  if (publicRoutes.includes(pathname) || (pathname === '/api/users' && req.method === 'POST')) {
+  if (publicRoutes.includes(pathname) || pathname == "/api/users" && req.method === "POST") {
     return NextResponse.next();
   }
 
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
   if (!token) {
+    if (pathname.startsWith('/api')) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
     const loginUrl = new URL('/', req.url);
     return NextResponse.redirect(loginUrl);
   }
 
-  const userId = token.userId as string;
-  const response = NextResponse.next();
-  response.headers.set('x-user-id', userId);
-
-  return response;
+    return NextResponse.next();
 }
 
 // Middleware configuration to match relevant routes
 export const config = {
   matcher: [
-  '/((?!_next/static|_next/image|favicon.ico|assets|public|manifest.json).*)'
+    '/((?!_next/static|_next/image|favicon.ico|assets|public|manifest.json).*)'
   ]
 };

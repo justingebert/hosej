@@ -1,33 +1,28 @@
-import { NextResponse } from 'next/server';
+import {NextRequest, NextResponse} from 'next/server';
 import dbConnect from "@/lib/dbConnect";
 import User from '@/db/models/user';
+import {NotFoundError, ValidationError} from "@/lib/api/errorHandling";
+import {AuthedContext, withAuthAndErrors} from "@/lib/api/withAuth";
 
-export async function POST(req: any) {
-  const userId = req.headers.get('x-user-id') as string;
-  await dbConnect();
-  const data = await req.json();
-  const token = data.token;
+export const POST = withAuthAndErrors(async (req: NextRequest, {userId}: AuthedContext) => {
+    await dbConnect();
 
-  if (!token) {
-    return NextResponse.json({ message: "Token is required" }, { status: 400 });
-  }
+    const {token} = await req.json();
+    if (!token) {
+        throw new ValidationError("Token is required");
+    }
 
-  try {
     const user = await User.findById(userId);
     if (!user) {
-      return NextResponse.json({ message: "User not found" }, { status: 404 });
+        throw new NotFoundError("User not found");
     }
 
     if (user.fcmToken === token) {
-      return NextResponse.json({ message: 'Token already exists' }, { status: 200 });
+        return NextResponse.json({message: 'Token already exists'}, {status: 200});
     }
 
-    user.fcmToken = token
+    user.fcmToken = token;
     await user.save();
 
-    return NextResponse.json({ message: "Token registered successfully" }, { status: 201 });
-  } catch (error) {
-    console.error("Error saving FCM token:", error);
-    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
-  }
-}
+    return NextResponse.json({message: "Token registered successfully"}, {status: 201});
+});

@@ -1,41 +1,40 @@
 import dbConnect from "@/lib/dbConnect";
 import Rally from "@/db/models/rally";
-import { NextRequest, NextResponse } from "next/server";
+import {NextRequest, NextResponse} from "next/server";
 import Group from "@/db/models/Group";
-import { isUserAdmin, isUserInGroup } from "@/lib/groupAuth";
+import {isUserAdmin} from "@/lib/groupAuth";
+import {AuthedContext, withAuthAndErrors} from "@/lib/api/withAuth";
+import {ForbiddenError, NotFoundError} from "@/lib/api/errorHandling";
 
-//get current rally and set state
-export async function POST(req: NextRequest,{ params }: { params: { groupId: string } }) {
-  const { groupId } = params;
-  const userId = req.headers.get('x-user-id') as string;
+export const POST = withAuthAndErrors(async (req: NextRequest, {params, userId}: AuthedContext<{
+    params: { groupId: string }
+}>) => {
+    const {groupId} = params;
 
-  try {
     const authCheck = await isUserAdmin(userId, groupId);
     if (!authCheck.isAuthorized) {
-      return NextResponse.json({ message: authCheck.message }, { status: authCheck.status });
+        if (authCheck.status === 404) throw new NotFoundError(authCheck.message || 'Group not found');
+        throw new ForbiddenError(authCheck.message || 'Forbidden');
     }
 
     await dbConnect();
     const group = await Group.findById(groupId);
+    if (!group) throw new NotFoundError('Group not found');
 
-    const activeRallies = await Rally.find({ groupId: groupId, active: true })
-    if(activeRallies.length >= group.rallyCount){
-        return NextResponse.json({ message: "rallies already active", rallies: activeRallies }, { status: 200 });
+    const activeRallies = await Rally.find({groupId: groupId, active: true})
+    if (activeRallies.length >= group.rallyCount) {
+        return NextResponse.json({message: "rallies already active", rallies: activeRallies}, {status: 200});
     }
     const countToActivate = group.rallyCount - activeRallies.length;
 
-    const rallies = await Rally.find({ groupId: groupId, active: false, used: false }).limit(countToActivate);
+    const rallies = await Rally.find({groupId: groupId, active: false, used: false}).limit(countToActivate);
     const currentTime = new Date();
-    for(let rally of rallies){
+    for (let rally of rallies) {
         rally.active = true;
         rally.startTime = new Date(currentTime.getTime());
         rally.endTime = new Date(rally.startTime.getTime() + rally.lengthInDays * 24 * 60 * 60 * 1000);
         await rally.save();
     }
 
-    return NextResponse.json({ message: "Activated rallies", rallies: rallies }, { status: 200 });
-  }catch (error: any) {
-    console.error(error);
-    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
-  }
-}
+    return NextResponse.json({message: "Activated rallies", rallies: rallies}, {status: 200});
+});

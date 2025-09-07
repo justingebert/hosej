@@ -1,35 +1,37 @@
-import { NextRequest, NextResponse } from 'next/server';
+import {NextRequest, NextResponse} from 'next/server';
 import dbConnect from "@/lib/dbConnect";
 import Chat from "@/db/models/Chat";
-import { isUserInGroup } from '@/lib/groupAuth';
+import {isUserInGroup} from '@/lib/groupAuth';
+import {AuthedContext, withAuthAndErrors} from '@/lib/api/withAuth';
+import {ForbiddenError, NotFoundError, ValidationError} from '@/lib/api/errorHandling';
 
-export async function POST(req: NextRequest, { params }: { params: { groupId:string, chatId: string } }) {
-  const { groupId, chatId } = params;
-  const userId = req.headers.get('x-user-id') as string;
+export const POST = withAuthAndErrors(async (req: NextRequest, {params, userId}: AuthedContext<{
+    params: { groupId: string, chatId: string }
+}>) => {
+    const {groupId, chatId} = params;
 
-  try {
     const authCheck = await isUserInGroup(userId, groupId);
     if (!authCheck.isAuthorized) {
-      return NextResponse.json({ message: authCheck.message }, { status: authCheck.status });
+        if (authCheck.status === 404) throw new NotFoundError(authCheck.message || 'Group not found');
+        throw new ForbiddenError(authCheck.message || 'Forbidden');
     }
 
     await dbConnect();
 
     const body = await req.json();
-    const { message } = body;
+    const {message} = body;
+    if (!message || typeof message !== 'string' || message.trim() === '') {
+        throw new ValidationError('Message is required');
+    }
 
     const chat = await Chat.findById(chatId);
     if (!chat) {
-      return NextResponse.json({ message: 'Chat not found' }, { status: 404 });
+        throw new NotFoundError('Chat not found');
     }
 
-    chat.messages.push({ user: userId, message, createdAt: new Date() });
+    chat.messages.push({user: userId, message, createdAt: new Date()});
     await chat.save();
 
     const newMessage = chat.messages[chat.messages.length - 1];
-    return NextResponse.json(newMessage, { status: 201 });
-  } catch (error) {
-    console.error('Error posting message:', error);
-    return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
-  }
-}
+    return NextResponse.json(newMessage, {status: 201});
+});
