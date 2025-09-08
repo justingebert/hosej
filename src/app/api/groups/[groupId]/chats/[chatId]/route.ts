@@ -14,7 +14,7 @@ export const GET = withAuthAndErrors(async (req: NextRequest, {params, userId}: 
     await dbConnect();
     await isUserInGroup(userId, groupId);
 
-    const chat = await Chat.findById(chatId).populate('messages.user', User);
+    const chat = await Chat.findById(chatId).populate(path:'messages.user', model:User);
     if (!chat) {
         throw new NotFoundError('Chat not found');
     }
