@@ -1,4 +1,4 @@
-import mongoose, { Types } from "mongoose";
+import mongoose, { Document, Types } from "mongoose";
 
 const memberSchema = new mongoose.Schema({
   user: { type: Types.ObjectId, ref: "User", required: true },
