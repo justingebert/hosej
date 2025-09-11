@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import ChatComponent from "../Chat/Chat.client";
 import { Separator } from "@/components/ui/separator";
@@ -10,14 +10,13 @@ import Image from "next/image";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
 import { Skeleton } from "../ui/skeleton";
-import { IQuestionJson } from "@/types/models/Question";
 import { IUserJson } from "@/types/models/user";
-import { on } from "events";
 import { useHaptic } from "use-haptic";
+import { QuestionDTO } from "@/db/models/Question";
 
 type VoteResultsProps = {
     user: IUserJson;
-    question: IQuestionJson;
+    question: QuestionDTO;
     available: boolean;
     returnTo?: string;
 };

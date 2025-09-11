@@ -10,7 +10,8 @@ import Image from "next/image";
 import fetcher from "@/lib/fetcher";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { IQuestionJson } from "@/types/models/Question";
+
+import { QuestionDTO } from "@/db/models/Question";
 
 const ResultsPage = () => {
     const { user } = useAuthRedirect();
@@ -22,7 +23,7 @@ const ResultsPage = () => {
         data: question,
         error,
         isLoading,
-    } = useSWR<IQuestionJson>(questionId ? `/api/groups/${groupId}/question/${questionId}` : null, fetcher);
+    } = useSWR<QuestionDTO>(questionId ? `/api/groups/${groupId}/question/${questionId}` : null, fetcher);
 
     if (isLoading) return <Loading />;
     if (error) return <div className="text-red-500">Failed to load question data.</div>;
@@ -32,7 +33,7 @@ const ResultsPage = () => {
             <BackLink href={`/groups/${groupId}/history`} />
             {question && (
                 <div>
-                    <h1 className="text-xl font-bold text-center mb-10 mt-10">{question.question}</h1>
+                    <h1 className="text-xl font-bold text-center mb-10 mt-10">{question._id}</h1>
                     {question.imageUrl && (
                         <Image
                             src={question.imageUrl}

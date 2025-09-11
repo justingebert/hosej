@@ -1,9 +1,10 @@
 import dbConnect from "@/lib/dbConnect";
 import Question from "@/db/models/Question";
-import {type NextRequest, NextResponse} from 'next/server';
-import {isUserInGroup} from "@/lib/groupAuth";
-import {AuthedContext, withAuthAndErrors} from "@/lib/api/withAuth";
-import {NotFoundError, ValidationError} from "@/lib/api/errorHandling";
+import { type NextRequest, NextResponse } from 'next/server';
+import { isUserInGroup } from "@/lib/groupAuth";
+import { AuthedContext, withAuthAndErrors } from "@/lib/api/withAuth";
+import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
+import { Types } from "mongoose";
 
 export const revalidate = 0;
 
@@ -29,17 +30,18 @@ export const POST = withAuthAndErrors(async (req: NextRequest, {params, userId}:
         throw new NotFoundError('Question not found');
     }
 
-    if (question.rating.good.includes(userId) || question.rating.ok.includes(userId) || question.rating.bad.includes(userId)) {
-        return NextResponse.json({message: "User already rated"}, {status: 304});
+    const userObjectId = new Types.ObjectId(userId);
+
+    const alreadyRated =
+        question.rating.good.some(id => id.equals(userObjectId)) ||
+        question.rating.ok.some(id => id.equals(userObjectId)) ||
+        question.rating.bad.some(id => id.equals(userObjectId));
+
+    if (alreadyRated) {
+        return NextResponse.json({ message: "User already rated" }, { status: 304 });
     }
 
-    if (rating === "good") {
-        question.rating.good.push(userId);
-    } else if (rating === "ok") {
-        question.rating.ok.push(userId);
-    } else if (rating === "bad") {
-        question.rating.bad.push(userId);
-    }
+    question.rating[rating].push(userObjectId);
     await question.save();
 
     return NextResponse.json({message: "Rating added"});

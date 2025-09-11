@@ -7,7 +7,8 @@ import Image from "next/image";
 import BackLink from "@/components/ui/custom/BackLink";
 import fetcher from "@/lib/fetcher";
 import { Skeleton } from "@/components/ui/skeleton";
-import { IResult } from "@/types/models/Question";
+
+import { IResult } from "@/db/models/Question";
 
 export default function ResultsDetailPage({
     params,

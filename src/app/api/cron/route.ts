@@ -1,47 +1,39 @@
 import dbConnect from "@/lib/dbConnect";
-import Question from "@/db/models/Question";
-import {IQuestion} from "@/types/models/Question";
-import {NextRequest, NextResponse} from "next/server";
-import {sendNotification} from "@/utils/sendNotification";
+import Question, { IQuestion } from "@/db/models/Question";
+import { NextRequest, NextResponse } from "next/server";
+import { sendNotification } from "@/utils/sendNotification";
 import Group from "@/db/models/Group";
 import Jukebox from "@/db/models/Jukebox";
 import Chat from "@/db/models/Chat";
-import {withErrorHandling} from "@/lib/api/errorHandling";
+import { withErrorHandling } from "@/lib/api/errorHandling";
 
 export const revalidate = 0;
 
 //deactives current questions and activates new ones
 async function selectDailyQuestions(groupId: string, limit: number): Promise<IQuestion[]> {
-    let questions: IQuestion[] = [];
-    try {
-        await dbConnect();
-
-        const currentQuestions = await Question.find({groupId: groupId, category: "Daily", active: true});
-        for (const question of currentQuestions) {
-            question.active = false;
-            await question.save();
-        }
-
-        questions = await Question.find({
-            groupId: groupId,
-            category: "Daily",
-            used: false,
-            active: false,
-        })
-            .sort({createdAt: 1})
-            .limit(limit);
-
-        for (const question of questions) {
-            question.active = true;
-            question.used = true;
-            question.usedAt = new Date();
-            await question.save();
-        }
-
-        return questions;
-    } catch (error: any) {
-        throw new Error(error);
+    const currentQuestions = await Question.find({groupId: groupId, category: "Daily", active: true});
+    for (const question of currentQuestions) {
+        question.active = false;
+        await question.save();
     }
+
+    const questions = await Question.find({
+        groupId: groupId,
+        category: "Daily",
+        used: false,
+        active: false,
+    })
+        .sort({createdAt: 1})
+        .limit(limit);
+
+    for (const question of questions) {
+        question.active = true;
+        question.used = true;
+        question.usedAt = new Date();
+        await question.save();
+    }
+
+    return questions;
 }
 
 //gets, populates and returns daily questions

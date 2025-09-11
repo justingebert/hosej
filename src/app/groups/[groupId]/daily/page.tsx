@@ -10,8 +10,8 @@ import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import BackLink from "@/components/ui/custom/BackLink";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
-import { IQuestionJson } from "@/types/models/Question";
 import QuestionsTabs from "./QuestionTabs";
+import { QuestionDTO } from "@/db/models/Question";
 
 const DailyQuestionPage = () => {
     const { user } = useAuthRedirect();
@@ -19,7 +19,7 @@ const DailyQuestionPage = () => {
     const groupId = params? params.groupId : "";
     const router = useRouter();
 
-    const { data, error, isLoading } = useSWR<{ questions: IQuestionJson[] }>(
+    const { data, error, isLoading } = useSWR<{ questions: QuestionDTO[] }>(
         user ? `/api/groups/${groupId}/question` : null,
         fetcher
     );

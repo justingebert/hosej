@@ -5,11 +5,11 @@ import { Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DataTableFacetedFilter } from "./data-table-faceted-filter";
-import { QuestionType } from "@/types/models/Question";
 import { useParams } from "next/navigation";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
 import { IGroupJson } from "@/types/models/group";
+import { QuestionType } from "@/db/models/Question";
 
 interface DataTableToolbarProps<TData> {
     table: Table<TData>;
