@@ -1,5 +1,5 @@
 import useSWRInfinite from "swr/infinite";
-import { QuestionDTO } from "@/db/models/Question";
+import type { QuestionDTO } from "@/db/models/Question";
 
 interface UsePaginatedDataProps {
   groupId: string;
