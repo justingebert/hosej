@@ -1,7 +1,8 @@
-import mongoose, { Document, Types } from "mongoose";
+import mongoose from "mongoose";
+import { IGroup, IGroupMember } from "@/types/models/group";
 
-const memberSchema = new mongoose.Schema({
-  user: { type: Types.ObjectId, ref: "User", required: true },
+const memberSchema = new mongoose.Schema<IGroupMember>({
+  user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   name: { type: String },
   points: { type: Number, default: 0 },
   streak: { type: Number, default: 0 },
@@ -9,7 +10,7 @@ const memberSchema = new mongoose.Schema({
   joinedAt: { type: Date, default: Date.now },
 });
 
-const groupSchema = new mongoose.Schema({
+const groupSchema = new mongoose.Schema<IGroup>({
     name: { type: String, required: true },
     admin: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     members: [memberSchema],
@@ -18,12 +19,10 @@ const groupSchema = new mongoose.Schema({
     rallyCount: { type: Number, default: 1 },
     rallyGapDays: { type: Number, default: 14 },
     jukebox: { type: Boolean, default: true },
-    jukeboxFrequency: { type: Number, default: 30 }, //days not implemented yet
-    spotifyConneceted: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now },
 });
 
-groupSchema.methods.addPoints = async function (userId:Types.ObjectId, points: number) {
+groupSchema.methods.addPoints = async function (userId: string | mongoose.Schema.Types.ObjectId, points: number) {
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Standardize to the start of the day
 
@@ -71,6 +70,6 @@ groupSchema.methods.addPoints = async function (userId:Types.ObjectId, points: n
 
 groupSchema.index({ name: 1 });
 
-const Group = mongoose.models.Group || mongoose.model("Group", groupSchema);
+const Group = mongoose.models.Group as mongoose.Model<IGroup> || mongoose.model("Group", groupSchema);
 
 export default Group;

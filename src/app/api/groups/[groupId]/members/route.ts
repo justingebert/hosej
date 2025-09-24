@@ -5,6 +5,7 @@ import Group from '@/db/models/Group';
 import {isUserInGroup} from '@/lib/groupAuth';
 import {AuthedContext, withAuthAndErrors} from '@/lib/api/withAuth';
 import {ConflictError, NotFoundError} from '@/lib/api/errorHandling';
+import { IGroupMember } from "@/types/models/group";
 
 export const revalidate = 0
 //get user by id
@@ -44,7 +45,8 @@ export const POST = withAuthAndErrors(async (req: NextRequest, {params, userId}:
         throw new ConflictError('User is already a member of this group');
     }
 
-    group.members.push({user: user._id, name: user.username});
+    const member = {user: user._id, name: user.username} as IGroupMember
+    group.members.push(member);
     await group.save();
 
     if (!user.groups.includes(groupId)) {

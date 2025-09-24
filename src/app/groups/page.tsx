@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { CircleHelp, Copy, Star, User } from "lucide-react";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
-import { IGroupJson } from "@/types/models/group";
+import { GroupDTO } from "@/types/models/group";
 import { JoinGroupDrawer } from "@/components/Group/joinGroupDrawer";
 import { CreateGroupDrawer } from "../../components/Group/createGroupDrawer";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -88,7 +88,7 @@ function GroupsList({
         }
     };
 
-    const { data, isLoading } = useSWR<{ groups: IGroupJson[] }>(user ? `/api/groups` : null, fetcher);
+    const { data, isLoading } = useSWR<{ groups: GroupDTO[] }>(user ? `/api/groups` : null, fetcher);
     const groups = data?.groups || [];
 
     return (

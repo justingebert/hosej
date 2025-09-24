@@ -8,7 +8,7 @@ import confetti from "canvas-confetti";
 import { Badge } from "@/components/ui/badge";
 import useSWR, { useSWRConfig } from "swr";
 import fetcher from "@/lib/fetcher";
-import { IGroupJson } from "@/types/models/group";
+import { GroupDTO } from "@/types/models/group";
 import { IRally } from "@/types/models/rally";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useHaptic } from "use-haptic";
@@ -20,7 +20,7 @@ export default function Dashboard() {
     const { triggerHaptic } = useHaptic();
     const params = useParams<{ groupId: string }>();
     const groupId = params?.groupId;
-    const { data: group, isLoading: groupLoading } = useSWR<IGroupJson>(groupId ? `/api/groups/${groupId}` : null, fetcher);
+    const { data: group, isLoading: groupLoading } = useSWR<GroupDTO>(groupId ? `/api/groups/${groupId}` : null, fetcher);
     const { data: questionsData, isLoading: questionLoading } = useSWR<{
         questions: QuestionDTO[];
         completionPercentage: number;

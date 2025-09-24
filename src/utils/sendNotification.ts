@@ -1,6 +1,7 @@
 import dbConnect from "@/lib/dbConnect";
 import User from "@/db/models/user"; // Assuming the user model is defined in this path
 import admin from "firebase-admin";
+import { Types } from "mongoose";
 
 if (!admin.apps.length) {
   const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT as string);
@@ -9,7 +10,7 @@ if (!admin.apps.length) {
   });
 }
 
-export async function sendNotification(title: string, body: string, groupId = "") {
+export async function sendNotification(title: string, body: string, groupId: string | Types.ObjectId = "") {
   if(process.env.ENV === "dev") {
     console.log("NOTIFICATION", title, body, groupId);
     return { success: true, successCount: 0, failureCount: 0 };

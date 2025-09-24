@@ -18,7 +18,7 @@ import { CircleMinus, Plus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { createQuestionData } from "@/app/groups/[groupId]/(pages)/create/page";
 import useSWR from "swr";
-import { IGroupJson } from "@/types/models/group";
+import { GroupDTO } from "@/types/models/group";
 import fetcher from "@/lib/fetcher";
 
 interface CreateQuestionProps {
@@ -44,7 +44,7 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
         optionsMode = "static";
     }
 
-    const { data: group, isLoading } = useSWR<IGroupJson>(
+    const { data: group, isLoading } = useSWR<GroupDTO>(
         user ? `/api/groups/${groupId}` : null,
         fetcher
     );

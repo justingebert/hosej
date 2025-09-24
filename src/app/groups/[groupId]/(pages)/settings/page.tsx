@@ -12,7 +12,7 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { IGroupJson } from "@/types/models/group";
+import { GroupDTO } from "@/types/models/group";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { useParams, useRouter } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
@@ -31,8 +31,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
+import { mutate as mutateGlobal } from "swr";
 
-interface IGroupProcessed extends IGroupJson {
+interface IGroupProcessed extends GroupDTO {
     userIsAdmin: boolean;
 }
 
@@ -119,12 +120,16 @@ export default function GroupPage() {
 
     const leaveGroup = async () => {
         try {
-            await fetch(`/api/groups/${groupId}/members/${user._id}`, { method: "DELETE" });
+            const res = await fetch(`/api/groups/${groupId}/members/${user._id}`, { method: "DELETE" });
+            if (!res.ok) {
+                toast({ title: "Failed to leave group", variant: "destructive" });
+            }
+            mutateGlobal('/api/groups')
             toast({ title: "You have left the group" });
             router.push("/groups");
         } catch (error) {
             console.error("Failed to leave group:", error);
-            toast({ title: "Failed to leave group", variant: "destructive" });
+            toast({ title: "Something went wrong", variant: "destructive" });
         }
     };
 

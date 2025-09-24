@@ -1,7 +1,7 @@
-import { Types, Document } from "mongoose";
-import { AsJson } from "../common";
+import { Types } from "mongoose";
+import { ToDTO } from "../common";
 
-export interface IGroupMember{
+export interface IGroupMember {
     user: Types.ObjectId;
     name: string;
     points: number;
@@ -10,7 +10,8 @@ export interface IGroupMember{
     joinedAt: Date;
 }
 
-export interface IGroup extends Document {
+export interface IGroup {
+    _id: Types.ObjectId;
     name: string;
     admin: Types.ObjectId
     members: IGroupMember[];
@@ -19,10 +20,9 @@ export interface IGroup extends Document {
     rallyCount: number;
     rallyGapDays: number;
     jukebox: boolean;
-    jukeboxFrequency: number; //days not implemented yet
-    spotifyConnected: boolean;
     createdAt: Date;
-    addPoints(userId: Types.ObjectId, points: number): Promise<void>;
+    addPoints(userId: string | Types.ObjectId, points: number): Promise<void>;
 }
 
-export type IGroupJson = AsJson<IGroup>;
+export type GroupMemberDTO = ToDTO<IGroupMember>;
+export type GroupDTO = ToDTO<IGroup>;

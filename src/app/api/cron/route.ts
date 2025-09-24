@@ -7,11 +7,12 @@ import Jukebox from "@/db/models/Jukebox";
 import Chat from "@/db/models/Chat";
 import { withErrorHandling } from "@/lib/api/errorHandling";
 import { IQuestion } from "@/types/models/question";
+import { Types } from "mongoose";
 
 export const revalidate = 0;
 
 //deactives current questions and activates new ones
-async function selectDailyQuestions(groupId: string, limit: number): Promise<IQuestion[]> {
+async function selectDailyQuestions(groupId: string | Types.ObjectId, limit: number): Promise<IQuestion[]> {
     const currentQuestions = await Question.find({groupId: groupId, category: "Daily", active: true});
     for (const question of currentQuestions) {
         question.active = false;

@@ -27,12 +27,11 @@ export type AsJson<T> = T extends Document // Only apply `_id` for Mongoose docu
 // - ObjectId -> string
 // - Date -> string
 // - Functions removed
-// - Recurses arrays / readonly arrays / objects
+// - Recurses arrays / objects
 export type ToDTO<T> =
     T extends Types.ObjectId ? string :
     T extends Date ? string :
     T extends (...args: any) => any ? never :
-    T extends ReadonlyArray<infer U> ? ReadonlyArray<ToDTO<U>> :
     T extends Array<infer U> ? ToDTO<U>[] :
     T extends object ? {
         [K in keyof T as T[K] extends (...args: any) => any ? never : K]: ToDTO<T[K]>;

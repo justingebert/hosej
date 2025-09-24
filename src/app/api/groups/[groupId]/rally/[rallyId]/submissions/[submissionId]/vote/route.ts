@@ -17,7 +17,7 @@ export const POST = withAuthAndErrors(async (req: NextRequest, {params, userId}:
     await isUserInGroup(userId, groupId);
 
     const user = await User.findById(userId).orFail();
-    const group = await Group.findById(groupId)
+    const group = await Group.findById(groupId).orFail();
 
     const rally = await Rally.findOne({groupId: groupId, _id: rallyId});
     if (!rally) {
