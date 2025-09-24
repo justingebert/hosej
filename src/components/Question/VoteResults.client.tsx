@@ -12,7 +12,8 @@ import fetcher from "@/lib/fetcher";
 import { Skeleton } from "../ui/skeleton";
 import { IUserJson } from "@/types/models/user";
 import { useHaptic } from "use-haptic";
-import { QuestionDTO } from "@/db/models/Question";
+
+import { QuestionDTO } from "@/types/models/question";
 
 type VoteResultsProps = {
     user: IUserJson;

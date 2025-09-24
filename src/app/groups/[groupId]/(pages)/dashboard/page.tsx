@@ -9,10 +9,10 @@ import { Badge } from "@/components/ui/badge";
 import useSWR, { useSWRConfig } from "swr";
 import fetcher from "@/lib/fetcher";
 import { IGroupJson } from "@/types/models/group";
-import { QuestionDTO } from "@/db/models/Question";
 import { IRally } from "@/types/models/rally";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useHaptic } from "use-haptic";
+import { QuestionDTO } from "@/types/models/question";
 
 export default function Dashboard() {
     const router = useRouter();

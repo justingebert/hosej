@@ -9,7 +9,8 @@ import { useParams } from "next/navigation";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
 import { IGroupJson } from "@/types/models/group";
-import { QuestionType } from "@/db/models/Question";
+
+import { QuestionType } from "@/types/models/question";
 
 interface DataTableToolbarProps<TData> {
     table: Table<TData>;

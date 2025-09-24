@@ -8,7 +8,8 @@ import BackLink from "@/components/ui/custom/BackLink";
 import fetcher from "@/lib/fetcher";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { IResult } from "@/db/models/Question";
+
+import { IResult } from "@/types/models/question";
 
 export default function ResultsDetailPage({
     params,

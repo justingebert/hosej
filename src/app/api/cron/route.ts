@@ -1,11 +1,12 @@
 import dbConnect from "@/lib/dbConnect";
-import Question, { IQuestion } from "@/db/models/Question";
+import Question from "@/db/models/Question";
 import { NextRequest, NextResponse } from "next/server";
 import { sendNotification } from "@/utils/sendNotification";
 import Group from "@/db/models/Group";
 import Jukebox from "@/db/models/Jukebox";
 import Chat from "@/db/models/Chat";
 import { withErrorHandling } from "@/lib/api/errorHandling";
+import { IQuestion } from "@/types/models/question";
 
 export const revalidate = 0;
 
