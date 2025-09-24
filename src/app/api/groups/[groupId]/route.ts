@@ -71,8 +71,8 @@ export const DELETE = withAuthAndErrors(
 
         await isUserInGroup(userId, groupId);
 
-        const user = await User.findById(userId);
-        const group = await Group.findById(groupId);
+        const user = await User.findById(userId).orFail();
+        const group = await Group.findById(groupId).orFail();
 
         if (!group.admin.equals(user._id)) {
             throw new ForbiddenError("You are not the admin of this group");
@@ -82,7 +82,7 @@ export const DELETE = withAuthAndErrors(
             const memberUser = await User.findById(member.user);
             if (memberUser) {
                 memberUser.groups = memberUser.groups.filter(
-                    (g: string) => g !== groupId
+                    (g) => g !== groupId
                 );
                 await memberUser.save();
             }

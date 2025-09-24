@@ -11,7 +11,8 @@ import fetcher from "@/lib/fetcher";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { QuestionDTO } from "@/db/models/Question";
+
+import { QuestionDTO } from "@/types/models/question";
 
 const ResultsPage = () => {
     const { user } = useAuthRedirect();

@@ -10,7 +10,7 @@ import { RallyTabs } from "./RallyTabs";
 import fetcher from "@/lib/fetcher";
 import { IRallyJson } from "@/types/models/rally";
 import { useEffect, useMemo, useState } from "react";
-import { IGroupJson } from "@/types/models/group";
+import { GroupDTO } from "@/types/models/group";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -21,7 +21,7 @@ const RallyPage = () => {
     const [userHasVoted, setUserHasVoted] = useState<Record<string, boolean>>({});
     const [userHasUploaded, setUserHasUploaded] = useState<Record<string, boolean>>({});
 
-    const { data: group} = useSWR<IGroupJson>(`/api/groups/${groupId}`, fetcher, {});
+    const { data: group} = useSWR<GroupDTO>(`/api/groups/${groupId}`, fetcher, {});
     const { data, isLoading } = useSWR<{ rallies: IRallyJson[] }>(
         user ? `/api/groups/${groupId}/rally` : null,
         fetcher

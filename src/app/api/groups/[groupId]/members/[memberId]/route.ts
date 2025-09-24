@@ -36,14 +36,14 @@ export const DELETE = withAuthAndErrors(
         //if admin left group, find another admin that joined first
         if (group.admin.equals(user._id)) {
             const newAdmin = group.members.sort(
-                (a: IGroup["members"][number], b: IGroup["members"][number]) =>
-                    a.joinedAt.getTime() - b.joinedAt.getTime()
+                (a, b) =>
+                    a?.joinedAt?.getTime() - b?.joinedAt?.getTime()
             )[0];
             group.admin = newAdmin.user;
         }
         await group.save();
 
-        member.groups = member.groups.filter((g: string) => g !== groupId);
+        member.groups = member.groups.filter((g) => g !== groupId);
         await member.save();
 
         if (group.members.length === 0) {

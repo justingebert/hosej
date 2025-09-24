@@ -31,7 +31,7 @@ export const GET = withAuthAndErrors(
             throw new NotFoundError("Question not found");
         }
 
-        const group = await Group.findById(groupId);
+        const group = await Group.findById(groupId).orFail();
         const totalUsers = group.members.length;
 
         const totalVotes = question.answers.length || 0;

@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import { IUser } from "@/types/models/user";
 
-const UserSchema = new Schema({
+const UserSchema = new Schema<IUser>({
     username: {
         type: String,
         required: true,
@@ -33,34 +33,12 @@ const UserSchema = new Schema({
         unique: true,
         sparse: true,
     },
-
-    spotifyConnected: {
-        type: Boolean,
-        default: false,
-    },
-    spotifyUsername: {
-        type: String,
-        requried: false,
-    },
-    spotifyAccessToken: {
-        type: String,
-        requried: false,
-    },
-    spotifyRefreshToken: {
-        type: String,
-        requried: false,
-    },
-    spotifyTokenExpiresAt: {
-        type: Number,
-        requried: false,
-    },
-
     createdAt: {
         type: Date,
         default: Date.now,
     },
 });
 
-const User = mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
+const User = mongoose.models.User as mongoose.Model<IUser> || mongoose.model<IUser>("User", UserSchema);
 
 export default User;

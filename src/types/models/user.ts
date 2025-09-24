@@ -1,22 +1,19 @@
-import { Document, Types } from "mongoose";
-import { AsJson } from "../common";
+import { Types } from "mongoose";
+import { ToDTO } from "../common";
 
-export interface IUser extends Document {
+export interface IUser {
+    _id: Types.ObjectId;
+    email: string;
+    image?: string;
     username: string;
-    groups: Types.ObjectId[];
+    groups: (Types.ObjectId | string) [];
 
     deviceId?: string;
     fcmToken?: string;
     googleConnected: boolean;
     googleId?: string;
 
-    spotifyConnected: boolean;
-    spotifyUsername?: string;
-    spotifyAccessToken?: string;
-    spotifyRefreshToken?: string;
-    spotifyTokenExpiresAt?: number;
-
     createdAt: Date;
 }
 
-export type IUserJson = AsJson<IUser>; 
+export type UserDTO = ToDTO<IUser>;

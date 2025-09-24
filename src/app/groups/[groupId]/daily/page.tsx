@@ -11,7 +11,8 @@ import BackLink from "@/components/ui/custom/BackLink";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
 import QuestionsTabs from "./QuestionTabs";
-import { QuestionDTO } from "@/db/models/Question";
+
+import { QuestionDTO } from "@/types/models/question";
 
 const DailyQuestionPage = () => {
     const { user } = useAuthRedirect();

@@ -13,7 +13,7 @@ import useSWR, { mutate } from "swr";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
-import { IUserJson } from "@/types/models/user";
+import { UserDTO } from "@/types/models/user";
 import {
     Drawer,
     DrawerContent,
@@ -97,7 +97,7 @@ function JukeboxSearch({
     setUserHasSubmitted,
 }: {
     jukebox: IJukeboxProcessed;
-    user: IUserJson;
+    user: UserDTO;
     toast: any;
     setUserHasSubmitted: React.SetStateAction<any>;
 }) {
@@ -282,7 +282,7 @@ function JukeboxSubmissions({
     toast,
 }: {
     jukebox: IJukeboxProcessed;
-    user: IUserJson;
+    user: UserDTO;
     toast: any;
 }) {
     const [selectedSong, setSelectedSong] = useState<IProcessedSong | null>(null);

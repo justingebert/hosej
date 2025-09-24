@@ -24,8 +24,7 @@ export const POST = withAuthAndErrors(async (req: NextRequest, {params, userId}:
     if (!chat) {
         throw new NotFoundError('Chat not found');
     }
-
-    chat.messages.push({user: userId, message, createdAt: new Date()});
+    chat.messages.push({user: userId, message, createdAt: new Date()})
     await chat.save();
 
     const newMessage = chat.messages[chat.messages.length - 1];

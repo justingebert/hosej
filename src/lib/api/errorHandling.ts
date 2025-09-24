@@ -1,5 +1,5 @@
 import {NextRequest, NextResponse} from "next/server";
-
+import {Error as mongooseError} from "mongoose"
 export type ApiRoute<TContext = {}> = (req: NextRequest, context: TContext ) => Promise<NextResponse>;
 
 export class AppError extends Error {
@@ -46,6 +46,13 @@ function errorResponse(error: Error): NextResponse {
             status: error.status,
             headers: { "Content-Type": "application/json" },
         })
+    }
+
+    if (error instanceof mongooseError.DocumentNotFoundError) {
+        return NextResponse.json(
+            { message: error.message },
+            { status: 404, headers: { "Content-Type": "application/json" } }
+        );
     }
 
     return NextResponse.json({ message: "Internal Server Error" }, {

@@ -16,8 +16,8 @@ export const POST = withAuthAndErrors(async (req: NextRequest, {params, userId}:
     await dbConnect();
     await isUserInGroup(userId, groupId);
 
-    const user = await User.findById(userId);
-    const group = await Group.findById(groupId)
+    const user = await User.findById(userId).orFail();
+    const group = await Group.findById(groupId).orFail();
 
     const rally = await Rally.findOne({groupId: groupId, _id: rallyId});
     if (!rally) {
@@ -27,7 +27,7 @@ export const POST = withAuthAndErrors(async (req: NextRequest, {params, userId}:
     if (!submission) {
         return NextResponse.json({message: 'Submission not found'});
     }
-    const userVoted = submission.votes.find((vote: { user: string }) => vote.user === user._id);
+    const userVoted = submission.votes.find((vote:any) => vote.user === user._id);
     if (userVoted) {
         return NextResponse.json({message: 'User already voted'}, {status: 304});
     }

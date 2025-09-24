@@ -3,7 +3,8 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { IQuestion } from "@/db/models/Question";
+
+import { IQuestion } from "@/types/models/question";
 
 export const columns: ColumnDef<IQuestion>[] = [
     {

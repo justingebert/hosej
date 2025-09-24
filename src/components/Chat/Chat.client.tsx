@@ -4,14 +4,15 @@ import { Send } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
-import { IChat } from "@/types/models/chat";
+
+import { ChatDTO } from "@/types/models/chat";
 
 function ChatComponent({ user, entity, available }: any) {
     const [newMessage, setNewMessage] = useState("");
     const [sending, setSending] = useState(false);
     const messagesEndRef = useRef<null | HTMLDivElement>(null);
 
-    const { data, error, mutate } = useSWR<IChat>(
+    const { data, error, mutate } = useSWR<ChatDTO>(
         entity.chat ? `/api/groups/${entity.groupId}/chats/${entity.chat}` : null,
         fetcher
     );
@@ -51,7 +52,7 @@ function ChatComponent({ user, entity, available }: any) {
                         ({
                             ...data,
                             messages: [...messages, completeMessage],
-                        } as IChat),
+                        } as ChatDTO),
                     false // Revalidate after this update
                 );
 

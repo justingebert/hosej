@@ -1,8 +1,8 @@
-import { Document, Types } from "mongoose";
-import { AsJson } from "../common";
+import { ToDTO } from "@/types/common";
+import { Types } from "mongoose";
 
 export interface IMessage {
-    user: Types.ObjectId; 
+    user: Types.ObjectId | string;
     message: string;
     createdAt: Date;
 }
@@ -13,7 +13,8 @@ enum EntityModel {
     Jukebox = "Jukebox",
 }
 
-export interface IChat extends Document {
+export interface IChat {
+    _id: Types.ObjectId;
     group: Types.ObjectId;
     messages: IMessage[];
     entity: Types.ObjectId;
@@ -21,4 +22,4 @@ export interface IChat extends Document {
     createdAt: Date;
 }
 
-export type IChatJson = AsJson<IChat>;
+export type ChatDTO = ToDTO<IChat>;

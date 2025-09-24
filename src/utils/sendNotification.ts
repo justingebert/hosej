@@ -1,6 +1,7 @@
 import dbConnect from "@/lib/dbConnect";
 import User from "@/db/models/user"; // Assuming the user model is defined in this path
 import admin from "firebase-admin";
+import { Types } from "mongoose";
 
 if (!admin.apps.length) {
   const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT as string);
@@ -9,7 +10,7 @@ if (!admin.apps.length) {
   });
 }
 
-export async function sendNotification(title: string, body: string, groupId = "") {
+export async function sendNotification(title: string, body: string, groupId: string | Types.ObjectId = "") {
   if(process.env.ENV === "dev") {
     console.log("NOTIFICATION", title, body, groupId);
     return { success: true, successCount: 0, failureCount: 0 };
@@ -27,9 +28,9 @@ export async function sendNotification(title: string, body: string, groupId = ""
       });
     }
     // Aggregate all tokens
-    const tokens = users.reduce((acc: string[], user) => {
-      return acc.concat(user.fcmToken);
-    }, []);
+    const tokens = users
+        .map((user) => user.fcmToken)
+        .filter((token) => token !== undefined);
 
     if (tokens.length === 0) {
       console.log('No tokens available to send messages');

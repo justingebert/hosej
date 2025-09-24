@@ -16,7 +16,7 @@ import { Separator } from "@/components/ui/separator";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
 import { Skeleton } from "@/components/ui/skeleton";
-import { IGroupJson } from "@/types/models/group";
+import { GroupDTO, GroupMemberDTO } from "@/types/models/group";
 
 type Statistics = {
     group: any;
@@ -38,7 +38,7 @@ const StatsPage = () => {
         `/api/groups/${groupId}/stats`,
         fetcher
     );
-    const { data, isLoading: groupLoading } = useSWR<IGroupJson>(`/api/groups/${groupId}/`, fetcher);
+    const { data, isLoading: groupLoading } = useSWR<GroupDTO>(`/api/groups/${groupId}/`, fetcher);
 
     const sortedUsers = data?.members.sort((a, b) => b.points - a.points) || [];
 
@@ -85,7 +85,7 @@ const StatsPage = () => {
                                 </TableCell>
                             </TableRow>
                         ))}
-                    {sortedUsers.map((member) => (
+                    {sortedUsers.map((member:GroupMemberDTO) => (
                         <TableRow key={member.user.toString()}>
                             <TableCell className="font-medium">{member.name}</TableCell>
                             <TableCell className="text-right">{member.points}</TableCell>

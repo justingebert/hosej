@@ -8,8 +8,9 @@ import { DataTableFacetedFilter } from "./data-table-faceted-filter";
 import { useParams } from "next/navigation";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
-import { IGroupJson } from "@/types/models/group";
-import { QuestionType } from "@/db/models/Question";
+import { GroupDTO } from "@/types/models/group";
+
+import { QuestionType } from "@/types/models/question";
 
 interface DataTableToolbarProps<TData> {
     table: Table<TData>;
@@ -23,7 +24,7 @@ const questionTypesOptions = Object.values(QuestionType).map((type) => ({
 export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>) {
     const params = useParams<{ groupId: string }>();
     const groupId = params? params.groupId : "";
-    const { data: users } = useSWR<IGroupJson["members"]>(`/api/groups/${groupId}/members`, fetcher);
+    const { data: users } = useSWR<GroupDTO["members"]>(`/api/groups/${groupId}/members`, fetcher);
 
     const groupMembers = users
         ? users.map((user: any) => ({
