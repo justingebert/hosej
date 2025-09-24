@@ -43,7 +43,7 @@ export const DELETE = withAuthAndErrors(
         }
         await group.save();
 
-        member.groups = member.groups.filter((g: string) => g !== groupId);
+        member.groups = member.groups.filter((g) => g !== groupId);
         await member.save();
 
         if (group.members.length === 0) {

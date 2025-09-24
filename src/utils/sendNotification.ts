@@ -27,9 +27,9 @@ export async function sendNotification(title: string, body: string, groupId = ""
       });
     }
     // Aggregate all tokens
-    const tokens = users.reduce((acc: string[], user) => {
-      return acc.concat(user.fcmToken);
-    }, []);
+    const tokens = users
+        .map((user) => user.fcmToken)
+        .filter((token) => token !== undefined);
 
     if (tokens.length === 0) {
       console.log('No tokens available to send messages');

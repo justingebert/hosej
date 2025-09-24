@@ -71,7 +71,7 @@ export const DELETE = withAuthAndErrors(
 
         await isUserInGroup(userId, groupId);
 
-        const user = await User.findById(userId);
+        const user = await User.findById(userId).orFail();
         const group = await Group.findById(groupId);
 
         if (!group.admin.equals(user._id)) {
@@ -82,7 +82,7 @@ export const DELETE = withAuthAndErrors(
             const memberUser = await User.findById(member.user);
             if (memberUser) {
                 memberUser.groups = memberUser.groups.filter(
-                    (g: string) => g !== groupId
+                    (g) => g !== groupId
                 );
                 await memberUser.save();
             }
