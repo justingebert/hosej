@@ -1,27 +1,5 @@
-import mongoose, { Types } from "mongoose";
-import { ToDTO } from "@/types/common";
-
-export interface IMessage {
-    user: Types.ObjectId | string;
-    message: string;
-    createdAt: Date;
-}
-
-enum EntityModel {
-    Question = "Question",
-    Rally = "Rally",
-    Jukebox = "Jukebox",
-}
-
-export interface IChat {
-    _id: Types.ObjectId;
-    group: Types.ObjectId;
-    messages: IMessage[];
-    entity: Types.ObjectId;
-    entityModel: EntityModel;
-    createdAt: Date;
-}
-
+import mongoose from "mongoose";
+import { IChat, IMessage } from "@/types/models/chat";
 
 const messageSchema = new mongoose.Schema<IMessage>({
     user: {
@@ -61,8 +39,6 @@ const chatSchema = new mongoose.Schema<IChat>({
         default: Date.now,
     },
 });
-
-export type ChatDTO = ToDTO<IChat>;
 
 const Chat = mongoose.models.Chat as mongoose.Model<IChat> || mongoose.model<IChat>("Chat", chatSchema);
 

@@ -4,7 +4,8 @@ import { Send } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
-import { ChatDTO } from "@/db/models/Chat";
+
+import { ChatDTO } from "@/types/models/chat";
 
 function ChatComponent({ user, entity, available }: any) {
     const [newMessage, setNewMessage] = useState("");

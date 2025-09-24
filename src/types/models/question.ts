@@ -2,7 +2,7 @@ import { Types } from "mongoose";
 import { ToDTO } from "@/types/common";
 
 export interface IQuestion {
-    _id?: Types.ObjectId;
+    _id: Types.ObjectId;
     groupId: Types.ObjectId;
     category: string;
     questionType: QuestionType;
