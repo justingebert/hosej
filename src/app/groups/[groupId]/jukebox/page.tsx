@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import BackLink from "@/components/ui/custom/BackLink";
 import Header from "@/components/ui/custom/Header";
 import { Input } from "@/components/ui/input";
-import { JukeboxDTO } from "@/types/models/jukebox";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import fetcher from "@/lib/fetcher";
 import { useParams } from "next/navigation";
@@ -14,16 +13,12 @@ import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { UserDTO } from "@/types/models/user";
-import {
-    Drawer,
-    DrawerContent,
-    DrawerHeader,
-    DrawerTitle,
-} from "@/components/ui/drawer";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, } from "@/components/ui/drawer";
 import { Slider } from "@/components/ui/slider";
 import { FoldVertical, Loader, Search, UnfoldVertical } from "lucide-react";
-import { IJukeboxProcessed, IProcessedSong } from "./types";
+import { IJukeboxProcessed, IProcessedSong } from "@/types/models/jukebox";
 import { FaSpotify, FaYoutube } from "react-icons/fa";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 import { SiApplemusic } from "react-icons/si";
 import { Badge } from "@/components/ui/badge";
@@ -31,28 +26,47 @@ import { Separator } from "@/components/ui/separator";
 import { AnimatePresence, motion } from "framer-motion";
 import ChatComponent from "@/components/Chat/Chat.client";
 
-//TODO out animation not working
+
+function JukeboxPageLoading() {
+    return <div className="space-y-3 mt-12">
+        {[...Array(8)].map((_, index) => (
+            <Skeleton key={index} className="p-3 rounded-md flex items-center gap-4">
+                <Skeleton className="w-16 h-16 rounded-md bg-primary-foreground"/>
+                <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-3/4 bg-primary-foreground"/>
+                    <Skeleton className="h-4 w-1/2 bg-primary-foreground"/>
+                </div>
+            </Skeleton>
+        ))}
+    </div>;
+}
 
 const JukeboxPage = () => {
     const { user } = useAuthRedirect();
     const params = useParams<{ groupId: string }>();
-    const groupId = params? params.groupId : "";
+    const groupId = params ? params.groupId : "";
     const { toast } = useToast();
-    const [userHasSubmitted, setUserHasSubmitted] = useState(false);
 
-    const { data, isLoading } = useSWR<{ data: IJukeboxProcessed[] }>(
-        user ? `/api/groups/${groupId}/jukebox?isActive=true&processed=true` : null,
+    // Track active tab (jukebox) and per-jukebox submission status
+    const [activeJukeboxId, setActiveJukeboxId] = useState<string | null>(null);
+    const [userHasSubmittedMap, setUserHasSubmittedMap] = useState<Record<string, boolean>>({});
+
+    const { data, isLoading } = useSWR<IJukeboxProcessed[]>(
+        user ? `/api/groups/${groupId}/jukebox?isActive=true` : null,
         fetcher
     );
 
     useEffect(() => {
-        if (data && data?.data[0]) {
-            setUserHasSubmitted(data.data[0].userHasSubmitted);
+        if (data && data.length > 0) {
+            // Initialize active tab and userHasSubmitted map from fetched data
+            setActiveJukeboxId((prev) => prev ?? data[0]._id);
+            const initMap: Record<string, boolean> = {};
+            for (const jukebox of data) {
+                initMap[jukebox._id] = !!jukebox.userHasSubmitted;
+            }
+            setUserHasSubmittedMap(initMap);
         }
-    }, [data, user]);
-
-    const date = data?.data[0]?.date ? new Date(data.data[0].date) : null;
-    const month = date ? new Intl.DateTimeFormat("en-US", { month: "long" }).format(date) : null;
+    }, [data]);
 
     return (
         <>
@@ -60,29 +74,58 @@ const JukeboxPage = () => {
                 leftComponent={<BackLink href={`/groups/${groupId}/dashboard`} />}
                 title={`Jukebox`}
             />
-            {isLoading || !data ? (
-                <div className="space-y-3 mt-12">
-                    {[...Array(8)].map((_, index) => (
-                        <Skeleton key={index} className="p-3 rounded-md flex items-center gap-4">
-                            <Skeleton className="w-16 h-16 rounded-md bg-primary-foreground" />
-                            <div className="flex-1 space-y-2">
-                                <Skeleton className="h-4 w-3/4 bg-primary-foreground" />
-                                <Skeleton className="h-4 w-1/2 bg-primary-foreground" />
-                            </div>
-                        </Skeleton>
-                    ))}
-                </div>
-            ) : (
+            {isLoading || !data ? JukeboxPageLoading() : (
                 <>
-                    {userHasSubmitted ? (
-                        <JukeboxSubmissions jukebox={data?.data[0]} user={user} toast={toast} />
+                    {data.length > 1 ? (
+                        <Tabs value={activeJukeboxId ?? undefined} onValueChange={setActiveJukeboxId}>
+                            <TabsList className="grid w-full mb-10"
+                                      style={{
+                                          gridTemplateColumns: `repeat(${data.length}, minmax(0, 1fr))`,
+                                      }}>
+                                {data.map((j) => {
+                                    return (
+                                        <TabsTrigger key={j._id} value={j._id} className="flex-shrink-0">
+                                            {j.title}
+                                        </TabsTrigger>
+                                    );
+                                })}
+                            </TabsList>
+                            {data.map((j) => {
+                                const hasSubmitted = userHasSubmittedMap[j._id] ?? j.userHasSubmitted;
+                                return (
+                                    <TabsContent key={j._id} value={j._id} className="mt-4">
+                                        {hasSubmitted ? (
+                                            <JukeboxSubmissions jukebox={j} user={user} toast={toast} />
+                                        ) : (
+                                            <JukeboxSearch
+                                                jukebox={j}
+                                                user={user}
+                                                toast={toast}
+                                                setUserHasSubmitted={() =>
+                                                    setUserHasSubmittedMap((prev) => ({ ...prev, [j._id]: true }))
+                                                }
+                                            />
+                                        )}
+                                    </TabsContent>
+                                );
+                            })}
+                        </Tabs>
                     ) : (
-                        <JukeboxSearch
-                            jukebox={data?.data[0]}
-                            user={user}
-                            toast={toast}
-                            setUserHasSubmitted={setUserHasSubmitted}
-                        />
+                        // Only one jukebox – render without tabs
+                        <>
+                            {(userHasSubmittedMap[data[0]._id] ?? data[0].userHasSubmitted) ? (
+                                <JukeboxSubmissions jukebox={data[0]} user={user} toast={toast} />
+                            ) : (
+                                <JukeboxSearch
+                                    jukebox={data[0]}
+                                    user={user}
+                                    toast={toast}
+                                    setUserHasSubmitted={() =>
+                                        setUserHasSubmittedMap((prev) => ({ ...prev, [data[0]._id]: true }))
+                                    }
+                                />
+                            )}
+                        </>
                     )}
                 </>
             )}

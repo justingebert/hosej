@@ -144,7 +144,7 @@ export default function Dashboard() {
 
                     {!groupLoading || group ? (
                         <>
-                            {group?.jukebox && (
+                            {group?.jukeboxSettings.enabled && (
                                 <div
                                     className="relative bg-primary-foreground px-6 py-4 flex items-center justify-between rounded-lg"
                                     onClick={() => {

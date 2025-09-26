@@ -10,6 +10,13 @@ export interface IGroupMember {
     joinedAt: Date;
 }
 
+interface IGroupJukeboxSettings {
+    enabled: boolean;
+    concurrent: string[]; // array of names of jukebox, length is concurrent count
+    maxConcurrentCount: number;
+    activationDays: number[]
+}
+
 export interface IGroup {
     _id: Types.ObjectId;
     name: string;
@@ -19,7 +26,7 @@ export interface IGroup {
     lastQuestionDate: Date | null;
     rallyCount: number;
     rallyGapDays: number;
-    jukebox: boolean;
+    jukeboxSettings: IGroupJukeboxSettings;
     createdAt: Date;
     addPoints(userId: string | Types.ObjectId, points: number): Promise<void>;
 }

@@ -8,6 +8,7 @@ import Chat from "@/db/models/Chat";
 import { withErrorHandling } from "@/lib/api/errorHandling";
 import { IQuestion } from "@/types/models/question";
 import { Types } from "mongoose";
+import { IGroup } from "@/types/models/group";
 
 export const revalidate = 0;
 
@@ -38,6 +39,38 @@ async function selectDailyQuestions(groupId: string | Types.ObjectId, limit: num
     return questions;
 }
 
+/**
+ * this deactivates active jukeboxes and actives new ones on the first of every month
+ * @param group
+ */
+async function handleJukebox(group: IGroup) {
+    const today = new Date();
+    if (group.jukeboxSettings.activationDays.includes(today.getDate())) {
+        await Jukebox.updateMany({active: true, groupId: group._id}, {active: false});
+
+        for (let i = 0; i < group.jukeboxSettings.concurrent.length; i++) {
+            const newJukebox = await new Jukebox({
+                groupId: group._id,
+                date: today, active: true,
+                title: group.jukeboxSettings.concurrent[i]
+            }).save();
+
+            const newChat = await new Chat({
+                group: group._id,
+                entityModel: "Jukebox",
+                entity: newJukebox._id,
+            }).save();
+
+            newJukebox.chat = newChat._id;
+            await newJukebox.save();
+            await newChat.save();
+        }
+
+        const monthName = new Intl.DateTimeFormat("en-US", {month: "long"}).format(today);
+        await sendNotification(`🎶JUKEBOX - ${monthName} 🎶`, "🎶SUBMIT YOUR SONGS🎶", group._id);
+    }
+}
+
 //gets, populates and returns daily questions
 export const GET = withErrorHandling(async (req: NextRequest) => {
     await dbConnect();
@@ -60,23 +93,8 @@ export const GET = withErrorHandling(async (req: NextRequest) => {
         }
 
         //jukebox logic
-        if (group.jukebox) {
-            const today = new Date();
-            const monthName = new Intl.DateTimeFormat("en-US", {month: "long"}).format(today);
-            if (today.getDate() === 2) {
-                await Jukebox.updateMany({active: true, groupId: group._id}, {active: false});
-                const newJukebox = await new Jukebox({groupId: group._id, date: today, active: true}).save();
-                const newChat = await new Chat({
-                    group: group._id,
-                    entityModel: "Jukebox",
-                    entity: newJukebox._id,
-                }).save();
-                newJukebox.chat = newChat._id;
-                await newJukebox.save();
-                await newChat.save();
-
-                await sendNotification(`🎶JUKEBOX - ${monthName} 🎶`, "🎶JETZT SONG ADDEN DU EI🎶", group._id);
-            }
+        if (group.jukeboxSettings.enabled) {
+            await handleJukebox(group);
         }
     }
 
