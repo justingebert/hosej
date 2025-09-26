@@ -18,7 +18,12 @@ const groupSchema = new mongoose.Schema<IGroup>({
     lastQuestionDate: { type: Date, default: null },
     rallyCount: { type: Number, default: 1 },
     rallyGapDays: { type: Number, default: 14 },
-    jukebox: { type: Boolean, default: true },
+    jukeboxSettings :{
+        enabled: { type: Boolean, default: true },
+        concurrent: [{ type: String, default: ["Jukebox"] }],
+        maxConcurrentCount: { type: Number, default: 4 },
+        activationDays: [{ type: Number, default: [1] }],
+    },
     createdAt: { type: Date, default: Date.now },
 });
 

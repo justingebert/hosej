@@ -44,6 +44,7 @@ const SongSchema = new mongoose.Schema<ISong>({
 
 const jukeboxSchema = new mongoose.Schema<IJukebox>({
     groupId: { type: mongoose.Schema.Types.ObjectId, ref: "Group", required: true },
+    title: { type: String },
     active: { type: Boolean, default: false },
     date: { type: Date, required: true },
     songs: [SongSchema],
