@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import BackLink from "@/components/ui/custom/BackLink";
 import Header from "@/components/ui/custom/Header";
 import { Input } from "@/components/ui/input";
-import { IJukeboxJson } from "@/types/models/jukebox";
+import { JukeboxDTO } from "@/types/models/jukebox";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import fetcher from "@/lib/fetcher";
 import { useParams } from "next/navigation";

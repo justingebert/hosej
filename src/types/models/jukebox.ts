@@ -1,8 +1,8 @@
-import { Types, Document } from "mongoose";
-import { AsJson } from "../common";
+import { Types } from "mongoose";
+import { ToDTO } from "../common";
 
 export interface IRating {
-    userId: Types.ObjectId;
+    userId: Types.ObjectId | string;
     rating: number;
 }
 
@@ -12,11 +12,12 @@ export interface ISong {
     artist: string;
     album: string;
     coverImageUrl: string;
-    submittedBy: Types.ObjectId;
+    submittedBy: Types.ObjectId | string;
     ratings: IRating[];
 }
 
-export interface IJukebox extends Document {
+export interface IJukebox {
+    _id: Types.ObjectId
     groupId: Types.ObjectId;
     active: boolean;
     date: Date;
@@ -24,6 +25,7 @@ export interface IJukebox extends Document {
     chat: Types.ObjectId;
     createdAt: Date;
 }
-export type IRatingJson = AsJson<IRating>;
-export type ISongJson = AsJson<ISong>;
-export type IJukeboxJson = AsJson<IJukebox>;
+
+export type RatingDTO = ToDTO<IRating>;
+export type SongDTO = ToDTO<ISong>;
+export type JukeboxDTO = ToDTO<IJukebox>;

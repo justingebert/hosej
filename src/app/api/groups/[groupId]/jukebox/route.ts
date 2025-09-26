@@ -1,10 +1,12 @@
 import dbConnect from "@/lib/dbConnect";
-import {isUserInGroup} from "@/lib/groupAuth";
-import {NextRequest, NextResponse} from "next/server";
+import { isUserInGroup } from "@/lib/groupAuth";
+import { NextRequest, NextResponse } from "next/server";
 import Jukebox from "@/db/models/Jukebox";
-import {ISong} from "@/types/models/jukebox";
+import { ISong } from "@/types/models/jukebox";
 import User from "@/db/models/user";
-import {AuthedContext, withAuthAndErrors} from "@/lib/api/withAuth";
+import { AuthedContext, withAuthAndErrors } from "@/lib/api/withAuth";
+import { IUser } from "@/types/models/user";
+import { IRating } from "@/types/models/jukebox";
 
 export const revalidate = 0;
 
@@ -33,20 +35,22 @@ export const GET = withAuthAndErrors(
         const skip = (page - 1) * limit;
 
         let jukeboxes = await Jukebox.find(query)
-            .sort({createdAt: -1})
-            .skip(skip)
-            .limit(limit)
-            .populate({
-                path: "songs.submittedBy",
-                model: User,
-                select: "_id username",
-            })
-            .populate({
-                path: "songs.ratings.userId",
-                model: User,
-                select: "_id username",
-            })
-            .lean();
+                .sort({createdAt: -1})
+                .skip(skip)
+                .limit(limit)
+                .populate
+            <{songs: (ISong & {submittedBy: IUser, ratings: (IRating & {userId: IUser})[]})[]}>
+            ([{
+                    path: "songs.submittedBy",
+                    model: User,
+                    select: "_id username",
+                },
+                    {
+                        path: "songs.ratings.userId",
+                        model: User,
+                        select: "_id username",
+                    }]
+            ).lean();
 
         const total = await Jukebox.countDocuments(query);
 
@@ -54,14 +58,14 @@ export const GET = withAuthAndErrors(
         if (processed) {
             jukeboxes = jukeboxes.map((jukebox) => {
                 const userHasSubmitted = jukebox.songs.some(
-                    (song: ISong) => String(song.submittedBy?._id) === String(userId)
+                    (song) => String(song.submittedBy?._id) === String(userId)
                 );
 
                 return {
                     ...jukebox,
                     userHasSubmitted,
                     songs: jukebox.songs
-                        .map((song: ISong) => {
+                        .map((song) => {
                             // First, sort the ratings array for each song (highest first)
                             const sortedRatings = [...song.ratings].sort(
                                 (a, b) => b.rating - a.rating

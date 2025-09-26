@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
-import { IJukebox } from "@/types/models/jukebox";
+import { IJukebox, IRating, ISong } from "@/types/models/jukebox";
 
-const RatingSchema = new mongoose.Schema({
+const RatingSchema = new mongoose.Schema<IRating>({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
@@ -15,7 +15,7 @@ const RatingSchema = new mongoose.Schema({
     },
 });
 
-const SongSchema = new mongoose.Schema({
+const SongSchema = new mongoose.Schema<ISong>({
     spotifyTrackId: {
         type: String,
         required: true,
@@ -42,7 +42,7 @@ const SongSchema = new mongoose.Schema({
     ratings: [RatingSchema],
 });
 
-const jukeBoxSchema = new mongoose.Schema({
+const jukeboxSchema = new mongoose.Schema<IJukebox>({
     groupId: { type: mongoose.Schema.Types.ObjectId, ref: "Group", required: true },
     active: { type: Boolean, default: false },
     date: { type: Date, required: true },
@@ -51,6 +51,6 @@ const jukeBoxSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now },
 });
 
-const Jukebox = mongoose.models.Jukebox || mongoose.model<IJukebox>("Jukebox", jukeBoxSchema);
+const Jukebox = mongoose.models.Jukebox as mongoose.Model<IJukebox> || mongoose.model<IJukebox>("Jukebox", jukeboxSchema);
 
 export default Jukebox;
