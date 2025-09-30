@@ -25,7 +25,7 @@ export const DELETE = withAuthAndErrors(
             throw new NotFoundError("User or group not found");
         }
 
-        if (!group.admin.equals(user._id) || userId !== memberId) {
+        if (userId !== memberId && !group.admin.equals(user._id)) {
             throw new ForbiddenError("You are not the admin of this group");
         }
 

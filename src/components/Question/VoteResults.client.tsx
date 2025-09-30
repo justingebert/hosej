@@ -45,7 +45,7 @@ const VoteResults = ({ user, question, available, returnTo }: VoteResultsProps) 
     return (
         <div>
             <div className="flex justify-center">{numOfVotes}</div>
-            <div className="mb-10">
+            <div>
                 {results.map((result: any, index: number) => (
                     <Link
                         key={index}
@@ -91,7 +91,7 @@ const VoteResults = ({ user, question, available, returnTo }: VoteResultsProps) 
                     </Link>
                 ))}
             </div>
-            <Separator />
+            <Separator className="my-4"/>
             <ChatComponent user={user} entity={question} available={available} />
         </div>
     );

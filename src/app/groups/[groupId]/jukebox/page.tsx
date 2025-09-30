@@ -42,67 +42,66 @@ function JukeboxPageLoading() {
 }
 
 const JukeboxPage = () => {
-    const { user } = useAuthRedirect();
+    const {user} = useAuthRedirect();
     const params = useParams<{ groupId: string }>();
     const groupId = params ? params.groupId : "";
-    const { toast } = useToast();
+    const {toast} = useToast();
 
     // Track active tab (jukebox) and per-jukebox submission status
     const [activeJukeboxId, setActiveJukeboxId] = useState<string | null>(null);
     const [userHasSubmittedMap, setUserHasSubmittedMap] = useState<Record<string, boolean>>({});
 
-    const { data, isLoading } = useSWR<IJukeboxProcessed[]>(
+    const {data: jukeboxes, isLoading} = useSWR<IJukeboxProcessed[]>(
         user ? `/api/groups/${groupId}/jukebox?isActive=true` : null,
         fetcher
     );
 
     useEffect(() => {
-        if (data && data.length > 0) {
-            // Initialize active tab and userHasSubmitted map from fetched data
-            setActiveJukeboxId((prev) => prev ?? data[0]._id);
+        if (jukeboxes && jukeboxes.length > 0) {
+            // Initialize active tab and userHasSubmitted map from fetched jukeboxes
+            setActiveJukeboxId((prev) => prev ?? jukeboxes[0]._id);
             const initMap: Record<string, boolean> = {};
-            for (const jukebox of data) {
+            for (const jukebox of jukeboxes) {
                 initMap[jukebox._id] = !!jukebox.userHasSubmitted;
             }
             setUserHasSubmittedMap(initMap);
         }
-    }, [data]);
+    }, [jukeboxes]);
 
     return (
         <>
             <Header
-                leftComponent={<BackLink href={`/groups/${groupId}/dashboard`} />}
+                leftComponent={<BackLink href={`/groups/${groupId}/dashboard`}/>}
                 title={`Jukebox`}
             />
-            {isLoading || !data ? JukeboxPageLoading() : (
+            {isLoading || !jukeboxes ? JukeboxPageLoading() : (
                 <>
-                    {data.length > 1 ? (
+                    {jukeboxes.length > 1 ? (
                         <Tabs value={activeJukeboxId ?? undefined} onValueChange={setActiveJukeboxId}>
-                            <TabsList className="grid w-full mb-10"
+                            <TabsList className="grid w-full mb-4"
                                       style={{
-                                          gridTemplateColumns: `repeat(${data.length}, minmax(0, 1fr))`,
+                                          gridTemplateColumns: `repeat(${jukeboxes.length}, minmax(0, 1fr))`,
                                       }}>
-                                {data.map((j) => {
+                                {jukeboxes.map((j, index) => {
                                     return (
                                         <TabsTrigger key={j._id} value={j._id} className="flex-shrink-0">
-                                            {j.title}
+                                            {j.title ?? `jukebox ${index+1}`}
                                         </TabsTrigger>
                                     );
                                 })}
                             </TabsList>
-                            {data.map((j) => {
+                            {jukeboxes.map((j) => {
                                 const hasSubmitted = userHasSubmittedMap[j._id] ?? j.userHasSubmitted;
                                 return (
                                     <TabsContent key={j._id} value={j._id} className="mt-4">
                                         {hasSubmitted ? (
-                                            <JukeboxSubmissions jukebox={j} user={user} toast={toast} />
+                                            <JukeboxSubmissions jukebox={j} user={user} toast={toast}/>
                                         ) : (
                                             <JukeboxSearch
                                                 jukebox={j}
-                                                user={user}
                                                 toast={toast}
                                                 setUserHasSubmitted={() =>
-                                                    setUserHasSubmittedMap((prev) => ({ ...prev, [j._id]: true }))
+                                                    setUserHasSubmittedMap((prev) => ({...prev, [j._id]: true}))
                                                 }
                                             />
                                         )}
@@ -113,15 +112,14 @@ const JukeboxPage = () => {
                     ) : (
                         // Only one jukebox – render without tabs
                         <>
-                            {(userHasSubmittedMap[data[0]._id] ?? data[0].userHasSubmitted) ? (
-                                <JukeboxSubmissions jukebox={data[0]} user={user} toast={toast} />
+                            {(userHasSubmittedMap[jukeboxes[0]._id] ?? jukeboxes[0].userHasSubmitted) ? (
+                                <JukeboxSubmissions jukebox={jukeboxes[0]} user={user} toast={toast}/>
                             ) : (
                                 <JukeboxSearch
-                                    jukebox={data[0]}
-                                    user={user}
+                                    jukebox={jukeboxes[0]}
                                     toast={toast}
                                     setUserHasSubmitted={() =>
-                                        setUserHasSubmittedMap((prev) => ({ ...prev, [data[0]._id]: true }))
+                                        setUserHasSubmittedMap((prev) => ({...prev, [jukeboxes[0]._id]: true}))
                                     }
                                 />
                             )}
@@ -134,18 +132,16 @@ const JukeboxPage = () => {
 };
 
 function JukeboxSearch({
-    jukebox,
-    user,
-    toast,
-    setUserHasSubmitted,
-}: {
+                           jukebox,
+                           toast,
+                           setUserHasSubmitted,
+                       }: {
     jukebox: IJukeboxProcessed;
-    user: UserDTO;
     toast: any;
     setUserHasSubmitted: React.SetStateAction<any>;
 }) {
     const params = useParams<{ groupId: string }>();
-    const groupId = params? params.groupId : "";
+    const groupId = params ? params.groupId : "";
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResults, setSearchResults] = useState<any[] | null>(null); // Null for no search yet
     const [isLoading, setIsLoading] = useState(false);
@@ -160,30 +156,29 @@ function JukeboxSearch({
             const response = await fetch(
                 `/api/groups/${groupId}/jukebox/search?q=${encodeURIComponent(searchQuery)}`
             );
+            if(!response.ok){
+                throw new Error("Failed to fetch search results");
+            }
             const result = await response.json();
             setSearchResults(result.tracks.items || []);
         } catch (err) {
+            toast({title: "Something went wrong", description: "Please try again later", variant: "destructive"});
             console.error("Error searching Spotify:", err);
         } finally {
             setIsLoading(false);
         }
     };
 
-    const handleSongSelect = (track: any) => {
-        setSelectedTrack(track);
-    };
-
-    const handleSubmit = async () => {
+    const handleSubmitTrack = async () => {
         if (!selectedTrack) {
             toast({
                 title: "No song selected",
-                description: "Please select a song before submitting.",
+                description: "Please select a song.",
             });
             return;
         }
 
         setIsSubmitting(true);
-
         try {
             const response = await fetch(`/api/groups/${groupId}/jukebox/${jukebox._id}/song`, {
                 method: "POST",
@@ -199,29 +194,16 @@ function JukeboxSearch({
                 }),
             });
 
-            if (response.ok) {
-                const newSong = {
-                    spotifyTrackId: selectedTrack.id,
-                    title: selectedTrack.name,
-                    artist: selectedTrack.artists.map((a: any) => a.name).join(", "),
-                    album: selectedTrack.album.name,
-                    coverImageUrl: selectedTrack.album.images[0]?.url || "",
-                    submittedBy: user._id,
-                    ratings: [],
-                };
-
-                mutate(`/api/groups/${groupId}/jukebox?isActive=true&processed=true`);
-
-                setSelectedTrack(null);
-                setSearchResults(null);
-                setUserHasSubmitted(true);
-            } else {
+            if (!response.ok) {
                 const errorData = await response.json();
-                toast({
-                    title: "Error",
-                    description: errorData.message || "Failed to submit the song.",
-                });
+                throw new Error(errorData.message || "Failed to submit song");
             }
+            mutate(`/api/groups/${groupId}/jukebox?isActive=true`);
+
+            setSelectedTrack(null);
+            setSearchResults(null);
+            setUserHasSubmitted(true);
+
         } catch (error) {
             console.error("Error submitting song:", error);
             toast({
@@ -233,6 +215,23 @@ function JukeboxSearch({
             setIsSubmitting(false);
         }
     };
+
+    function songSearchLoadingSkeleton () {
+        return <ul className="space-y-3">
+            {[...Array(5)].map((_, index) => (
+                <Skeleton
+                    key={index}
+                    className="p-3 rounded-md flex items-center gap-4"
+                >
+                    <Skeleton className="w-16 h-16 rounded-md bg-primary-foreground"/>
+                    <div className="flex-1 space-y-2">
+                        <Skeleton className="h-4 w-3/4 bg-primary-foreground"/>
+                        <Skeleton className="h-4 w-1/2 bg-primary-foreground"/>
+                    </div>
+                </Skeleton>
+            ))}
+        </ul>;
+    }
 
     return (
         <>
@@ -254,26 +253,12 @@ function JukeboxSearch({
                     disabled={isLoading}
                     variant={"ghost"}
                 >
-                    {isLoading ? <Loader /> : <Search />}
+                    {isLoading ? <Loader/> : <Search/>}
                 </Button>
             </div>
             <div className="mt-4 pb-28">
-                {isLoading ? (
-                    <ul className="space-y-3">
-                        {[...Array(5)].map((_, index) => (
-                            <Skeleton
-                                key={index}
-                                className="p-3 rounded-md flex items-center gap-4"
-                            >
-                                <Skeleton className="w-16 h-16 rounded-md bg-primary-foreground" />
-                                <div className="flex-1 space-y-2">
-                                    <Skeleton className="h-4 w-3/4 bg-primary-foreground" />
-                                    <Skeleton className="h-4 w-1/2 bg-primary-foreground" />
-                                </div>
-                            </Skeleton>
-                        ))}
-                    </ul>
-                ) : searchResults === null ? null : searchResults.length > 0 ? ( // Display nothing if no search has been performed yet
+                {isLoading ? songSearchLoadingSkeleton () :
+                    searchResults === null ? null : searchResults.length > 0 ? ( // Display nothing if no search has been performed yet
                     <ul className="space-y-3">
                         {searchResults.map((track) => (
                             <li
@@ -283,7 +268,7 @@ function JukeboxSearch({
                                         ? "bg-primary text-primary-foreground"
                                         : "bg-secondary"
                                 }`}
-                                onClick={() => handleSongSelect(track)}
+                                onClick={() => setSelectedTrack(track)}
                             >
                                 <Image
                                     src={track.album.images[0]?.url || ""}
@@ -308,7 +293,7 @@ function JukeboxSearch({
             </div>
             <div className="fixed bottom-0 left-0 w-full backdrop-blur-md pb-10 pt-4 px-6">
                 <Button
-                    onClick={handleSubmit}
+                    onClick={handleSubmitTrack}
                     className="w-full h-12 text-lg font-bold"
                     disabled={!selectedTrack || isSubmitting}
                 >
@@ -320,10 +305,10 @@ function JukeboxSearch({
 }
 
 function JukeboxSubmissions({
-    jukebox,
-    user,
-    toast,
-}: {
+                                jukebox,
+                                user,
+                                toast,
+                            }: {
     jukebox: IJukeboxProcessed;
     user: UserDTO;
     toast: any;
@@ -364,8 +349,6 @@ function JukeboxSubmissions({
         if (!selectedSong) return;
         setIsSubmitting(true);
 
-        mutate(`/api/groups/${jukebox.groupId}/jukebox?isActive=true&processed=true`);
-
         try {
             const response = await fetch(
                 `/api/groups/${jukebox.groupId}/jukebox/${jukebox._id}/song/${selectedSong.spotifyTrackId}/rate`,
@@ -375,59 +358,49 @@ function JukeboxSubmissions({
                         "Content-Type": "application/json",
                         "x-user-id": user._id,
                     },
-                    body: JSON.stringify({ rating: ratingValue }),
+                    body: JSON.stringify({rating: ratingValue}),
                 }
             );
 
             if (!response.ok) {
-                throw new Error("Failed to submit rating");
+                throw new Error("Failed to submit song rating");
             }
 
-            mutate(`/api/groups/${jukebox.groupId}/jukebox?isActive=true&processed=true`);
-
-            setDrawerOpen(false);
-            setRatingValue(50);
+            mutate(`/api/groups/${jukebox.groupId}/jukebox?isActive=true`);
         } catch (error) {
             console.error("Error submitting rating:", error);
-            toast({ title: "Error", description: "Something went wrong", variant: "destructive" });
-
-            // Rollback UI changes if API call fails
-            mutate(`/api/groups/${jukebox.groupId}/jukebox?isActive=true&processed=true`);
+            toast({title: "Error", description: "Something went wrong", variant: "destructive"});
         } finally {
+            setDrawerOpen(false);
+            setRatingValue(50);
             setIsSubmitting(false);
             setSliderMoved(false);
         }
     };
 
     const rollOutVariants = {
-        hidden: { opacity: 0, y: -30 },
-        visible: { opacity: 1, y: 0 },
-        exit: { opacity: 0, y: -30 },
+        hidden: {opacity: 0, y: -30},
+        visible: {opacity: 1, y: 0},
+        exit: {opacity: 0, y: -30},
     };
 
     return (
-        <div className="pb-20">
-            <div className="flex justify-end mb-2 -mt-4">
-                <Button onClick={handleExpandAll} variant={"ghost"}>
-                    {expandAll ? <FoldVertical size={20} /> : <UnfoldVertical size={20} />}
-                </Button>
-            </div>
-
+        <>
             <div className="space-y-4">
-                {jukebox.songs.map((song) => {
+                {jukebox.songs.map((song, index) => {
                     const isExpanded = expandedSongs[song.spotifyTrackId] || false;
                     const rating = song.avgRating || 0;
                     const ratingColor =
                         rating <= 33
                             ? "bg-red-500"
                             : rating <= 66
-                            ? "bg-orange-500"
-                            : "bg-green-500";
+                                ? "bg-orange-500"
+                                : "bg-green-500";
 
                     return (
                         <>
                             <div
-                                key={song.spotifyTrackId}
+                                key={index}
                                 className="rounded-md shadow-md bg-secondary"
                             >
                                 <div
@@ -475,7 +448,8 @@ function JukeboxSubmissions({
                                     (user && song.submittedBy._id === user._id)) && (
                                     <div className="px-2">
                                         <AnimatePresence>
-                                            <div className="flex justify-between items-center rounded-md bg-secondarydark px-4 py-2 shadow-md mb-2">
+                                            <div
+                                                className="flex justify-between items-center rounded-md bg-secondarydark px-4 py-2 shadow-md mb-2">
                                                 <div className="">
                                                     {/* <span>submitted by: </span> */}
                                                     <span>{song.submittedBy.username}</span>
@@ -489,7 +463,7 @@ function JukeboxSubmissions({
                                                         rel="noopener noreferrer"
                                                         className="flex items-center gap-1 text-black"
                                                     >
-                                                        <SiApplemusic size={32} color="#FF4E6B" />
+                                                        <SiApplemusic size={32} color="#FF4E6B"/>
                                                     </Link>
                                                     <Link
                                                         href={`https://open.spotify.com/track/${song.spotifyTrackId}`}
@@ -497,7 +471,7 @@ function JukeboxSubmissions({
                                                         rel="noopener noreferrer"
                                                         className="flex items-center gap-1 text-green-500"
                                                     >
-                                                        <FaSpotify size={32} />
+                                                        <FaSpotify size={32}/>
                                                     </Link>
                                                     <Link
                                                         href={`https://www.youtube.com/results?search_query=${encodeURIComponent(
@@ -507,7 +481,7 @@ function JukeboxSubmissions({
                                                         rel="noopener noreferrer"
                                                         className="flex items-center gap-1 text-red-600"
                                                     >
-                                                        <FaYoutube size={32} />
+                                                        <FaYoutube size={32}/>
                                                     </Link>
                                                 </div>
                                             </div>
@@ -516,8 +490,8 @@ function JukeboxSubmissions({
                                                     rating.rating <= 33
                                                         ? "text-red-500"
                                                         : rating.rating <= 66
-                                                        ? "text-orange-500"
-                                                        : "text-green-500";
+                                                            ? "text-orange-500"
+                                                            : "text-green-500";
                                                 return (
                                                     <motion.div
                                                         key={rating.userId._id}
@@ -525,7 +499,7 @@ function JukeboxSubmissions({
                                                         animate="visible"
                                                         exit="exit"
                                                         variants={rollOutVariants}
-                                                        transition={{ duration: 0.3 }}
+                                                        transition={{duration: 0.3}}
                                                         className="mb-2 rounded-md bg-secondarydark px-4 py-2 shadow-md"
                                                     >
                                                         <div className="flex justify-between text-sm">
@@ -545,9 +519,14 @@ function JukeboxSubmissions({
                         </>
                     );
                 })}
-                <Separator />
-                <ChatComponent user={user} entity={jukebox} available={true} />
+                <div className="flex justify-end -mt-4">
+                    <Button onClick={handleExpandAll} variant={"ghost"}>
+                        {expandAll ? <FoldVertical size={20}/> : <UnfoldVertical size={20}/>}
+                    </Button>
+                </div>
             </div>
+            <Separator className="my-2"/>
+            <ChatComponent user={user} entity={jukebox} available={true}/>
 
             <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
                 <DrawerContent className="p-4">
@@ -578,7 +557,7 @@ function JukeboxSubmissions({
                                     rel="noopener noreferrer"
                                     className="flex items-center gap-1 text-black"
                                 >
-                                    <SiApplemusic size={32} color="#FF4E6B" />
+                                    <SiApplemusic size={32} color="#FF4E6B"/>
                                 </Link>
                                 <Link
                                     href={`https://open.spotify.com/track/${selectedSong.spotifyTrackId}`}
@@ -586,7 +565,7 @@ function JukeboxSubmissions({
                                     rel="noopener noreferrer"
                                     className="flex items-center gap-1 text-green-500"
                                 >
-                                    <FaSpotify size={32} />
+                                    <FaSpotify size={32}/>
                                 </Link>
                                 <Link
                                     href={`https://www.youtube.com/results?search_query=${encodeURIComponent(
@@ -596,7 +575,7 @@ function JukeboxSubmissions({
                                     rel="noopener noreferrer"
                                     className="flex items-center gap-1 text-red-600"
                                 >
-                                    <FaYoutube size={32} />
+                                    <FaYoutube size={32}/>
                                 </Link>
                             </div>
                             <div className="my-10">
@@ -625,7 +604,7 @@ function JukeboxSubmissions({
                     )}
                 </DrawerContent>
             </Drawer>
-        </div>
+        </>
     );
 }
 
