@@ -65,11 +65,11 @@ function ChatComponent({ user, entity, available }: any) {
         }
     };
 
-    if (error) return <div className="text-red-500">Failed to load messages</div>;
+    if (error) return <div className="text-destructive text-center">Failed to load messages</div>;
 
     return (
-        <div className={`flex flex-col ${available ? "h-screen" : ""}`}>
-            <div className="flex-1 overflow-y-auto p-4">
+        <div className={`flex flex-col min-h-[70dvh]`}>
+            <div className="flex-1">
                 {messages.length > 0 ? (
                     <>
                         {messages.map((msg: any, index: number) => (
@@ -104,12 +104,12 @@ function ChatComponent({ user, entity, available }: any) {
                     <div className="flex-grow"></div> /* Empty space to push input to bottom */
                 )}
             </div>
-
+            {/*{available && <div className="h-12" />}*/}
             {available && (
-                <div className="bg-background sticky pb-6 bottom-0 left-0 w-full">
-                    <div className="flex gap-x-2">
+                <div className="sticky bottom-0 -mx-6 px-6 py-4 backdrop-blur-md">
+                    <div className="mx-auto max-w-screen-sm flex gap-x-2">
                         <Input
-                            className="flex-grow p-2"
+                            className="backdrop-blur-md flex-grow p-2"
                             value={newMessage}
                             onChange={(e) => setNewMessage(e.target.value)}
                             onKeyDown={(e) => {

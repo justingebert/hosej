@@ -43,10 +43,8 @@ export const PUT = withAuthAndErrors(
 
         await isUserInGroup(userId, groupId);
 
-
-        const user = await User.findById(userId);
-        const group = await Group.findById(groupId);
-        if (!user || !group) throw new NotFoundError("User or group not found");
+        const user = await User.findById(userId).orFail();
+        const group = await Group.findById(groupId).orFail();
 
         if (!group.admin.equals(user._id)) {
             throw new ForbiddenError("You are not the admin of this group");

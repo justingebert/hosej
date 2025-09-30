@@ -37,6 +37,30 @@ const getAccessToken = async (): Promise<string | null> => {
     return accessToken;
 };
 
+async function searchSpotify(query: string) {
+    const token = await getAccessToken();
+    if (!token) {
+        console.error("Failed to get access token");
+        throw new Error("Failed to get spotify access  token");
+    }
+    const response = await fetch(
+        `https://api.spotify.com/v1/search?type=track&q=${encodeURIComponent(
+            query
+        )}`,
+        {
+            headers: {Authorization: `Bearer ${token}`},
+        }
+    );
+
+    if (!response.ok) {
+        console.error("Failed to fetch Spotify data:", response.statusText);
+        throw new Error("Failed to fetch Spotify data");
+    }
+
+    const data = await response.json();
+    return data;
+}
+
 export const GET = withAuthAndErrors(async (req: NextRequest, {params, userId}: AuthedContext<{
     params: { groupId: string }
 }>) => {
@@ -50,32 +74,6 @@ export const GET = withAuthAndErrors(async (req: NextRequest, {params, userId}: 
 
     await dbConnect();
     await isUserInGroup(userId, groupId);
-
-    const token = await getAccessToken();
-    if (!token) {
-        console.error("Failed to get access token");
-        return NextResponse.json(
-            {error: "Internal Server Error"},
-            {status: 500}
-        );
-    }
-    const response = await fetch(
-        `https://api.spotify.com/v1/search?type=track&q=${encodeURIComponent(
-            query
-        )}`,
-        {
-            headers: {Authorization: `Bearer ${token}`},
-        }
-    );
-
-    if (!response.ok) {
-        console.error("Failed to fetch Spotify data:", response.statusText);
-        return NextResponse.json(
-            {error: "Failed to fetch Spotify data"},
-            {status: response.status}
-        );
-    }
-
-    const data = await response.json();
+    const data = await searchSpotify(query);
     return NextResponse.json(data);
 });
