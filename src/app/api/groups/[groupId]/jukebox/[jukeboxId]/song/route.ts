@@ -4,6 +4,7 @@ import Jukebox from "@/db/models/Jukebox";
 import { NextRequest, NextResponse } from "next/server";
 import { AuthedContext, withAuthAndErrors } from "@/lib/api/withAuth";
 import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
+import { createSong, ISong } from "@/types/models/jukebox";
 
 export const revalidate = 0;
 
@@ -27,7 +28,7 @@ export const POST = withAuthAndErrors(async (req: NextRequest, {params, userId}:
         throw new NotFoundError("Jukebox not found");
     }
 
-    jukebox.songs.push({
+    const newSong:createSong = {
         spotifyTrackId,
         title,
         artist,
@@ -35,7 +36,9 @@ export const POST = withAuthAndErrors(async (req: NextRequest, {params, userId}:
         coverImageUrl,
         submittedBy: userId,
         ratings: [],
-    });
+    };
+
+    jukebox.songs.push(newSong as ISong);
 
     await jukebox.save();
 

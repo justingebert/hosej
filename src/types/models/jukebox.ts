@@ -8,6 +8,7 @@ export interface IRating {
 }
 
 export interface ISong {
+    _id: Types.ObjectId;
     spotifyTrackId: string;
     title: string;
     artist: string;
@@ -16,6 +17,8 @@ export interface ISong {
     submittedBy: Types.ObjectId | string;
     ratings: IRating[];
 }
+
+export type createSong = Omit<ISong, "_id">;
 
 export interface IJukebox {
     _id: Types.ObjectId

@@ -326,7 +326,7 @@ function JukeboxSubmissions({
             const newExpandAll = !prevExpandAll;
             setExpandedSongs(
                 newExpandAll
-                    ? Object.fromEntries(jukebox.songs.map((song) => [song.spotifyTrackId, true])) // Expand all
+                    ? Object.fromEntries(jukebox.songs.map((song) => [song._id, true])) // Expand all
                     : {} // Collapse all
             );
             return newExpandAll;
@@ -340,7 +340,7 @@ function JukeboxSubmissions({
         } else {
             setExpandedSongs((prev) => ({
                 ...prev,
-                [song.spotifyTrackId]: !prev[song.spotifyTrackId],
+                [song._id]: !prev[song._id],
             }));
         }
     };
@@ -351,12 +351,11 @@ function JukeboxSubmissions({
 
         try {
             const response = await fetch(
-                `/api/groups/${jukebox.groupId}/jukebox/${jukebox._id}/song/${selectedSong.spotifyTrackId}/rate`,
+                `/api/groups/${jukebox.groupId}/jukebox/${jukebox._id}/song/${selectedSong._id}/rate`,
                 {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        "x-user-id": user._id,
                     },
                     body: JSON.stringify({rating: ratingValue}),
                 }
@@ -388,7 +387,7 @@ function JukeboxSubmissions({
         <>
             <div className="space-y-4">
                 {jukebox.songs.map((song, index) => {
-                    const isExpanded = expandedSongs[song.spotifyTrackId] || false;
+                    const isExpanded = expandedSongs[song._id] || false;
                     const rating = song.avgRating || 0;
                     const ratingColor =
                         rating <= 33

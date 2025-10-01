@@ -4,6 +4,7 @@ import Jukebox from "@/db/models/Jukebox";
 import { isUserInGroup } from "@/lib/groupAuth";
 import { AuthedContext, withAuthAndErrors } from "@/lib/api/withAuth";
 import { ConflictError, NotFoundError } from "@/lib/api/errorHandling";
+import { ISong } from "@/types/models/jukebox";
 
 export const POST = withAuthAndErrors(async (req: NextRequest, {params, userId}: AuthedContext<{
     params: { groupId: string, jukeboxId: string, songId: string }
@@ -17,9 +18,14 @@ export const POST = withAuthAndErrors(async (req: NextRequest, {params, userId}:
     if (!jukebox) {
         throw new NotFoundError("Jukebox not found")
     }
-    const song = jukebox.songs.find((s: any) => s.spotifyTrackId === songId);
+
+    const song = jukebox.songs.find((s: ISong) => s._id.toString() === songId);
     if (!song) {
         throw new NotFoundError("Song not found")
+    }
+
+    if(song.submittedBy.toString() === userId){
+        throw new ConflictError("You cannot rate your own song")
     }
 
     // Check if user has already rated the song
