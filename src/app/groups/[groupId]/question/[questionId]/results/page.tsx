@@ -34,7 +34,7 @@ const ResultsPage = () => {
             <BackLink href={`/groups/${groupId}/history`} />
             {question && (
                 <div>
-                    <h1 className="text-xl font-bold text-center mb-10 mt-10">{question._id}</h1>
+                    <h1 className="text-xl font-bold text-center mb-10 mt-10">{question.question}</h1>
                     {question.imageUrl && (
                         <Image
                             src={question.imageUrl}
