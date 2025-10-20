@@ -37,8 +37,14 @@ export enum QuestionType {
     Rating = "rating",
     ImageSelectOne = "image-select-one",
     ImageSelectMultiple = "image-select-multiple",
-    // CollectAndVoteOne = "collect-and-vote-one",
-    // CollectAndVoteMultiple = "collect-and-vote-multiple",
+    MatchUsersToOne = "match-users-to-one",
+    // MatchUsersToMany = "match-users-to-many",
+    // MatchCustomToOne = "match-one-to-one",
+    // MatchOneToMany = "match-one-to-many",
+    // MatchManyToOne = "match-many-to-one",
+    // MatchManyToMany = "match-many-to-many",
+    // CollectAndVoteOne = "collect-and-response-one",
+    // CollectAndVoteMultiple = "collect-and-response-multiple",
 }
 
 export interface IAnswer {

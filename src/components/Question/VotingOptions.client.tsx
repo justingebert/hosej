@@ -30,7 +30,7 @@ const VoteOptions = ({ question, onVote }: any) => {
     const response = text ? [textResponse] : selectedOptions;
     const processedResponse = response.map((res: any) => (res.key ? res.key : res));
 
-    await fetch(`/api/groups/${question.groupId}/question/${question._id}/vote`, {
+    await fetch(`/api/groups/${question.groupId}/question/${question._id}/response`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

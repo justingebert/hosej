@@ -39,57 +39,67 @@ const VoteResults = ({ user, question, available, returnTo }: VoteResultsProps) 
             </div>
         );
 
-    const results = data.results;
+    const isMatching = String(data.questionType || question.questionType || "").startsWith("match-");
+    const displayItems = isMatching ? data.pairs || [] : data.results || [];
     const numOfVotes = `${data.totalVotes} of ${data.totalUsers} voted`;
 
     return (
         <div>
-            <div className="flex justify-center">{numOfVotes}</div>
+            <div className="flex flex-col items-center">
+                <div className="flex justify-center">{numOfVotes}</div>
+                {isMatching && (
+                    <div className="text-xs text-muted-foreground mt-1">
+                        {typeof data.totalPairs === "number" ? `${data.totalPairs} pair selections` : null}
+                    </div>
+                )}
+            </div>
             <div>
-                {results.map((result: any, index: number) => (
-                    <Link
-                        key={index}
-                        href={`/groups/${question.groupId}/question/${question._id}/resultsdetailed/?returnTo=${returnTo}`}
-                        onClick={triggerHaptic}
-                    >
-                        <div className="bg-secondary my-2 rounded-md relative">
-                            <motion.div
-                                className="bg-secondarydark h-12 rounded"
-                                initial={{ width: 0 }}
-                                animate={{
-                                    width: animationTriggered ? `${result.percentage}%` : "0%",
-                                }}
-                                transition={{ duration: 1, ease: "easeInOut" }}
-                            ></motion.div>
-                            <div className="absolute inset-0 flex justify-between px-2 items-center">
-                                {question.questionType.startsWith("image") ? (
-                                    <Image
-                                        src={result.option}
-                                        alt={`Option ${index + 1}`}
-                                        height={30}
-                                        width={30}
-                                        className="object-cover rounded-sm w-8 h-8"
-                                        priority={index === 0}
-                                    />
-                                ) : (
-                                    <span
-                                        style={{
-                                            whiteSpace: "nowrap",
-                                            overflow: "hidden",
-                                            textOverflow: "ellipsis",
-                                            maxWidth: "80%",
-                                        }}
-                                    >
-                                        {result.option}
-                                    </span>
-                                )}
-                                <Badge>
-                                    <CountUpBadge targetPercentage={result.percentage} />
-                                </Badge>
+                {displayItems.map((item: any, index: number) => {
+                    const percentage = item.percentage ?? 0;
+                    const label = isMatching ? `${item.source} → ${item.target}` : item.option;
+                    return (
+                        <Link
+                            key={index}
+                            href={`/groups/${question.groupId}/question/${question._id}/resultsdetailed/?returnTo=${returnTo}`}
+                            onClick={triggerHaptic}
+                        >
+                            <div className="bg-secondary my-2 rounded-md relative">
+                                <motion.div
+                                    className="bg-secondarydark h-12 rounded"
+                                    initial={{ width: 0 }}
+                                    animate={{ width: animationTriggered ? `${percentage}%` : "0%" }}
+                                    transition={{ duration: 1, ease: "easeInOut" }}
+                                ></motion.div>
+                                <div className="absolute inset-0 flex justify-between px-2 items-center">
+                                    {!isMatching && question.questionType.startsWith("image") ? (
+                                        <Image
+                                            src={item.option}
+                                            alt={`Option ${index + 1}`}
+                                            height={30}
+                                            width={30}
+                                            className="object-cover rounded-sm w-8 h-8"
+                                            priority={index === 0}
+                                        />
+                                    ) : (
+                                        <span
+                                            style={{
+                                                whiteSpace: "nowrap",
+                                                overflow: "hidden",
+                                                textOverflow: "ellipsis",
+                                                maxWidth: "80%",
+                                            }}
+                                        >
+                                            {label}
+                                        </span>
+                                    )}
+                                    <Badge>
+                                        <CountUpBadge targetPercentage={percentage} />
+                                    </Badge>
+                                </div>
                             </div>
-                        </div>
-                    </Link>
-                ))}
+                        </Link>
+                    );
+                })}
             </div>
             <Separator className="my-4"/>
             <ChatComponent user={user} entity={question} available={available} />

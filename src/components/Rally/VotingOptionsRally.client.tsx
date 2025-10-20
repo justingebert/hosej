@@ -73,7 +73,7 @@ const RallyVoteCarousel = ({ user, rally, onVote }: any) => {
 
     const submitVote = async () => {
         if (!selectedSubmission) {
-            alert("Please select a submission to vote for.");
+            alert("Please select a submission to response for.");
             return;
         }
 

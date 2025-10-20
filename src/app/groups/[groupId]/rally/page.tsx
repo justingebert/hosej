@@ -32,7 +32,7 @@ const RallyPage = () => {
     const userIsAdmin =
         group && group?.admin && user?._id && group.admin.toString() === user._id.toString();
 
-    // Calculate user vote and upload status based on the fetched data
+    // Calculate user response and upload status based on the fetched data
     useEffect(() => {
         const HasVoted = rallies.reduce((acc: Record<string, boolean>, rally) => {
             const rallyId = rally._id.toString(); // Ensure _id is a string

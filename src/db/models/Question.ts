@@ -3,7 +3,7 @@ import { IAnswer, IQuestion, QuestionType } from "@/types/models/question";
 
 const answerSchema = new mongoose.Schema<IAnswer>({
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    response: { type: mongoose.Schema.Types.Mixed, required: true }, // Can be a string, object, etc.
+    response: { type: mongoose.Schema.Types.Mixed, required: true },
     time: { type: Date, default: Date.now },
 });
 

@@ -7,7 +7,7 @@ import {isUserInGroup} from "@/lib/groupAuth";
 import {VOTED_RALLY_POINTS} from "@/db/POINT_CONFIG";
 import {AuthedContext, withAuthAndErrors} from "@/lib/api/withAuth";
 
-//vote on a submission
+//response on a submission
 export const POST = withAuthAndErrors(async (req: NextRequest, {params, userId}: AuthedContext<{
     params: { groupId: string, rallyId: string, submissionId: string }
 }>) => {
