@@ -106,7 +106,7 @@ function StartPage() {
       <main className="flex flex-col items-center justify-center flex-grow space-y-6">
         <Input
           type="text"
-          placeholder="What's do your friends call you?"
+          placeholder="What do your friends call you?"
           value={userName}
           onChange={(e) => setUserName(e.target.value)}
           className="w-full max-w-sm text-center"
