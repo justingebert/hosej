@@ -25,6 +25,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { AnimatePresence, motion } from "framer-motion";
 import ChatComponent from "@/components/Chat/Chat.client";
+import { Card } from "@/components/ui/card";
 
 
 function JukeboxPageLoading() {
@@ -75,57 +76,77 @@ const JukeboxPage = () => {
                 title={`Jukebox`}
             />
             {isLoading || !jukeboxes ? JukeboxPageLoading() : (
-                <>
-                    {jukeboxes.length > 1 ? (
-                        <Tabs value={activeJukeboxId ?? undefined} onValueChange={setActiveJukeboxId}>
-                            <TabsList className="grid w-full mb-4"
-                                      style={{
-                                          gridTemplateColumns: `repeat(${jukeboxes.length}, minmax(0, 1fr))`,
-                                      }}>
-                                {jukeboxes.map((j, index) => {
+                jukeboxes.length === 0 ? (
+                    <div className="flex items-center justify-center">
+                            <Card className="text-center p-6 ">
+                                <h2 className="font-bold">Not active</h2>
+                            </Card>
+                            {/*{userIsAdmin && (*/}
+                            {/*    <Button*/}
+                            {/*        onClick={() => {*/}
+                            {/*            fetch(`/api/groups/${groupId}/rally/activate`, {*/}
+                            {/*                method: "POST",*/}
+                            {/*            });*/}
+                            {/*            router.refresh();*/}
+                            {/*        }}*/}
+                            {/*    >*/}
+                            {/*        Activate Rally*/}
+                            {/*    </Button>*/}
+                            {/*)}*/}
+                    </div>
+                ) : (
+                    <>
+                        {jukeboxes.length > 1 ? (
+                            <Tabs value={activeJukeboxId ?? undefined} onValueChange={setActiveJukeboxId}>
+                                <TabsList className="grid w-full mb-4"
+                                          style={{
+                                              gridTemplateColumns: `repeat(${jukeboxes.length}, minmax(0, 1fr))`,
+                                          }}>
+                                    {jukeboxes.map((j, index) => {
+                                        return (
+                                            <TabsTrigger key={j._id} value={j._id} className="flex-shrink-0">
+                                                {j.title ?? `jukebox ${index+1}`}
+                                            </TabsTrigger>
+                                        );
+                                    })}
+                                </TabsList>
+                                {jukeboxes.map((j) => {
+                                    const hasSubmitted = userHasSubmittedMap[j._id] ?? j.userHasSubmitted;
                                     return (
-                                        <TabsTrigger key={j._id} value={j._id} className="flex-shrink-0">
-                                            {j.title ?? `jukebox ${index+1}`}
-                                        </TabsTrigger>
+                                        <TabsContent key={j._id} value={j._id} className="mt-4">
+                                            {hasSubmitted ? (
+                                                <JukeboxSubmissions jukebox={j} user={user} toast={toast}/>
+                                            ) : (
+                                                <JukeboxSearch
+                                                    jukebox={j}
+                                                    toast={toast}
+                                                    setUserHasSubmitted={() =>
+                                                        setUserHasSubmittedMap((prev) => ({...prev, [j._id]: true}))
+                                                    }
+                                                />
+                                            )}
+                                        </TabsContent>
                                     );
                                 })}
-                            </TabsList>
-                            {jukeboxes.map((j) => {
-                                const hasSubmitted = userHasSubmittedMap[j._id] ?? j.userHasSubmitted;
-                                return (
-                                    <TabsContent key={j._id} value={j._id} className="mt-4">
-                                        {hasSubmitted ? (
-                                            <JukeboxSubmissions jukebox={j} user={user} toast={toast}/>
-                                        ) : (
-                                            <JukeboxSearch
-                                                jukebox={j}
-                                                toast={toast}
-                                                setUserHasSubmitted={() =>
-                                                    setUserHasSubmittedMap((prev) => ({...prev, [j._id]: true}))
-                                                }
-                                            />
-                                        )}
-                                    </TabsContent>
-                                );
-                            })}
-                        </Tabs>
-                    ) : (
-                        // Only one jukebox – render without tabs
-                        <>
-                            {(userHasSubmittedMap[jukeboxes[0]._id] ?? jukeboxes[0].userHasSubmitted) ? (
-                                <JukeboxSubmissions jukebox={jukeboxes[0]} user={user} toast={toast}/>
-                            ) : (
-                                <JukeboxSearch
-                                    jukebox={jukeboxes[0]}
-                                    toast={toast}
-                                    setUserHasSubmitted={() =>
-                                        setUserHasSubmittedMap((prev) => ({...prev, [jukeboxes[0]._id]: true}))
-                                    }
-                                />
-                            )}
-                        </>
-                    )}
-                </>
+                            </Tabs>
+                        ) : (
+                            // Only one jukebox – render without tabs
+                            <>
+                                {(userHasSubmittedMap[jukeboxes[0]._id] ?? jukeboxes[0].userHasSubmitted) ? (
+                                    <JukeboxSubmissions jukebox={jukeboxes[0]} user={user} toast={toast}/>
+                                ) : (
+                                    <JukeboxSearch
+                                        jukebox={jukeboxes[0]}
+                                        toast={toast}
+                                        setUserHasSubmitted={() =>
+                                            setUserHasSubmittedMap((prev) => ({...prev, [jukeboxes[0]._id]: true}))
+                                        }
+                                    />
+                                )}
+                            </>
+                        )}
+                    </>
+                )
             )}
         </>
     );
