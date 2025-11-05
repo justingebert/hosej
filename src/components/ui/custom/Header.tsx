@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const Header = ({
   leftComponent = null, 
-  title,
+  title = null,
   rightComponent = null,
 }: {
   leftComponent?: React.ReactNode; 
@@ -17,7 +17,7 @@ const Header = ({
     </div>
     
     <h1 className="text-xl font-bold text-center flex-grow">
-      {title ? title : <Skeleton className="w-40 h-6 mx-auto" />}
+      {title || title === null ? title : <Skeleton className="w-40 h-6 mx-auto" />}
     </h1>
 
     <div className="flex items-center justify-end">
