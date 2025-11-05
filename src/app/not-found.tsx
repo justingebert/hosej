@@ -35,7 +35,7 @@ export default function NotFound() {
                         <CardTitle>Page Not Found</CardTitle>
                     </div>
                     <CardDescription>
-                        The page you're looking for doesn't exist or has been moved.
+                        The page you&apos;re looking for doesn&apos;t exist or has been moved.
                         <br />
                         <span className="text-xs text-muted-foreground mt-2 block">
                             Redirecting to groups in 5 seconds...
