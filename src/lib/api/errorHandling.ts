@@ -40,7 +40,7 @@ export class ConflictError extends AppError {
     }
 }
 
-function errorResponse(error: Error): NextResponse {
+function errorResponse(req:NextRequest, error: Error): NextResponse {
     if (error instanceof AppError) {
         return NextResponse.json({ message: error.message }, {
             status: error.status,
@@ -55,6 +55,14 @@ function errorResponse(error: Error): NextResponse {
         );
     }
 
+    if (error instanceof mongooseError.CastError) {
+        return NextResponse.json(
+            { message: "Invalid ID format" },
+            { status: 400, headers: { "Content-Type": "application/json" } }
+        );
+    }
+
+    console.error(`API Route Error: ${req.url}`, error);
     return NextResponse.json({ message: "Internal Server Error" }, {
         status: 500,
         headers: { "Content-Type": "application/json" },
@@ -67,8 +75,7 @@ export function withErrorHandling<TContext = {}>(fn: ApiRoute<TContext>): ApiRou
         try {
             return await fn(req, context);
         } catch (error: any) {
-            console.error(`API Route Error: ${req.url}`, error);
-            return errorResponse(error);
+            return errorResponse(req, error);
         }
     };
 }
