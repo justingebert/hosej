@@ -19,10 +19,10 @@ export const POST = withAuthAndErrors(async (req: NextRequest, {params, userId}:
     if (!group) throw new NotFoundError('Group not found');
 
     const activeRallies = await Rally.find({groupId: groupId, active: true})
-    if (activeRallies.length >= group.rallyCount) {
+    if (activeRallies.length >= group.features.rallies.settings.rallyCount) {
         return NextResponse.json({message: "rallies already active", rallies: activeRallies}, {status: 200});
     }
-    const countToActivate = group.rallyCount - activeRallies.length;
+    const countToActivate = group.features.rallies.settings.rallyCount - activeRallies.length;
 
     const rallies = await Rally.find({groupId: groupId, active: false, used: false}).limit(countToActivate);
     const currentTime = new Date();

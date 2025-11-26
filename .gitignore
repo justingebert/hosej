@@ -88,3 +88,5 @@ service_key.json
 certificates
 
 *.http
+
+.ai

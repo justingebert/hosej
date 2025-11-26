@@ -2,27 +2,40 @@ import mongoose from "mongoose";
 import { IGroup, IGroupMember } from "@/types/models/group";
 
 const memberSchema = new mongoose.Schema<IGroupMember>({
-  user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  name: { type: String },
-  points: { type: Number, default: 0 },
-  streak: { type: Number, default: 0 },
-  lastPointDate: { type: Date, default: null },
-  joinedAt: { type: Date, default: Date.now },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    name: { type: String },
+    points: { type: Number, default: 0 },
+    streak: { type: Number, default: 0 },
+    lastPointDate: { type: Date, default: null },
+    joinedAt: { type: Date, default: Date.now },
 });
 
 const groupSchema = new mongoose.Schema<IGroup>({
     name: { type: String, required: true },
     admin: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     members: [memberSchema],
-    questionCount: { type: Number, default: 1 },
-    lastQuestionDate: { type: Date, default: null },
-    rallyCount: { type: Number, default: 1 },
-    rallyGapDays: { type: Number, default: 14 },
-    jukeboxSettings :{
-        enabled: { type: Boolean, default: true },
-        concurrent: [{ type: String, default: ["Jukebox"] }],
-        maxConcurrentCount: { type: Number, default: 4 },
-        activationDays: [{ type: Number, default: [1] }],
+    features: {
+        questions: {
+            enabled: { type: Boolean, default: true },
+            settings: {
+                questionCount: { type: Number, default: 1 },
+                lastQuestionDate: { type: Date, default: null },
+            },
+        },
+        rallies: {
+            enabled: { type: Boolean, default: true },
+            settings: {
+                rallyCount: { type: Number, default: 1 },
+                rallyGapDays: { type: Number, default: 14 },
+            },
+        },
+        jukebox: {
+            enabled: { type: Boolean, default: true },
+            settings: {
+                concurrent: { type: [String], default: ["Jukebox"] },
+                activationDays: { type: [Number], default: [1] },
+            },
+        },
     },
     createdAt: { type: Date, default: Date.now },
 });
@@ -35,7 +48,7 @@ groupSchema.methods.addPoints = async function (userId: string | mongoose.Schema
     yesterday.setDate(today.getDate() - 1);
 
     // Get `lastQuestionDate`, or set it far in the past if it's null
-    const lastQuestionDate = this.lastQuestionDate ? new Date(this.lastQuestionDate) : new Date(0);
+    const lastQuestionDate = this.features.questions.settings.lastQuestionDate ? new Date(this.features.questions.settings.lastQuestionDate) : new Date(0);
     lastQuestionDate.setHours(0, 0, 0, 0);
 
     const memberEntry = this.members.find((member: any) => member.user.toString() === userId.toString());
@@ -54,7 +67,7 @@ groupSchema.methods.addPoints = async function (userId: string | mongoose.Schema
         ) {
             // If points were already added today, do nothing to the streak
         } else if (
-            !this.lastQuestionDate ||
+            !this.features.questions.settings.lastQuestionDate ||
             (lastQuestionDate <= yesterday &&
                 memberEntry.lastPointDate?.toDateString() === lastQuestionDate.toDateString())
         ) {

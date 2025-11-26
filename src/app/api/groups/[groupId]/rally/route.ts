@@ -1,22 +1,23 @@
 import dbConnect from "@/lib/dbConnect";
 import Rally from "@/db/models/rally";
-import {NextRequest, NextResponse} from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import User from "@/db/models/user";
-import {sendNotification} from "@/utils/sendNotification";
+import { sendNotification } from "@/utils/sendNotification";
 import Chat from "@/db/models/Chat";
 import Group from "@/db/models/Group";
-import {isUserInGroup} from "@/lib/groupAuth";
-import {CREATED_RALLY_POINTS} from "@/db/POINT_CONFIG";
-import {AuthedContext, withAuthAndErrors} from "@/lib/api/withAuth";
-import {NotFoundError, ValidationError} from "@/lib/api/errorHandling";
+import { isUserInGroup } from "@/lib/groupAuth";
+import { CREATED_RALLY_POINTS } from "@/db/POINT_CONFIG";
+import { AuthedContext, withAuthAndErrors } from "@/lib/api/withAuth";
+import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 
 export const revalidate = 0;
 
 //get current rally and set state
-export const GET = withAuthAndErrors(async (req: NextRequest, {params, userId}: AuthedContext<{
+export const GET = withAuthAndErrors(async (req: NextRequest, { params, userId }: AuthedContext<{
     params: { groupId: string }
 }>) => {
-    const {groupId} = params;
+    const { groupId } = params;
+
 
     await dbConnect();
     await isUserInGroup(userId, groupId);
@@ -27,9 +28,9 @@ export const GET = withAuthAndErrors(async (req: NextRequest, {params, userId}: 
 
     const currentTime = new Date();
 
-    const rallies = await Rally.find({groupId: groupId, active: true})
+    const rallies = await Rally.find({ groupId: groupId, active: true })
     if (rallies.length === 0) {
-        return NextResponse.json({message: "No active rallies", rallies: []}, {status: 200});
+        return NextResponse.json({ message: "No active rallies", rallies: [] }, { status: 200 });
     }
 
     for (let rally of rallies) {
@@ -71,7 +72,7 @@ export const GET = withAuthAndErrors(async (req: NextRequest, {params, userId}: 
             rally.endTime = currentTime;
             await rally.save();
             // After results viewing day, set gap phase
-            const gapEndTime = new Date(currentTime.getTime() + group.rallyGapDays * 24 * 60 * 60 * 1000);
+            const gapEndTime = new Date(currentTime.getTime() + group.features.rallies.settings.rallyGapDays * 24 * 60 * 60 * 1000);
 
             // Start a new rally after the gap phase
             const newRally = await Rally.findOne({
@@ -87,26 +88,27 @@ export const GET = withAuthAndErrors(async (req: NextRequest, {params, userId}: 
                 await newRally.save();
                 await sendNotification(`📷 ${group.name} Rally finished! 📷`, `📷 Next Rally starting: ${newRally.startTime.toLocaleString()}📷`, group._id);
             } else {
-                return NextResponse.json({message: "No rallies left", rallies: []}, {status: 200});
+                return NextResponse.json({ message: "No rallies left", rallies: [] }, { status: 200 });
             }
         }
     }
     // return rallies that are currently running and are not in gaptime
     const currentRallies = rallies.filter(rally => currentTime >= new Date(rally.startTime));
 
-    return NextResponse.json({rallies: currentRallies});
+    return NextResponse.json({ rallies: currentRallies });
 });
 
 //create rally
-export const POST = withAuthAndErrors(async (req: NextRequest, {params, userId}: AuthedContext<{
+export const POST = withAuthAndErrors(async (req: NextRequest, { params, userId }: AuthedContext<{
     params: { groupId: string }
 }>) => {
-    const {groupId} = params;
+    const { groupId } = params;
+
 
     await dbConnect();
     await isUserInGroup(userId, groupId);
 
-    const {task, lengthInDays} = await req.json();
+    const { task, lengthInDays } = await req.json();
     if (!task || !lengthInDays) {
         throw new ValidationError('task and lengthInDays are required');
     }
@@ -136,5 +138,5 @@ export const POST = withAuthAndErrors(async (req: NextRequest, {params, userId}:
 
     await group.addPoints(submittingUser._id, CREATED_RALLY_POINTS);
 
-    return NextResponse.json({message: "Rally created successfully"});
+    return NextResponse.json({ message: "Rally created successfully" });
 });

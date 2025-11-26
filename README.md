@@ -21,8 +21,7 @@ HoseJ is a Next.js 14 App Router application. The UI is built with client compon
 - Push Notifications (Firebase Cloud Messaging)
 - Device auth (no login needed) and optional Google OAuth via NextAuth
 - Photo uploading (AWS S3)
-- App Router (Next.js 14), Client Components UI
-- Tailwind CSS + shadcn/ui components
+- Admin panel: Global and group-level feature control (admin panel at `/admin`)
 
 ---
 
@@ -32,7 +31,7 @@ HoseJ is a Next.js 14 App Router application. The UI is built with client compon
 - Runtime: Node.js
 - Framework: Next.js 14 (App Router)
 - Package Manager: npm (package-lock.json)
-- Styling: Tailwind CSS, shadcn/ui, Radix UI
+- Styling: Tailwind CSS, shadcn/ui, 
 - State/Data fetching: SWR
 - Auth: NextAuth (Google provider + credentials), next-auth/jwt in middleware
 - Database: MongoDB with Mongoose
@@ -78,3 +77,16 @@ Spotify API:
 
 Misc:
 - ENV  // set to "dev" to disable notifications and certain PWA behaviors in development
+
+---
+
+## Feature Toggles & Admin
+
+HoseJ includes a feature toggle system for controlling features globally and per-group.
+
+- **Admin Panel**: `/admin` - Control features system-wide (requires admin access)
+- **Group Settings**: `/groups/[groupId]/settings` - Control features per group (requires group admin)
+
+**Setup**: See [docs/ADMIN_SETUP.md](./docs/ADMIN_SETUP.md) for setting up admin access.
+
+**Documentation**: See [docs/FEATURE_TOGGLES.md](./docs/FEATURE_TOGGLES.md) for complete documentation.

@@ -13,7 +13,7 @@ export const revalidate = 0;
 function buildJukeboxQuery(groupId: string, url: URL) {
     const isActive = url.searchParams.get("isActive") === "true";
 
-    const query: Partial<IJukebox> = {groupId: groupId};
+    const query: Partial<IJukebox> = { groupId: groupId };
     if (url.searchParams.has("isActive")) {
         query.active = isActive;
     }
@@ -23,9 +23,9 @@ function buildJukeboxQuery(groupId: string, url: URL) {
 export const GET = withAuthAndErrors(
     async (
         req: NextRequest,
-        {params, userId}: AuthedContext<{ params: { groupId: string } }>
+        { params, userId }: AuthedContext<{ params: { groupId: string } }>
     ) => {
-        const {groupId} = params;
+        const { groupId } = params;
         const url = new URL(req.url);
 
         await dbConnect();
@@ -37,20 +37,20 @@ export const GET = withAuthAndErrors(
         const query = buildJukeboxQuery(groupId, url);
 
         const jukeboxes = await Jukebox.find(query)
-                .sort({createdAt: -1})
-                .limit(group.jukeboxSettings.maxConcurrentCount)
-                .populate
-            < {songs: [ISong & {submittedBy: IUser, ratings: [(IRating & {userId: IUser})]}]} >
+            .sort({ createdAt: -1 })
+            .limit(group.features.jukebox.settings.concurrent.length)
+            .populate
+            <{ songs: [ISong & { submittedBy: IUser, ratings: [(IRating & { userId: IUser })] }] }>
             ([{
-                    path: "songs.submittedBy",
-                    model: User,
-                    select: "_id username",
-                },
-                    {
-                        path: "songs.ratings.userId",
-                        model: User,
-                        select: "_id username",
-                    }]
+                path: "songs.submittedBy",
+                model: User,
+                select: "_id username",
+            },
+            {
+                path: "songs.ratings.userId",
+                model: User,
+                select: "_id username",
+            }]
             ).lean();
 
         const processedJukeboxes = jukeboxes.map((jukebox) => {
@@ -69,9 +69,9 @@ export const GET = withAuthAndErrors(
                     const avgRating =
                         sortedRatings.length > 0
                             ? sortedRatings.reduce(
-                            (acc, rating) => acc + rating.rating,
-                            0
-                        ) / sortedRatings.length
+                                (acc, rating) => acc + rating.rating,
+                                0
+                            ) / sortedRatings.length
                             : null;
 
                     // Determine whether the user has rated this song
