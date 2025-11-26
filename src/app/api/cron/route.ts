@@ -45,14 +45,14 @@ async function selectDailyQuestions(groupId: string | Types.ObjectId, limit: num
  */
 async function handleJukebox(group: IGroup) {
     const today = new Date();
-    if (group.jukeboxSettings.activationDays.includes(today.getDate())) {
+    if (group.features.jukebox.settings.activationDays.includes(today.getDate())) {
         await Jukebox.updateMany({active: true, groupId: group._id}, {active: false});
 
-        for (let i = 0; i < group.jukeboxSettings.concurrent.length; i++) {
+        for (let i = 0; i < group.features.jukebox.settings.concurrent.length; i++) {
             const newJukebox = await new Jukebox({
                 groupId: group._id,
                 date: today, active: true,
-                title: group.jukeboxSettings.concurrent[i]
+                title: group.features.jukebox.settings.concurrent[i]
             }).save();
 
             const newChat = await new Chat({
@@ -78,7 +78,7 @@ export const GET = withErrorHandling(async (req: NextRequest) => {
     const groups = await Group.find({});
     //TODO this sends multiple notifications to one user this is wrong
     for (const group of groups) {
-        const questions = await selectDailyQuestions(group._id, group.questionCount);
+        const questions = await selectDailyQuestions(group._id, group.features.questions.settings.questionCount);
         if (questions.length === 0) {
             await sendNotification(
                 "🥗DA HABEN WIR DEN SALAT🥗",
@@ -88,12 +88,12 @@ export const GET = withErrorHandling(async (req: NextRequest) => {
             await group.save();
         } else {
             await sendNotification(`🚨Neue ${group.name} Fragen!!🚨`, "🚨JETZT VOTEN DU FISCH🚨", group._id);
-            group.lastQuestionDate = new Date();
+            group.features.questions.settings.lastQuestionDate = new Date();
             await group.save();
         }
 
         //jukebox logic
-        if (group.jukeboxSettings.enabled) {
+        if (group.features.jukebox.enabled) {
             await handleJukebox(group);
         }
     }

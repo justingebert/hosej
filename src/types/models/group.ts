@@ -10,11 +10,30 @@ export interface IGroupMember {
     joinedAt: Date;
 }
 
-interface IGroupJukeboxSettings {
-    enabled: boolean;
+export interface IGroupJukeboxSettings {
     concurrent: string[]; // array of names of jukebox, length is concurrent count
-    maxConcurrentCount: number;
-    activationDays: number[]
+    activationDays: number[];
+}
+
+export interface IGroupFeatures {
+    questions: {
+        enabled: boolean;
+        settings: {
+            questionCount: number;
+            lastQuestionDate: Date | null;
+        };
+    };
+    rallies: {
+        enabled: boolean;
+        settings: {
+            rallyCount: number;
+            rallyGapDays: number;
+        };
+    };
+    jukebox: {
+        enabled: boolean;
+        settings: IGroupJukeboxSettings;
+    };
 }
 
 export interface IGroup {
@@ -22,11 +41,7 @@ export interface IGroup {
     name: string;
     admin: Types.ObjectId
     members: IGroupMember[];
-    questionCount: number;
-    lastQuestionDate: Date | null;
-    rallyCount: number;
-    rallyGapDays: number;
-    jukeboxSettings: IGroupJukeboxSettings;
+    features: IGroupFeatures;
     createdAt: Date;
     addPoints(userId: string | Types.ObjectId, points: number): Promise<void>;
 }

@@ -155,14 +155,7 @@ const StatsPage = () => {
                     <h2 className="text-xl font-bold text-center">Rallies</h2>
                     <Table className="w-full max-w-md mx-auto">
                         <TableBody>
-                            <TableRow>
-                                <TableCell className="font-medium px-4 py-2 text-left">
-                                    Rally Gap in Days
-                                </TableCell>
-                                <TableCell className="px-4 py-2 text-right">
-                                    {stats.group.rallyGapDays}
-                                </TableCell>
-                            </TableRow>
+                          
                             <TableRow>
                                 <TableCell className="font-medium px-4 py-2 text-left">
                                     Rallies Used

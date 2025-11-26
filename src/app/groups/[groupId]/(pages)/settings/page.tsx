@@ -30,38 +30,55 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
+import { Accordion } from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
 import useSWR, { useSWRConfig } from "swr";
 import fetcher from "@/lib/fetcher";
+import { FeatureStatus } from "@/types/models/appConfig";
+import { GroupInfoCard } from "@/components/settings/GroupInfoCard";
+import { FeatureSettingsAccordionSimple } from "@/components/settings/FeatureSettingsAccordionSimple";
+import { QuestionSettings } from "@/components/settings/QuestionSettings";
+import { RallySettings } from "@/components/settings/RallySettings";
+import { JukeboxSettings } from "@/components/settings/JukeboxSettings";
 
 interface IGroupProcessed extends GroupDTO {
     userIsAdmin: boolean;
 }
 
 interface ISettings {
-    questionCount: number;
-    rallyCount: number;
-    rallyGapDays: number;
-    jukeboxSettings?: {
-        enabled: boolean;
-        concurrent: string[];
-        maxConcurrentCount: number;
-        activationDays: number[];
+    features?: {
+        questions: {
+            enabled: boolean;
+            settings: {
+                questionCount: number;
+                lastQuestionDate: Date | null;
+            };
+        };
+        rallies: {
+            enabled: boolean;
+            settings: {
+                rallyCount: number;
+                rallyGapDays: number;
+            };
+        };
+        jukebox: {
+            enabled: boolean;
+            settings: {
+                concurrent: string[];
+                activationDays: number[];
+            };
+        };
     };
 }
 
 export default function GroupPage() {
     const params = useParams<{ groupId: string }>();
-    const groupId = params? params.groupId : "";
+    const groupId = params ? params.groupId : "";
     const { user } = useAuthRedirect();
     const { toast } = useToast();
     const [settings, setSettings] = useState<ISettings | any>({});
     const [deleteInput, setDeleteInput] = useState("");
     const [memberToKick, setMemberToKick] = useState<string | null>(null);
-    const [concurrentInput, setConcurrentInput] = useState("");
-    const [activationDaysInput, setActivationDaysInput] = useState("");
     const router = useRouter();
 
     const {
@@ -71,16 +88,39 @@ export default function GroupPage() {
         mutate,
     } = useSWR<IGroupProcessed>(`/api/groups/${groupId}`, fetcher, {});
 
+    const { data: globalFeatures } = useSWR<{
+        questions: { status: FeatureStatus };
+        rallies: { status: FeatureStatus };
+        jukebox: { status: FeatureStatus };
+    }>('/api/features/status', fetcher);
+
     useEffect(() => {
         if (group) {
             setSettings({
-                questionCount: group.questionCount,
-                rallyCount: group.rallyCount,
-                rallyGapDays: group.rallyGapDays,
-                jukeboxSettings: group.jukeboxSettings,
+                features: group.features || {
+                    questions: {
+                        enabled: true,
+                        settings: {
+                            questionCount: 1,
+                            lastQuestionDate: null
+                        }
+                    },
+                    rallies: {
+                        enabled: true,
+                        settings: {
+                            rallyCount: 1,
+                            rallyGapDays: 14
+                        }
+                    },
+                    jukebox: {
+                        enabled: true,
+                        settings: {
+                            concurrent: ["Jukebox"],
+                            activationDays: [1]
+                        }
+                    }
+                },
             });
-            setConcurrentInput((group.jukeboxSettings.concurrent || []).join(", "));
-            setActivationDaysInput((group.jukeboxSettings.activationDays || []).join(", "));
         }
     }, [group]);
 
@@ -90,7 +130,7 @@ export default function GroupPage() {
 
     const adminName = group?.admin
         ? group.members.find((member) => member.user.toString() === group.admin.toString())?.name ||
-          "N/A"
+        "N/A"
         : "N/A";
 
     const currentMember = group?.members.find(
@@ -98,17 +138,18 @@ export default function GroupPage() {
     );
     const currentMemberName = currentMember?.name || "Member not found";
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setSettings((prev: any) => ({ ...prev, [name]: Number(value) }));
-    };
-
-    const updateJukebox = (partial: Partial<ISettings["jukeboxSettings"]>) => {
+    const updateJukebox = (partial: any) => {
         setSettings((prev: any) => ({
             ...prev,
-            jukeboxSettings: {
-                ...(prev?.jukeboxSettings || {}),
-                ...partial,
+            features: {
+                ...(prev?.features || {}),
+                jukebox: {
+                    ...(prev?.features?.jukebox || {}),
+                    settings: {
+                        ...(prev?.features?.jukebox?.settings || {}),
+                        ...partial,
+                    },
+                },
             },
         }));
     };
@@ -116,24 +157,6 @@ export default function GroupPage() {
     const saveSettings = async () => {
         try {
             const payload: any = { ...settings };
-            if (payload.jukeboxSettings) {
-                const parsedConcurrent = (concurrentInput || "")
-                    .split(",")
-                    .map((s: string) => s.trim())
-                    .filter((s: string) => s.length > 0);
-                const parsedDays = (activationDaysInput || "")
-                    .split(",")
-                    .map((s: string) => s.trim())
-                    .filter((s: string) => s !== "")
-                    .map((n: string) => Number(n))
-                    .filter((n: number) => !Number.isNaN(n))
-                    .filter((n: number) => n >= 1 && n <= 31);
-                payload.jukeboxSettings = {
-                    ...payload.jukeboxSettings,
-                    concurrent: parsedConcurrent,
-                    activationDays: parsedDays,
-                };
-            }
             await fetch(`/api/groups/${groupId}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
@@ -158,7 +181,7 @@ export default function GroupPage() {
             const response = await fetch(`/api/groups/${groupId}/members/${memberToKick}`, {
                 method: "DELETE",
             });
-            if(!response.ok){
+            if (!response.ok) {
                 throw new Error("Failed to kick member");
             }
             toast({ title: "Member kicked" });
@@ -204,326 +227,254 @@ export default function GroupPage() {
                 <Header title={group?.name || null} />
             </Suspense>
 
-            {isLoading ? (
-                [...Array(10)].map((_, i) => <Skeleton className="h-12 mb-4 mt" key={i} />)
-            ) : group && user ? (
-                <div className="space-y-6 pb-12">
-                    {/* Group Information Card */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Group Information</CardTitle>
-                            <CardDescription>Overview and general settings</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="text-sm text-muted-foreground">Your Name in this group</div>
-                                <div className="text-right">{currentMemberName}</div>
+            {
+                isLoading ? (
+                    [...Array(10)].map((_, i) => <Skeleton className="h-12 mb-4 mt" key={i} />)
+                ) : group && user ? (
+                    <div className="space-y-6 pb-12">
+                        {/* Group Information Card */}
+                        <GroupInfoCard
+                            currentMemberName={currentMemberName}
+                            groupId={groupId}
+                            createdAt={new Date(group.createdAt)}
+                            adminName={adminName}
+                        />
 
-                                <div className="text-sm text-muted-foreground">Group ID</div>
-                                <div className="text-right break-all">{groupId}</div>
-
-                                <div className="text-sm text-muted-foreground">Last Question Date</div>
-                                <div className="text-right">
-                                    {group.lastQuestionDate ? new Date(group.lastQuestionDate).toLocaleDateString() : "N/A"}
-                                </div>
-
-                                <div className="text-sm text-muted-foreground">Created At</div>
-                                <div className="text-right">{new Date(group.createdAt).toLocaleDateString()}</div>
-
-                                <div className="text-sm text-muted-foreground">Admin</div>
-                                <div className="text-right">{group.admin ? `${adminName}` : "N/A"}</div>
-                            </div>
-
-                            <div className="pt-2 space-y-3">
-                                <div className="flex items-center justify-between gap-4">
-                                    <Label htmlFor="questionCount">Question Count</Label>
-                                    {userIsAdmin ? (
-                                        <Input
-                                            id="questionCount"
-                                            type="number"
-                                            pattern="\\d*"
-                                            name="questionCount"
-                                            value={settings.questionCount ?? ""}
-                                            onChange={handleInputChange}
-                                            className="w-20 text-center"
-                                        />
-                                    ) : (
-                                        <div className="text-right w-20">{group.questionCount}</div>
-                                    )}
-                                </div>
-                                <div className="flex items-center justify-between gap-4">
-                                    <Label htmlFor="rallyCount">Rally Count</Label>
-                                    {userIsAdmin ? (
-                                        <Input
-                                            id="rallyCount"
-                                            type="number"
-                                            pattern="\\d*"
-                                            name="rallyCount"
-                                            value={settings.rallyCount ?? ""}
-                                            onChange={handleInputChange}
-                                            className="w-20 text-center"
-                                        />
-                                    ) : (
-                                        <div className="text-right w-20">{group.rallyCount}</div>
-                                    )}
-                                </div>
-                                <div className="flex items-center justify-between gap-4">
-                                    <Label htmlFor="rallyGapDays">Rally Gap Days</Label>
-                                    {userIsAdmin ? (
-                                        <Input
-                                            id="rallyGapDays"
-                                            type="number"
-                                            pattern="\\d*"
-                                            name="rallyGapDays"
-                                            value={settings.rallyGapDays ?? ""}
-                                            onChange={handleInputChange}
-                                            className="w-20 text-center"
-                                        />
-                                    ) : (
-                                        <div className="text-right w-20">{group.rallyGapDays}</div>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Jukebox Accordion */}
-                            <Accordion type="single" collapsible className="w-full pt-2">
-                                <AccordionItem value="jukebox">
-                                    <AccordionTrigger>Jukebox Settings</AccordionTrigger>
-                                    <AccordionContent>
-                                        <div className="space-y-4">
-                                            <div className="flex items-center justify-between">
-                                                <div className="space-y-0.5">
-                                                    <Label htmlFor="jukebox-enabled">Enabled</Label>
-                                                    <p className="text-sm text-muted-foreground">Allow jukebox features in this group</p>
-                                                </div>
-                                                <Switch
-                                                    id="jukebox-enabled"
-                                                    checked={!!settings.jukeboxSettings?.enabled}
-                                                    onCheckedChange={(checked) => updateJukebox({ enabled: checked })}
-                                                    disabled={!userIsAdmin}
-                                                />
-                                            </div>
-
-                                            <div className="space-y-2">
-                                                <Label htmlFor="jukebox-max-concurrent">Max Concurrent Count</Label>
-                                                <Input
-                                                    id="jukebox-max-concurrent"
-                                                    type="number"
-                                                    min={1}
-                                                    value={settings.jukeboxSettings?.maxConcurrentCount ?? ""}
-                                                    onChange={(e) => updateJukebox({ maxConcurrentCount: Number(e.target.value) || 0 })}
-                                                    disabled={!userIsAdmin}
-                                                />
-                                            </div>
-
-                                            <div className="space-y-2">
-                                                <Label htmlFor="jukebox-concurrent">Concurrent (comma-separated)</Label>
-                                                <Input
-                                                    id="jukebox-concurrent"
-                                                    type="text"
-                                                    placeholder="e.g. Jukebox, AnotherFeature"
-                                                    value={concurrentInput}
-                                                    onChange={(e) => setConcurrentInput(e.target.value)}
-                                                    onBlur={() => {
-                                                        const parsed = concurrentInput
-                                                            .split(",")
-                                                            .map((s) => s.trim())
-                                                            .filter((s) => s.length > 0);
-                                                        updateJukebox({ concurrent: parsed });
-                                                        setConcurrentInput(parsed.join(", "));
-                                                    }}
-                                                    onKeyDown={(e) => {
-                                                        if (e.key === "Enter") {
-                                                            const parsed = concurrentInput
-                                                                .split(",")
-                                                                .map((s) => s.trim())
-                                                                .filter((s) => s.length > 0);
-                                                            updateJukebox({ concurrent: parsed });
-                                                            setConcurrentInput(parsed.join(", "));
+                        {/* Feature Settings Card */}
+                        {userIsAdmin && (
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Feature Settings</CardTitle>
+                                    <CardDescription>Manage features and their settings for this group</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <Accordion type="single" collapsible className="w-full">
+                                        {/* Questions Feature */}
+                                        <FeatureSettingsAccordionSimple
+                                            featureName="Questions"
+                                            featureKey="questions"
+                                            globalStatus={globalFeatures?.questions?.status}
+                                            description="Configure daily questions settings"
+                                        >
+                                            <QuestionSettings
+                                                questionCount={settings.features?.questions?.settings?.questionCount || 0}
+                                                lastQuestionDate={group.features?.questions?.settings?.lastQuestionDate ? new Date(group.features.questions.settings.lastQuestionDate) : null}
+                                                onQuestionCountChange={(value) => {
+                                                    setSettings((prev: any) => ({
+                                                        ...prev,
+                                                        features: {
+                                                            ...prev.features,
+                                                            questions: {
+                                                                ...prev.features.questions,
+                                                                settings: {
+                                                                    ...prev.features.questions.settings,
+                                                                    questionCount: value
+                                                                }
+                                                            }
                                                         }
-                                                    }}
-                                                    disabled={!userIsAdmin}
-                                                />
-                                            </div>
+                                                    }));
+                                                }}
+                                            />
+                                        </FeatureSettingsAccordionSimple>
 
-                                            <div className="space-y-2">
-                                                <Label htmlFor="jukebox-activation-days">Activation Days (day of month, comma-separated)</Label>
-                                                <Input
-                                                    id="jukebox-activation-days"
-                                                    type="text"
-                                                    placeholder="e.g. 1, 3, 5"
-                                                    value={activationDaysInput}
-                                                    onChange={(e) => setActivationDaysInput(e.target.value)}
-                                                    onBlur={() => {
-                                                        const parsed = (activationDaysInput || "")
-                                                            .split(",")
-                                                            .map((s) => s.trim())
-                                                            .filter((s) => s !== "")
-                                                            .map((n) => Number(n))
-                                                            .filter((n) => !Number.isNaN(n))
-                                                            .filter((n) => n >= 1 && n <= 31);
-                                                        updateJukebox({ activationDays: parsed });
-                                                        setActivationDaysInput(parsed.join(", "));
-                                                    }}
-                                                    onKeyDown={(e) => {
-                                                        if (e.key === "Enter") {
-                                                            const parsed = (activationDaysInput || "")
-                                                                .split(",")
-                                                                .map((s) => s.trim())
-                                                                .filter((s) => s !== "")
-                                                                .map((n) => Number(n))
-                                                                .filter((n) => !Number.isNaN(n))
-                                                                .filter((n) => n >= 1 && n <= 31);
-                                                            updateJukebox({ activationDays: parsed });
-                                                            setActivationDaysInput(parsed.join(", "));
+                                        {/* Rallies Feature */}
+                                        <FeatureSettingsAccordionSimple
+                                            featureName="Rallies"
+                                            featureKey="rallies"
+                                            globalStatus={globalFeatures?.rallies?.status}
+                                            description="Configure rally settings"
+                                        >
+                                            <RallySettings
+                                                rallyCount={settings.features?.rallies?.settings?.rallyCount || 0}
+                                                rallyGapDays={settings.features?.rallies?.settings?.rallyGapDays || 0}
+                                                onRallyCountChange={(value) => {
+                                                    setSettings((prev: any) => ({
+                                                        ...prev,
+                                                        features: {
+                                                            ...prev.features,
+                                                            rallies: {
+                                                                ...prev.features.rallies,
+                                                                settings: {
+                                                                    ...prev.features.rallies.settings,
+                                                                    rallyCount: value
+                                                                }
+                                                            }
                                                         }
-                                                    }}
-                                                    disabled={!userIsAdmin}
-                                                />
-                                                <p className="text-xs text-muted-foreground">Use numbers 1-31</p>
-                                            </div>
-                                        </div>
-                                    </AccordionContent>
-                                </AccordionItem>
-                            </Accordion>
-                        </CardContent>
-                    </Card>
+                                                    }));
+                                                }}
+                                                onRallyGapDaysChange={(value) => {
+                                                    setSettings((prev: any) => ({
+                                                        ...prev,
+                                                        features: {
+                                                            ...prev.features,
+                                                            rallies: {
+                                                                ...prev.features.rallies,
+                                                                settings: {
+                                                                    ...prev.features.rallies.settings,
+                                                                    rallyGapDays: value
+                                                                }
+                                                            }
+                                                        }
+                                                    }));
+                                                }}
+                                            />
+                                        </FeatureSettingsAccordionSimple>
 
-                    {userIsAdmin && (
-                        <div className="sticky bottom-0 left-0 right-0 ">
-                            <Button className="w-full" size="lg" onClick={saveSettings}>
-                                Save Changes
-                            </Button>
-                        </div>
-                    )}
+                                        {/* Jukebox Feature */}
+                                        <FeatureSettingsAccordionSimple
+                                            featureName="Jukebox"
+                                            featureKey="jukebox"
+                                            globalStatus={globalFeatures?.jukebox?.status}
+                                            description="Configure jukebox settings"
+                                        >
+                                            <JukeboxSettings
+                                                concurrent={settings.features?.jukebox?.settings?.concurrent || []}
+                                                activationDays={settings.features?.jukebox?.settings?.activationDays || []}
+                                                onConcurrentChange={(value) => updateJukebox({ concurrent: value })}
+                                                onActivationDaysChange={(value) => updateJukebox({ activationDays: value })}
+                                            />
+                                        </FeatureSettingsAccordionSimple>
+                                    </Accordion>
+                                </CardContent>
+                            </Card>
+                        )}
 
-                    {/* Members Card */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Members ({group.members.length})</CardTitle>
-                            <CardDescription>Manage group members</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead className="w-[150px]">Name</TableHead>
-                                        <TableHead className="text-right">Joined At</TableHead>
-                                        {userIsAdmin && (
-                                            <TableHead className="text-right">Remove</TableHead>
-                                        )}
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {group.members.map((member) => (
-                                        <TableRow key={member.user.toString()}>
-                                            <TableCell className="font-medium">{member.name || "N/A"}</TableCell>
-                                            <TableCell className="text-right">{member.joinedAt ? new Date(member.joinedAt).toLocaleDateString() : "N/A"}</TableCell>
-                                            {userIsAdmin && member.user !== user._id && (
-                                                <TableCell className="text-right">
-                                                    <AlertDialog>
-                                                        <AlertDialogTrigger asChild>
-                                                            <Button
-                                                                variant="destructive"
-                                                                onClick={() => confirmKickMember(member.user.toString())}
-                                                            >
-                                                                <UserRoundMinus size={20} />
-                                                            </Button>
-                                                        </AlertDialogTrigger>
-                                                        <AlertDialogContent>
-                                                            <AlertDialogHeader>
-                                                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                                                <AlertDialogDescription>
-                                                                    This action cannot be undone. This will remove {member.name} from the group.
-                                                                </AlertDialogDescription>
-                                                            </AlertDialogHeader>
-                                                            <AlertDialogFooter>
-                                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                                <AlertDialogAction onClick={kickMember} className="bg-destructive">
-                                                                    Kick
-                                                                </AlertDialogAction>
-                                                            </AlertDialogFooter>
-                                                        </AlertDialogContent>
-                                                    </AlertDialog>
-                                                </TableCell>
+                        {userIsAdmin && (
+                            <div className="sticky bottom-0 left-0 right-0 ">
+                                <Button className="w-full" size="lg" onClick={saveSettings}>
+                                    Save Changes
+                                </Button>
+                            </div>
+                        )}
+
+                        {/* Members Card */}
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Members ({group.members.length})</CardTitle>
+                                <CardDescription>Manage group members</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead className="w-[150px]">Name</TableHead>
+                                            <TableHead className="text-right">Joined At</TableHead>
+                                            {userIsAdmin && (
+                                                <TableHead className="text-right">Remove</TableHead>
                                             )}
                                         </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </CardContent>
-                    </Card>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {group.members.map((member) => (
+                                            <TableRow key={member.user.toString()}>
+                                                <TableCell className="font-medium">{member.name || "N/A"}</TableCell>
+                                                <TableCell className="text-right">{member.joinedAt ? new Date(member.joinedAt).toLocaleDateString() : "N/A"}</TableCell>
+                                                {userIsAdmin && member.user !== user._id && (
+                                                    <TableCell className="text-right">
+                                                        <AlertDialog>
+                                                            <AlertDialogTrigger asChild>
+                                                                <Button
+                                                                    variant="destructive"
+                                                                    onClick={() => confirmKickMember(member.user.toString())}
+                                                                >
+                                                                    <UserRoundMinus size={20} />
+                                                                </Button>
+                                                            </AlertDialogTrigger>
+                                                            <AlertDialogContent>
+                                                                <AlertDialogHeader>
+                                                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                                                    <AlertDialogDescription>
+                                                                        This action cannot be undone. This will remove {member.name} from the group.
+                                                                    </AlertDialogDescription>
+                                                                </AlertDialogHeader>
+                                                                <AlertDialogFooter>
+                                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                                    <AlertDialogAction onClick={kickMember} className="bg-destructive">
+                                                                        Kick
+                                                                    </AlertDialogAction>
+                                                                </AlertDialogFooter>
+                                                            </AlertDialogContent>
+                                                        </AlertDialog>
+                                                    </TableCell>
+                                                )}
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </CardContent>
+                        </Card>
 
-                    {/* Danger Zone Card */}
-                    <Card className="border-destructive">
-                        <CardHeader>
-                            <CardTitle className="text-destructive">Danger Zone</CardTitle>
-                            <CardDescription>Irreversible actions</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-3">
-                            <Button variant="destructive" className="w-full">
-                                <DoorOpen />
-                                <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                        <span>Leave Group</span>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                            <AlertDialogTitle>Are you sure you want to leave?</AlertDialogTitle>
-                                            <AlertDialogDescription>
-                                                This action cannot be undone. You will lose access to this group.
-                                            </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                            <AlertDialogAction onClick={leaveGroup} className="bg-destructive">
-                                                Leave
-                                            </AlertDialogAction>
-                                        </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialog>
-                            </Button>
+                        {/* Danger Zone Card */}
+                        <Card className="border-destructive">
+                            <CardHeader>
+                                <CardTitle className="text-destructive">Danger Zone</CardTitle>
+                                <CardDescription>Irreversible actions</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                                <Button variant="destructive" className="w-full">
+                                    <DoorOpen />
+                                    <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <span>Leave Group</span>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>Are you sure you want to leave?</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    This action cannot be undone. You will lose access to this group.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                <AlertDialogAction onClick={leaveGroup} className="bg-destructive">
+                                                    Leave
+                                                </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
+                                </Button>
 
-                            {userIsAdmin && (
-                                <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                        <Button variant="destructive" className="w-full">
-                                            <Trash />
-                                            <span>Delete Group</span>
-                                        </Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                            <AlertDialogTitle>Are you sure you want to delete this group?</AlertDialogTitle>
-                                            <AlertDialogDescription>
-                                                This action is permanent and cannot be undone. Type <strong>{group.name}</strong> to confirm.
-                                            </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <Input
-                                            placeholder="Type group name"
-                                            value={deleteInput}
-                                            onChange={(e) => setDeleteInput(e.target.value)}
-                                            className="my-2"
-                                        />
-                                        <AlertDialogFooter>
-                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                            <AlertDialogAction
-                                                disabled={deleteInput !== group.name}
-                                                onClick={deleteGroup}
-                                                className="bg-destructive"
-                                            >
-                                                Delete
-                                            </AlertDialogAction>
-                                        </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialog>
-                            )}
-                        </CardContent>
-                    </Card>
-                </div>
-            ) : (
-                <p>Group not found.</p>
-            )}
+                                {userIsAdmin && (
+                                    <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <Button variant="destructive" className="w-full">
+                                                <Trash />
+                                                <span>Delete Group</span>
+                                            </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>Are you sure you want to delete this group?</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                    This action is permanent and cannot be undone. Type <strong>{group.name}</strong> to confirm.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <Input
+                                                placeholder="Type group name"
+                                                value={deleteInput}
+                                                onChange={(e) => setDeleteInput(e.target.value)}
+                                                className="my-2"
+                                            />
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                <AlertDialogAction
+                                                    disabled={deleteInput !== group.name}
+                                                    onClick={deleteGroup}
+                                                    className="bg-destructive"
+                                                >
+                                                    Delete
+                                                </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </div>
+                ) : (
+                    <p>Group not found.</p>
+                )
+            }
         </>
     );
 }

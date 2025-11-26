@@ -9,6 +9,17 @@ interface CreateUserRequest {
     userName: string;
 }
 
+export const GET = withAuthAndErrors(async (req: NextRequest, {userId}: AuthedContext) => {
+    await dbConnect();
+
+    const user = await User.findById(userId);
+    if (!user) {
+        throw new NotFoundError('User not found');
+    }
+
+    return NextResponse.json(user, {status: 200});
+});
+
 export const POST = withErrorHandling(
     async (req: NextRequest) => {
         await dbConnect();
