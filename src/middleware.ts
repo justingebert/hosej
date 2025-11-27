@@ -40,6 +40,6 @@ export async function middleware(req: NextRequest) {
 // Middleware configuration to match relevant routes
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|assets|public|manifest.json).*)'
+    '/((?!_next/static|_next/image|favicon.ico|assets|public|manifest.json|AppIcons).*)'
   ]
 };
