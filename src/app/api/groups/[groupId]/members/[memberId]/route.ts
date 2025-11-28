@@ -1,17 +1,14 @@
 import Group from "@/db/models/Group";
-import {IGroup} from "@/types/models/group";
+import { IGroup } from "@/types/models/group";
 import User from "@/db/models/user";
-import dbConnect from "@/lib/dbConnect";
-import {isUserInGroup} from "@/lib/groupAuth";
-import {NextRequest, NextResponse} from "next/server";
-import {AuthedContext, withAuthAndErrors} from "@/lib/api/withAuth";
-import {ForbiddenError, NotFoundError} from "@/lib/api/errorHandling";
+import dbConnect from "@/db/dbConnect";
+import { isUserInGroup } from "@/lib/userAuth";
+import { NextRequest, NextResponse } from "next/server";
+import { AuthedContext, withAuthAndErrors } from "@/lib/api/withAuth";
+import { ForbiddenError, NotFoundError } from "@/lib/api/errorHandling";
 
 export const DELETE = withAuthAndErrors(
-    async (
-        req: NextRequest,
-        {params, userId}: AuthedContext<{ params: { groupId: string; memberId: string } }>
-    ) => {
+    async (req: NextRequest, {params, userId}: AuthedContext<{ params: { groupId: string; memberId: string } }>) => {
         const {groupId, memberId} = params;
 
         await dbConnect();
@@ -35,10 +32,7 @@ export const DELETE = withAuthAndErrors(
 
         //if admin left group, find another admin that joined first
         if (group.admin.equals(user._id)) {
-            const newAdmin = group.members.sort(
-                (a, b) =>
-                    a?.joinedAt?.getTime() - b?.joinedAt?.getTime()
-            )[0];
+            const newAdmin = group.members.sort((a, b) => a?.joinedAt?.getTime() - b?.joinedAt?.getTime())[0];
             group.admin = newAdmin.user;
         }
         await group.save();

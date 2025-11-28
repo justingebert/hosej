@@ -15,19 +15,19 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const RallyPage = () => {
-    const { user } = useAuthRedirect();
-    const { groupId } = useParams<{ groupId: string }>();
+    const {user} = useAuthRedirect();
+    const {groupId} = useParams<{ groupId: string }>();
     const router = useRouter();
     const [userHasVoted, setUserHasVoted] = useState<Record<string, boolean>>({});
     const [userHasUploaded, setUserHasUploaded] = useState<Record<string, boolean>>({});
 
-    const { data: group} = useSWR<GroupDTO>(`/api/groups/${groupId}`, fetcher, {});
-    const { data, isLoading } = useSWR<{ rallies: IRallyJson[] }>(
+    const {data: group} = useSWR<GroupDTO>(`/api/groups/${groupId}`, fetcher, {});
+    const {data, isLoading} = useSWR<{ rallies: IRallyJson[] }>(
         user ? `/api/groups/${groupId}/rally` : null,
         fetcher
     );
 
-    const rallies = useMemo(() => data?.rallies || [], [data]);
+    const rallies = useMemo(() => data?.rallies || [], [data?.rallies]);
 
     const userIsAdmin =
         group && group?.admin && user?._id && group.admin.toString() === user._id.toString();
@@ -56,14 +56,14 @@ const RallyPage = () => {
         return (
             <div>
                 <Header
-                    leftComponent={<BackLink href={`/groups/${groupId}/dashboard`} />}
+                    leftComponent={<BackLink href={`/groups/${groupId}/dashboard`}/>}
                     title="Rallies"
                 />
                 <div>
-                    <Skeleton className="w-full h-10 mb-4" />
-                    <Skeleton className="w-full h-20 mb-20" />
-                    <Skeleton className="w-full h-96 mb-20" />
-                    <Skeleton className="w-full h-12 mb-6" />
+                    <Skeleton className="w-full h-10 mb-4"/>
+                    <Skeleton className="w-full h-20 mb-20"/>
+                    <Skeleton className="w-full h-96 mb-20"/>
+                    <Skeleton className="w-full h-12 mb-6"/>
                 </div>
             </div>
         );
@@ -73,7 +73,7 @@ const RallyPage = () => {
         return (
             <div className="flex flex-col h-[100dvh]">
                 <Header
-                    leftComponent={<BackLink href={`/groups/${groupId}/dashboard`} />}
+                    leftComponent={<BackLink href={`/groups/${groupId}/dashboard`}/>}
                     title="Rallies"
                 />
                 <div className="flex flex-grow justify-center items-center">
@@ -102,7 +102,7 @@ const RallyPage = () => {
     return (
         <div>
             <Header
-                leftComponent={<BackLink href={`/groups/${groupId}/dashboard`} />}
+                leftComponent={<BackLink href={`/groups/${groupId}/dashboard`}/>}
                 title="Rallies"
             />
             <RallyTabs

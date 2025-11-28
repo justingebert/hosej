@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
+
 //import ChatMessage from "../models/chatmessage";
-import Chat from "../models/Chat";
-import Question from "../models/Question";
 
 async function migrateChatMessages() {
     try {
@@ -9,7 +8,7 @@ async function migrateChatMessages() {
 
         // Fetch all ChatMessage documents
         // const chatMessages = await ChatMessage.find({});
-        
+
         // // Group messages by questionId
         // const messagesGroupedByQuestion = chatMessages.reduce((acc, message) => {
         //     const questionIdStr = message.question.toString(); // Convert ObjectId to string

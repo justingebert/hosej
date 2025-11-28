@@ -10,23 +10,23 @@ async function migrateChatMessages() {
         const rallies = await Rally.find({});
         console.log(rallies)
         console.log('Migrating chat messages...');
-            for (const rally of rallies) {
-                const newChat = new Chat({
-                    group: rally.groupId,
-                    entity: rally._id,
-                    entityModel: 'Rally',
-                    messages: [],
-                });
+        for (const rally of rallies) {
+            const newChat = new Chat({
+                group: rally.groupId,
+                entity: rally._id,
+                entityModel: 'Rally',
+                messages: [],
+            });
 
-                await newChat.save();
+            await newChat.save();
 
-                rally.chat = newChat._id;
-                await rally.save();
+            rally.chat = newChat._id;
+            await rally.save();
 
-                console.log(`Updated rally ${rally._id} with chatId ${newChat._id}`);
-            }
+            console.log(`Updated rally ${rally._id} with chatId ${newChat._id}`);
+        }
 
-            console.log('Migration complete!');
+        console.log('Migration complete!');
 
     } catch (error) {
         console.error('Error during migration:', error);

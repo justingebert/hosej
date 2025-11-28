@@ -1,9 +1,9 @@
-import {createPresignedPost} from '@aws-sdk/s3-presigned-post'
-import {S3Client} from '@aws-sdk/client-s3'
-import {v4 as uuidv4} from 'uuid'
-import {NextRequest, NextResponse} from 'next/server'
-import {AuthedContext, withAuthAndErrors} from '@/lib/api/withAuth'
-import {ValidationError} from '@/lib/api/errorHandling'
+import { createPresignedPost } from '@aws-sdk/s3-presigned-post'
+import { S3Client } from '@aws-sdk/client-s3'
+import { v4 as uuidv4 } from 'uuid'
+import { NextRequest, NextResponse } from 'next/server'
+import { AuthedContext, withAuthAndErrors } from '@/lib/api/withAuth'
+import { ValidationError } from '@/lib/api/errorHandling'
 
 // create a presigned URL for uploading images to S3
 export const POST = withAuthAndErrors(async (request: NextRequest, {userId}: AuthedContext) => {

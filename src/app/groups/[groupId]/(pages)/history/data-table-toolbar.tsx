@@ -21,16 +21,16 @@ const questionTypesOptions = Object.values(QuestionType).map((type) => ({
     value: type,
 }));
 
-export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>) {
+export function DataTableToolbar<TData>({table}: DataTableToolbarProps<TData>) {
     const params = useParams<{ groupId: string }>();
-    const groupId = params? params.groupId : "";
-    const { data: users } = useSWR<GroupDTO["members"]>(`/api/groups/${groupId}/members`, fetcher);
+    const groupId = params ? params.groupId : "";
+    const {data: users} = useSWR<GroupDTO["members"]>(`/api/groups/${groupId}/members`, fetcher);
 
     const groupMembers = users
         ? users.map((user: any) => ({
-              label: user.name,
-              value: user.user,
-          }))
+            label: user.name,
+            value: user.user,
+        }))
         : [];
 
     const isFiltered = table.getState().columnFilters.length > 0;
@@ -43,7 +43,7 @@ export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>)
                     onChange={(event) => table.getColumn("question")?.setFilterValue(event.target.value)}
                     className="w-full pr-10"
                 />
-                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2" />
+                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2"/>
             </div>
 
             <div className="flex flex-wrap justify-between md:space-x-2">
@@ -74,7 +74,7 @@ export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>)
                 </Button>
                 <Button disabled={!isFiltered} onClick={() => table.resetColumnFilters()} className="h-8 px-2 lg:px-3">
                     Reset
-                    <X className="-mr-1" />
+                    <X className="-mr-1"/>
                 </Button>
             </div>
         </div>

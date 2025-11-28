@@ -18,9 +18,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import BackLink from "@/components/ui/custom/BackLink";
 
 export default function SettingsPage() {
-    const { session, status, user, update } = useAuthRedirect();
+    const {session, status, user, update} = useAuthRedirect();
     const router = useRouter();
-    const { toast } = useToast();
+    const {toast} = useToast();
 
     const [notificationsEnabled, setNotificationsEnabled] = useState(false);
     const [googleConnected, setGoogleConnected] = useState(false);
@@ -34,7 +34,7 @@ export default function SettingsPage() {
         }
     }, [status, user]);
 
-    if (status === "loading" || !user) return <SettingsSkeleton />;
+    if (status === "loading" || !user) return <SettingsSkeleton/>;
 
     const handlegoogleDisconnect = async () => {
         const deviceId = uuidv4();
@@ -47,12 +47,12 @@ export default function SettingsPage() {
 
         await fetch("/api/auth/google/disconnect", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ userId: user._id, deviceId }),
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({userId: user._id, deviceId}),
         });
 
-        await signIn("credentials", { redirect: false, deviceId });
-        toast({ title: "Google account unlinked!" });
+        await signIn("credentials", {redirect: false, deviceId});
+        toast({title: "Google account unlinked!"});
     };
 
     const handleLogout = async () => {
@@ -72,8 +72,8 @@ export default function SettingsPage() {
             if (token) {
                 await fetch(`/api/users/register-push`, {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ token }),
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({token}),
                 });
                 console.log("FCM token registered successfully.");
                 localStorage.setItem("lastSentFcmToken", token);
@@ -83,8 +83,8 @@ export default function SettingsPage() {
             if (token) {
                 await fetch(`/api/users/unregister-push`, {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ token }),
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({token}),
                 });
                 localStorage.removeItem("lastSentFcmToken");
             }
@@ -97,9 +97,9 @@ export default function SettingsPage() {
     return (
         <div className="flex flex-col h-[100dvh]">
             <Header
-                leftComponent={<BackLink href={`/groups/`} />}
+                leftComponent={<BackLink href={`/groups/`}/>}
                 title="Settings"
-                rightComponent={<ThemeSelector />}
+                rightComponent={<ThemeSelector/>}
             />
             <div className="flex-grow mt-4">
                 <div className="flex items-center justify-between mb-4">
@@ -110,7 +110,7 @@ export default function SettingsPage() {
                     />
                 </div>
 
-                <UserDataTable user={user} googleConnected={googleConnected} />
+                <UserDataTable user={user} googleConnected={googleConnected}/>
                 <GoogleConnectButton
                     googleConnected={googleConnected}
                     onDisconnect={handlegoogleDisconnect}
@@ -126,7 +126,7 @@ export default function SettingsPage() {
     );
 }
 
-function UserDataTable({ user, googleConnected }: { user: UserDTO; googleConnected: boolean }) {
+function UserDataTable({user, googleConnected}: { user: UserDTO; googleConnected: boolean }) {
     const formattedDate = new Date(user.createdAt).toLocaleDateString(undefined, {
         year: "numeric",
         month: "numeric",
@@ -160,10 +160,10 @@ function UserDataTable({ user, googleConnected }: { user: UserDTO; googleConnect
 }
 
 function GoogleConnectButton({
-    googleConnected,
-    onDisconnect,
-    className,
-}: {
+                                 googleConnected,
+                                 onDisconnect,
+                                 className,
+                             }: {
     googleConnected: boolean;
     onDisconnect: () => void;
     className: string;
@@ -172,17 +172,17 @@ function GoogleConnectButton({
         <div className={className}>
             {googleConnected ? (
                 <Button onClick={onDisconnect} className="w-full" variant="destructive">
-                    <FcGoogle className="mr-2" size={24} />
+                    <FcGoogle className="mr-2" size={24}/>
                     Disconnect Google
                 </Button>
             ) : (
                 <Button
                     onClick={async () => {
-                        await signIn("google", { callbackUrl: `/connectgoogle` });
+                        await signIn("google", {callbackUrl: `/connectgoogle`});
                     }}
                     className="w-full"
                 >
-                    <FcGoogle className="mr-2" />
+                    <FcGoogle className="mr-2"/>
                     Connect with Google
                 </Button>
             )}
@@ -194,18 +194,18 @@ function GoogleConnectButton({
 function SettingsSkeleton() {
     return (
         <div className="flex flex-col h-[100dvh]">
-            <Header href={`/groups/`} title="Settings" rightComponent={<ThemeSelector />} />
+            <Header href={`/groups/`} title="Settings" rightComponent={<ThemeSelector/>}/>
             <div className="flex-grow mt-4 space-y-4">
                 <div className="flex items-center justify-between mb-4">
                     <span>Notifications</span>
-                    <Skeleton className="h-6 w-10" />
+                    <Skeleton className="h-6 w-10"/>
                 </div>
                 {[...Array(4)].map((_, i) => (
-                    <Skeleton key={i} className="h-10" />
+                    <Skeleton key={i} className="h-10"/>
                 ))}
             </div>
             <div className="mt-auto mb-14">
-                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full"/>
             </div>
         </div>
     );

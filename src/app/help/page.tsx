@@ -9,17 +9,17 @@ export default function HelpPage() {
     return (
         <>
             <Header leftComponent={<BackLink href={`/groups`}/>} title={"Help"}/>
-            <Image src={cat} alt="cat" className="rounded-lg" />
+            <Image src={cat} alt="cat" className="rounded-lg"/>
             <p>This is a private app in development </p>
             <div className='flex flex-row justify-between my-6'>
                 <Link href={"/terms"}>
                     <Button variant='secondary'>
-                    Terms of Service
+                        Terms of Service
                     </Button>
-                    </Link>    
+                </Link>
                 <Link href={"/privacy"}>
                     <Button variant='secondary'>
-                    Privacy Policy
+                        Privacy Policy
                     </Button>
                 </Link>
             </div>

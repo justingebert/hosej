@@ -1,11 +1,11 @@
-import {NextRequest, NextResponse} from 'next/server';
-import dbConnect from '@/lib/dbConnect';
-import Group from '@/db/models/Group';
-import User from '@/db/models/user';
-import {AuthedContext, withAuthAndErrors} from "@/lib/api/withAuth";
-import {NotFoundError, ValidationError} from "@/lib/api/errorHandling";
+import { NextRequest, NextResponse } from "next/server";
+import dbConnect from "@/db/dbConnect";
+import Group from "@/db/models/Group";
+import User from "@/db/models/user";
+import { AuthedContext, withAuthAndErrors } from "@/lib/api/withAuth";
+import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 
-export const revalidate = 0
+export const revalidate = 0;
 
 export const POST = withAuthAndErrors(async (req: NextRequest, {userId}: AuthedContext) => {
     await dbConnect();
@@ -23,7 +23,7 @@ export const POST = withAuthAndErrors(async (req: NextRequest, {userId}: AuthedC
     const member = {
         user: userAdmin._id,
         name: userAdmin.username,
-    }
+    };
     const newGroup = new Group({
         name: name,
         admin: userAdmin._id,
@@ -39,7 +39,7 @@ export const POST = withAuthAndErrors(async (req: NextRequest, {userId}: AuthedC
 
 export const GET = withAuthAndErrors(async (req: NextRequest, {userId}: AuthedContext) => {
     await dbConnect();
-    const user = await User.findById(userId).populate({path: 'groups', model: Group});
+    const user = await User.findById(userId).populate({path: "groups", model: Group});
     if (!user) {
         throw new NotFoundError("User not found");
     }

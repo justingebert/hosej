@@ -1,4 +1,4 @@
-import { JukeboxDTO, IRating, RatingDTO, ISong, SongDTO } from "@/types/models/jukebox";
+import { JukeboxDTO, RatingDTO, SongDTO } from "@/types/models/jukebox";
 import { UserDTO } from "@/types/models/user";
 
 export interface IProcessedRating extends Omit<RatingDTO, 'userId'> {

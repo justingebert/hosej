@@ -1,12 +1,12 @@
-import {NextRequest, NextResponse} from "next/server";
-import dbConnect from "@/lib/dbConnect";
+import { NextRequest, NextResponse } from "next/server";
+import dbConnect from "@/db/dbConnect";
 import Question from "@/db/models/Question";
-import {isUserInGroup} from "@/lib/groupAuth";
-import {generateSignedUrl} from "@/lib/generateSingledUrl";
+import { isUserInGroup } from "@/lib/userAuth";
+import { generateSignedUrl } from "@/lib/generateSingledUrl";
 import Group from "@/db/models/Group";
 import User from "@/db/models/user";
-import {AuthedContext, withAuthAndErrors} from "@/lib/api/withAuth";
-import {NotFoundError} from "@/lib/api/errorHandling";
+import { AuthedContext, withAuthAndErrors } from "@/lib/api/withAuth";
+import { NotFoundError } from "@/lib/api/errorHandling";
 
 export const revalidate = 0;
 
@@ -20,11 +20,10 @@ export const GET = withAuthAndErrors(
         await dbConnect();
         await isUserInGroup(userId, groupId);
 
-
         const question = await Question.findById(questionId).populate({
             path: "answers.user",
             model: User,
-            select: "-googleId -spotifyAccessToken -spotifyRefreshToken -spotifyTokenExpiresAt -deviceId"
+            select: "-googleId -spotifyAccessToken -spotifyRefreshToken -spotifyTokenExpiresAt -deviceId",
         });
 
         if (!question) {
@@ -72,4 +71,5 @@ export const GET = withAuthAndErrors(
             {results, totalVotes, totalUsers, questionType: question.questionType},
             {status: 200}
         );
-    })
+    }
+);

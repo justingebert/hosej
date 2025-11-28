@@ -1,8 +1,8 @@
-import {NextRequest, NextResponse} from 'next/server';
-import dbConnect from "@/lib/dbConnect";
-import User from '@/db/models/user';
-import {NotFoundError, ValidationError} from "@/lib/api/errorHandling";
-import {AuthedContext, withAuthAndErrors} from "@/lib/api/withAuth";
+import { NextRequest, NextResponse } from "next/server";
+import dbConnect from "@/db/dbConnect";
+import User from "@/db/models/user";
+import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
+import { AuthedContext, withAuthAndErrors } from "@/lib/api/withAuth";
 
 export const POST = withAuthAndErrors(async (req: NextRequest, {userId}: AuthedContext) => {
     await dbConnect();
@@ -18,7 +18,7 @@ export const POST = withAuthAndErrors(async (req: NextRequest, {userId}: AuthedC
     }
 
     if (user.fcmToken === token) {
-        return NextResponse.json({message: 'Token already exists'}, {status: 200});
+        return NextResponse.json({message: "Token already exists"}, {status: 200});
     }
 
     user.fcmToken = token;

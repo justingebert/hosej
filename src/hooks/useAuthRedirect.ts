@@ -1,9 +1,9 @@
 import { useEffect } from "react";
-import { useSession, signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { UserDTO } from "@/types/models/user";
 
 export function useAuthRedirect() {
-    const { data: session, status, update } = useSession();
+    const {data: session, status, update} = useSession();
 
     useEffect(() => {
         if (status === "loading") return;
@@ -12,5 +12,5 @@ export function useAuthRedirect() {
 
     const user = session?.user as UserDTO;
 
-    return { session, status, user, update };
+    return {session, status, user, update};
 }

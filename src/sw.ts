@@ -1,29 +1,27 @@
-import { disableDevLogs } from "serwist";
+import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
+import { disableDevLogs, Serwist } from "serwist";
+import { defaultCache } from "@serwist/next/worker";
 
 disableDevLogs();
-
-import { defaultCache } from "@serwist/next/worker";
-import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
-import { Serwist } from "serwist";
 
 // This declares the value of `injectionPoint` to TypeScript.
 // `injectionPoint` is the string that will be replaced by the
 // actual precache manifest. By default, this string is set to
 // `"self.__SW_MANIFEST"`.
 declare global {
-  interface WorkerGlobalScope extends SerwistGlobalConfig {
-    __SW_MANIFEST: (PrecacheEntry | string)[] | undefined;
-  }
+    interface WorkerGlobalScope extends SerwistGlobalConfig {
+        __SW_MANIFEST: (PrecacheEntry | string)[] | undefined;
+    }
 }
 
 declare const self: ServiceWorkerGlobalScope;
 
 const serwist = new Serwist({
-  precacheEntries: self.__SW_MANIFEST,
-  skipWaiting: true,
-  clientsClaim: true,
-  navigationPreload: true,
-  runtimeCaching: defaultCache,
+    precacheEntries: self.__SW_MANIFEST,
+    skipWaiting: true,
+    clientsClaim: true,
+    navigationPreload: true,
+    runtimeCaching: defaultCache,
 });
 
 serwist.addEventListeners();
@@ -31,18 +29,18 @@ serwist.addEventListeners();
 //importScripts('/firebase-config.js');
 importScripts("https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js");
 importScripts(
-  "https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js"
+    "https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js"
 );
 
 
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+    measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
 //@ts-ignore
@@ -50,19 +48,19 @@ firebase.initializeApp(firebaseConfig) as any;
 //@ts-ignore
 const messaging = firebase.messaging();
 
-messaging.onBackgroundMessage((payload:any) => {
-  console.log(
-    "[firebase-messaging-sw.js] Received background message ",
-    payload
-  );
+messaging.onBackgroundMessage((payload: any) => {
+    console.log(
+        "[firebase-messaging-sw.js] Received background message ",
+        payload
+    );
 
-  // payload.fcmOptions?.link comes from our backend API route handle
-  // payload.data.link comes from the Firebase Console where link is the 'key'
-  const notificationTitle = payload.data.title;
-  const notificationOptions = {
-    body: payload.data.body,
-  };
-  self.registration.showNotification(notificationTitle, notificationOptions);
+    // payload.fcmOptions?.link comes from our backend API route handle
+    // payload.data.link comes from the Firebase Console where link is the 'key'
+    const notificationTitle = payload.data.title;
+    const notificationOptions = {
+        body: payload.data.body,
+    };
+    self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
 /* self.addEventListener("notificationclick", function (event) {

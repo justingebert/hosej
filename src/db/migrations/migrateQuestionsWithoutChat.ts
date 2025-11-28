@@ -7,7 +7,7 @@ async function migrateQuestionsWithoutChats() {
         await mongoose.connect('mongodb://localhost:27017/hosej'); // Update with your MongoDB URI
 
         // Find all questions that do not have an associated chat
-        const questionsWithoutChats = await Question.find({ chat: { $exists: false } });
+        const questionsWithoutChats = await Question.find({chat: {$exists: false}});
 
         for (const question of questionsWithoutChats) {
             console.log(`Processing question ${question._id}`);

@@ -1,4 +1,4 @@
-import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 const s3 = new S3Client({
@@ -16,8 +16,8 @@ export async function generateSignedUrl(s3Key: string, expiresIn: number = 180) 
     });
 
     try {
-        const url = await getSignedUrl(s3, command, { expiresIn });
-        return { key: s3Key, url };
+        const url = await getSignedUrl(s3, command, {expiresIn});
+        return {key: s3Key, url};
     } catch (error: any) {
         console.error(`Failed to generate pre-signed URL for ${s3Key}`, error);
         throw new Error(`Failed to generate pre-signed URL: ${error.message}`);

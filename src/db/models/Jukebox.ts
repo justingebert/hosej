@@ -43,13 +43,13 @@ const SongSchema = new mongoose.Schema<ISong>({
 });
 
 const jukeboxSchema = new mongoose.Schema<IJukebox>({
-    groupId: { type: mongoose.Schema.Types.ObjectId, ref: "Group", required: true },
-    title: { type: String },
-    active: { type: Boolean, default: false },
-    date: { type: Date, required: true },
+    groupId: {type: mongoose.Schema.Types.ObjectId, ref: "Group", required: true},
+    title: {type: String},
+    active: {type: Boolean, default: false},
+    date: {type: Date, required: true},
     songs: [SongSchema],
-    chat: { type: mongoose.Schema.Types.ObjectId, ref: "Chat" },
-    createdAt: { type: Date, default: Date.now },
+    chat: {type: mongoose.Schema.Types.ObjectId, ref: "Chat"},
+    createdAt: {type: Date, default: Date.now},
 });
 
 const Jukebox = mongoose.models.Jukebox as mongoose.Model<IJukebox> || mongoose.model<IJukebox>("Jukebox", jukeboxSchema);

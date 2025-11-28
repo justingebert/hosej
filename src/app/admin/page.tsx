@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Shield, ArrowLeft } from "lucide-react";
+import { ArrowLeft, Shield } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import useSWR from "swr";
@@ -26,13 +26,13 @@ interface GlobalConfig {
 }
 
 export default function AdminPage() {
-    const { user } = useAuthRedirect();
+    const {user} = useAuthRedirect();
     const router = useRouter();
-    const { toast } = useToast();
+    const {toast} = useToast();
     const [localConfig, setLocalConfig] = useState<GlobalConfig | null>(null);
     const [saving, setSaving] = useState(false);
 
-    const { data: config, error, isLoading, mutate } = useSWR<GlobalConfig>(
+    const {data: config, error, isLoading, mutate} = useSWR<GlobalConfig>(
         user ? "/api/admin/config" : null,
         fetcher
     );
@@ -70,7 +70,7 @@ export default function AdminPage() {
             ...localConfig,
             features: {
                 ...localConfig.features,
-                [feature]: { status },
+                [feature]: {status},
             },
         });
     };
@@ -82,12 +82,17 @@ export default function AdminPage() {
         try {
             const response = await fetch("/api/admin/config", {
                 method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ features: localConfig.features }),
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({features: localConfig.features}),
             });
 
             if (!response.ok) {
-                throw new Error("Failed to save settings");
+                toast({
+                    title: "Error",
+                    description: "Failed to save settings",
+                    variant: "destructive",
+                });
+                return
             }
 
             const updated = await response.json();
@@ -115,8 +120,8 @@ export default function AdminPage() {
     if (isLoading) {
         return (
             <div className="container max-w-4xl mx-auto py-8 space-y-6">
-                <Skeleton className="h-12 w-64" />
-                <Skeleton className="h-64 w-full" />
+                <Skeleton className="h-12 w-64"/>
+                <Skeleton className="h-64 w-full"/>
             </div>
         );
     }
@@ -133,11 +138,11 @@ export default function AdminPage() {
                     size="icon"
                     onClick={() => router.push("/groups")}
                 >
-                    <ArrowLeft />
+                    <ArrowLeft/>
                 </Button>
                 <div className="flex-1">
                     <div className="flex items-center gap-2">
-                        <Shield className="h-5 w-5 md:h-6 md:w-6" />
+                        <Shield className="h-5 w-5 md:h-6 md:w-6"/>
                         <h1 className="text-2xl md:text-3xl font-bold">Admin Panel</h1>
                     </div>
                 </div>
@@ -149,7 +154,8 @@ export default function AdminPage() {
                         <div>
                             <CardTitle>Global Feature Control</CardTitle>
                             <CardDescription>
-                                Enable or disable features system-wide. Disabled features will not be available in any group.
+                                Enable or disable features system-wide. Disabled features will not be available in any
+                                group.
                             </CardDescription>
                         </div>
                         <Badge variant="secondary">Admin</Badge>
@@ -172,15 +178,15 @@ export default function AdminPage() {
                                 className="flex flex-col sm:flex-row gap-3 sm:gap-4"
                             >
                                 <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="enabled" id="q-enabled" />
+                                    <RadioGroupItem value="enabled" id="q-enabled"/>
                                     <Label htmlFor="q-enabled" className="cursor-pointer">Enabled</Label>
                                 </div>
                                 <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="comingSoon" id="q-coming" />
+                                    <RadioGroupItem value="comingSoon" id="q-coming"/>
                                     <Label htmlFor="q-coming" className="cursor-pointer">Coming Soon</Label>
                                 </div>
                                 <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="disabled" id="q-disabled" />
+                                    <RadioGroupItem value="disabled" id="q-disabled"/>
                                     <Label htmlFor="q-disabled" className="cursor-pointer">Disabled</Label>
                                 </div>
                             </RadioGroup>
@@ -201,15 +207,15 @@ export default function AdminPage() {
                                 className="flex flex-col sm:flex-row gap-3 sm:gap-4"
                             >
                                 <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="enabled" id="r-enabled" />
+                                    <RadioGroupItem value="enabled" id="r-enabled"/>
                                     <Label htmlFor="r-enabled" className="cursor-pointer">Enabled</Label>
                                 </div>
                                 <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="comingSoon" id="r-coming" />
+                                    <RadioGroupItem value="comingSoon" id="r-coming"/>
                                     <Label htmlFor="r-coming" className="cursor-pointer">Coming Soon</Label>
                                 </div>
                                 <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="disabled" id="r-disabled" />
+                                    <RadioGroupItem value="disabled" id="r-disabled"/>
                                     <Label htmlFor="r-disabled" className="cursor-pointer">Disabled</Label>
                                 </div>
                             </RadioGroup>
@@ -230,15 +236,15 @@ export default function AdminPage() {
                                 className="flex flex-col sm:flex-row gap-3 sm:gap-4"
                             >
                                 <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="enabled" id="j-enabled" />
+                                    <RadioGroupItem value="enabled" id="j-enabled"/>
                                     <Label htmlFor="j-enabled" className="cursor-pointer">Enabled</Label>
                                 </div>
                                 <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="comingSoon" id="j-coming" />
+                                    <RadioGroupItem value="comingSoon" id="j-coming"/>
                                     <Label htmlFor="j-coming" className="cursor-pointer">Coming Soon</Label>
                                 </div>
                                 <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="disabled" id="j-disabled" />
+                                    <RadioGroupItem value="disabled" id="j-disabled"/>
                                     <Label htmlFor="j-disabled" className="cursor-pointer">Disabled</Label>
                                 </div>
                             </RadioGroup>

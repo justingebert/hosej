@@ -1,7 +1,7 @@
-import dbConnect from "@/lib/dbConnect";
+import dbConnect from "@/db/dbConnect";
 import Question from "@/db/models/Question";
 import { NextRequest, NextResponse } from "next/server";
-import { sendNotification } from "@/utils/sendNotification";
+import { sendNotification } from "@/lib/sendNotification";
 import Group from "@/db/models/Group";
 import Jukebox from "@/db/models/Jukebox";
 import Chat from "@/db/models/Chat";
@@ -51,8 +51,9 @@ async function handleJukebox(group: IGroup) {
         for (let i = 0; i < group.features.jukebox.settings.concurrent.length; i++) {
             const newJukebox = await new Jukebox({
                 groupId: group._id,
-                date: today, active: true,
-                title: group.features.jukebox.settings.concurrent[i]
+                date: today,
+                active: true,
+                title: group.features.jukebox.settings.concurrent[i],
             }).save();
 
             const newChat = await new Chat({
@@ -72,7 +73,7 @@ async function handleJukebox(group: IGroup) {
 }
 
 //gets, populates and returns daily questions
-export const GET = withErrorHandling(async (req: NextRequest) => {
+export const GET = withErrorHandling(async () => {
     await dbConnect();
 
     const groups = await Group.find({});

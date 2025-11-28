@@ -1,5 +1,5 @@
-import dbConnect from "@/lib/dbConnect";
-import { isUserInGroup } from "@/lib/groupAuth";
+import dbConnect from "@/db/dbConnect";
+import { isUserInGroup } from "@/lib/userAuth";
 import { NextRequest, NextResponse } from "next/server";
 import Jukebox from "@/db/models/Jukebox";
 import { IJukebox, IRating, ISong } from "@/types/models/jukebox";
@@ -13,7 +13,7 @@ export const revalidate = 0;
 function buildJukeboxQuery(groupId: string, url: URL) {
     const isActive = url.searchParams.get("isActive") === "true";
 
-    const query: Partial<IJukebox> = { groupId: groupId };
+    const query: Partial<IJukebox> = {groupId: groupId};
     if (url.searchParams.has("isActive")) {
         query.active = isActive;
     }
@@ -21,11 +21,8 @@ function buildJukeboxQuery(groupId: string, url: URL) {
 }
 
 export const GET = withAuthAndErrors(
-    async (
-        req: NextRequest,
-        { params, userId }: AuthedContext<{ params: { groupId: string } }>
-    ) => {
-        const { groupId } = params;
+    async (req: NextRequest, {params, userId}: AuthedContext<{ params: { groupId: string } }>) => {
+        const {groupId} = params;
         const url = new URL(req.url);
 
         await dbConnect();
@@ -37,57 +34,45 @@ export const GET = withAuthAndErrors(
         const query = buildJukeboxQuery(groupId, url);
 
         const jukeboxes = await Jukebox.find(query)
-            .sort({ createdAt: -1 })
+            .sort({createdAt: -1})
             .limit(group.features.jukebox.settings.concurrent.length)
-            .populate
-            <{ songs: [ISong & { submittedBy: IUser, ratings: [(IRating & { userId: IUser })] }] }>
-            ([{
-                path: "songs.submittedBy",
-                model: User,
-                select: "_id username",
-            },
-            {
-                path: "songs.ratings.userId",
-                model: User,
-                select: "_id username",
-            }]
-            ).lean();
+            .populate<{ songs: [ISong & { submittedBy: IUser; ratings: [IRating & { userId: IUser }] }] }>([
+                {
+                    path: "songs.submittedBy",
+                    model: User,
+                    select: "_id username",
+                },
+                {
+                    path: "songs.ratings.userId",
+                    model: User,
+                    select: "_id username",
+                },
+            ])
+            .lean();
 
         const processedJukeboxes = jukeboxes.map((jukebox) => {
-            const userHasSubmitted = jukebox.songs.some(
-                (song) => String(song.submittedBy?._id) === userId
-            );
+            const userHasSubmitted = jukebox.songs.some((song) => String(song.submittedBy?._id) === userId);
 
             const songs = jukebox.songs
                 .map((song) => {
                     // First, sort the ratings array for each song (highest first)
-                    const sortedRatings = [...song.ratings].sort(
-                        (a, b) => b.rating - a.rating
-                    );
+                    const sortedRatings = [...song.ratings].sort((a, b) => b.rating - a.rating);
 
                     // Compute average rating, if any
                     const avgRating =
                         sortedRatings.length > 0
-                            ? sortedRatings.reduce(
-                                (acc, rating) => acc + rating.rating,
-                                0
-                            ) / sortedRatings.length
+                            ? sortedRatings.reduce((acc, rating) => acc + rating.rating, 0) / sortedRatings.length
                             : null;
 
                     // Determine whether the user has rated this song
-                    const userHasRated = sortedRatings.some(
-                        (rating) => String(rating.userId._id) === userId
-                    );
+                    const userHasRated = sortedRatings.some((rating) => String(rating.userId._id) === userId);
 
                     return {
                         ...song,
                         ratings: sortedRatings,
                         avgRating,
                         // For sorting purposes, treat songs submitted by the user as if they are rated
-                        userHasRated:
-                            String(song.submittedBy?._id) === userId
-                                ? true
-                                : userHasRated,
+                        userHasRated: String(song.submittedBy?._id) === userId ? true : userHasRated,
                     };
                 })
                 .sort((a: any, b: any) => {
@@ -99,8 +84,7 @@ export const GET = withAuthAndErrors(
                     if (a.avgRating !== null && b.avgRating === null) return -1;
                     if (a.avgRating === null && b.avgRating === null) return 0;
                     return b.avgRating - a.avgRating;
-                })
-
+                });
 
             return {
                 ...jukebox,

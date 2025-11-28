@@ -2,42 +2,42 @@ import mongoose from "mongoose";
 import { IGroup, IGroupMember } from "@/types/models/group";
 
 const memberSchema = new mongoose.Schema<IGroupMember>({
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    name: { type: String },
-    points: { type: Number, default: 0 },
-    streak: { type: Number, default: 0 },
-    lastPointDate: { type: Date, default: null },
-    joinedAt: { type: Date, default: Date.now },
+    user: {type: mongoose.Schema.Types.ObjectId, ref: "User", required: true},
+    name: {type: String},
+    points: {type: Number, default: 0},
+    streak: {type: Number, default: 0},
+    lastPointDate: {type: Date, default: null},
+    joinedAt: {type: Date, default: Date.now},
 });
 
 const groupSchema = new mongoose.Schema<IGroup>({
-    name: { type: String, required: true },
-    admin: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    name: {type: String, required: true},
+    admin: {type: mongoose.Schema.Types.ObjectId, ref: "User", required: true},
     members: [memberSchema],
     features: {
         questions: {
-            enabled: { type: Boolean, default: true },
+            enabled: {type: Boolean, default: true},
             settings: {
-                questionCount: { type: Number, default: 1 },
-                lastQuestionDate: { type: Date, default: null },
+                questionCount: {type: Number, default: 1},
+                lastQuestionDate: {type: Date, default: null},
             },
         },
         rallies: {
-            enabled: { type: Boolean, default: true },
+            enabled: {type: Boolean, default: true},
             settings: {
-                rallyCount: { type: Number, default: 1 },
-                rallyGapDays: { type: Number, default: 14 },
+                rallyCount: {type: Number, default: 1},
+                rallyGapDays: {type: Number, default: 14},
             },
         },
         jukebox: {
-            enabled: { type: Boolean, default: true },
+            enabled: {type: Boolean, default: true},
             settings: {
-                concurrent: { type: [String], default: ["Jukebox"] },
-                activationDays: { type: [Number], default: [1] },
+                concurrent: {type: [String], default: ["Jukebox"]},
+                activationDays: {type: [Number], default: [1]},
             },
         },
     },
-    createdAt: { type: Date, default: Date.now },
+    createdAt: {type: Date, default: Date.now},
 });
 
 groupSchema.methods.addPoints = async function (userId: string | mongoose.Schema.Types.ObjectId, points: number) {
@@ -86,7 +86,7 @@ groupSchema.methods.addPoints = async function (userId: string | mongoose.Schema
     }
 };
 
-groupSchema.index({ name: 1 });
+groupSchema.index({name: 1});
 
 const Group = mongoose.models.Group as mongoose.Model<IGroup> || mongoose.model("Group", groupSchema);
 

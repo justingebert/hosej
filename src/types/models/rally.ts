@@ -1,7 +1,7 @@
-import { Types, Document, Schema } from "mongoose";
+import { Document, Types } from "mongoose";
 import { AsJson } from "../common";
 
-export interface IPictureSubmission{
+export interface IPictureSubmission {
     _id: Types.ObjectId;
     userId: Types.ObjectId;
     username: string;

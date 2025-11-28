@@ -43,6 +43,7 @@ export interface IGroup {
     members: IGroupMember[];
     features: IGroupFeatures;
     createdAt: Date;
+
     addPoints(userId: string | Types.ObjectId, points: number): Promise<void>;
 }
 

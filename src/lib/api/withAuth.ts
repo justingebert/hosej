@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 import type { ApiRoute } from "./errorHandling";
-import { withErrorHandling, AuthError } from "./errorHandling";
+import { AuthError, withErrorHandling } from "./errorHandling";
 
 export type AuthedContext<T = {}> = T & { userId: string };
 

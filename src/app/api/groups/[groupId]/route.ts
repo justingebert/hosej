@@ -1,19 +1,16 @@
-import {NextRequest, NextResponse} from "next/server";
-import dbConnect from "@/lib/dbConnect";
-import {isUserInGroup} from "@/lib/groupAuth";
+import { NextRequest, NextResponse } from "next/server";
+import dbConnect from "@/db/dbConnect";
+import { isUserInGroup } from "@/lib/userAuth";
 import Group from "@/db/models/Group";
 import User from "@/db/models/user";
-import {AuthedContext, withAuthAndErrors} from "@/lib/api/withAuth";
-import {ForbiddenError, NotFoundError} from "@/lib/api/errorHandling";
+import { AuthedContext, withAuthAndErrors } from "@/lib/api/withAuth";
+import { ForbiddenError, NotFoundError } from "@/lib/api/errorHandling";
 
 export const revalidate = 0;
 
 //get group
 export const GET = withAuthAndErrors(
-    async (
-        req: NextRequest,
-        {params, userId}: AuthedContext<{ params: { groupId: string } }>
-    ) => {
+    async (req: NextRequest, {params, userId}: AuthedContext<{ params: { groupId: string } }>) => {
         const {groupId} = params;
         await dbConnect();
 
@@ -32,10 +29,7 @@ export const GET = withAuthAndErrors(
 
 //update group
 export const PUT = withAuthAndErrors(
-    async (
-        req: NextRequest,
-        {params, userId}: AuthedContext<{ params: { groupId: string } }>
-    ) => {
+    async (req: NextRequest, {params, userId}: AuthedContext<{ params: { groupId: string } }>) => {
         const {groupId} = params;
 
         const data = await req.json();
@@ -57,12 +51,8 @@ export const PUT = withAuthAndErrors(
     }
 );
 
-
 export const DELETE = withAuthAndErrors(
-    async (
-        req: NextRequest,
-        {params, userId}: AuthedContext<{ params: { groupId: string } }>
-    ) => {
+    async (req: NextRequest, {params, userId}: AuthedContext<{ params: { groupId: string } }>) => {
         const {groupId} = params;
 
         await dbConnect();
@@ -79,9 +69,7 @@ export const DELETE = withAuthAndErrors(
         for (const member of group.members) {
             const memberUser = await User.findById(member.user);
             if (memberUser) {
-                memberUser.groups = memberUser.groups.filter(
-                    (g) => g !== groupId
-                );
+                memberUser.groups = memberUser.groups.filter((g) => g !== groupId);
                 await memberUser.save();
             }
         }
