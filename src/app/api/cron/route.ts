@@ -9,12 +9,13 @@ import { withErrorHandling } from "@/lib/api/errorHandling";
 import { IQuestion } from "@/types/models/question";
 import { Types } from "mongoose";
 import { IGroup } from "@/types/models/group";
+import { populateUserOptions } from "@/lib/question/enrichment/populateUserOptions";
 
 export const revalidate = 0;
 
 //deactives current questions and activates new ones
 async function selectDailyQuestions(groupId: string | Types.ObjectId, limit: number): Promise<IQuestion[]> {
-    const currentQuestions = await Question.find({groupId: groupId, category: "Daily", active: true});
+    const currentQuestions = await Question.find({ groupId: groupId, category: "Daily", active: true });
     for (const question of currentQuestions) {
         question.active = false;
         await question.save();
@@ -26,10 +27,14 @@ async function selectDailyQuestions(groupId: string | Types.ObjectId, limit: num
         used: false,
         active: false,
     })
-        .sort({createdAt: 1})
+        .sort({ createdAt: 1 })
         .limit(limit);
 
     for (const question of questions) {
+        // Populate user options if it's a users-* question type
+        // This ensures the member list is current at activation time
+        await populateUserOptions(question);
+
         question.active = true;
         question.used = true;
         question.usedAt = new Date();
@@ -46,7 +51,7 @@ async function selectDailyQuestions(groupId: string | Types.ObjectId, limit: num
 async function handleJukebox(group: IGroup) {
     const today = new Date();
     if (group.features.jukebox.settings.activationDays.includes(today.getDate())) {
-        await Jukebox.updateMany({active: true, groupId: group._id}, {active: false});
+        await Jukebox.updateMany({ active: true, groupId: group._id }, { active: false });
 
         for (let i = 0; i < group.features.jukebox.settings.concurrent.length; i++) {
             const newJukebox = await new Jukebox({
@@ -67,7 +72,7 @@ async function handleJukebox(group: IGroup) {
             await newChat.save();
         }
 
-        const monthName = new Intl.DateTimeFormat("en-US", {month: "long"}).format(today);
+        const monthName = new Intl.DateTimeFormat("en-US", { month: "long" }).format(today);
         await sendNotification(`🎶JUKEBOX - ${monthName} 🎶`, "🎶SUBMIT YOUR SONGS🎶", group._id);
     }
 }
@@ -99,5 +104,5 @@ export const GET = withErrorHandling(async () => {
         }
     }
 
-    return NextResponse.json({message: "cron exceuted successfully"}, {status: 200});
+    return NextResponse.json({ message: "cron exceuted successfully" }, { status: 200 });
 });
