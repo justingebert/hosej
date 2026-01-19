@@ -20,7 +20,8 @@ export interface IQuestion {
     used: boolean;
     active: boolean;
     usedAt?: Date
-    submittedBy: Types.ObjectId;
+    submittedBy?: Types.ObjectId | null;
+    templateId?: Types.ObjectId;
 
     chat?: Types.ObjectId;
     createdAt: Date;
