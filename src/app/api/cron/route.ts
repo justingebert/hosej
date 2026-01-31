@@ -1,49 +1,14 @@
 import dbConnect from "@/db/dbConnect";
-import Question from "@/db/models/Question";
-import { NextRequest, NextResponse } from "next/server";
-import { sendNotification } from "@/lib/sendNotification";
+import Chat from "@/db/models/Chat";
 import Group from "@/db/models/Group";
 import Jukebox from "@/db/models/Jukebox";
-import Chat from "@/db/models/Chat";
 import { withErrorHandling } from "@/lib/api/errorHandling";
-import { IQuestion } from "@/types/models/question";
-import { Types } from "mongoose";
+import { activateNextQuestions } from "@/lib/question/activateQuestion";
+import { sendNotification } from "@/lib/sendNotification";
 import { IGroup } from "@/types/models/group";
-import { populateUserOptions } from "@/lib/question/enrichment/populateUserOptions";
+import { NextResponse } from "next/server";
 
 export const revalidate = 0;
-
-//deactives current questions and activates new ones
-async function selectDailyQuestions(groupId: string | Types.ObjectId, limit: number): Promise<IQuestion[]> {
-    const currentQuestions = await Question.find({ groupId: groupId, category: "Daily", active: true });
-    for (const question of currentQuestions) {
-        question.active = false;
-        await question.save();
-    }
-
-    const questions = await Question.find({
-        groupId: groupId,
-        category: "Daily",
-        used: false,
-        active: false,
-    })
-        .sort({ createdAt: 1 })
-        .limit(limit);
-
-    for (const question of questions) {
-        // Populate user options if it's a users-* question type
-        // This ensures the member list is current at activation time
-        await populateUserOptions(question);
-
-        question.active = true;
-        question.used = true;
-        question.usedAt = new Date();
-        await question.save();
-    }
-
-    return questions;
-}
-
 /**
  * this deactivates active jukeboxes and actives new ones on the first of every month
  * @param group
@@ -84,7 +49,7 @@ export const GET = withErrorHandling(async () => {
     const groups = await Group.find({});
     //TODO this sends multiple notifications to one user this is wrong
     for (const group of groups) {
-        const questions = await selectDailyQuestions(group._id, group.features.questions.settings.questionCount);
+        const questions = await activateNextQuestions(group._id, group.features.questions.settings.questionCount);
         if (questions.length === 0) {
             await sendNotification(
                 "🥗DA HABEN WIR DEN SALAT🥗",

@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Upload, AlertCircle, CheckCircle2 } from "lucide-react";
-import { validateTemplates, formatValidationErrors, type ValidationError } from "@/lib/question/validation/validateTemplates";
+import { validateTemplates, formatValidationErrors, type ValidationError } from "@/lib/template-questions/validateTemplates";
 
 interface UploadResult {
     success?: boolean;

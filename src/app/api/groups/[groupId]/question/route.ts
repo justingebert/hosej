@@ -8,7 +8,7 @@ import { ValidationError } from "@/lib/api/errorHandling";
 import { AuthedContext, withAuthAndErrors } from "@/lib/api/withAuth";
 import { generateSignedUrl } from "@/lib/generateSingledUrl";
 import { QuestionDTO } from "@/types/models/question";
-import { createQuestionInGroup } from "@/lib/question/core/createQuestionInGroup";
+import { createQuestionInGroup } from "@/lib/question/createQuestionInGroup";
 
 export const revalidate = 0;
 
@@ -51,7 +51,7 @@ type QuestionWithUserState = QuestionDTO & {
     userRating: UserRating;
 };
 
-// Return active daily questions
+// Return active questions
 export const GET = withAuthAndErrors(
     async (
         req: NextRequest,
@@ -69,7 +69,6 @@ export const GET = withAuthAndErrors(
 
         let questions = await Question.find({
             groupId: groupId,
-            category: "Daily",
             used: true,
             active: true,
         }).lean();

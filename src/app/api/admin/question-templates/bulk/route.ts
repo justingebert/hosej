@@ -3,7 +3,7 @@ import dbConnect from "@/db/dbConnect";
 import { AuthedContext, withAuthAndErrors } from "@/lib/api/withAuth";
 import { ForbiddenError, ValidationError } from "@/lib/api/errorHandling";
 import { isGlobalAdmin } from "@/lib/userAuth";
-import { createQuestionTemplatesFromArray } from "@/lib/question/templates/createTemplateQuestions";
+import { createQuestionTemplatesFromArray } from "@/lib/question/template-questions/createTemplateQuestions";
 
 export const revalidate = 0;
 

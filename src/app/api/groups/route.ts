@@ -4,7 +4,8 @@ import Group from "@/db/models/Group";
 import User from "@/db/models/user";
 import { AuthedContext, withAuthAndErrors } from "@/lib/api/withAuth";
 import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
-import { addTemplatePackToGroup } from "@/lib/question/templates/addTemplatesToGroup";
+import { addTemplatePackToGroup } from "@/lib/template-questions/addTemplatesToGroup";
+import { activateNextQuestions } from "@/lib/question/activateQuestion";
 
 export const revalidate = 0;
 
@@ -37,6 +38,7 @@ export const POST = withAuthAndErrors(async (req: NextRequest, { userId }: Authe
 
     await addTemplatePackToGroup(newGroup._id, 'starter-pack');
 
+    await activateNextQuestions(newGroup._id, newGroup.features.questions.settings.questionCount);
 
     return NextResponse.json(newGroup, { status: 201 });
 });
@@ -49,3 +51,4 @@ export const GET = withAuthAndErrors(async (req: NextRequest, { userId }: Authed
     }
     return NextResponse.json({ groups: user.groups }, { status: 200 });
 });
+

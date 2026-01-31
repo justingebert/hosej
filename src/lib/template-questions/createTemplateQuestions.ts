@@ -1,6 +1,6 @@
 import QuestionTemplate from "@/db/models/QuestionTemplate";
 import { QuestionType } from "@/types/models/question";
-import { validateTemplates, type TemplateInput, type ValidationError } from "../validation/validateTemplates";
+import { validateTemplates, type TemplateInput, type ValidationError } from "./validateTemplates";
 
 /**
  * Validate and create multiple question templates from an array
