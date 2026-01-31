@@ -10,7 +10,7 @@
 import dbConnect from "../dbConnect";
 import Group from "../models/Group";
 import Question from "../models/Question";
-import { addTemplatePackToGroup } from "@/lib/template-questions/addTemplatesToGroup";
+import { addTemplatePackToGroup } from "@/lib/template-questions/addPackToGroup";
 
 async function addStarterPackToExistingGroups() {
     try {

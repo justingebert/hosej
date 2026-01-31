@@ -4,7 +4,7 @@ import Group from "@/db/models/Group";
 import User from "@/db/models/user";
 import { AuthedContext, withAuthAndErrors } from "@/lib/api/withAuth";
 import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
-import { addTemplatePackToGroup } from "@/lib/template-questions/addTemplatesToGroup";
+import { addTemplatePackToGroup } from "@/lib/template-questions/addPackToGroup";
 import { activateNextQuestions } from "@/lib/question/activateQuestion";
 
 export const revalidate = 0;

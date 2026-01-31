@@ -8,7 +8,7 @@ import { ValidationError } from "@/lib/api/errorHandling";
 import { AuthedContext, withAuthAndErrors } from "@/lib/api/withAuth";
 import { generateSignedUrl } from "@/lib/generateSingledUrl";
 import { QuestionDTO } from "@/types/models/question";
-import { createQuestionInGroup } from "@/lib/question/createQuestionInGroup";
+import { createQuestionInGroup } from "@/lib/question/createQuestion";
 
 export const revalidate = 0;
 

@@ -1,7 +1,7 @@
 import QuestionTemplate from "@/db/models/QuestionTemplate";
 import { Types } from "mongoose";
 import { NotFoundError } from "@/lib/api/errorHandling";
-import { createQuestionInGroup } from "@/lib/question/createQuestionInGroup";
+import { createQuestionInGroup } from "@/lib/question/createQuestion";
 
 /**
  * Add all templates from a pack to a group as real questions
