@@ -10,7 +10,7 @@
 import dbConnect from "../dbConnect";
 import Group from "../models/Group";
 import Question from "../models/Question";
-import { addTemplatePackToGroup } from "@/lib/question/template-questions/addTemplatesToGroup";
+import { addTemplatePackToGroup } from "@/lib/template-questions/addTemplatesToGroup";
 
 async function addStarterPackToExistingGroups() {
     try {
@@ -43,15 +43,7 @@ async function addStarterPackToExistingGroups() {
                 }
 
                 // Add starter pack
-                const result = await addTemplatePackToGroup(group._id, 'starter-pack');
-
-                console.log(`  ✅ Added ${result.created} questions`);
-                if (result.errors.length > 0) {
-                    console.log(`  ⚠️  Errors: ${result.errors.length}`);
-                    result.errors.forEach(err => console.log(`     - ${err}`));
-                }
-
-                successCount++;
+                await addTemplatePackToGroup(group._id, 'starter-pack');
             } catch (error) {
                 console.error(`  ❌ Error processing group ${group.name}:`, error);
                 errorCount++;

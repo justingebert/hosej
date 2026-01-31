@@ -152,14 +152,7 @@ export default function AdminPage() {
             <Card>
                 <CardHeader>
                     <div className="flex items-center justify-between">
-                        <div>
-                            <CardTitle>Global Feature Control</CardTitle>
-                            <CardDescription>
-                                Enable or disable features system-wide. Disabled features will not be available in any
-                                group.
-                            </CardDescription>
-                        </div>
-                        <Badge variant="secondary">Admin</Badge>
+                        <CardTitle>Global Feature Control</CardTitle>
                     </div>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -169,9 +162,6 @@ export default function AdminPage() {
                                 <Label className="text-base font-semibold">
                                     Questions
                                 </Label>
-                                <p className="text-sm text-muted-foreground">
-                                    Daily questions and voting system
-                                </p>
                             </div>
                             <RadioGroup
                                 value={localConfig.features.questions.status}
@@ -198,9 +188,6 @@ export default function AdminPage() {
                                 <Label className="text-base font-semibold">
                                     Rallies
                                 </Label>
-                                <p className="text-sm text-muted-foreground">
-                                    Photo rallies and challenges
-                                </p>
                             </div>
                             <RadioGroup
                                 value={localConfig.features.rallies.status}
@@ -227,9 +214,6 @@ export default function AdminPage() {
                                 <Label className="text-base font-semibold">
                                     Jukebox
                                 </Label>
-                                <p className="text-sm text-muted-foreground">
-                                    Music submission and rating system
-                                </p>
                             </div>
                             <RadioGroup
                                 value={localConfig.features.jukebox.status}

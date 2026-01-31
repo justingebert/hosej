@@ -122,7 +122,6 @@ export default function TemplateUploadCard() {
         <Card>
             <CardHeader>
                 <div className="flex items-center gap-2">
-                    <Upload className="h-5 w-5" />
                     <div>
                         <CardTitle>Upload Question Templates</CardTitle>
                         <CardDescription>
@@ -155,10 +154,6 @@ export default function TemplateUploadCard() {
                         rows={12}
                         className="font-mono text-sm"
                     />
-                    <p className="text-xs text-muted-foreground">
-                        Valid question types: users-select-one, users-select-multiple, custom-select-one,
-                        custom-select-multiple, text, rating, image-select-one, image-select-multiple
-                    </p>
                 </div>
 
                 {uploadResult && (
