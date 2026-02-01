@@ -1,5 +1,5 @@
 import QuestionTemplate from "@/db/models/QuestionTemplate";
-import { Types } from "mongoose";
+import type { Types } from "mongoose";
 import { NotFoundError } from "@/lib/api/errorHandling";
 import { createQuestionInGroup } from "@/lib/question/createQuestion";
 
@@ -8,7 +8,7 @@ import { createQuestionInGroup } from "@/lib/question/createQuestion";
  */
 export async function addTemplatePackToGroup(
     groupId: string | Types.ObjectId,
-    packId: string,
+    packId: string
 ): Promise<void> {
     const templates = await QuestionTemplate.find({ packId });
 

@@ -1,12 +1,12 @@
-import { useEffect } from 'react';
+import { useEffect } from "react";
 //import { signIn } from 'next-auth/react';
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 
 const generateDeviceId = () => {
-    let deviceId = localStorage.getItem('deviceId');
+    let deviceId = localStorage.getItem("deviceId");
     if (!deviceId) {
         deviceId = uuidv4();
-        localStorage.setItem('deviceId', deviceId);
+        localStorage.setItem("deviceId", deviceId);
     }
     return deviceId;
 };

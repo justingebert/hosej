@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, Shield } from "lucide-react";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
-import { FeatureStatus } from "@/types/models/appConfig";
+import type { FeatureStatus } from "@/types/models/appConfig";
 import TemplateUploadCard from "@/components/admin/TemplateUploadCard";
 import GlobalFeatureControl from "@/components/admin/GlobalFeatureControl";
 
@@ -30,10 +30,12 @@ export default function AdminPage() {
     const [localConfig, setLocalConfig] = useState<GlobalConfig | null>(null);
     const [saving, setSaving] = useState(false);
 
-    const { data: config, error, isLoading, mutate } = useSWR<GlobalConfig>(
-        user ? "/api/admin/config" : null,
-        fetcher
-    );
+    const {
+        data: config,
+        error,
+        isLoading,
+        mutate,
+    } = useSWR<GlobalConfig>(user ? "/api/admin/config" : null, fetcher);
 
     // Check for 403 error and redirect
     useEffect(() => {
@@ -61,7 +63,7 @@ export default function AdminPage() {
         }
     }, [config]);
 
-    const updateFeature = (feature: 'questions' | 'rallies' | 'jukebox', status: FeatureStatus) => {
+    const updateFeature = (feature: "questions" | "rallies" | "jukebox", status: FeatureStatus) => {
         if (!localConfig) return;
 
         setLocalConfig({
@@ -90,7 +92,7 @@ export default function AdminPage() {
                     description: "Failed to save settings",
                     variant: "destructive",
                 });
-                return
+                return;
             }
 
             const updated = await response.json();
@@ -131,11 +133,7 @@ export default function AdminPage() {
     return (
         <div className="container max-w-4xl mx-auto py-4 md:py-8 px-4 space-y-4 md:space-y-6">
             <div className="flex items-center gap-2 md:gap-4">
-                <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => router.push("/groups")}
-                >
+                <Button variant="outline" size="icon" onClick={() => router.push("/groups")}>
                     <ArrowLeft />
                 </Button>
                 <div className="flex-1">

@@ -6,7 +6,7 @@ export class FetchError extends Error {
         super(message);
         this.status = status;
         this.info = info;
-        this.name = 'FetchError';
+        this.name = "FetchError";
     }
 }
 
@@ -14,14 +14,14 @@ export default async function fetcher<JSON = any>(
     input: RequestInfo,
     init?: RequestInit
 ): Promise<JSON> {
-    const res = await fetch(input, init)
+    const res = await fetch(input, init);
     if (!res.ok) {
         const info = await res.json().catch(() => ({}));
         throw new FetchError(
-            info.message || 'An error occurred while fetching the data.',
+            info.message || "An error occurred while fetching the data.",
             res.status,
             info
         );
     }
-    return await res.json()
+    return await res.json();
 }

@@ -51,7 +51,6 @@
         --chart-9: 250 45% 60%; /* Light purple */
         --chart-10: 10 60% 60%; /* Coral red */
 
-
         --shine-color: rgba(0, 0, 0, 0); /* Default shine color for light mode */
         --shine-highlight: rgba(40, 40, 40, 0.4); /* Shine highlight for light mode */
     }
@@ -101,8 +100,7 @@
         --chart-9: 250 60% 55%; /* Added */
         --chart-10: 10 70% 55%; /* Added */
 
-
-        --shine-color: rgba(255, 255, 255, .4);
+        --shine-color: rgba(255, 255, 255, 0.4);
         --shine-highlight: rgba(255, 255, 255, 1);
     }
 }
@@ -117,7 +115,8 @@
     }
 }
 
-html, body {
+html,
+body {
     height: 100%;
     margin: 0;
     padding: 0;

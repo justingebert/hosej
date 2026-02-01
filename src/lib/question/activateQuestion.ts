@@ -1,7 +1,7 @@
 import Question from "@/db/models/Question";
-import { Types } from "mongoose";
+import type { Types } from "mongoose";
 import { populateUserOptions } from "./populateUserOptions";
-import { IQuestion } from "@/types/models/question";
+import type { IQuestion } from "@/types/models/question";
 
 /**
  * Activates a single question: populates user options and marks as active/used
@@ -30,13 +30,13 @@ async function deactivateCurrentQuestions(groupId: Types.ObjectId): Promise<void
 }
 
 /**
- * Smart question activation: activates one custom (user-submitted) question 
+ * Smart question activation: activates one custom (user-submitted) question
  * and one template question if available.
- * 
+ *
  * Priority:
  * 1. Custom questions (submittedBy is set) - activates 1 if available
  * 2. Template questions (submittedBy is null) - activates 1 if available
- * 
+ *
  * @param groupId - The group to activate questions for
  * @returns Promise<IQuestion[]> - The activated questions
  */
@@ -62,10 +62,7 @@ export async function activateSmartQuestions(groupId: Types.ObjectId): Promise<I
     // Find one template question (submittedBy is null or doesn't exist)
     const templateQuestion = await Question.findOne({
         groupId: groupId,
-        $or: [
-            { submittedBy: null },
-            { submittedBy: { $exists: false } }
-        ],
+        $or: [{ submittedBy: null }, { submittedBy: { $exists: false } }],
         used: false,
         active: false,
     }).sort({ createdAt: 1 });

@@ -1,5 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
-import { AuthedContext, withAuthAndErrors } from "@/lib/api/withAuth";
+import type { NextRequest} from "next/server";
+import { NextResponse } from "next/server";
+import type { AuthedContext} from "@/lib/api/withAuth";
+import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { ForbiddenError } from "@/lib/api/errorHandling";
 import AppConfig from "@/db/models/AppConfig";
 import dbConnect from "@/db/dbConnect";
@@ -8,7 +10,7 @@ import { getGlobalConfig, isGlobalAdmin } from "@/lib/userAuth";
 export const revalidate = 0;
 
 // Get admin config
-export const GET = withAuthAndErrors(async (req: NextRequest, {userId}: AuthedContext) => {
+export const GET = withAuthAndErrors(async (req: NextRequest, { userId }: AuthedContext) => {
     await dbConnect();
 
     const isAdmin = await isGlobalAdmin(userId);
@@ -24,12 +26,12 @@ export const GET = withAuthAndErrors(async (req: NextRequest, {userId}: AuthedCo
             adminUsers: config.adminUsers,
             updatedAt: config.updatedAt,
         },
-        {status: 200}
+        { status: 200 }
     );
 });
 
 // Update admin config
-export const PUT = withAuthAndErrors(async (req: NextRequest, {userId}: AuthedContext) => {
+export const PUT = withAuthAndErrors(async (req: NextRequest, { userId }: AuthedContext) => {
     await dbConnect();
 
     const isAdmin = await isGlobalAdmin(userId);
@@ -38,7 +40,7 @@ export const PUT = withAuthAndErrors(async (req: NextRequest, {userId}: AuthedCo
     }
 
     const data = await req.json();
-    const config = await AppConfig.findOne({configKey: "global_features"});
+    const config = await AppConfig.findOne({ configKey: "global_features" });
 
     if (!config) {
         throw new Error("Config not found");
@@ -60,6 +62,6 @@ export const PUT = withAuthAndErrors(async (req: NextRequest, {userId}: AuthedCo
             adminUsers: config.adminUsers,
             updatedAt: config.updatedAt,
         },
-        {status: 200}
+        { status: 200 }
     );
 });

@@ -15,26 +15,26 @@ import { Input } from "@/components/ui/input";
 
 export function CreateGroupDrawer() {
     const [groupName, setGroupName] = useState("");
-    const {toast} = useToast();
+    const { toast } = useToast();
 
     const createGroup = async () => {
         try {
             const res = await fetch("/api/groups", {
                 method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({name: groupName}),
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name: groupName }),
             });
 
             if (!res.ok) {
                 console.error("Failed to create group: ", res);
-                toast({title: "Failed to create group!", variant: "destructive"});
+                toast({ title: "Failed to create group!", variant: "destructive" });
                 return;
             }
 
             mutate(`/api/groups`);
         } catch (error) {
             console.error("Failed to create group: ", error);
-            toast({title: "Failed to create group!", variant: "destructive"});
+            toast({ title: "Failed to create group!", variant: "destructive" });
         }
     };
 

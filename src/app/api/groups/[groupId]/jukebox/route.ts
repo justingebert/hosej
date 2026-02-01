@@ -1,11 +1,13 @@
 import dbConnect from "@/db/dbConnect";
 import { isUserInGroup } from "@/lib/userAuth";
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest} from "next/server";
+import { NextResponse } from "next/server";
 import Jukebox from "@/db/models/Jukebox";
-import { IJukebox, IRating, ISong } from "@/types/models/jukebox";
+import type { IJukebox, IRating, ISong } from "@/types/models/jukebox";
 import User from "@/db/models/user";
-import { AuthedContext, withAuthAndErrors } from "@/lib/api/withAuth";
-import { IUser } from "@/types/models/user";
+import type { AuthedContext} from "@/lib/api/withAuth";
+import { withAuthAndErrors } from "@/lib/api/withAuth";
+import type { IUser } from "@/types/models/user";
 import Group from "@/db/models/Group";
 
 export const revalidate = 0;
@@ -13,7 +15,7 @@ export const revalidate = 0;
 function buildJukeboxQuery(groupId: string, url: URL) {
     const isActive = url.searchParams.get("isActive") === "true";
 
-    const query: Partial<IJukebox> = {groupId: groupId};
+    const query: Partial<IJukebox> = { groupId: groupId };
     if (url.searchParams.has("isActive")) {
         query.active = isActive;
     }
@@ -21,8 +23,11 @@ function buildJukeboxQuery(groupId: string, url: URL) {
 }
 
 export const GET = withAuthAndErrors(
-    async (req: NextRequest, {params, userId}: AuthedContext<{ params: { groupId: string } }>) => {
-        const {groupId} = params;
+    async (
+        req: NextRequest,
+        { params, userId }: AuthedContext<{ params: { groupId: string } }>
+    ) => {
+        const { groupId } = params;
         const url = new URL(req.url);
 
         await dbConnect();
@@ -34,9 +39,11 @@ export const GET = withAuthAndErrors(
         const query = buildJukeboxQuery(groupId, url);
 
         const jukeboxes = await Jukebox.find(query)
-            .sort({createdAt: -1})
+            .sort({ createdAt: -1 })
             .limit(group.features.jukebox.settings.concurrent.length)
-            .populate<{ songs: [ISong & { submittedBy: IUser; ratings: [IRating & { userId: IUser }] }] }>([
+            .populate<{
+                songs: [ISong & { submittedBy: IUser; ratings: [IRating & { userId: IUser }] }];
+            }>([
                 {
                     path: "songs.submittedBy",
                     model: User,
@@ -51,7 +58,9 @@ export const GET = withAuthAndErrors(
             .lean();
 
         const processedJukeboxes = jukeboxes.map((jukebox) => {
-            const userHasSubmitted = jukebox.songs.some((song) => String(song.submittedBy?._id) === userId);
+            const userHasSubmitted = jukebox.songs.some(
+                (song) => String(song.submittedBy?._id) === userId
+            );
 
             const songs = jukebox.songs
                 .map((song) => {
@@ -61,18 +70,22 @@ export const GET = withAuthAndErrors(
                     // Compute average rating, if any
                     const avgRating =
                         sortedRatings.length > 0
-                            ? sortedRatings.reduce((acc, rating) => acc + rating.rating, 0) / sortedRatings.length
+                            ? sortedRatings.reduce((acc, rating) => acc + rating.rating, 0) /
+                              sortedRatings.length
                             : null;
 
                     // Determine whether the user has rated this song
-                    const userHasRated = sortedRatings.some((rating) => String(rating.userId._id) === userId);
+                    const userHasRated = sortedRatings.some(
+                        (rating) => String(rating.userId._id) === userId
+                    );
 
                     return {
                         ...song,
                         ratings: sortedRatings,
                         avgRating,
                         // For sorting purposes, treat songs submitted by the user as if they are rated
-                        userHasRated: String(song.submittedBy?._id) === userId ? true : userHasRated,
+                        userHasRated:
+                            String(song.submittedBy?._id) === userId ? true : userHasRated,
                     };
                 })
                 .sort((a: any, b: any) => {

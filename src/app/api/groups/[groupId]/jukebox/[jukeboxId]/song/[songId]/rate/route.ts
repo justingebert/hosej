@@ -1,10 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest} from "next/server";
+import { NextResponse } from "next/server";
 import dbConnect from "@/db/dbConnect";
 import Jukebox from "@/db/models/Jukebox";
 import { isUserInGroup } from "@/lib/userAuth";
-import { AuthedContext, withAuthAndErrors } from "@/lib/api/withAuth";
+import type { AuthedContext} from "@/lib/api/withAuth";
+import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { ConflictError, NotFoundError } from "@/lib/api/errorHandling";
-import { ISong } from "@/types/models/jukebox";
+import type { ISong } from "@/types/models/jukebox";
 
 export const POST = withAuthAndErrors(
     async (
@@ -16,8 +18,8 @@ export const POST = withAuthAndErrors(
             params: { groupId: string; jukeboxId: string; songId: string };
         }>
     ) => {
-        const {groupId, jukeboxId, songId} = params;
-        const {rating} = await req.json();
+        const { groupId, jukeboxId, songId } = params;
+        const { rating } = await req.json();
         await dbConnect();
         await isUserInGroup(userId, groupId);
 
@@ -41,10 +43,13 @@ export const POST = withAuthAndErrors(
             throw new ConflictError("User has already rated this song");
         }
 
-        song.ratings.push({userId: userId, rating: rating});
+        song.ratings.push({ userId: userId, rating: rating });
 
         await jukebox.save();
 
-        return NextResponse.json({message: "Rating submitted successfully", data: song}, {status: 201});
+        return NextResponse.json(
+            { message: "Rating submitted successfully", data: song },
+            { status: 201 }
+        );
     }
 );

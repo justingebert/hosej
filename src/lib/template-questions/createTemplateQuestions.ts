@@ -1,6 +1,10 @@
 import QuestionTemplate from "@/db/models/QuestionTemplate";
-import { QuestionType } from "@/types/models/question";
-import { validateTemplates, type TemplateInput, type ValidationError } from "./validateTemplateQuestions";
+import type { QuestionType } from "@/types/models/question";
+import {
+    validateTemplates,
+    type TemplateInput,
+    type ValidationError,
+} from "./validateTemplateQuestions";
 
 /**
  * Validate and create multiple question templates from an array
@@ -10,7 +14,7 @@ import { validateTemplates, type TemplateInput, type ValidationError } from "./v
  */
 export async function createQuestionTemplatesFromArray(
     packId: string,
-    templates: TemplateInput[],
+    templates: TemplateInput[]
 ): Promise<{ loaded: number; skipped: number; errors: ValidationError[] }> {
     let loaded = 0;
     let skipped = 0;
@@ -28,7 +32,7 @@ export async function createQuestionTemplatesFromArray(
         return {
             loaded: 0,
             skipped: templates.length,
-            errors: validationResult.errors
+            errors: validationResult.errors,
         };
     }
 
@@ -52,7 +56,7 @@ export async function createQuestionTemplatesFromArray(
             errors.push({
                 index: i,
                 field: "database",
-                message: error instanceof Error ? error.message : String(error)
+                message: error instanceof Error ? error.message : String(error),
             });
             skipped++;
         }

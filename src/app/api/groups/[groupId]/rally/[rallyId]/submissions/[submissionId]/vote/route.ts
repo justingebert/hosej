@@ -1,11 +1,13 @@
 import dbConnect from "@/db/dbConnect";
 import Rally from "@/db/models/rally";
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest} from "next/server";
+import { NextResponse } from "next/server";
 import User from "@/db/models/user";
 import Group from "@/db/models/Group";
 import { isUserInGroup } from "@/lib/userAuth";
 import { VOTED_RALLY_POINTS } from "@/config/POINT_CONFIG";
-import { AuthedContext, withAuthAndErrors } from "@/lib/api/withAuth";
+import type { AuthedContext} from "@/lib/api/withAuth";
+import { withAuthAndErrors } from "@/lib/api/withAuth";
 
 //vote on a submission
 export const POST = withAuthAndErrors(
@@ -18,7 +20,7 @@ export const POST = withAuthAndErrors(
             params: { groupId: string; rallyId: string; submissionId: string };
         }>
     ) => {
-        const {groupId, rallyId, submissionId} = params;
+        const { groupId, rallyId, submissionId } = params;
 
         await dbConnect();
         await isUserInGroup(userId, groupId);
@@ -26,19 +28,19 @@ export const POST = withAuthAndErrors(
         const user = await User.findById(userId).orFail();
         const group = await Group.findById(groupId).orFail();
 
-        const rally = await Rally.findOne({groupId: groupId, _id: rallyId});
+        const rally = await Rally.findOne({ groupId: groupId, _id: rallyId });
         if (!rally) {
-            return NextResponse.json({message: "Rally not found"}, {status: 404});
+            return NextResponse.json({ message: "Rally not found" }, { status: 404 });
         }
         const submission = rally.submissions.id(submissionId);
         if (!submission) {
-            return NextResponse.json({message: "Submission not found"});
+            return NextResponse.json({ message: "Submission not found" });
         }
         const userVoted = submission.votes.find((vote: any) => vote.user === user._id);
         if (userVoted) {
-            return NextResponse.json({message: "User already voted"}, {status: 304});
+            return NextResponse.json({ message: "User already voted" }, { status: 304 });
         }
-        submission.votes.push({user: user._id, time: Date.now()});
+        submission.votes.push({ user: user._id, time: Date.now() });
 
         await rally.save();
 

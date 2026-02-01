@@ -11,10 +11,10 @@ import fetcher from "@/lib/fetcher";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { QuestionDTO } from "@/types/models/question";
+import type { QuestionDTO } from "@/types/models/question";
 
 const ResultsPage = () => {
-    const {user} = useAuthRedirect();
+    const { user } = useAuthRedirect();
     const params = useParams<{ groupId: string; questionId: string }>();
     const groupId = params ? params.groupId : "";
     const questionId = params ? params.questionId : "";
@@ -23,17 +23,22 @@ const ResultsPage = () => {
         data: question,
         error,
         isLoading,
-    } = useSWR<QuestionDTO>(questionId ? `/api/groups/${groupId}/question/${questionId}` : null, fetcher);
+    } = useSWR<QuestionDTO>(
+        questionId ? `/api/groups/${groupId}/question/${questionId}` : null,
+        fetcher
+    );
 
-    if (isLoading) return <Loading/>;
+    if (isLoading) return <Loading />;
     if (error) return <div className="text-red-500">Failed to load question data.</div>;
 
     return (
         <>
-            <BackLink href={`/groups/${groupId}/history`}/>
+            <BackLink href={`/groups/${groupId}/history`} />
             {question && (
                 <div>
-                    <h1 className="text-xl font-bold text-center mb-10 mt-10">{question.question}</h1>
+                    <h1 className="text-xl font-bold text-center mb-10 mt-10">
+                        {question.question}
+                    </h1>
                     {question.imageUrl && (
                         <Image
                             src={question.imageUrl}
@@ -69,7 +74,10 @@ const ResultsPage = () => {
                         {!question.questionType.startsWith("image") &&
                             question.options &&
                             question.options.map((option: any, index: number) => (
-                                <div key={index} className="p-4 m-2 bg-secondary rounded-lg w-full max-w-md">
+                                <div
+                                    key={index}
+                                    className="p-4 m-2 bg-secondary rounded-lg w-full max-w-md"
+                                >
                                     {option}
                                 </div>
                             ))}
@@ -87,23 +95,23 @@ const ResultsPage = () => {
 };
 
 const ResultsPageWrapper = () => (
-    <Suspense fallback={<Loading/>}>
-        <ResultsPage/>
+    <Suspense fallback={<Loading />}>
+        <ResultsPage />
     </Suspense>
 );
 
 const Loading = () => (
     <div className="flex flex-col items-center mt-20">
-        <Skeleton className="w-3/4 h-8 mb-6"/>
+        <Skeleton className="w-3/4 h-8 mb-6" />
         <div className="flex w-full justify-around mb-6 mt-6">
-            <Skeleton className="w-12 h-6 rounded-full"/>
-            <Skeleton className="w-12 h-6 rounded-full"/>
-            <Skeleton className="w-12 h-6 rounded-full"/>
+            <Skeleton className="w-12 h-6 rounded-full" />
+            <Skeleton className="w-12 h-6 rounded-full" />
+            <Skeleton className="w-12 h-6 rounded-full" />
         </div>
-        <Skeleton className="w-full h-40 rounded-lg"/>
+        <Skeleton className="w-full h-40 rounded-lg" />
         <div className="flex flex-col space-y-3 mt-6 w-full max-w-md">
             {[...Array(10)].map((_, i) => (
-                <Skeleton key={i} className="h-12"/>
+                <Skeleton key={i} className="h-12" />
             ))}
         </div>
     </div>

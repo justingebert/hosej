@@ -1,14 +1,21 @@
 "use client";
 
 import React from "react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
 import { useParams } from "next/navigation";
 import Header from "@/components/ui/custom/Header";
 import { QuestionsByType, QuestionsByUser } from "@/components/features/charts/QuestionCharts";
 import { Separator } from "@/components/ui/separator";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
-import { GroupDTO, GroupMemberDTO } from "@/types/models/group";
+import type { GroupDTO, GroupMemberDTO } from "@/types/models/group";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type Statistics = {
@@ -27,8 +34,11 @@ const StatsPage = () => {
     const params = useParams<{ groupId: string }>();
     const groupId = params ? params.groupId : "";
 
-    const {data: stats, isLoading: statsLoading} = useSWR<Statistics>(`/api/groups/${groupId}/stats`, fetcher);
-    const {data, isLoading: groupLoading} = useSWR<GroupDTO>(`/api/groups/${groupId}/`, fetcher);
+    const { data: stats, isLoading: statsLoading } = useSWR<Statistics>(
+        `/api/groups/${groupId}/stats`,
+        fetcher
+    );
+    const { data, isLoading: groupLoading } = useSWR<GroupDTO>(`/api/groups/${groupId}/`, fetcher);
 
     const sortedUsers = data?.members.sort((a, b) => b.points - a.points) || [];
 
@@ -57,7 +67,7 @@ const StatsPage = () => {
 
     return (
         <>
-            <Header title="Statistics"/>
+            <Header title="Statistics" />
             <Table>
                 <TableHeader>
                     <TableRow>
@@ -71,7 +81,7 @@ const StatsPage = () => {
                         [...Array(10)].map((_, i) => (
                             <TableRow key={i}>
                                 <TableCell colSpan={3} className="p-2">
-                                    <Skeleton className="h-10"/>
+                                    <Skeleton className="h-10" />
                                 </TableCell>
                             </TableRow>
                         ))}
@@ -90,16 +100,16 @@ const StatsPage = () => {
                 </TableBody>
             </Table>
 
-            <Separator className="my-6"/>
+            <Separator className="my-6" />
 
             {statsLoading || !stats ? (
                 <div>
-                    <Skeleton className="h-10 mb-2"/>
-                    <Skeleton className="h-10 mb-2"/>
-                    <Skeleton className="h-10 mb-2"/>
-                    <Skeleton className="h-10 mb-6"/>
-                    <Skeleton className="h-80 mb-6"/>
-                    <Skeleton className="h-80"/>
+                    <Skeleton className="h-10 mb-2" />
+                    <Skeleton className="h-10 mb-2" />
+                    <Skeleton className="h-10 mb-2" />
+                    <Skeleton className="h-10 mb-6" />
+                    <Skeleton className="h-80 mb-6" />
+                    <Skeleton className="h-80" />
                 </div>
             ) : (
                 <>
@@ -107,67 +117,99 @@ const StatsPage = () => {
                     <Table className="w-full max-w-md mx-auto">
                         <TableBody>
                             <TableRow>
-                                <TableCell className="font-medium px-4 py-2 text-left">Questions Used</TableCell>
-                                <TableCell className="px-4 py-2 text-right">{stats.questionsUsedCount}</TableCell>
+                                <TableCell className="font-medium px-4 py-2 text-left">
+                                    Questions Used
+                                </TableCell>
+                                <TableCell className="px-4 py-2 text-right">
+                                    {stats.questionsUsedCount}
+                                </TableCell>
                             </TableRow>
                             <TableRow>
-                                <TableCell className="font-medium px-4 py-2 text-left">Questions Left</TableCell>
-                                <TableCell className="px-4 py-2 text-right">{stats.questionsLeftCount}</TableCell>
+                                <TableCell className="font-medium px-4 py-2 text-left">
+                                    Questions Left
+                                </TableCell>
+                                <TableCell className="px-4 py-2 text-right">
+                                    {stats.questionsLeftCount}
+                                </TableCell>
                             </TableRow>
                             <TableRow>
-                                <TableCell className="font-medium px-4 py-2 text-left">Total Questions</TableCell>
-                                <TableCell className="px-4 py-2 text-right">{totalQuestions}</TableCell>
+                                <TableCell className="font-medium px-4 py-2 text-left">
+                                    Total Questions
+                                </TableCell>
+                                <TableCell className="px-4 py-2 text-right">
+                                    {totalQuestions}
+                                </TableCell>
                             </TableRow>
                         </TableBody>
                     </Table>
 
                     <div className="my-6">
-                        <QuestionsByUser data={stats.questionsByUser}/>
+                        <QuestionsByUser data={stats.questionsByUser} />
                     </div>
                     <div className="my-6">
-                        <QuestionsByType data={stats.questionsByType}/>
+                        <QuestionsByType data={stats.questionsByType} />
                     </div>
 
-                    <Separator className="my-6"/>
+                    <Separator className="my-6" />
 
                     <h2 className="text-xl font-bold text-center">Rallies</h2>
                     <Table className="w-full max-w-md mx-auto">
                         <TableBody>
                             <TableRow>
-                                <TableCell className="font-medium px-4 py-2 text-left">Rallies Used</TableCell>
-                                <TableCell className="px-4 py-2 text-right">{stats.RalliesUsedCount}</TableCell>
+                                <TableCell className="font-medium px-4 py-2 text-left">
+                                    Rallies Used
+                                </TableCell>
+                                <TableCell className="px-4 py-2 text-right">
+                                    {stats.RalliesUsedCount}
+                                </TableCell>
                             </TableRow>
                             <TableRow>
-                                <TableCell className="font-medium px-4 py-2 text-left">Rallies Left</TableCell>
-                                <TableCell className="px-4 py-2 text-right">{stats.RalliesLeftCount}</TableCell>
+                                <TableCell className="font-medium px-4 py-2 text-left">
+                                    Rallies Left
+                                </TableCell>
+                                <TableCell className="px-4 py-2 text-right">
+                                    {stats.RalliesLeftCount}
+                                </TableCell>
                             </TableRow>
                             <TableRow>
-                                <TableCell className="font-medium px-4 py-2 text-left">Total Rallies</TableCell>
-                                <TableCell className="px-4 py-2 text-right">{totalRallies}</TableCell>
+                                <TableCell className="font-medium px-4 py-2 text-left">
+                                    Total Rallies
+                                </TableCell>
+                                <TableCell className="px-4 py-2 text-right">
+                                    {totalRallies}
+                                </TableCell>
                             </TableRow>
                         </TableBody>
                     </Table>
 
-                    <Separator className="my-6"/>
+                    <Separator className="my-6" />
 
                     <h2 className="text-xl font-bold text-center">Users</h2>
                     <Table className="w-full max-w-md mx-auto">
                         <TableBody>
                             <TableRow>
-                                <TableCell className="font-medium px-4 py-2 text-left">User Count</TableCell>
-                                <TableCell className="px-4 py-2 text-right">{stats.group.members.length}</TableCell>
+                                <TableCell className="font-medium px-4 py-2 text-left">
+                                    User Count
+                                </TableCell>
+                                <TableCell className="px-4 py-2 text-right">
+                                    {stats.group.members.length}
+                                </TableCell>
                             </TableRow>
                         </TableBody>
                     </Table>
 
-                    <Separator className="my-6"/>
+                    <Separator className="my-6" />
 
                     <h2 className="text-xl font-bold mb-4 text-center">Messages</h2>
                     <Table className="w-full max-w-md mx-auto mb-6">
                         <TableBody>
                             <TableRow>
-                                <TableCell className="font-medium px-4 py-2 text-left">Message Count</TableCell>
-                                <TableCell className="px-4 py-2 text-right">{stats.messagesCount}</TableCell>
+                                <TableCell className="font-medium px-4 py-2 text-left">
+                                    Message Count
+                                </TableCell>
+                                <TableCell className="px-4 py-2 text-right">
+                                    {stats.messagesCount}
+                                </TableCell>
                             </TableRow>
                         </TableBody>
                     </Table>

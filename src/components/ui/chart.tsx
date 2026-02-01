@@ -6,13 +6,16 @@ import * as RechartsPrimitive from "recharts";
 import { cn } from "@/lib/utils/utils";
 
 // Format: { THEME_NAME: CSS_SELECTOR }
-const THEMES = {light: "", dark: ".dark"} as const;
+const THEMES = { light: "", dark: ".dark" } as const;
 
 export type ChartConfig = {
     [k in string]: {
-    label?: React.ReactNode;
-    icon?: React.ComponentType;
-} & ({ color?: string; theme?: never } | { color?: never; theme: Record<keyof typeof THEMES, string> });
+        label?: React.ReactNode;
+        icon?: React.ComponentType;
+    } & (
+        | { color?: string; theme?: never }
+        | { color?: never; theme: Record<keyof typeof THEMES, string> }
+    );
 };
 
 type ChartContextProps = {
@@ -34,15 +37,15 @@ function useChart() {
 const ChartContainer = React.forwardRef<
     HTMLDivElement,
     React.ComponentProps<"div"> & {
-    config: ChartConfig;
-    children: React.ComponentProps<typeof RechartsPrimitive.ResponsiveContainer>["children"];
-}
->(({id, className, children, config, ...props}, ref) => {
+        config: ChartConfig;
+        children: React.ComponentProps<typeof RechartsPrimitive.ResponsiveContainer>["children"];
+    }
+>(({ id, className, children, config, ...props }, ref) => {
     const uniqueId = React.useId();
     const chartId = `chart-${id || uniqueId.replace(/:/g, "")}`;
 
     return (
-        <ChartContext.Provider value={{config}}>
+        <ChartContext.Provider value={{ config }}>
             <div
                 data-chart={chartId}
                 ref={ref}
@@ -52,16 +55,20 @@ const ChartContainer = React.forwardRef<
                 )}
                 {...props}
             >
-                <ChartStyle id={chartId} config={config}/>
-                <RechartsPrimitive.ResponsiveContainer>{children}</RechartsPrimitive.ResponsiveContainer>
+                <ChartStyle id={chartId} config={config} />
+                <RechartsPrimitive.ResponsiveContainer>
+                    {children}
+                </RechartsPrimitive.ResponsiveContainer>
             </div>
         </ChartContext.Provider>
     );
 });
 ChartContainer.displayName = "Chart";
 
-const ChartStyle = ({id, config}: { id: string; config: ChartConfig }) => {
-    const colorConfig = Object.entries(config).filter(([_, config]) => config.theme || config.color);
+const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
+    const colorConfig = Object.entries(config).filter(
+        ([_, config]) => config.theme || config.color
+    );
 
     if (!colorConfig.length) {
         return null;
@@ -75,11 +82,12 @@ const ChartStyle = ({id, config}: { id: string; config: ChartConfig }) => {
                         ([theme, prefix]) => `
 ${prefix} [data-chart=${id}] {
 ${colorConfig
-                            .map(([key, itemConfig]) => {
-                                const color = itemConfig.theme?.[theme as keyof typeof itemConfig.theme] || itemConfig.color;
-                                return color ? `  --color-${key}: ${color};` : null;
-                            })
-                            .join("\n")}
+    .map(([key, itemConfig]) => {
+        const color =
+            itemConfig.theme?.[theme as keyof typeof itemConfig.theme] || itemConfig.color;
+        return color ? `  --color-${key}: ${color};` : null;
+    })
+    .join("\n")}
 }
 `
                     )
@@ -94,13 +102,13 @@ const ChartTooltip = RechartsPrimitive.Tooltip;
 const ChartTooltipContent = React.forwardRef<
     HTMLDivElement,
     React.ComponentProps<typeof RechartsPrimitive.Tooltip> &
-    React.ComponentProps<"div"> & {
-    hideLabel?: boolean;
-    hideIndicator?: boolean;
-    indicator?: "line" | "dot" | "dashed";
-    nameKey?: string;
-    labelKey?: string;
-}
+        React.ComponentProps<"div"> & {
+            hideLabel?: boolean;
+            hideIndicator?: boolean;
+            indicator?: "line" | "dot" | "dashed";
+            nameKey?: string;
+            labelKey?: string;
+        }
 >(
     (
         {
@@ -120,7 +128,7 @@ const ChartTooltipContent = React.forwardRef<
         },
         ref
     ) => {
-        const {config} = useChart();
+        const { config } = useChart();
 
         const tooltipLabel = React.useMemo(() => {
             if (hideLabel || !payload?.length) {
@@ -136,7 +144,11 @@ const ChartTooltipContent = React.forwardRef<
                     : itemConfig?.label;
 
             if (labelFormatter) {
-                return <div className={cn("font-medium", labelClassName)}>{labelFormatter(value, payload)}</div>;
+                return (
+                    <div className={cn("font-medium", labelClassName)}>
+                        {labelFormatter(value, payload)}
+                    </div>
+                );
             }
 
             if (!value) {
@@ -180,7 +192,7 @@ const ChartTooltipContent = React.forwardRef<
                                 ) : (
                                     <>
                                         {itemConfig?.icon ? (
-                                            <itemConfig.icon/>
+                                            <itemConfig.icon />
                                         ) : (
                                             !hideIndicator && (
                                                 <div
@@ -191,7 +203,8 @@ const ChartTooltipContent = React.forwardRef<
                                                             "w-1": indicator === "line",
                                                             "w-0 border-[1.5px] border-dashed bg-transparent":
                                                                 indicator === "dashed",
-                                                            "my-0.5": nestLabel && indicator === "dashed",
+                                                            "my-0.5":
+                                                                nestLabel && indicator === "dashed",
                                                         }
                                                     )}
                                                     style={
@@ -238,12 +251,12 @@ const ChartLegend = RechartsPrimitive.Legend;
 const ChartLegendContent = React.forwardRef<
     HTMLDivElement,
     React.ComponentProps<"div"> &
-    Pick<RechartsPrimitive.LegendProps, "payload" | "verticalAlign"> & {
-    hideIcon?: boolean;
-    nameKey?: string;
-}
->(({className, hideIcon = false, payload, verticalAlign = "bottom", nameKey}, ref) => {
-    const {config} = useChart();
+        Pick<RechartsPrimitive.LegendProps, "payload" | "verticalAlign"> & {
+            hideIcon?: boolean;
+            nameKey?: string;
+        }
+>(({ className, hideIcon = false, payload, verticalAlign = "bottom", nameKey }, ref) => {
+    const { config } = useChart();
 
     if (!payload?.length) {
         return null;
@@ -270,7 +283,7 @@ const ChartLegendContent = React.forwardRef<
                         )}
                     >
                         {itemConfig?.icon && !hideIcon ? (
-                            <itemConfig.icon/>
+                            <itemConfig.icon />
                         ) : (
                             <div
                                 className="h-2 w-2 shrink-0 rounded-[2px]"
@@ -314,4 +327,11 @@ function getPayloadConfigFromPayload(config: ChartConfig, payload: unknown, key:
     return configLabelKey in config ? config[configLabelKey] : config[key as keyof typeof config];
 }
 
-export { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, ChartStyle };
+export {
+    ChartContainer,
+    ChartTooltip,
+    ChartTooltipContent,
+    ChartLegend,
+    ChartLegendContent,
+    ChartStyle,
+};

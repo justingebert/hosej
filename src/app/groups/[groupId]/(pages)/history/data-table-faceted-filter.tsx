@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Column } from "@tanstack/react-table";
+import type { Column } from "@tanstack/react-table";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils/utils";
 import { Badge } from "@/components/ui/badge";
@@ -18,10 +18,10 @@ interface DataTableFacetedFilterProps<TData, TValue> {
 }
 
 export function DataTableFacetedFilter<TData, TValue>({
-                                                          column,
-                                                          title,
-                                                          options,
-                                                      }: DataTableFacetedFilterProps<TData, TValue>) {
+    column,
+    title,
+    options,
+}: DataTableFacetedFilterProps<TData, TValue>) {
     const selectedValues = new Set(column?.getFilterValue() as string[]);
 
     const toggleSelection = (value: string) => {
@@ -39,11 +39,15 @@ export function DataTableFacetedFilter<TData, TValue>({
             <PopoverTrigger asChild>
                 <Button className="text-xs truncate w-full" variant={"secondary"}>
                     {title}
-                    <Separator orientation="vertical" className="mx-2 h-4"/>
-                    <Badge className="rounded-sm px-1 font-normal lg:hidden text-xs">{selectedValues.size}</Badge>
+                    <Separator orientation="vertical" className="mx-2 h-4" />
+                    <Badge className="rounded-sm px-1 font-normal lg:hidden text-xs">
+                        {selectedValues.size}
+                    </Badge>
                     <div className="hidden space-x-1 lg:flex">
                         {selectedValues.size > 2 ? (
-                            <Badge className="rounded-sm px-1 font-normal">{selectedValues.size} selected</Badge>
+                            <Badge className="rounded-sm px-1 font-normal">
+                                {selectedValues.size} selected
+                            </Badge>
                         ) : (
                             options
                                 .filter((option) => selectedValues.has(option.value))
@@ -74,12 +78,16 @@ export function DataTableFacetedFilter<TData, TValue>({
                                 <div
                                     className={cn(
                                         "flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
-                                        isSelected ? "bg-primary text-primary-foreground" : "opacity-50"
+                                        isSelected
+                                            ? "bg-primary text-primary-foreground"
+                                            : "opacity-50"
                                     )}
                                 >
-                                    {isSelected && <Check className="h-3 w-3"/>}
+                                    {isSelected && <Check className="h-3 w-3" />}
                                 </div>
-                                {option.icon && <option.icon className="h-4 w-4 text-muted-foreground"/>}
+                                {option.icon && (
+                                    <option.icon className="h-4 w-4 text-muted-foreground" />
+                                )}
                                 <span>{option.label}</span>
                             </label>
                         );

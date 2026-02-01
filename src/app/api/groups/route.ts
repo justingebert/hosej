@@ -1,8 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest} from "next/server";
+import { NextResponse } from "next/server";
 import dbConnect from "@/db/dbConnect";
 import Group from "@/db/models/Group";
 import User from "@/db/models/user";
-import { AuthedContext, withAuthAndErrors } from "@/lib/api/withAuth";
+import type { AuthedContext} from "@/lib/api/withAuth";
+import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 import { addTemplatePackToGroup } from "@/lib/template-questions/addPackToGroup";
 import { activateSmartQuestions } from "@/lib/question/activateQuestion";
@@ -36,7 +38,7 @@ export const POST = withAuthAndErrors(async (req: NextRequest, { userId }: Authe
     userAdmin.groups.push(newGroup._id);
     await userAdmin.save();
 
-    await addTemplatePackToGroup(newGroup._id, 'starter-pack');
+    await addTemplatePackToGroup(newGroup._id, "starter-pack");
 
     // Smart activation: 1 custom + 1 template question
     await activateSmartQuestions(newGroup._id);
@@ -52,4 +54,3 @@ export const GET = withAuthAndErrors(async (req: NextRequest, { userId }: Authed
     }
     return NextResponse.json({ groups: user.groups }, { status: 200 });
 });
-

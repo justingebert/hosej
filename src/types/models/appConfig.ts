@@ -1,7 +1,7 @@
-import { Types } from "mongoose";
-import { ToDTO } from "../common";
+import type { Types } from "mongoose";
+import type { ToDTO } from "../common";
 
-export type FeatureStatus = 'enabled' | 'disabled' | 'comingSoon';
+export type FeatureStatus = "enabled" | "disabled" | "comingSoon";
 
 export interface IAppConfig {
     _id: Types.ObjectId;
@@ -16,4 +16,3 @@ export interface IAppConfig {
 }
 
 export type AppConfigDTO = ToDTO<IAppConfig>;
-

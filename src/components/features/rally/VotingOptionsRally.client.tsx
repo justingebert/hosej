@@ -16,16 +16,16 @@ import Modal from "react-modal";
 import { X } from "lucide-react";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
-import { IPictureSubmissionJson } from "@/types/models/rally";
+import type { IPictureSubmissionJson } from "@/types/models/rally";
 
-const RallyVoteCarousel = ({user, rally, onVote}: any) => {
+const RallyVoteCarousel = ({ user, rally, onVote }: any) => {
     const [selectedSubmission, setSelectedSubmission] = useState<string>("");
     const [api, setApi] = useState<CarouselApi | null>(null);
     const [hasVoted, setHasVoted] = useState(false);
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-    const {data, isLoading} = useSWR<{ submissions: IPictureSubmissionJson[] }>(
+    const { data, isLoading } = useSWR<{ submissions: IPictureSubmissionJson[] }>(
         `/api/groups/${rally.groupId}/rally/${rally._id}/submissions`,
         fetcher
     );
@@ -134,8 +134,8 @@ const RallyVoteCarousel = ({user, rally, onVote}: any) => {
                         </CarouselItem>
                     ))}
                 </CarouselContent>
-                <CarouselPrevious className="h-[40dvh] rounded-md -translate-y-[18dvh] "/>
-                <CarouselNext className="h-[40dvh] rounded-md translate-y-[18dvh]"/>
+                <CarouselPrevious className="h-[40dvh] rounded-md -translate-y-[18dvh] " />
+                <CarouselNext className="h-[40dvh] rounded-md translate-y-[18dvh]" />
             </Carousel>
             <div className="flex justify-center mb-6">
                 <Button
@@ -169,7 +169,7 @@ const RallyVoteCarousel = ({user, rally, onVote}: any) => {
                             className="absolute top-4 right-2"
                             variant={"ghost"}
                         >
-                            <X/>
+                            <X />
                         </Button>
                     </div>
                 )}

@@ -1,7 +1,7 @@
 import dbConnect from "@/db/dbConnect";
 import User from "@/db/models/user"; // Assuming the user model is defined in this path
 import admin from "firebase-admin";
-import { Types } from "mongoose";
+import type { Types } from "mongoose";
 
 if (!admin.apps.length) {
     const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT as string);
@@ -10,21 +10,25 @@ if (!admin.apps.length) {
     });
 }
 
-export async function sendNotification(title: string, body: string, groupId: string | Types.ObjectId = "") {
+export async function sendNotification(
+    title: string,
+    body: string,
+    groupId: string | Types.ObjectId = ""
+) {
     if (process.env.ENV === "dev") {
         console.log("NOTIFICATION", title, body, groupId);
-        return {success: true, successCount: 0, failureCount: 0};
+        return { success: true, successCount: 0, failureCount: 0 };
     }
     try {
         await dbConnect();
 
         let users;
         if (groupId === "") {
-            users = await User.find({fcmToken: {$exists: true, $ne: ""}});
+            users = await User.find({ fcmToken: { $exists: true, $ne: "" } });
         } else {
             users = await User.find({
-                fcmToken: {$exists: true, $ne: ""},
-                groups: {$in: [groupId]},
+                fcmToken: { $exists: true, $ne: "" },
+                groups: { $in: [groupId] },
             });
         }
         // Aggregate all tokens
@@ -54,7 +58,11 @@ export async function sendNotification(title: string, body: string, groupId: str
         console.log(`${response.successCount} messages were sent successfully`);
         console.log(`${response.failureCount} messages failed`);
 
-        return {success: true, successCount: response.successCount, failureCount: response.failureCount};
+        return {
+            success: true,
+            successCount: response.successCount,
+            failureCount: response.failureCount,
+        };
     } catch (error) {
         console.error("Error sending messages:", error);
         throw new Error("Error sending messages");

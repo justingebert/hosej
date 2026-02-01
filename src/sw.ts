@@ -28,10 +28,7 @@ serwist.addEventListeners();
 
 //importScripts('/firebase-config.js');
 importScripts("https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js");
-importScripts(
-    "https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js"
-);
-
+importScripts("https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js");
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -49,10 +46,7 @@ firebase.initializeApp(firebaseConfig) as any;
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload: any) => {
-    console.log(
-        "[firebase-messaging-sw.js] Received background message ",
-        payload
-    );
+    console.log("[firebase-messaging-sw.js] Received background message ", payload);
 
     // payload.fcmOptions?.link comes from our backend API route handle
     // payload.data.link comes from the Firebase Console where link is the 'key'

@@ -5,15 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
 
-const VoteOptions = ({question, onVote}: any) => {
+const VoteOptions = ({ question, onVote }: any) => {
     // Check if the question allows multiple selections
     const multiple = question.questionType.includes("multiple");
     const text = question.questionType === "text";
 
     const [textResponse, setTextResponse] = useState<string>("");
-    const [selectedOptions, setSelectedOptions] = useState<any[]>(
-        multiple ? [] : [null]
-    );
+    const [selectedOptions, setSelectedOptions] = useState<any[]>(multiple ? [] : [null]);
 
     const toggleOption = (option: any) => {
         setSelectedOptions((prev) => {
@@ -60,9 +58,7 @@ const VoteOptions = ({question, onVote}: any) => {
                         <Button
                             key={index}
                             onClick={() => toggleOption(option)}
-                            variant={
-                                selectedOptions.includes(option) ? "default" : "secondary"
-                            }
+                            variant={selectedOptions.includes(option) ? "default" : "secondary"}
                             className="p-2 text-sm md:text-base lg:text-lg h-auto whitespace-normal"
                         >
                             {question.questionType.startsWith("image") ? (

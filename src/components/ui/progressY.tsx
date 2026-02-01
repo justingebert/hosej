@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils/utils";
 const ProgressY = React.forwardRef<
     React.ElementRef<typeof ProgressPrimitive.Root>,
     React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root>
->(({className, value, ...props}, ref) => (
+>(({ className, value, ...props }, ref) => (
     <ProgressPrimitive.Root
         ref={ref}
         className={cn(
@@ -19,7 +19,7 @@ const ProgressY = React.forwardRef<
     >
         <ProgressPrimitive.Indicator
             className="w-full bg-primary transition-all"
-            style={{transform: `translateY(${100 - (value || 0)}%)`, height: "100%"}} // Adjust Y-axis translation
+            style={{ transform: `translateY(${100 - (value || 0)}%)`, height: "100%" }} // Adjust Y-axis translation
         />
     </ProgressPrimitive.Root>
 ));

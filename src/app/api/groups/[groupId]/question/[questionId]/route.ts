@@ -3,7 +3,8 @@ import Question from "@/db/models/Question";
 import { type NextRequest, NextResponse } from "next/server";
 import { isUserInGroup } from "@/lib/userAuth";
 import { generateSignedUrl } from "@/lib/generateSingledUrl";
-import { AuthedContext, withAuthAndErrors } from "@/lib/api/withAuth";
+import type { AuthedContext} from "@/lib/api/withAuth";
+import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { NotFoundError } from "@/lib/api/errorHandling";
 
 export const GET = withAuthAndErrors(
@@ -16,16 +17,16 @@ export const GET = withAuthAndErrors(
             params: { groupId: string; questionId: string };
         }>
     ) => {
-        const {questionId, groupId} = params;
+        const { questionId, groupId } = params;
 
         await dbConnect();
         await isUserInGroup(userId, groupId);
 
-        const question = await Question.findOne({groupId, _id: questionId});
+        const question = await Question.findOne({ groupId, _id: questionId });
         if (!question) throw new NotFoundError("Question not found");
 
         if (question.image) {
-            const {url} = await generateSignedUrl(new URL(question.image).pathname);
+            const { url } = await generateSignedUrl(new URL(question.image).pathname);
             (question as any).imageUrl = url;
         }
 

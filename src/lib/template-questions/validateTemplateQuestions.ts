@@ -21,7 +21,7 @@ export interface ValidationResult {
 /**
  * Validate an array of question templates
  * Can be used in both frontend (for pre-validation) and backend (for final validation)
- * 
+ *
  * @param templates - Array of template objects to validate
  * @returns ValidationResult with valid flag and array of errors
  */
@@ -33,7 +33,7 @@ export function validateTemplates(templates: any): ValidationResult {
         errors.push({
             index: -1,
             field: "templates",
-            message: "Templates must be an array"
+            message: "Templates must be an array",
         });
         return { valid: false, errors };
     }
@@ -42,7 +42,7 @@ export function validateTemplates(templates: any): ValidationResult {
         errors.push({
             index: -1,
             field: "templates",
-            message: "Templates array cannot be empty"
+            message: "Templates array cannot be empty",
         });
         return { valid: false, errors };
     }
@@ -56,7 +56,7 @@ export function validateTemplates(templates: any): ValidationResult {
             errors.push({
                 index: i,
                 field: "template",
-                message: "Template is null or undefined"
+                message: "Template is null or undefined",
             });
             continue;
         }
@@ -66,7 +66,7 @@ export function validateTemplates(templates: any): ValidationResult {
             errors.push({
                 index: i,
                 field: "category",
-                message: "Category is required and must be a string"
+                message: "Category is required and must be a string",
             });
         }
 
@@ -75,14 +75,14 @@ export function validateTemplates(templates: any): ValidationResult {
             errors.push({
                 index: i,
                 field: "questionType",
-                message: "Question type is required and must be a string"
+                message: "Question type is required and must be a string",
             });
         } else if (!Object.values(QuestionType).includes(template.questionType as QuestionType)) {
             const validTypes = Object.values(QuestionType).join(", ");
             errors.push({
                 index: i,
                 field: "questionType",
-                message: `Invalid question type "${template.questionType}". Valid types: ${validTypes}`
+                message: `Invalid question type "${template.questionType}". Valid types: ${validTypes}`,
             });
         }
 
@@ -91,23 +91,27 @@ export function validateTemplates(templates: any): ValidationResult {
             errors.push({
                 index: i,
                 field: "question",
-                message: "Question text is required and must be a string"
+                message: "Question text is required and must be a string",
             });
         }
 
         // Validate options if present
-        if (template.options !== undefined && template.options !== null && !Array.isArray(template.options)) {
+        if (
+            template.options !== undefined &&
+            template.options !== null &&
+            !Array.isArray(template.options)
+        ) {
             errors.push({
                 index: i,
                 field: "options",
-                message: "Options must be an array if provided"
+                message: "Options must be an array if provided",
             });
         }
     }
 
     return {
         valid: errors.length === 0,
-        errors
+        errors,
     };
 }
 

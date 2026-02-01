@@ -1,9 +1,9 @@
 /**
  * Migration Script: Add Starter Pack to Existing Groups
- * 
+ *
  * This script adds the starter pack questions to all existing groups
  * that don't already have them.
- * 
+ *
  * NOTE: You should first upload the starter pack via admin UI at /admin
  */
 
@@ -21,7 +21,7 @@ async function addStarterPackToExistingGroups() {
         const groups = await Group.find({});
         console.log(`Found ${groups.length} groups`);
 
-        let successCount = 0;
+        const successCount = 0;
         let skipCount = 0;
         let errorCount = 0;
 
@@ -33,17 +33,19 @@ async function addStarterPackToExistingGroups() {
                 // (questions with templateId set)
                 const existingTemplateQuestions = await Question.countDocuments({
                     groupId: group._id,
-                    templateId: { $exists: true, $ne: null }
+                    templateId: { $exists: true, $ne: null },
                 });
 
                 if (existingTemplateQuestions > 0) {
-                    console.log(`  ⏭️  Skipping - already has ${existingTemplateQuestions} template questions`);
+                    console.log(
+                        `  ⏭️  Skipping - already has ${existingTemplateQuestions} template questions`
+                    );
                     skipCount++;
                     continue;
                 }
 
                 // Add starter pack
-                await addTemplatePackToGroup(group._id, 'starter-pack-v1');
+                await addTemplatePackToGroup(group._id, "starter-pack-v1");
             } catch (error) {
                 console.error(`  ❌ Error processing group ${group.name}:`, error);
                 errorCount++;

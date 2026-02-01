@@ -7,10 +7,10 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
-import { UserDTO } from "@/types/models/user";
+import type { UserDTO } from "@/types/models/user";
 import { useHaptic } from "use-haptic";
 
-import { QuestionDTO } from "@/types/models/question";
+import type { QuestionDTO } from "@/types/models/question";
 import { Badge } from "@/components/ui/badge";
 import ChatComponent from "@/components/features/chat/Chat.client";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -22,10 +22,13 @@ type VoteResultsProps = {
     returnTo?: string;
 };
 
-const VoteResults = ({user, question, available, returnTo}: VoteResultsProps) => {
+const VoteResults = ({ user, question, available, returnTo }: VoteResultsProps) => {
     const [animationTriggered, setAnimationTriggered] = useState(false);
-    const {triggerHaptic} = useHaptic();
-    const {data, error} = useSWR<any>(`/api/groups/${question.groupId}/question/${question._id}/results/`, fetcher);
+    const { triggerHaptic } = useHaptic();
+    const { data, error } = useSWR<any>(
+        `/api/groups/${question.groupId}/question/${question._id}/results/`,
+        fetcher
+    );
 
     useEffect(() => {
         if (data) setAnimationTriggered(true);
@@ -35,7 +38,7 @@ const VoteResults = ({user, question, available, returnTo}: VoteResultsProps) =>
     if (!data)
         return (
             <div className="flex justify-center">
-                <Skeleton className="w-full h-40 "/>
+                <Skeleton className="w-full h-40 " />
             </div>
         );
 
@@ -55,11 +58,11 @@ const VoteResults = ({user, question, available, returnTo}: VoteResultsProps) =>
                         <div className="bg-secondary my-2 rounded-md relative">
                             <motion.div
                                 className="bg-secondarydark h-12 rounded"
-                                initial={{width: 0}}
+                                initial={{ width: 0 }}
                                 animate={{
                                     width: animationTriggered ? `${result.percentage}%` : "0%",
                                 }}
-                                transition={{duration: 1, ease: "easeInOut"}}
+                                transition={{ duration: 1, ease: "easeInOut" }}
                             ></motion.div>
                             <div className="absolute inset-0 flex justify-between px-2 items-center">
                                 {question.questionType.startsWith("image") ? (
@@ -84,22 +87,22 @@ const VoteResults = ({user, question, available, returnTo}: VoteResultsProps) =>
                                     </span>
                                 )}
                                 <Badge>
-                                    <CountUpBadge targetPercentage={result.percentage}/>
+                                    <CountUpBadge targetPercentage={result.percentage} />
                                 </Badge>
                             </div>
                         </div>
                     </Link>
                 ))}
             </div>
-            <Separator className="my-4"/>
-            <ChatComponent user={user} entity={question} available={available}/>
+            <Separator className="my-4" />
+            <ChatComponent user={user} entity={question} available={available} />
         </div>
     );
 };
 
 export default VoteResults;
 
-const CountUpBadge = ({targetPercentage}: { targetPercentage: number }) => {
+const CountUpBadge = ({ targetPercentage }: { targetPercentage: number }) => {
     const [currentPercentage, setCurrentPercentage] = useState(0);
 
     useEffect(() => {

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { IChat, IMessage } from "@/types/models/chat";
+import type { IChat, IMessage } from "@/types/models/chat";
 
 const messageSchema = new mongoose.Schema<IMessage>({
     user: {
@@ -40,6 +40,7 @@ const chatSchema = new mongoose.Schema<IChat>({
     },
 });
 
-const Chat = mongoose.models.Chat as mongoose.Model<IChat> || mongoose.model<IChat>("Chat", chatSchema);
+const Chat =
+    (mongoose.models.Chat as mongoose.Model<IChat>) || mongoose.model<IChat>("Chat", chatSchema);
 
 export default Chat;

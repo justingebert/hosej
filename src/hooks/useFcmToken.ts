@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
-import { onMessage, Unsubscribe } from "firebase/messaging";
-import { fetchToken, messaging } from '@/firebase';
+import { useEffect, useRef, useState } from "react";
+import type { Unsubscribe } from "firebase/messaging";
+import { onMessage } from "firebase/messaging";
+import { fetchToken, messaging } from "@/firebase";
 
 export async function requestPermissionReturnToken() {
     if (!("Notification" in window)) {
@@ -11,17 +12,17 @@ export async function requestPermissionReturnToken() {
         const permission = await Notification.requestPermission();
         if (permission === "granted") {
             const currentToken = await fetchToken();
-            await localStorage.setItem('notificationsEnabled', "true")
+            await localStorage.setItem("notificationsEnabled", "true");
             return currentToken;
         } else {
             console.log("Notification permission not granted.");
-            await localStorage.setItem('notificationsEnabled', "false")
+            await localStorage.setItem("notificationsEnabled", "false");
             return null;
         }
     }
     if (Notification.permission === "granted") {
         const currentToken = await fetchToken();
-        await localStorage.setItem('notificationsEnabled', "true")
+        await localStorage.setItem("notificationsEnabled", "true");
         return currentToken;
     }
     if (Notification.permission === "denied") {
@@ -115,7 +116,7 @@ const useFcmToken = (isAuthenticated: boolean, isRegistered: boolean) => {
         return () => unsubscribe?.();
     }, [token]);
 
-    return {fcmToken: token, notificationPermissionStatus};
+    return { fcmToken: token, notificationPermissionStatus };
 };
 
 export default useFcmToken;

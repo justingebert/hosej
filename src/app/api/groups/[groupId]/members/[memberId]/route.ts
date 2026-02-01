@@ -1,15 +1,20 @@
 import Group from "@/db/models/Group";
-import { IGroup } from "@/types/models/group";
+import type { IGroup } from "@/types/models/group";
 import User from "@/db/models/user";
 import dbConnect from "@/db/dbConnect";
 import { isUserInGroup } from "@/lib/userAuth";
-import { NextRequest, NextResponse } from "next/server";
-import { AuthedContext, withAuthAndErrors } from "@/lib/api/withAuth";
+import type { NextRequest} from "next/server";
+import { NextResponse } from "next/server";
+import type { AuthedContext} from "@/lib/api/withAuth";
+import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { ForbiddenError, NotFoundError } from "@/lib/api/errorHandling";
 
 export const DELETE = withAuthAndErrors(
-    async (req: NextRequest, {params, userId}: AuthedContext<{ params: { groupId: string; memberId: string } }>) => {
-        const {groupId, memberId} = params;
+    async (
+        req: NextRequest,
+        { params, userId }: AuthedContext<{ params: { groupId: string; memberId: string } }>
+    ) => {
+        const { groupId, memberId } = params;
 
         await dbConnect();
 
@@ -32,7 +37,9 @@ export const DELETE = withAuthAndErrors(
 
         //if admin left group, find another admin that joined first
         if (group.admin.equals(user._id)) {
-            const newAdmin = group.members.sort((a, b) => a?.joinedAt?.getTime() - b?.joinedAt?.getTime())[0];
+            const newAdmin = group.members.sort(
+                (a, b) => a?.joinedAt?.getTime() - b?.joinedAt?.getTime()
+            )[0];
             group.admin = newAdmin.user;
         }
         await group.save();
@@ -42,9 +49,9 @@ export const DELETE = withAuthAndErrors(
 
         if (group.members.length === 0) {
             await Group.findByIdAndDelete(groupId);
-            return NextResponse.json({message: "Group deleted"}, {status: 200});
+            return NextResponse.json({ message: "Group deleted" }, { status: 200 });
         }
 
-        return NextResponse.json(group, {status: 200});
+        return NextResponse.json(group, { status: 200 });
     }
 );

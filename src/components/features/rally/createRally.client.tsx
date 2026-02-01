@@ -5,18 +5,18 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { createRallyData } from "@/app/groups/[groupId]/(pages)/create/page";
+import type { createRallyData } from "@/app/groups/[groupId]/(pages)/create/page";
 
 interface CreateRallyProps {
     rallyData: createRallyData;
     setRallyData: React.Dispatch<React.SetStateAction<createRallyData>>;
 }
 
-const CreateRally = ({rallyData, setRallyData}: CreateRallyProps) => {
+const CreateRally = ({ rallyData, setRallyData }: CreateRallyProps) => {
     const [loading, setLoading] = useState(false);
     const params = useParams<{ groupId: string }>();
     const groupId = params?.groupId;
-    const {toast} = useToast();
+    const { toast } = useToast();
 
     const lengthInputRef = useRef<HTMLInputElement>(null);
 
@@ -39,13 +39,13 @@ const CreateRally = ({rallyData, setRallyData}: CreateRallyProps) => {
             });
 
             if (!response.ok) {
-                toast({title: "Failed to create rally!", variant: "destructive"});
+                toast({ title: "Failed to create rally!", variant: "destructive" });
             } else {
-                toast({title: "Rally created successfully!"});
+                toast({ title: "Rally created successfully!" });
             }
 
             // Reset the state
-            setRallyData({task: "", lengthInDays: 0});
+            setRallyData({ task: "", lengthInDays: 0 });
         } catch (err: any) {
             toast({
                 title: "Error",
@@ -64,7 +64,7 @@ const CreateRally = ({rallyData, setRallyData}: CreateRallyProps) => {
                     type="text"
                     placeholder="Enter task"
                     value={rallyData.task}
-                    onChange={(e) => setRallyData((prev) => ({...prev, task: e.target.value}))}
+                    onChange={(e) => setRallyData((prev) => ({ ...prev, task: e.target.value }))}
                     onKeyDown={(e) => {
                         if (e.key === "Enter" && lengthInputRef.current) {
                             e.preventDefault();

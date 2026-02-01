@@ -6,22 +6,23 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export function RallyTabs({
-                              groupId,
-                              user,
-                              rallies,
-                              userHasVoted,
-                              userHasUploaded,
-                              setUserHasVoted,
-                              setUserHasUploaded,
-                          }: any) {
+    groupId,
+    user,
+    rallies,
+    userHasVoted,
+    userHasUploaded,
+    setUserHasVoted,
+    setUserHasUploaded,
+}: any) {
     const searchParams = useSearchParams();
-    const defaultTab = searchParams?.get("returnTo") || (rallies.length > 0 ? rallies[0]._id : undefined);
+    const defaultTab =
+        searchParams?.get("returnTo") || (rallies.length > 0 ? rallies[0]._id : undefined);
 
     return (
         <Tabs defaultValue={defaultTab}>
             <TabsList
                 className="grid w-full"
-                style={{gridTemplateColumns: `repeat(${rallies.length}, minmax(0, 1fr))`}}
+                style={{ gridTemplateColumns: `repeat(${rallies.length}, minmax(0, 1fr))` }}
             >
                 {rallies.map((rally: any, index: number) => (
                     <TabsTrigger key={rally._id} value={rally._id}>
@@ -47,18 +48,18 @@ export function RallyTabs({
 }
 
 function RallyTabContent({
-                             groupId,
-                             user,
-                             rally,
-                             userHasVoted,
-                             userHasUploaded,
-                             setUserHasVoted,
-                             setUserHasUploaded,
-                         }: any) {
+    groupId,
+    user,
+    rally,
+    userHasVoted,
+    userHasUploaded,
+    setUserHasVoted,
+    setUserHasUploaded,
+}: any) {
     const router = useRouter();
 
     const handleVote = async () => {
-        setUserHasVoted((prev: any) => ({...prev, [rally._id]: true}));
+        setUserHasVoted((prev: any) => ({ ...prev, [rally._id]: true }));
         router.refresh();
     };
 
@@ -82,15 +83,15 @@ function RallyTabContent({
                 !rally.resultsShowing &&
                 (userHasVoted[rally._id] ? (
                     <div className="mt-5">
-                        <RallyResults user={user} rally={rally}/>
+                        <RallyResults user={user} rally={rally} />
                     </div>
                 ) : (
-                    <RallyVoteCarousel user={user} rally={rally} onVote={handleVote}/>
+                    <RallyVoteCarousel user={user} rally={rally} onVote={handleVote} />
                 ))}
 
             {rally.resultsShowing && (
                 <div className="mt-5">
-                    <RallyResults user={user} rally={rally}/>
+                    <RallyResults user={user} rally={rally} />
                 </div>
             )}
         </div>

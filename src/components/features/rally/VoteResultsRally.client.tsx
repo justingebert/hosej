@@ -5,17 +5,17 @@ import Image from "next/image";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import useSWR from "swr";
-import { IPictureSubmissionJson } from "@/types/models/rally";
+import type { IPictureSubmissionJson } from "@/types/models/rally";
 import fetcher from "@/lib/fetcher";
 import { RallyVotesChart } from "@/components/features/charts/RallyResultsChart";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import ChatComponent from "@/components/features/chat/Chat.client";
 
-const RallyResults = ({user, rally}: any) => {
+const RallyResults = ({ user, rally }: any) => {
     const [loadedImages, setLoadedImages] = useState<{ [key: number]: boolean }>({});
 
-    const {data, isLoading} = useSWR<{ submissions: IPictureSubmissionJson[] }>(
+    const { data, isLoading } = useSWR<{ submissions: IPictureSubmissionJson[] }>(
         `/api/groups/${rally.groupId}/rally/${rally._id}/submissions`,
         fetcher
     );
@@ -23,13 +23,13 @@ const RallyResults = ({user, rally}: any) => {
     const submissions = useMemo(() => data?.submissions || [], [data?.submissions]);
 
     const handleImageLoad = (id: number) => {
-        setLoadedImages((prev) => ({...prev, [id]: true}));
+        setLoadedImages((prev) => ({ ...prev, [id]: true }));
     };
 
     return (
         <div>
             <div className="mb-6">
-                <RallyVotesChart submissions={submissions}/>
+                <RallyVotesChart submissions={submissions} />
             </div>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-5">
                 {submissions.map((submission, index) => (
@@ -50,8 +50,8 @@ const RallyResults = ({user, rally}: any) => {
                                         index === 0
                                             ? "default"
                                             : index === 1
-                                                ? "secondary"
-                                                : "outline"
+                                              ? "secondary"
+                                              : "outline"
                                     }
                                 >
                                     {index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉"}
@@ -68,7 +68,7 @@ const RallyResults = ({user, rally}: any) => {
                                 width={300}
                                 height={300}
                                 priority={index === 0}
-                                style={{transition: "opacity 0.3s ease-in-out"}}
+                                style={{ transition: "opacity 0.3s ease-in-out" }}
                                 onLoad={() => handleImageLoad(index)}
                             />
                         </CardContent>
@@ -84,8 +84,8 @@ const RallyResults = ({user, rally}: any) => {
                     </Card>
                 ))}
             </div>
-            <Separator className="my-6"/>
-            <ChatComponent user={user} entity={rally} available={true}/>
+            <Separator className="my-6" />
+            <ChatComponent user={user} entity={rally} available={true} />
         </div>
     );
 };

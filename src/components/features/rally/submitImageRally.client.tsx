@@ -50,21 +50,21 @@ function calcTimeProgress(startTime: Date, endTime: Date) {
 }
 
 export default function SubmitRally({
-                                        rally,
-                                        groupId,
-                                        user,
-                                        userHasUploaded,
-                                        setUserHasUploaded,
-                                        setUserHasVoted,
-                                    }: any) {
+    rally,
+    groupId,
+    user,
+    userHasUploaded,
+    setUserHasUploaded,
+    setUserHasVoted,
+}: any) {
     const [loading, setLoading] = useState(false);
     const [file, setFile] = useState<File | null>(null);
     const [clearImageInput, setClearImageInput] = useState(false);
     const [uploadsCount, setUploadsCount] = useState(rally.submissions.length); // Track uploads count
     const [timeLeft, setTimeLeft] = useState(calcTimeLeft(rally.endTime)); // State for time left
     const [progressValue, setProgressValue] = useState(0); // Progress bar value
-    const {toast} = useToast();
-    const {uploading, compressImages, handleImageUpload} = useImageUploader();
+    const { toast } = useToast();
+    const { uploading, compressImages, handleImageUpload } = useImageUploader();
 
     // Set up a timer to update the countdown and progress every second
     useEffect(() => {
@@ -110,14 +110,16 @@ export default function SubmitRally({
         setLoading(true);
         try {
             const [compressedMainImage] = await compressImages([file]);
-            const imageUrl = await handleImageUpload(groupId, "rally", rally._id, user._id, [compressedMainImage]);
+            const imageUrl = await handleImageUpload(groupId, "rally", rally._id, user._id, [
+                compressedMainImage,
+            ]);
             if (imageUrl && imageUrl.length > 0) {
                 await createRallySubmission(rally._id, rally.groupId, imageUrl[0].url);
             }
-            setUserHasVoted((prev: any) => ({...prev, [rally._id]: true}));
-            setUserHasUploaded((prev: any) => ({...prev, [rally._id]: true}));
+            setUserHasVoted((prev: any) => ({ ...prev, [rally._id]: true }));
+            setUserHasUploaded((prev: any) => ({ ...prev, [rally._id]: true }));
             setUploadsCount((prevCount: any) => prevCount + 1);
-            toast({title: "Submission successful!"});
+            toast({ title: "Submission successful!" });
         } catch (error: any) {
             toast({
                 title: "Error",
@@ -143,7 +145,7 @@ export default function SubmitRally({
                     <span>s</span>
                 </div>
                 <div className="mt-2">
-                    <Progress value={progressValue}/>
+                    <Progress value={progressValue} />
                 </div>
             </div>
 
@@ -153,8 +155,7 @@ export default function SubmitRally({
                     <span> uploads</span>
                 </div>
                 {userHasUploaded[rally._id] ? (
-                    <div
-                        className="border rounded-lg text-center text-green-500 h-40 flex items-center justify-center text-2xl font-bold">
+                    <div className="border rounded-lg text-center text-green-500 h-40 flex items-center justify-center text-2xl font-bold">
                         Already submitted
                     </div>
                 ) : (

@@ -2,7 +2,8 @@ import dbConnect from "@/db/dbConnect";
 import Question from "@/db/models/Question";
 import { type NextRequest, NextResponse } from "next/server";
 import { isUserInGroup } from "@/lib/userAuth";
-import { AuthedContext, withAuthAndErrors } from "@/lib/api/withAuth";
+import type { AuthedContext} from "@/lib/api/withAuth";
+import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { ValidationError } from "@/lib/api/errorHandling";
 
 export const revalidate = 0;
@@ -16,7 +17,7 @@ export const GET = withAuthAndErrors(
             params: { groupId: string };
         }>
     ) => {
-        const {groupId} = params;
+        const { groupId } = params;
 
         await dbConnect();
         await isUserInGroup(userId, groupId);
@@ -38,12 +39,12 @@ export const GET = withAuthAndErrors(
         })
             .skip(offset)
             .limit(limit)
-            .sort({createdAt: -1});
+            .sort({ createdAt: -1 });
 
         if (!questions) {
-            return NextResponse.json({message: "No questions available"});
+            return NextResponse.json({ message: "No questions available" });
         }
 
-        return NextResponse.json({questions});
+        return NextResponse.json({ questions });
     }
 );

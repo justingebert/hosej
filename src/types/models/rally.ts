@@ -1,5 +1,5 @@
-import { Document, Types } from "mongoose";
-import { AsJson } from "../common";
+import type { Document, Types } from "mongoose";
+import type { AsJson } from "../common";
 
 export interface IPictureSubmission {
     _id: Types.ObjectId;
@@ -10,7 +10,7 @@ export interface IPictureSubmission {
         {
             user: Types.ObjectId;
             time: Date;
-        }
+        },
     ];
 }
 

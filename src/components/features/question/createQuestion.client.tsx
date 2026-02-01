@@ -2,7 +2,13 @@
 import { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import ImageUploader from "@/components/common/ImageUploader";
 import { useImageUploader } from "@/hooks/useImageUploader";
 import { useParams } from "next/navigation";
@@ -10,9 +16,9 @@ import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { useToast } from "@/hooks/use-toast";
 import { CircleMinus, Plus } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
-import { createQuestionData } from "@/app/groups/[groupId]/(pages)/create/page";
+import type { createQuestionData } from "@/app/groups/[groupId]/(pages)/create/page";
 import useSWR from "swr";
-import { GroupDTO } from "@/types/models/group";
+import type { GroupDTO } from "@/types/models/group";
 import fetcher from "@/lib/fetcher";
 
 interface CreateQuestionProps {
@@ -20,14 +26,14 @@ interface CreateQuestionProps {
     setQuestionData: React.Dispatch<React.SetStateAction<createQuestionData>>;
 }
 
-const CreateQuestion = ({questionData, setQuestionData}: CreateQuestionProps) => {
+const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) => {
     const params = useParams<{ groupId: string }>();
     const groupId = params ? params.groupId : "";
-    const {user} = useAuthRedirect();
-    const {toast} = useToast();
+    const { user } = useAuthRedirect();
+    const { toast } = useToast();
     const [clearImageInput, setClearImageInput] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const {uploading, compressImages, handleImageUpload} = useImageUploader();
+    const { uploading, compressImages, handleImageUpload } = useImageUploader();
 
     let optionsMode: OptionsMode;
     if (questionData.questionType.startsWith("custom")) {
@@ -38,7 +44,10 @@ const CreateQuestion = ({questionData, setQuestionData}: CreateQuestionProps) =>
         optionsMode = "static";
     }
 
-    const {data: group, isLoading} = useSWR<GroupDTO>(user ? `/api/groups/${groupId}` : null, fetcher);
+    const { data: group, isLoading } = useSWR<GroupDTO>(
+        user ? `/api/groups/${groupId}` : null,
+        fetcher
+    );
 
     useEffect(() => {
         if (clearImageInput) {
@@ -78,9 +87,9 @@ const CreateQuestion = ({questionData, setQuestionData}: CreateQuestionProps) =>
                 options: group?.members.map((member) => member.name) || [],
             }));
         } else if (value.startsWith("custom") || value.startsWith("image")) {
-            setQuestionData((prev) => ({...prev, questionType: value, options: [""]}));
+            setQuestionData((prev) => ({ ...prev, questionType: value, options: [""] }));
         } else {
-            setQuestionData((prev) => ({...prev, questionType: value, options: []}));
+            setQuestionData((prev) => ({ ...prev, questionType: value, options: [] }));
         }
     };
 
@@ -96,7 +105,7 @@ const CreateQuestion = ({questionData, setQuestionData}: CreateQuestionProps) =>
         setQuestionData((prev) => {
             const updatedOptions = [...prev.options];
             updatedOptions[index] = value;
-            return {...prev, options: updatedOptions};
+            return { ...prev, options: updatedOptions };
         });
     };
 
@@ -112,12 +121,12 @@ const CreateQuestion = ({questionData, setQuestionData}: CreateQuestionProps) =>
         setQuestionData((prev) => {
             const updatedOptionFiles = [...prev.optionFiles];
             updatedOptionFiles[index] = file;
-            return {...prev, optionFiles: updatedOptionFiles};
+            return { ...prev, optionFiles: updatedOptionFiles };
         });
     };
 
     const handleMainImageAdded = (file: File | null) => {
-        setQuestionData((prev) => ({...prev, mainImageFile: file}));
+        setQuestionData((prev) => ({ ...prev, mainImageFile: file }));
     };
 
     const resetForm = () => {
@@ -136,7 +145,9 @@ const CreateQuestion = ({questionData, setQuestionData}: CreateQuestionProps) =>
         e.preventDefault();
 
         console.log(questionData.options);
-        const trimmedOptions = questionData.options.map((option) => option.trim()).filter((option) => option !== "");
+        const trimmedOptions = questionData.options
+            .map((option) => option.trim())
+            .filter((option) => option !== "");
 
         const trimmedOptionsFiles = questionData.optionFiles.filter((file) => file !== null);
 
@@ -149,7 +160,10 @@ const CreateQuestion = ({questionData, setQuestionData}: CreateQuestionProps) =>
             return;
         }
 
-        if (questionData.questionType.startsWith("image-select") && trimmedOptionsFiles.length < 2) {
+        if (
+            questionData.questionType.startsWith("image-select") &&
+            trimmedOptionsFiles.length < 2
+        ) {
             toast({
                 title: "Please add at least two options for image selections.",
                 variant: "destructive",
@@ -178,30 +192,37 @@ const CreateQuestion = ({questionData, setQuestionData}: CreateQuestionProps) =>
             });
 
             if (!response.ok) {
-                toast({title: "Failed to create question", variant: "destructive"});
+                toast({ title: "Failed to create question", variant: "destructive" });
                 setIsSubmitting(false);
                 return;
             }
-            const {newQuestion} = await response.json();
+            const { newQuestion } = await response.json();
 
             // Upload the main image if there is one
             if (questionData.mainImageFile) {
                 const [compressedMainImage] = await compressImages([questionData.mainImageFile]);
-                const imageUrl = await handleImageUpload(groupId, "question", newQuestion._id, user._id, [
-                    compressedMainImage,
-                ]);
+                const imageUrl = await handleImageUpload(
+                    groupId,
+                    "question",
+                    newQuestion._id,
+                    user._id,
+                    [compressedMainImage]
+                );
 
                 if (imageUrl && imageUrl.length > 0) {
                     // Attach the main image to the question
-                    const response = await fetch(`/api/groups/${groupId}/question/${newQuestion._id}/attachImage`, {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({imageUrl: imageUrl[0].url}),
-                    });
+                    const response = await fetch(
+                        `/api/groups/${groupId}/question/${newQuestion._id}/attachImage`,
+                        {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({ imageUrl: imageUrl[0].url }),
+                        }
+                    );
                     if (!response.ok) {
-                        toast({title: "Failed to create question", variant: "destructive"});
+                        toast({ title: "Failed to create question", variant: "destructive" });
                         //TODO delte question
                         setIsSubmitting(false);
                         return;
@@ -214,7 +235,9 @@ const CreateQuestion = ({questionData, setQuestionData}: CreateQuestionProps) =>
                 questionData.questionType === "image-select-multiple"
             ) {
                 // Upload option images and update the options array
-                const compressedFiles = await compressImages(questionData.optionFiles.filter(Boolean) as File[]);
+                const compressedFiles = await compressImages(
+                    questionData.optionFiles.filter(Boolean) as File[]
+                );
                 const optionImageUrls = await handleImageUpload(
                     groupId,
                     "question-option",
@@ -228,15 +251,18 @@ const CreateQuestion = ({questionData, setQuestionData}: CreateQuestionProps) =>
                 });
 
                 // Update the question with options
-                const res = await fetch(`/api/groups/${groupId}/question/${newQuestion._id}/attachOptions`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({options: updatedOptions}),
-                });
+                const res = await fetch(
+                    `/api/groups/${groupId}/question/${newQuestion._id}/attachOptions`,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ options: updatedOptions }),
+                    }
+                );
                 if (!res.ok) {
-                    toast({title: "Failed to create question", variant: "destructive"});
+                    toast({ title: "Failed to create question", variant: "destructive" });
                     setIsSubmitting(false);
                     return;
                 }
@@ -259,17 +285,21 @@ const CreateQuestion = ({questionData, setQuestionData}: CreateQuestionProps) =>
             <div className="mt-5">
                 <Select value={questionData.questionType} onValueChange={handleTypeSelect}>
                     <SelectTrigger>
-                        <SelectValue placeholder="Select Question Type"/>
+                        <SelectValue placeholder="Select Question Type" />
                     </SelectTrigger>
                     <SelectContent className="absolute z-50">
                         <SelectItem value="users-select-one">Vote One User</SelectItem>
                         <SelectItem value="users-select-multiple">Vote Multiple Users</SelectItem>
                         <SelectItem value="custom-select-one">Vote One Custom Option</SelectItem>
-                        <SelectItem value="custom-select-multiple">Vote Multiple Custom Options</SelectItem>
+                        <SelectItem value="custom-select-multiple">
+                            Vote Multiple Custom Options
+                        </SelectItem>
                         <SelectItem value="text">Text Reply</SelectItem>
                         <SelectItem value="rating">Rating (1-10)</SelectItem>
                         <SelectItem value="image-select-one">Vote One Custom Image</SelectItem>
-                        <SelectItem value="image-select-multiple">Vote Multiple Custom Images</SelectItem>
+                        <SelectItem value="image-select-multiple">
+                            Vote Multiple Custom Images
+                        </SelectItem>
                     </SelectContent>
                 </Select>
             </div>
@@ -278,7 +308,9 @@ const CreateQuestion = ({questionData, setQuestionData}: CreateQuestionProps) =>
                     type="text"
                     placeholder="Enter question"
                     value={questionData.question}
-                    onChange={(e) => setQuestionData((prev) => ({...prev, question: e.target.value}))}
+                    onChange={(e) =>
+                        setQuestionData((prev) => ({ ...prev, question: e.target.value }))
+                    }
                     required
                     className="w-full"
                 />
@@ -293,7 +325,7 @@ const CreateQuestion = ({questionData, setQuestionData}: CreateQuestionProps) =>
             <div
                 ref={optionsContainerRef}
                 className="mt-4 px-4 overflow-y-auto"
-                style={{maxHeight: availableHeight ? `${availableHeight}px` : "auto"}}
+                style={{ maxHeight: availableHeight ? `${availableHeight}px` : "auto" }}
             >
                 <DisplayOptions
                     mode={optionsMode}
@@ -306,10 +338,18 @@ const CreateQuestion = ({questionData, setQuestionData}: CreateQuestionProps) =>
                 />
             </div>
 
-            <div ref={buttonRef} className="flex justify-center fixed bottom-6 left-0 w-full p-6 bg-background mb-16">
+            <div
+                ref={buttonRef}
+                className="flex justify-center fixed bottom-6 left-0 w-full p-6 bg-background mb-16"
+            >
                 <Button
                     onClick={handleSubmit}
-                    disabled={uploading || isSubmitting || !questionData.question.trim() || !questionData.questionType}
+                    disabled={
+                        uploading ||
+                        isSubmitting ||
+                        !questionData.question.trim() ||
+                        !questionData.questionType
+                    }
                     className="h-12 w-full"
                 >
                     {uploading || isSubmitting ? "Creating..." : "Create Question"}
@@ -334,20 +374,20 @@ interface DisplayOptionsProps {
 }
 
 const rollOutVariants = {
-    hidden: {opacity: 0, y: -30},
-    visible: {opacity: 1, y: 0},
-    exit: {opacity: 0, y: -30},
+    hidden: { opacity: 0, y: -30 },
+    visible: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -30 },
 };
 
 export const DisplayOptions = ({
-                                   mode,
-                                   options,
-                                   clearInput,
-                                   onOptionChange,
-                                   onOptionRemove,
-                                   onOptionAdd,
-                                   onOptionImageAdded,
-                               }: DisplayOptionsProps) => {
+    mode,
+    options,
+    clearInput,
+    onOptionChange,
+    onOptionRemove,
+    onOptionAdd,
+    onOptionImageAdded,
+}: DisplayOptionsProps) => {
     const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
 
     if (mode === "static") {
@@ -360,10 +400,10 @@ export const DisplayOptions = ({
                         animate="visible"
                         exit="exit"
                         variants={rollOutVariants}
-                        transition={{duration: 0.3}}
+                        transition={{ duration: 0.3 }}
                         className="mt-2 flex w-full items-center gap-4"
                     >
-                        <Input value={option} disabled={true} className="w-full"/>
+                        <Input value={option} disabled={true} className="w-full" />
                     </motion.div>
                 ))}
             </AnimatePresence>
@@ -380,7 +420,7 @@ export const DisplayOptions = ({
                         animate="visible"
                         exit="exit"
                         variants={rollOutVariants}
-                        transition={{duration: 0.3}}
+                        transition={{ duration: 0.3 }}
                         className="mt-2 flex justify-between gap-4"
                     >
                         {mode === "editable" && (
@@ -420,14 +460,14 @@ export const DisplayOptions = ({
                             variant="secondary"
                             onClick={() => onOptionRemove(index)}
                         >
-                            <CircleMinus color={"red"}/>
+                            <CircleMinus color={"red"} />
                         </Button>
                     </motion.div>
                 ))}
             </AnimatePresence>
             <div className="flex justify-end mt-2">
                 <Button variant="outline" size="icon" onClick={onOptionAdd}>
-                    <Plus size={25}/>
+                    <Plus size={25} />
                 </Button>
             </div>
         </>

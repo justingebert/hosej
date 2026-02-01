@@ -2,11 +2,13 @@ import { Types } from "mongoose";
 import dbConnect from "@/db/dbConnect";
 import Question from "@/db/models/Question";
 import Rally from "@/db/models/rally";
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest} from "next/server";
+import { NextResponse } from "next/server";
 import Chat from "@/db/models/Chat";
 import Group from "@/db/models/Group";
 import { isUserInGroup } from "@/lib/userAuth";
-import { AuthedContext, withAuthAndErrors } from "@/lib/api/withAuth";
+import type { AuthedContext} from "@/lib/api/withAuth";
+import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { NotFoundError } from "@/lib/api/errorHandling";
 
 export const revalidate = 0;
@@ -21,7 +23,7 @@ export const GET = withAuthAndErrors(
             params: { groupId: string };
         }>
     ) => {
-        const {groupId} = params;
+        const { groupId } = params;
 
         await dbConnect();
         await isUserInGroup(userId, groupId);
@@ -29,13 +31,13 @@ export const GET = withAuthAndErrors(
         const group = await Group.findById(groupId);
         if (!group) throw new NotFoundError("Group not found");
 
-        const questionsUsedCount = await Question.countDocuments({groupId: groupId, used: true});
-        const questionsLeftCount = await Question.countDocuments({groupId: groupId, used: false});
+        const questionsUsedCount = await Question.countDocuments({ groupId: groupId, used: true });
+        const questionsLeftCount = await Question.countDocuments({ groupId: groupId, used: false });
 
         const questionsByType = await Question.aggregate([
-            {$match: {groupId: new Types.ObjectId(groupId)}},
-            {$group: {_id: "$questionType", count: {$sum: 1}}},
-            {$sort: {count: -1}},
+            { $match: { groupId: new Types.ObjectId(groupId) } },
+            { $group: { _id: "$questionType", count: { $sum: 1 } } },
+            { $sort: { count: -1 } },
         ]);
 
         const questionsByUser = await Question.aggregate([
@@ -43,7 +45,7 @@ export const GET = withAuthAndErrors(
             {
                 $match: {
                     groupId: new Types.ObjectId(groupId),
-                    submittedBy: {$exists: true, $ne: null},
+                    submittedBy: { $exists: true, $ne: null },
                 },
             },
 
@@ -51,7 +53,7 @@ export const GET = withAuthAndErrors(
             {
                 $group: {
                     _id: "$submittedBy", // Group by the user ID (submittedBy)
-                    count: {$sum: 1}, // Count how many questions each user submitted
+                    count: { $sum: 1 }, // Count how many questions each user submitted
                 },
             },
 
@@ -81,17 +83,17 @@ export const GET = withAuthAndErrors(
 
             // Step 6: Sort the results by the number of questions in descending order
             {
-                $sort: {count: -1},
+                $sort: { count: -1 },
             },
         ]);
 
-        const RalliesUsedCount = await Rally.countDocuments({groupId: groupId, used: true});
-        const RalliesLeftCount = await Rally.countDocuments({groupId: groupId, used: false});
+        const RalliesUsedCount = await Rally.countDocuments({ groupId: groupId, used: true });
+        const RalliesLeftCount = await Rally.countDocuments({ groupId: groupId, used: false });
 
         const messages = await Chat.aggregate([
-            {$match: {group: new Types.ObjectId(groupId)}},
-            {$unwind: "$messages"},
-            {$count: "messagesCount"},
+            { $match: { group: new Types.ObjectId(groupId) } },
+            { $unwind: "$messages" },
+            { $count: "messagesCount" },
         ]);
         const messagesCount = messages[0]?.messagesCount || 0;
 
@@ -106,7 +108,7 @@ export const GET = withAuthAndErrors(
                 RalliesLeftCount,
                 messagesCount,
             },
-            {status: 200}
+            { status: 200 }
         );
     }
 );

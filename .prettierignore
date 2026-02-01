@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+.next/
+out/
+build/
+dist/
+
+# Generated files
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+public/sw.js
+public/sw.js.map
+public/swe-worker-*.js
+
+# IDE
+.idea/
+.vscode/
+
+# Misc
+.vercel/
+.env*
+*.log

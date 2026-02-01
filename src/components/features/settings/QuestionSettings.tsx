@@ -7,7 +7,11 @@ interface QuestionSettingsProps {
     onQuestionCountChange: (value: number) => void;
 }
 
-export function QuestionSettings({questionCount, lastQuestionDate, onQuestionCountChange}: QuestionSettingsProps) {
+export function QuestionSettings({
+    questionCount,
+    lastQuestionDate,
+    onQuestionCountChange,
+}: QuestionSettingsProps) {
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between gap-4">
@@ -23,9 +27,8 @@ export function QuestionSettings({questionCount, lastQuestionDate, onQuestionCou
                 />
             </div>
             <div className="text-sm text-muted-foreground">
-                Last Question Date: {lastQuestionDate
-                ? new Date(lastQuestionDate).toLocaleDateString()
-                : "N/A"}
+                Last Question Date:{" "}
+                {lastQuestionDate ? new Date(lastQuestionDate).toLocaleDateString() : "N/A"}
             </div>
         </div>
     );

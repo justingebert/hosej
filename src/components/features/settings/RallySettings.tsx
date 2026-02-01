@@ -9,11 +9,11 @@ interface RallySettingsProps {
 }
 
 export function RallySettings({
-                                  rallyCount,
-                                  rallyGapDays,
-                                  onRallyCountChange,
-                                  onRallyGapDaysChange
-                              }: RallySettingsProps) {
+    rallyCount,
+    rallyGapDays,
+    onRallyCountChange,
+    onRallyGapDaysChange,
+}: RallySettingsProps) {
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between gap-4">
