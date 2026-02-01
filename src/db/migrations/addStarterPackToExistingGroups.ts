@@ -43,7 +43,7 @@ async function addStarterPackToExistingGroups() {
                 }
 
                 // Add starter pack
-                await addTemplatePackToGroup(group._id, 'starter-pack');
+                await addTemplatePackToGroup(group._id, 'starter-pack-v1');
             } catch (error) {
                 console.error(`  ❌ Error processing group ${group.name}:`, error);
                 errorCount++;

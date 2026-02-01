@@ -4,7 +4,7 @@ import { IQuestionTemplate } from "@/types/models/questionTemplate";
 
 const questionTemplateSchema = new mongoose.Schema<IQuestionTemplate>(
     {
-        packId: { type: String, required: true },
+        packId: { type: String, required: true},
         category: { type: String },
         questionType: {
             type: String,

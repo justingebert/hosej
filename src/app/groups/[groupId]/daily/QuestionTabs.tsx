@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import VoteOptions from "@/components/features/question/VotingOptions.client";
 import VoteResults from "@/components/features/question/VoteResults.client";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -21,17 +21,62 @@ import { mutate } from "swr";
 import { CheckCheck } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
-export default function QuestionsTabs({user, groupId, questions}: any) {
+// Get display category for a question
+function getDisplayCategory(question: any): string {
+    if (question.submittedBy) return "Custom";
+    return question.category || "Other";
+}
+
+// Build flat list of questions with display labels (Custom first, then others)
+// Returns: [{ question, label: "Custom 1" }, { question, label: "Starter 1" }, ...]
+function buildFlatQuestionList(questions: any[]): { question: any; label: string }[] {
+    // Group by category
+    const grouped: Record<string, any[]> = {};
+    for (const q of questions) {
+        const cat = getDisplayCategory(q);
+        if (!grouped[cat]) grouped[cat] = [];
+        grouped[cat].push(q);
+    }
+
+    // Sort categories: Custom first, then alphabetically
+    const categories = Object.keys(grouped).sort((a, b) => {
+        if (a === "Custom") return -1;
+        if (b === "Custom") return 1;
+        return a.localeCompare(b);
+    });
+
+    // Build flat list with labels
+    const result: { question: any; label: string }[] = [];
+    for (const cat of categories) {
+        const catQuestions = grouped[cat];
+        catQuestions.forEach((q, idx) => {
+            result.push({
+                question: q,
+                label: catQuestions.length === 1 ? cat : `${cat} ${idx + 1}`
+            });
+        });
+    }
+
+    return result;
+}
+
+export default function QuestionsTabs({ user, groupId, questions }: any) {
     const [drawerOpen, setDrawerOpen] = useState(false);
     const searchParams = useSearchParams();
     const router = useRouter();
-    const defaultTab = searchParams?.get("returnTo") || (questions.length > 0 ? questions[0]._id : undefined);
+
+    // Build flat list with labels
+    const flatList = useMemo(() => buildFlatQuestionList(questions), [questions]);
+
+    // Determine default tab
+    const returnToParam = searchParams?.get("returnTo");
+    const defaultTab = returnToParam || (flatList.length > 0 ? flatList[0].question._id : undefined);
 
     const rateQuestion = async (questionId: string, rating: string) => {
         await fetch(`/api/groups/${groupId}/question/${questionId}/rate`, {
             method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({rating: rating}),
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ rating: rating }),
         });
 
         mutate(`/api/groups/${groupId}/question`);
@@ -43,7 +88,6 @@ export default function QuestionsTabs({user, groupId, questions}: any) {
     };
 
     const handleTabChange = (tabValue: string) => {
-        console.log("[handleTabChange] Switching to tab:", tabValue);
         router.push(`/groups/${groupId}/daily?returnTo=${tabValue}`);
     };
 
@@ -52,65 +96,109 @@ export default function QuestionsTabs({user, groupId, questions}: any) {
             <TabsList
                 className="grid w-full mb-10"
                 style={{
-                    gridTemplateColumns: `repeat(${questions.length}, minmax(0, 1fr))`,
+                    gridTemplateColumns: `repeat(${flatList.length}, minmax(0, 1fr))`,
                 }}
             >
-                {questions.map((question: any, index: number) => (
+                {flatList.map(({ question, label }) => (
                     <TabsTrigger key={question._id} value={question._id}>
-                        {"Daily " + (index + 1)}
+                        {label}
                     </TabsTrigger>
                 ))}
             </TabsList>
-            {questions.map((question: any) => (
-                <TabsContent key={question._id} value={question._id}>
-                    {RatingDrawer(drawerOpen, setDrawerOpen, question, rateQuestion)}
 
-                    {question.imageUrl && (
-                        <Image
-                            src={question.imageUrl}
-                            alt={`${question.question}`}
-                            className="object-cover w-full h-full cursor-pointer rounded-lg mt-4"
-                            width={300}
-                            height={300}
-                        />
-                    )}
-                    <div className="mt-10">
-                        {question.userHasVoted ? (
-                            <VoteResults
-                                user={user}
-                                question={question}
-                                available={true}
-                                returnTo={`daily?returnTo=${question._id}`}
-                            />
-                        ) : (
-                            <VoteOptions
-                                question={question}
-                                onVote={() => {
-                                    mutate(`/api/groups/${groupId}/question`);
-                                    handleDrawer();
-                                }}
-                            />
-                        )}
-                    </div>
+            {flatList.map(({ question }) => (
+                <TabsContent key={question._id} value={question._id}>
+                    <QuestionContent
+                        user={user}
+                        groupId={groupId}
+                        question={question}
+                        drawerOpen={drawerOpen}
+                        setDrawerOpen={setDrawerOpen}
+                        rateQuestion={rateQuestion}
+                        handleDrawer={handleDrawer}
+                    />
                 </TabsContent>
             ))}
         </Tabs>
     );
 }
 
-function RatingDrawer(
-    drawerOpen: boolean,
-    setDrawerOpen: React.Dispatch<React.SetStateAction<boolean>>,
-    question: any,
-    rateQuestion: (questionId: string, rating: string) => Promise<void>
-) {
+// Extracted question content component
+function QuestionContent({
+    user,
+    groupId,
+    question,
+    drawerOpen,
+    setDrawerOpen,
+    rateQuestion,
+    handleDrawer,
+}: {
+    user: any;
+    groupId: string;
+    question: any;
+    drawerOpen: boolean;
+    setDrawerOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    rateQuestion: (questionId: string, rating: string) => Promise<void>;
+    handleDrawer: () => void;
+}) {
+    return (
+        <>
+            <RatingDrawer
+                drawerOpen={drawerOpen}
+                setDrawerOpen={setDrawerOpen}
+                question={question}
+                rateQuestion={rateQuestion}
+            />
+
+            {question.imageUrl && (
+                <Image
+                    src={question.imageUrl}
+                    alt={`${question.question}`}
+                    className="object-cover w-full h-full cursor-pointer rounded-lg mt-4"
+                    width={300}
+                    height={300}
+                />
+            )}
+            <div className="mt-10">
+                {question.userHasVoted ? (
+                    <VoteResults
+                        user={user}
+                        question={question}
+                        available={true}
+                        returnTo={`daily?returnTo=${question._id}`}
+                    />
+                ) : (
+                    <VoteOptions
+                        question={question}
+                        onVote={() => {
+                            mutate(`/api/groups/${groupId}/question`);
+                            handleDrawer();
+                        }}
+                    />
+                )}
+            </div>
+        </>
+    );
+}
+
+function RatingDrawer({
+    drawerOpen,
+    setDrawerOpen,
+    question,
+    rateQuestion,
+}: {
+    drawerOpen: boolean;
+    setDrawerOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    question: any;
+    rateQuestion: (questionId: string, rating: string) => Promise<void>;
+}) {
     return (
         <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
             <DrawerTrigger className="w-full">
                 <Card className="relative bg-foreground text-center">
                     <h2 className="font-bold p-6 text-secondary">{question.question}</h2>
                     {question.questionType.includes("multiple") && (
-                        <CheckCheck className="absolute bottom-2 right-2 text-secondary w-4 h-4"/>
+                        <CheckCheck className="absolute bottom-2 right-2 text-secondary w-4 h-4" />
                     )}
                 </Card>
             </DrawerTrigger>
@@ -145,14 +233,14 @@ function RatingDrawer(
                                     question.options.map((option: any, index: number) => (
                                         <div
                                             key={index}
-                                            className="text-sm p-2 bg-secondary rounded-lg max-w-md text-center flex items-center justify-center overflow-hidden" // fixed height for text options
+                                            className="text-sm p-2 bg-secondary rounded-lg max-w-md text-center flex items-center justify-center overflow-hidden"
                                         >
                                             <span className="line-clamp-3">{option}</span>
                                         </div>
                                     ))}
                             </div>
                         </div>
-                        <Separator className="my-6"/>
+                        <Separator className="my-6" />
                     </>
                 )}
                 <div>

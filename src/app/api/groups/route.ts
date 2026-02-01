@@ -5,7 +5,7 @@ import User from "@/db/models/user";
 import { AuthedContext, withAuthAndErrors } from "@/lib/api/withAuth";
 import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 import { addTemplatePackToGroup } from "@/lib/template-questions/addPackToGroup";
-import { activateNextQuestions } from "@/lib/question/activateQuestion";
+import { activateSmartQuestions } from "@/lib/question/activateQuestion";
 
 export const revalidate = 0;
 
@@ -38,7 +38,8 @@ export const POST = withAuthAndErrors(async (req: NextRequest, { userId }: Authe
 
     await addTemplatePackToGroup(newGroup._id, 'starter-pack');
 
-    await activateNextQuestions(newGroup._id, newGroup.features.questions.settings.questionCount);
+    // Smart activation: 1 custom + 1 template question
+    await activateSmartQuestions(newGroup._id);
 
     return NextResponse.json(newGroup, { status: 201 });
 });

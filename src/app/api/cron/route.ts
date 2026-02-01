@@ -3,7 +3,7 @@ import Chat from "@/db/models/Chat";
 import Group from "@/db/models/Group";
 import Jukebox from "@/db/models/Jukebox";
 import { withErrorHandling } from "@/lib/api/errorHandling";
-import { activateNextQuestions } from "@/lib/question/activateQuestion";
+import { activateSmartQuestions } from "@/lib/question/activateQuestion";
 import { sendNotification } from "@/lib/sendNotification";
 import { IGroup } from "@/types/models/group";
 import { NextResponse } from "next/server";
@@ -49,7 +49,8 @@ export const GET = withErrorHandling(async () => {
     const groups = await Group.find({});
     //TODO this sends multiple notifications to one user this is wrong
     for (const group of groups) {
-        const questions = await activateNextQuestions(group._id, group.features.questions.settings.questionCount);
+        // Smart activation: 1 custom + 1 template question
+        const questions = await activateSmartQuestions(group._id);
         if (questions.length === 0) {
             await sendNotification(
                 "🥗DA HABEN WIR DEN SALAT🥗",
