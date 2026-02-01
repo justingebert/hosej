@@ -2,7 +2,7 @@ import dbConnect from "../db/dbConnect";
 import Group from "@/db/models/Group";
 import { ForbiddenError, NotFoundError } from "@/lib/api/errorHandling";
 import AppConfig from "@/db/models/AppConfig";
-import { Types } from "mongoose";
+import type { Types } from "mongoose";
 
 export async function isUserInGroup(userId: string, groupId: string) {
     const group = await Group.findById(groupId);
@@ -16,7 +16,7 @@ export async function isUserInGroup(userId: string, groupId: string) {
         throw new ForbiddenError("You are not a member of this group");
     }
 
-    return {isAuthorized: true};
+    return { isAuthorized: true };
 }
 
 export async function isUserAdmin(userId: string, groupId: string) {
@@ -37,10 +37,12 @@ export async function isUserAdmin(userId: string, groupId: string) {
 export async function isGlobalAdmin(userId: string | Types.ObjectId): Promise<boolean> {
     await dbConnect();
 
-    const config = await AppConfig.findOne({configKey: "global_features"});
+    const config = await AppConfig.findOne({ configKey: "global_features" });
     if (!config) return false;
 
-    return config.adminUsers.some((adminId: Types.ObjectId) => adminId.toString() === userId.toString());
+    return config.adminUsers.some(
+        (adminId: Types.ObjectId) => adminId.toString() === userId.toString()
+    );
 }
 
 /**
@@ -49,5 +51,5 @@ export async function isGlobalAdmin(userId: string | Types.ObjectId): Promise<bo
 export async function getGlobalConfig() {
     await dbConnect();
 
-    return await AppConfig.findOne({configKey: "global_features"}).orFail();
+    return await AppConfig.findOne({ configKey: "global_features" }).orFail();
 }

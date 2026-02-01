@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { CircleHelp, Copy, Star, User } from "lucide-react";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
-import { GroupDTO } from "@/types/models/group";
+import type { GroupDTO } from "@/types/models/group";
 import { JoinGroupDrawer } from "@/components/features/group/joinGroupDrawer";
 import { CreateGroupDrawer } from "@/components/features/group/createGroupDrawer";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -11,38 +11,38 @@ import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
 import { useToast } from "@/hooks/use-toast";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
-import { UserDTO } from "@/types/models/user";
+import type { UserDTO } from "@/types/models/user";
 import { useEffect, useState } from "react";
 
 export default function GroupsPage() {
-    const {toast} = useToast();
+    const { toast } = useToast();
     const router = useRouter();
-    const {user} = useAuthRedirect();
+    const { user } = useAuthRedirect();
 
     function copyToClipboard(text: string) {
         navigator.clipboard
             .writeText(text)
             .then(() => {
-                toast({title: "GroupId copied to clipboard!"});
+                toast({ title: "GroupId copied to clipboard!" });
             })
             .catch((err) => {
                 console.error("Failed to copy to clipboard: ", err);
-                toast({title: "Ooops someting went wrong while coping!", variant: "destructive"});
+                toast({ title: "Ooops someting went wrong while coping!", variant: "destructive" });
             });
     }
 
     return (
         <div className="relative min-h-screen flex flex-col">
-            <Header router={router}/>
+            <Header router={router} />
 
-            <GroupsList router={router} copyFn={copyToClipboard} user={user}/>
+            <GroupsList router={router} copyFn={copyToClipboard} user={user} />
 
             <div className="fixed bottom-0 left-0 w-full backdrop-blur-sm p-8 flex space-x-4">
                 <div className="w-1/2">
-                    <CreateGroupDrawer/>
+                    <CreateGroupDrawer />
                 </div>
                 <div className="w-1/2">
-                    <JoinGroupDrawer/>
+                    <JoinGroupDrawer />
                 </div>
             </div>
         </div>
@@ -50,10 +50,10 @@ export default function GroupsPage() {
 }
 
 function GroupsList({
-                        router,
-                        copyFn,
-                        user,
-                    }: {
+    router,
+    copyFn,
+    user,
+}: {
     router: ReturnType<typeof useRouter>;
     copyFn: (text: string) => void;
     user: UserDTO;
@@ -70,8 +70,8 @@ function GroupsList({
         if (userName) {
             fetch("/api/users", {
                 method: "PUT",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({username: userName}),
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username: userName }),
             });
             localStorage.removeItem("userName");
         }
@@ -88,13 +88,16 @@ function GroupsList({
         }
     };
 
-    const {data, isLoading} = useSWR<{ groups: GroupDTO[] }>(user ? `/api/groups` : null, fetcher);
+    const { data, isLoading } = useSWR<{ groups: GroupDTO[] }>(
+        user ? `/api/groups` : null,
+        fetcher
+    );
     const groups = data?.groups || [];
 
     return (
         <>
             {isLoading || !user ? (
-                <GroupListSkeleton/>
+                <GroupListSkeleton />
             ) : (
                 <div className="flex-grow overflow-y-auto py-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-24">
@@ -110,10 +113,16 @@ function GroupsList({
                                         <CardDescription>Go Vote Now!</CardDescription>
                                     </div>
                                     <div className="flex items-center space-x-2">
-                                        <Button variant="ghost" size="icon" onClick={(e) => handleStar(group._id, e)}>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={(e) => handleStar(group._id, e)}
+                                        >
                                             <Star
                                                 className="w-4 h-4"
-                                                color={starredGroupId === group._id ? "gold" : "gray"}
+                                                color={
+                                                    starredGroupId === group._id ? "gold" : "gray"
+                                                }
                                             />
                                         </Button>
 
@@ -125,7 +134,7 @@ function GroupsList({
                                                 copyFn(`${group._id}`);
                                             }}
                                         >
-                                            <Copy className="w-4 h-4"/>
+                                            <Copy className="w-4 h-4" />
                                         </Button>
                                     </div>
                                 </CardContent>
@@ -146,10 +155,10 @@ function GroupListSkeleton() {
                     <Card key={i} className="cursor-pointer">
                         <CardContent className="flex justify-between items-center p-4">
                             <div>
-                                <Skeleton className="h-6 w-32"/>
-                                <Skeleton className="h-4 w-24 mt-1"/>
+                                <Skeleton className="h-6 w-32" />
+                                <Skeleton className="h-4 w-24 mt-1" />
                             </div>
-                            <Skeleton className="h-8 w-8"/>
+                            <Skeleton className="h-8 w-8" />
                         </CardContent>
                     </Card>
                 ))}
@@ -158,15 +167,15 @@ function GroupListSkeleton() {
     );
 }
 
-function Header({router}: { router: ReturnType<typeof useRouter> }) {
+function Header({ router }: { router: ReturnType<typeof useRouter> }) {
     return (
         <div className="flex justify-between items-center w-full">
             <Button variant="outline" size="icon" onClick={() => router.push(`/help`)}>
-                <CircleHelp/>
+                <CircleHelp />
             </Button>
             <h1 className="text-4xl font-bold">Groups</h1>
             <Button variant="outline" size="icon" onClick={() => router.push(`/settings`)}>
-                <User/>
+                <User />
             </Button>
         </div>
     );

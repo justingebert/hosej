@@ -1,6 +1,6 @@
 import useSWRInfinite from "swr/infinite";
 
-import { QuestionDTO } from "@/types/models/question";
+import type { QuestionDTO } from "@/types/models/question";
 
 interface UsePaginatedDataProps {
     groupId: string;
@@ -9,7 +9,7 @@ interface UsePaginatedDataProps {
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-export function usePaginatedData({groupId, limit = 1000}: UsePaginatedDataProps) {
+export function usePaginatedData({ groupId, limit = 1000 }: UsePaginatedDataProps) {
     // Define the SWR key generator for each page of data
     const getKey = (pageIndex: number, previousPageData: { questions: QuestionDTO[] }) => {
         // If no more data to fetch, return null to stop the pagination
@@ -19,7 +19,7 @@ export function usePaginatedData({groupId, limit = 1000}: UsePaginatedDataProps)
         return `/api/groups/${groupId}/history?limit=${limit}&offset=${pageIndex * limit}`;
     };
 
-    const {data, error, isLoading, size, setSize} = useSWRInfinite(getKey, fetcher);
+    const { data, error, isLoading, size, setSize } = useSWRInfinite(getKey, fetcher);
 
     // Merge all pages of data into a single array
     const questions = data ? data.flatMap((page) => page.questions) : [];
@@ -28,5 +28,5 @@ export function usePaginatedData({groupId, limit = 1000}: UsePaginatedDataProps)
 
     const loadMore = () => setSize(size + 1);
 
-    return {data: questions, loading: isLoading, hasMore, loadMore, error};
+    return { data: questions, loading: isLoading, hasMore, loadMore, error };
 }

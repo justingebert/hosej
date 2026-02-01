@@ -1,17 +1,22 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest} from "next/server";
+import { NextResponse } from "next/server";
 import dbConnect from "@/db/dbConnect";
 import { isUserInGroup } from "@/lib/userAuth";
 import Group from "@/db/models/Group";
 import User from "@/db/models/user";
-import { AuthedContext, withAuthAndErrors } from "@/lib/api/withAuth";
+import type { AuthedContext} from "@/lib/api/withAuth";
+import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { ForbiddenError, NotFoundError } from "@/lib/api/errorHandling";
 
 export const revalidate = 0;
 
 //get group
 export const GET = withAuthAndErrors(
-    async (req: NextRequest, {params, userId}: AuthedContext<{ params: { groupId: string } }>) => {
-        const {groupId} = params;
+    async (
+        req: NextRequest,
+        { params, userId }: AuthedContext<{ params: { groupId: string } }>
+    ) => {
+        const { groupId } = params;
         await dbConnect();
 
         await isUserInGroup(userId, groupId);
@@ -23,14 +28,17 @@ export const GET = withAuthAndErrors(
         const group = groupDoc.toObject();
         (group as any).userIsAdmin = userIsAdmin;
 
-        return NextResponse.json(group, {status: 200});
+        return NextResponse.json(group, { status: 200 });
     }
 );
 
 //update group
 export const PUT = withAuthAndErrors(
-    async (req: NextRequest, {params, userId}: AuthedContext<{ params: { groupId: string } }>) => {
-        const {groupId} = params;
+    async (
+        req: NextRequest,
+        { params, userId }: AuthedContext<{ params: { groupId: string } }>
+    ) => {
+        const { groupId } = params;
 
         const data = await req.json();
         await dbConnect();
@@ -47,13 +55,16 @@ export const PUT = withAuthAndErrors(
         group.set(data);
         await group.save();
 
-        return NextResponse.json(group, {status: 200});
+        return NextResponse.json(group, { status: 200 });
     }
 );
 
 export const DELETE = withAuthAndErrors(
-    async (req: NextRequest, {params, userId}: AuthedContext<{ params: { groupId: string } }>) => {
-        const {groupId} = params;
+    async (
+        req: NextRequest,
+        { params, userId }: AuthedContext<{ params: { groupId: string } }>
+    ) => {
+        const { groupId } = params;
 
         await dbConnect();
 
@@ -76,6 +87,6 @@ export const DELETE = withAuthAndErrors(
 
         await Group.findByIdAndDelete(groupId);
 
-        return NextResponse.json({message: "Group deleted"}, {status: 200});
+        return NextResponse.json({ message: "Group deleted" }, { status: 200 });
     }
 );

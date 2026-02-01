@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { FeatureStatus } from "@/types/models/appConfig";
+import type { FeatureStatus } from "@/types/models/appConfig";
 
 interface GlobalConfig {
     features: {
@@ -19,7 +19,7 @@ interface GlobalConfig {
 interface GlobalFeatureControlProps {
     config: GlobalConfig;
     localConfig: GlobalConfig;
-    onUpdateFeature: (feature: 'questions' | 'rallies' | 'jukebox', status: FeatureStatus) => void;
+    onUpdateFeature: (feature: "questions" | "rallies" | "jukebox", status: FeatureStatus) => void;
     onSave: () => void;
     saving: boolean;
 }
@@ -44,31 +44,26 @@ export default function GlobalFeatureControl({
                         label="Questions"
                         id="q"
                         value={localConfig.features.questions.status}
-                        onChange={(status) => onUpdateFeature('questions', status)}
+                        onChange={(status) => onUpdateFeature("questions", status)}
                     />
 
                     <FeatureRadioGroup
                         label="Rallies"
                         id="r"
                         value={localConfig.features.rallies.status}
-                        onChange={(status) => onUpdateFeature('rallies', status)}
+                        onChange={(status) => onUpdateFeature("rallies", status)}
                     />
 
                     <FeatureRadioGroup
                         label="Jukebox"
                         id="j"
                         value={localConfig.features.jukebox.status}
-                        onChange={(status) => onUpdateFeature('jukebox', status)}
+                        onChange={(status) => onUpdateFeature("jukebox", status)}
                     />
                 </div>
 
                 <div className="flex flex-col gap-2 pt-4 border-t">
-                    <Button
-                        onClick={onSave}
-                        disabled={saving}
-                        size="lg"
-                        className="w-full"
-                    >
+                    <Button onClick={onSave} disabled={saving} size="lg" className="w-full">
                         {saving ? "Saving..." : "Save Global Settings"}
                     </Button>
                     <p className="text-xs text-muted-foreground text-center">
@@ -103,15 +98,21 @@ function FeatureRadioGroup({
             >
                 <div className="flex items-center space-x-2">
                     <RadioGroupItem value="enabled" id={`${id}-enabled`} />
-                    <Label htmlFor={`${id}-enabled`} className="cursor-pointer">Enabled</Label>
+                    <Label htmlFor={`${id}-enabled`} className="cursor-pointer">
+                        Enabled
+                    </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                     <RadioGroupItem value="comingSoon" id={`${id}-coming`} />
-                    <Label htmlFor={`${id}-coming`} className="cursor-pointer">Coming Soon</Label>
+                    <Label htmlFor={`${id}-coming`} className="cursor-pointer">
+                        Coming Soon
+                    </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                     <RadioGroupItem value="disabled" id={`${id}-disabled`} />
-                    <Label htmlFor={`${id}-disabled`} className="cursor-pointer">Disabled</Label>
+                    <Label htmlFor={`${id}-disabled`} className="cursor-pointer">
+                        Disabled
+                    </Label>
                 </div>
             </RadioGroup>
         </div>

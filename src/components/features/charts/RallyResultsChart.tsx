@@ -1,16 +1,21 @@
-"use client"
+"use client";
 
-import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from "recharts"
-import { Card, CardContent } from "@/components/ui/card"
-import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from "recharts";
+import { Card, CardContent } from "@/components/ui/card";
+import type {
+    ChartConfig} from "@/components/ui/chart";
+import {
+    ChartContainer,
+    ChartTooltip,
+    ChartTooltipContent,
+} from "@/components/ui/chart";
 
-
-export function RallyVotesChart({submissions}: { submissions: any[] }) {
+export function RallyVotesChart({ submissions }: { submissions: any[] }) {
     const chartData = submissions.map((submission, index) => ({
         username: submission.username, // Username for the label
         votes: submission.votes.length, // Number of votes for each submission
-        fill: `hsl(var(--chart-${index % 5 + 1}))`, // Assign colors dynamically based on index
-    }))
+        fill: `hsl(var(--chart-${(index % 5) + 1}))`, // Assign colors dynamically based on index
+    }));
 
     // Step 2: Create chart config dynamically
     const rallyVotesConfig: ChartConfig = {
@@ -21,10 +26,10 @@ export function RallyVotesChart({submissions}: { submissions: any[] }) {
             config[item.username] = {
                 label: item.username, // Set label as the username
                 color: item.fill, // Use the fill color for the legend
-            }
-            return config
+            };
+            return config;
         }, {}),
-    }
+    };
 
     return (
         <Card>
@@ -34,9 +39,9 @@ export function RallyVotesChart({submissions}: { submissions: any[] }) {
                         accessibilityLayer
                         data={chartData}
                         layout="vertical"
-                        margin={{right: 16}}
+                        margin={{ right: 16 }}
                     >
-                        <CartesianGrid horizontal={false}/>
+                        <CartesianGrid horizontal={false} />
                         <YAxis
                             dataKey="username"
                             type="category"
@@ -46,10 +51,10 @@ export function RallyVotesChart({submissions}: { submissions: any[] }) {
                             tickFormatter={(value) => value}
                             hide
                         />
-                        <XAxis dataKey="votes" type="number" hide/>
+                        <XAxis dataKey="votes" type="number" hide />
                         <ChartTooltip
                             cursor={false}
-                            content={<ChartTooltipContent indicator="line"/>}
+                            content={<ChartTooltipContent indicator="line" />}
                         />
                         <Bar
                             dataKey="votes"
@@ -77,5 +82,5 @@ export function RallyVotesChart({submissions}: { submissions: any[] }) {
                 </ChartContainer>
             </CardContent>
         </Card>
-    )
+    );
 }

@@ -7,7 +7,12 @@ interface GroupInfoCardProps {
     adminName: string;
 }
 
-export function GroupInfoCard({currentMemberName, groupId, createdAt, adminName}: GroupInfoCardProps) {
+export function GroupInfoCard({
+    currentMemberName,
+    groupId,
+    createdAt,
+    adminName,
+}: GroupInfoCardProps) {
     return (
         <Card>
             <CardHeader>

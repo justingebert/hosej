@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 import type { ApiRoute } from "./errorHandling";
 import { AuthError, withErrorHandling } from "./errorHandling";
@@ -11,12 +11,12 @@ export type AuthedContext<T = {}> = T & { userId: string };
  */
 export function withAuth<TCtx = {}>(handler: ApiRoute<AuthedContext<TCtx>>): ApiRoute<TCtx> {
     return async (req: NextRequest, context: TCtx) => {
-        const token = await getToken({req, secret: process.env.NEXTAUTH_SECRET});
+        const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
         if (!token?.userId) {
             throw new AuthError("Unauthorized");
         }
         const userId = String(token.userId);
-        return handler(req, Object.assign({}, context, {userId}));
+        return handler(req, Object.assign({}, context, { userId }));
     };
 }
 

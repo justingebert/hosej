@@ -2,7 +2,8 @@ import dbConnect from "@/db/dbConnect";
 import Question from "@/db/models/Question";
 import { type NextRequest, NextResponse } from "next/server";
 import { isUserInGroup } from "@/lib/userAuth";
-import { AuthedContext, withAuthAndErrors } from "@/lib/api/withAuth";
+import type { AuthedContext} from "@/lib/api/withAuth";
+import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 import { Types } from "mongoose";
 
@@ -19,14 +20,14 @@ export const POST = withAuthAndErrors(
             params: { groupId: string; questionId: string };
         }>
     ) => {
-        const {groupId, questionId} = params;
+        const { groupId, questionId } = params;
 
         await dbConnect();
 
         await isUserInGroup(userId, groupId);
 
         const data = await req.json();
-        const {rating} = data as { rating: "good" | "ok" | "bad" };
+        const { rating } = data as { rating: "good" | "ok" | "bad" };
         if (!["good", "ok", "bad"].includes(rating)) {
             throw new ValidationError("rating must be one of good | ok | bad");
         }
@@ -44,12 +45,12 @@ export const POST = withAuthAndErrors(
             question.rating.bad.some((id) => id.equals(userObjectId));
 
         if (alreadyRated) {
-            return NextResponse.json({message: "User already rated"}, {status: 304});
+            return NextResponse.json({ message: "User already rated" }, { status: 304 });
         }
 
         question.rating[rating].push(userObjectId);
         await question.save();
 
-        return NextResponse.json({message: "Rating added"});
+        return NextResponse.json({ message: "Rating added" });
     }
 );

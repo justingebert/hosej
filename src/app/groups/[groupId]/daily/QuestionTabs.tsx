@@ -52,7 +52,7 @@ function buildFlatQuestionList(questions: any[]): { question: any; label: string
         catQuestions.forEach((q, idx) => {
             result.push({
                 question: q,
-                label: catQuestions.length === 1 ? cat : `${cat} ${idx + 1}`
+                label: catQuestions.length === 1 ? cat : `${cat} ${idx + 1}`,
             });
         });
     }
@@ -70,7 +70,8 @@ export default function QuestionsTabs({ user, groupId, questions }: any) {
 
     // Determine default tab
     const returnToParam = searchParams?.get("returnTo");
-    const defaultTab = returnToParam || (flatList.length > 0 ? flatList[0].question._id : undefined);
+    const defaultTab =
+        returnToParam || (flatList.length > 0 ? flatList[0].question._id : undefined);
 
     const rateQuestion = async (questionId: string, rating: string) => {
         await fetch(`/api/groups/${groupId}/question/${questionId}/rate`, {

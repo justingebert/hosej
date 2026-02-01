@@ -16,29 +16,29 @@ import { Input } from "@/components/ui/input";
 
 export function JoinGroupDrawer() {
     const [groupId, setGroupId] = useState("");
-    const {toast} = useToast();
-    const {user} = useAuthRedirect();
+    const { toast } = useToast();
+    const { user } = useAuthRedirect();
 
     const handleJoin = async () => {
         if (groupId.trim() === "") return;
         try {
             const res = await fetch(`/api/groups/${groupId}/members`, {
-                method: 'POST',
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
+                    "Content-Type": "application/json",
                 },
             });
 
             if (!res.ok) {
                 const response = await res.json();
-                toast({title: "Error", description: response.message, variant: "destructive"});
-                return
+                toast({ title: "Error", description: response.message, variant: "destructive" });
+                return;
             }
 
-            mutate(user ? `/api/groups` : null)
+            mutate(user ? `/api/groups` : null);
         } catch (error: any) {
             console.error("Failed to join group: ", error);
-            toast({title: "Failed to join group!", variant: "destructive"});
+            toast({ title: "Failed to join group!", variant: "destructive" });
         } finally {
             setGroupId("");
         }
@@ -65,8 +65,11 @@ export function JoinGroupDrawer() {
                     </div>
                     <DrawerFooter>
                         <DrawerClose asChild>
-                            <Button onClick={handleJoin} disabled={!groupId}
-                                    className="mb-6 w-full h-12 text-lg font-bold">
+                            <Button
+                                onClick={handleJoin}
+                                disabled={!groupId}
+                                className="mb-6 w-full h-12 text-lg font-bold"
+                            >
                                 Join
                             </Button>
                         </DrawerClose>

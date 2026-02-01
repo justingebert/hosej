@@ -1,6 +1,6 @@
-import { Types } from "mongoose";
-import { ToDTO } from "../common";
-import { UserDTO } from "./user";
+import type { Types } from "mongoose";
+import type { ToDTO } from "../common";
+import type { UserDTO } from "./user";
 
 export interface IRating {
     userId: Types.ObjectId | string;
@@ -21,9 +21,9 @@ export interface ISong {
 export type createSong = Omit<ISong, "_id">;
 
 export interface IJukebox {
-    _id: Types.ObjectId
+    _id: Types.ObjectId;
     groupId: Types.ObjectId | string;
-    title?: string,
+    title?: string;
     active: boolean;
     date: Date;
     songs: ISong[];
@@ -34,7 +34,6 @@ export interface IJukebox {
 export type RatingDTO = ToDTO<IRating>;
 export type SongDTO = ToDTO<ISong>;
 export type JukeboxDTO = ToDTO<IJukebox>;
-
 
 export interface IProcessedRatingDTO {
     userId: UserDTO;

@@ -3,24 +3,35 @@
 import dynamic from "next/dynamic";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { BarChartBig, CircleSlash, Clock, Info, MousePointerClick, ScanSearch, Users } from "lucide-react";
+import {
+    BarChartBig,
+    CircleSlash,
+    Clock,
+    Info,
+    MousePointerClick,
+    ScanSearch,
+    Users,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import useSWR, { useSWRConfig } from "swr";
 import fetcher from "@/lib/fetcher";
-import { GroupDTO } from "@/types/models/group";
-import { IRally } from "@/types/models/rally";
+import type { GroupDTO } from "@/types/models/group";
+import type { IRally } from "@/types/models/rally";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useHaptic } from "use-haptic";
-import { QuestionDTO } from "@/types/models/question";
-import { FeatureStatus } from "@/types/models/appConfig";
+import type { QuestionDTO } from "@/types/models/question";
+import type { FeatureStatus } from "@/types/models/appConfig";
 
 // Lazy load CompletionChart (uses recharts ~200KB)
 const CompletionChart = dynamic(
-    () => import("@/components/features/charts/CompletionChart").then(mod => ({ default: mod.CompletionChart })),
+    () =>
+        import("@/components/features/charts/CompletionChart").then((mod) => ({
+            default: mod.CompletionChart,
+        })),
     {
         loading: () => <div className="w-24 h-24 bg-muted rounded-lg animate-pulse" />,
-        ssr: false
+        ssr: false,
     }
 );
 
@@ -42,7 +53,10 @@ export default function Dashboard() {
     const { data: questionsData, isLoading: questionLoading } = useSWR<{
         questions: QuestionDTO[];
         completionPercentage: number;
-    }>(globalFeatures?.questions?.status === "enabled" ? `/api/groups/${groupId}/question` : null, fetcher);
+    }>(
+        globalFeatures?.questions?.status === "enabled" ? `/api/groups/${groupId}/question` : null,
+        fetcher
+    );
     const { data: ralliesData, isLoading: rallyLoading } = useSWR<{ rallies: IRally[] }>(
         globalFeatures?.rallies?.status === "enabled" ? `/api/groups/${groupId}/rally` : null,
         fetcher
@@ -61,7 +75,9 @@ export default function Dashboard() {
                 <Button variant="outline" size="icon" onClick={() => router.push(`/groups`)}>
                     <Users />
                 </Button>
-                <h1 className={`flex-grow ${titleClass} font-bold text-center break-words`}>{group?.name}</h1>
+                <h1 className={`flex-grow ${titleClass} font-bold text-center break-words`}>
+                    {group?.name}
+                </h1>
                 {/* <Link href={`/groups/${groupId}/settings`}> */}
                 <Button variant="outline" size="icon">
                     <Info />
@@ -129,7 +145,9 @@ export default function Dashboard() {
                                 <Badge variant="secondary" className="mx-auto">
                                     Coming Soon
                                 </Badge>
-                                <CardDescription className="mt-2">Photo rally challenges coming soon!</CardDescription>
+                                <CardDescription className="mt-2">
+                                    Photo rally challenges coming soon!
+                                </CardDescription>
                             </CardHeader>
                         </Card>
                     ) : (
@@ -210,7 +228,9 @@ export default function Dashboard() {
                                         <div className="flex flex-col justify-center">
                                             <div className="font-bold text-2xl">Jukebox</div>
                                         </div>
-                                        <div className="w-24 h-24 flex items-center justify-center text-6xl">📻</div>
+                                        <div className="w-24 h-24 flex items-center justify-center text-6xl">
+                                            📻
+                                        </div>
                                     </div>
                                 )
                             )}

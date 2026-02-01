@@ -5,7 +5,7 @@ import Jukebox from "@/db/models/Jukebox";
 import { withErrorHandling } from "@/lib/api/errorHandling";
 import { activateSmartQuestions } from "@/lib/question/activateQuestion";
 import { sendNotification } from "@/lib/sendNotification";
-import { IGroup } from "@/types/models/group";
+import type { IGroup } from "@/types/models/group";
 import { NextResponse } from "next/server";
 
 export const revalidate = 0;
@@ -59,7 +59,11 @@ export const GET = withErrorHandling(async () => {
             );
             await group.save();
         } else {
-            await sendNotification(`🚨Neue ${group.name} Fragen!!🚨`, "🚨JETZT VOTEN DU FISCH🚨", group._id);
+            await sendNotification(
+                `🚨Neue ${group.name} Fragen!!🚨`,
+                "🚨JETZT VOTEN DU FISCH🚨",
+                group._id
+            );
             group.features.questions.settings.lastQuestionDate = new Date();
             await group.save();
         }

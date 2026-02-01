@@ -5,15 +5,19 @@ import Group from "@/db/models/Group";
 import { isUserInGroup } from "@/lib/userAuth";
 import { CREATED_QUESTION_POINTS } from "@/config/POINT_CONFIG";
 import { ValidationError } from "@/lib/api/errorHandling";
-import { AuthedContext, withAuthAndErrors } from "@/lib/api/withAuth";
+import type { AuthedContext} from "@/lib/api/withAuth";
+import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { generateSignedUrl } from "@/lib/generateSingledUrl";
-import { QuestionDTO } from "@/types/models/question";
+import type { QuestionDTO } from "@/types/models/question";
 import { createQuestionInGroup } from "@/lib/question/createQuestion";
 
 export const revalidate = 0;
 
 export const POST = withAuthAndErrors(
-    async (req: NextRequest, { params, userId }: { params: { groupId: string }; userId: string }) => {
+    async (
+        req: NextRequest,
+        { params, userId }: { params: { groupId: string }; userId: string }
+    ) => {
         const { groupId } = params;
 
         await dbConnect();
@@ -25,7 +29,7 @@ export const POST = withAuthAndErrors(
             throw new ValidationError("Missing required fields");
         }
 
-        let options = data.options || [];
+        const options = data.options || [];
 
         const newQuestion = await createQuestionInGroup(
             groupId,
@@ -67,7 +71,7 @@ export const GET = withAuthAndErrors(
         await dbConnect();
         await isUserInGroup(userId, groupId);
 
-        let questions = await Question.find({
+        const questions = await Question.find({
             groupId: groupId,
             used: true,
             active: true,
@@ -79,8 +83,13 @@ export const GET = withAuthAndErrors(
 
         const group = await Group.findById(groupId).orFail();
         const userCount = group.members.length;
-        const totalVotes = questions.reduce((acc, question) => acc + (question.answers?.length || 0), 0);
-        const completionPercentage = ((totalVotes / (questions.length * userCount)) * 100).toFixed(0);
+        const totalVotes = questions.reduce(
+            (acc, question) => acc + (question.answers?.length || 0),
+            0
+        );
+        const completionPercentage = ((totalVotes / (questions.length * userCount)) * 100).toFixed(
+            0
+        );
 
         const questionsPopulated = questions.map((q) => {
             const userHasVoted = q.answers?.some((a) => a.user.toString() === userId) ?? false;
@@ -88,10 +97,10 @@ export const GET = withAuthAndErrors(
             const userRating: UserRating = q.rating.good.some((id) => id.toString() === userId)
                 ? "good"
                 : q.rating.ok.some((id) => id.toString() === userId)
-                    ? "ok"
-                    : q.rating.bad.some((id) => id.toString() === userId)
-                        ? "bad"
-                        : null;
+                  ? "ok"
+                  : q.rating.bad.some((id) => id.toString() === userId)
+                    ? "bad"
+                    : null;
 
             // return a new object with computed fields
             return { ...q, userHasVoted, userRating };

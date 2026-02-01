@@ -1,8 +1,8 @@
 "use client";
 
-import { PolarAngleAxis, RadialBar, RadialBarChart, } from "recharts";
+import { PolarAngleAxis, RadialBar, RadialBarChart } from "recharts";
 
-export function CompletionChart({completion}: { completion: number }) {
+export function CompletionChart({ completion }: { completion: number }) {
     // Data configuration with completion value
 
     const getFillColor = () => {
@@ -11,9 +11,7 @@ export function CompletionChart({completion}: { completion: number }) {
         return "green";
     };
 
-    const data = [
-        {name: "Completion", value: completion, fill: getFillColor()},
-    ];
+    const data = [{ name: "Completion", value: completion, fill: getFillColor() }];
 
     const circleSize = 100;
 
@@ -31,12 +29,7 @@ export function CompletionChart({completion}: { completion: number }) {
                 startAngle={90}
                 endAngle={-270}
             >
-                <PolarAngleAxis
-                    type="number"
-                    domain={[0, 100]}
-                    angleAxisId={0}
-                    tick={false}
-                />
+                <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
                 <RadialBar
                     background
                     dataKey="value"

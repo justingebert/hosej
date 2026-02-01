@@ -1,6 +1,8 @@
 import { isUserInGroup } from "@/lib/userAuth";
-import { NextRequest, NextResponse } from "next/server";
-import { AuthedContext, withAuthAndErrors } from "@/lib/api/withAuth";
+import type { NextRequest} from "next/server";
+import { NextResponse } from "next/server";
+import type { AuthedContext} from "@/lib/api/withAuth";
+import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { ValidationError } from "@/lib/api/errorHandling";
 import dbConnect from "@/db/dbConnect";
 
@@ -41,9 +43,12 @@ async function searchSpotify(query: string) {
         console.error("Failed to get access token");
         throw new Error("Failed to get spotify access  token");
     }
-    const response = await fetch(`https://api.spotify.com/v1/search?type=track&q=${encodeURIComponent(query)}`, {
-        headers: {Authorization: `Bearer ${token}`},
-    });
+    const response = await fetch(
+        `https://api.spotify.com/v1/search?type=track&q=${encodeURIComponent(query)}`,
+        {
+            headers: { Authorization: `Bearer ${token}` },
+        }
+    );
 
     if (!response.ok) {
         console.error("Failed to fetch Spotify data:", response.statusText);
@@ -63,8 +68,8 @@ export const GET = withAuthAndErrors(
             params: { groupId: string };
         }>
     ) => {
-        const {groupId} = params;
-        const {searchParams} = new URL(req.url);
+        const { groupId } = params;
+        const { searchParams } = new URL(req.url);
         const query = searchParams.get("q");
 
         if (!query) {

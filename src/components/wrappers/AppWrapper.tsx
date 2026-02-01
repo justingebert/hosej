@@ -5,9 +5,7 @@ import { TokenProvider } from "./TokenProvider";
 import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "./ThemeProvider";
 
-
-export const AppWrapper = ({children}: { children: ReactNode }) => {
-
+export const AppWrapper = ({ children }: { children: ReactNode }) => {
     return (
         <SessionProvider>
             <TokenProvider>

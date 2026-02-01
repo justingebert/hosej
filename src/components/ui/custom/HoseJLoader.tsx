@@ -1,5 +1,5 @@
 "use client";
-import { motion } from 'framer-motion';
+import { motion } from "framer-motion";
 
 export const HoseJLoader = () => {
     return (
@@ -7,7 +7,8 @@ export const HoseJLoader = () => {
             <motion.h1
                 className="text-4xl font-bold text-center relative"
                 style={{
-                    backgroundImage: "linear-gradient(90deg, var(--shine-color) 0%, var(--shine-highlight) 50%, var(--shine-color) 100%)",
+                    backgroundImage:
+                        "linear-gradient(90deg, var(--shine-color) 0%, var(--shine-highlight) 50%, var(--shine-color) 100%)",
                     backgroundSize: "200% 100%",
                     backgroundClip: "text",
                     WebkitBackgroundClip: "text",

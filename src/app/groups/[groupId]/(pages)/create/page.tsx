@@ -28,11 +28,11 @@ const CreatePage = () => {
         optionFiles: [],
     });
 
-    const [rallyData, setRallyData] = useState<createRallyData>({task: "", lengthInDays: 0});
+    const [rallyData, setRallyData] = useState<createRallyData>({ task: "", lengthInDays: 0 });
 
     return (
         <>
-            <Header title="Create"/>
+            <Header title="Create" />
             {/* rightComponent={<Button variant={"outline"} size={"icon"}><Info/></Button>}/> */}
             <div className="mt-4">
                 <Tabs defaultValue="create-question" className="w-full">
@@ -42,10 +42,13 @@ const CreatePage = () => {
                     </TabsList>
 
                     <TabsContent value="create-question">
-                        <CreateQuestion questionData={questionData} setQuestionData={setQuestionData}/>
+                        <CreateQuestion
+                            questionData={questionData}
+                            setQuestionData={setQuestionData}
+                        />
                     </TabsContent>
                     <TabsContent value="create-rally">
-                        <CreateRally rallyData={rallyData} setRallyData={setRallyData}/>
+                        <CreateRally rallyData={rallyData} setRallyData={setRallyData} />
                     </TabsContent>
                 </Tabs>
             </div>

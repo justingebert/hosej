@@ -13,12 +13,12 @@ interface ImageUploaderProps {
 }
 
 const ImageUploader: React.FC<ImageUploaderProps> = ({
-                                                         onFileSelect,
-                                                         clearInput,
-                                                         showFilename,
-                                                         className,
-                                                         buttonstyle,
-                                                     }) => {
+    onFileSelect,
+    clearInput,
+    showFilename,
+    className,
+    buttonstyle,
+}) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [selectedFileName, setSelectedFileName] = useState<string | null>(null); // State to hold the selected file name
 
@@ -63,16 +63,16 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
                         <div className="flex items-center w-full min-w-0">
                             <span className="flex-1 truncate min-w-0">{selectedFileName}</span>
                             <div className="flex-shrink-0 ml-2">
-                                <X color="red"/>
+                                <X color="red" />
                             </div>
                         </div>
                     ) : (
                         <div className="flex items-center justify-center w-full">
-                            <X color="red"/>
+                            <X color="red" />
                         </div>
                     )
                 ) : (
-                    <ImagePlus/>
+                    <ImagePlus />
                 )}
             </Button>
             <Input
@@ -80,7 +80,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
                 type="file"
                 accept="image/*"
                 onChange={handleFileChange}
-                style={{display: "none"}}
+                style={{ display: "none" }}
             />
         </div>
     );

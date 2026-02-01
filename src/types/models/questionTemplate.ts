@@ -1,5 +1,5 @@
-import { Types } from "mongoose";
-import { QuestionType } from "@/types/models/question";
+import type { Types } from "mongoose";
+import type { QuestionType } from "@/types/models/question";
 
 export interface IQuestionTemplate {
     _id: Types.ObjectId;

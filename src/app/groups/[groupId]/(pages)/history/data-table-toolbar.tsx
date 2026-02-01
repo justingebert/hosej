@@ -1,6 +1,6 @@
 "use client";
 
-import { Table } from "@tanstack/react-table";
+import type { Table } from "@tanstack/react-table";
 import { Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,7 @@ import { DataTableFacetedFilter } from "./data-table-faceted-filter";
 import { useParams } from "next/navigation";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
-import { GroupDTO } from "@/types/models/group";
+import type { GroupDTO } from "@/types/models/group";
 
 import { QuestionType } from "@/types/models/question";
 
@@ -21,16 +21,16 @@ const questionTypesOptions = Object.values(QuestionType).map((type) => ({
     value: type,
 }));
 
-export function DataTableToolbar<TData>({table}: DataTableToolbarProps<TData>) {
+export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>) {
     const params = useParams<{ groupId: string }>();
     const groupId = params ? params.groupId : "";
-    const {data: users} = useSWR<GroupDTO["members"]>(`/api/groups/${groupId}/members`, fetcher);
+    const { data: users } = useSWR<GroupDTO["members"]>(`/api/groups/${groupId}/members`, fetcher);
 
     const groupMembers = users
         ? users.map((user: any) => ({
-            label: user.name,
-            value: user.user,
-        }))
+              label: user.name,
+              value: user.user,
+          }))
         : [];
 
     const isFiltered = table.getState().columnFilters.length > 0;
@@ -40,10 +40,12 @@ export function DataTableToolbar<TData>({table}: DataTableToolbarProps<TData>) {
             <div className="relative w-full">
                 <Input
                     value={(table.getColumn("question")?.getFilterValue() as string) ?? ""}
-                    onChange={(event) => table.getColumn("question")?.setFilterValue(event.target.value)}
+                    onChange={(event) =>
+                        table.getColumn("question")?.setFilterValue(event.target.value)
+                    }
                     className="w-full pr-10"
                 />
-                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2"/>
+                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2" />
             </div>
 
             <div className="flex flex-wrap justify-between md:space-x-2">
@@ -72,9 +74,13 @@ export function DataTableToolbar<TData>({table}: DataTableToolbarProps<TData>) {
                 <Button size="sm" className="h-8">
                     <div className="text-sm">{table.getFilteredRowModel().rows.length} Results</div>
                 </Button>
-                <Button disabled={!isFiltered} onClick={() => table.resetColumnFilters()} className="h-8 px-2 lg:px-3">
+                <Button
+                    disabled={!isFiltered}
+                    onClick={() => table.resetColumnFilters()}
+                    className="h-8 px-2 lg:px-3"
+                >
                     Reset
-                    <X className="-mr-1"/>
+                    <X className="-mr-1" />
                 </Button>
             </div>
         </div>

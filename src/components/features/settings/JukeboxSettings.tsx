@@ -10,11 +10,11 @@ interface JukeboxSettingsProps {
 }
 
 export function JukeboxSettings({
-                                    concurrent,
-                                    activationDays,
-                                    onConcurrentChange,
-                                    onActivationDaysChange
-                                }: JukeboxSettingsProps) {
+    concurrent,
+    activationDays,
+    onConcurrentChange,
+    onActivationDaysChange,
+}: JukeboxSettingsProps) {
     const [concurrentInput, setConcurrentInput] = useState("");
     const [activationDaysInput, setActivationDaysInput] = useState("");
 
@@ -49,7 +49,6 @@ export function JukeboxSettings({
 
     return (
         <div className="space-y-4">
-
             <div className="space-y-2">
                 <Label htmlFor="jukebox-concurrent">Concurrent (comma-separated)</Label>
                 <Input
@@ -68,7 +67,9 @@ export function JukeboxSettings({
             </div>
 
             <div className="space-y-2">
-                <Label htmlFor="jukebox-activation-days">Activation Days (day of month, comma-separated)</Label>
+                <Label htmlFor="jukebox-activation-days">
+                    Activation Days (day of month, comma-separated)
+                </Label>
                 <Input
                     id="jukebox-activation-days"
                     type="text"

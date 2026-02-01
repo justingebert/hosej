@@ -4,15 +4,15 @@ import { Input } from "@/components/ui/input";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
 
-import { ChatDTO } from "@/types/models/chat";
+import type { ChatDTO } from "@/types/models/chat";
 import { Button } from "@/components/ui/button";
 
-function ChatComponent({user, entity, available}: any) {
+function ChatComponent({ user, entity, available }: any) {
     const [newMessage, setNewMessage] = useState("");
     const [sending, setSending] = useState(false);
     const messagesEndRef = useRef<null | HTMLDivElement>(null);
 
-    const {data, error, mutate} = useSWR<ChatDTO>(
+    const { data, error, mutate } = useSWR<ChatDTO>(
         entity.chat ? `/api/groups/${entity.groupId}/chats/${entity.chat}` : null,
         fetcher
     );
@@ -24,7 +24,7 @@ function ChatComponent({user, entity, available}: any) {
         setSending(true);
 
         try {
-            const messageData = {message: newMessage};
+            const messageData = { message: newMessage };
             const response = await fetch(
                 `/api/groups/${entity.groupId}/chats/${entity.chat}/messages`,
                 {
@@ -52,7 +52,7 @@ function ChatComponent({user, entity, available}: any) {
                         ({
                             ...data,
                             messages: [...messages, completeMessage],
-                        } as ChatDTO),
+                        }) as ChatDTO,
                     false // Revalidate after this update
                 );
 
@@ -97,7 +97,7 @@ function ChatComponent({user, entity, available}: any) {
                                 </div>
                             </div>
                         ))}
-                        {available && <div ref={messagesEndRef}/>}{" "}
+                        {available && <div ref={messagesEndRef} />}{" "}
                         {/* Empty div to keep track of the bottom */}
                     </>
                 ) : (
@@ -120,7 +120,7 @@ function ChatComponent({user, entity, available}: any) {
                             }}
                         />
                         <Button onClick={handleSendMessage} disabled={sending}>
-                            <Send size={20}/>
+                            <Send size={20} />
                         </Button>
                     </div>
                 </div>

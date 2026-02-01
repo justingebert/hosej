@@ -2,12 +2,12 @@ import { AccordionContent, AccordionItem, AccordionTrigger } from "@/components/
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { FeatureStatus } from "@/types/models/appConfig";
-import { ReactNode } from "react";
+import type { FeatureStatus } from "@/types/models/appConfig";
+import type { ReactNode } from "react";
 
 interface FeatureSettingsAccordionProps {
     featureName: string;
-    featureKey: 'questions' | 'rallies' | 'jukebox';
+    featureKey: "questions" | "rallies" | "jukebox";
     globalStatus?: FeatureStatus;
     enabled: boolean;
     onToggle: (enabled: boolean) => void;
@@ -16,29 +16,25 @@ interface FeatureSettingsAccordionProps {
 }
 
 export function FeatureSettingsAccordion({
-                                             featureName,
-                                             featureKey,
-                                             globalStatus,
-                                             enabled,
-                                             onToggle,
-                                             description,
-                                             children
-                                         }: FeatureSettingsAccordionProps) {
-    const isGloballyEnabled = globalStatus === 'enabled';
-    const isComingSoon = globalStatus === 'comingSoon';
-    const isDisabled = globalStatus === 'disabled';
+    featureName,
+    featureKey,
+    globalStatus,
+    enabled,
+    onToggle,
+    description,
+    children,
+}: FeatureSettingsAccordionProps) {
+    const isGloballyEnabled = globalStatus === "enabled";
+    const isComingSoon = globalStatus === "comingSoon";
+    const isDisabled = globalStatus === "disabled";
 
     return (
         <AccordionItem value={featureKey}>
             <AccordionTrigger>
                 <div className="flex items-center gap-2">
                     {featureName}
-                    {isComingSoon && (
-                        <Badge variant="secondary">Coming Soon</Badge>
-                    )}
-                    {isDisabled && (
-                        <Badge variant="destructive">Globally Disabled</Badge>
-                    )}
+                    {isComingSoon && <Badge variant="secondary">Coming Soon</Badge>}
+                    {isDisabled && <Badge variant="destructive">Globally Disabled</Badge>}
                 </div>
             </AccordionTrigger>
             <AccordionContent>
@@ -49,7 +45,7 @@ export function FeatureSettingsAccordion({
                             <p className="text-sm text-muted-foreground">
                                 {isGloballyEnabled
                                     ? description
-                                    : `Feature is ${isComingSoon ? 'coming soon' : 'globally disabled'}`}
+                                    : `Feature is ${isComingSoon ? "coming soon" : "globally disabled"}`}
                             </p>
                         </div>
                         <Switch
@@ -61,9 +57,7 @@ export function FeatureSettingsAccordion({
                     </div>
 
                     {isGloballyEnabled && enabled && children && (
-                        <div className="pt-2 border-t">
-                            {children}
-                        </div>
+                        <div className="pt-2 border-t">{children}</div>
                     )}
                 </div>
             </AccordionContent>

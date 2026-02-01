@@ -3,9 +3,16 @@
 import Header from "@/components/ui/custom/Header";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { GroupDTO } from "@/types/models/group";
+import type { GroupDTO } from "@/types/models/group";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { useParams, useRouter } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
@@ -26,7 +33,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Accordion } from "@/components/ui/accordion";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
-import { FeatureStatus } from "@/types/models/appConfig";
+import type { FeatureStatus } from "@/types/models/appConfig";
 import { GroupInfoCard } from "@/components/features/settings/GroupInfoCard";
 import { FeatureSettingsAccordionSimple } from "@/components/features/settings/FeatureSettingsAccordionSimple";
 import { QuestionSettings } from "@/components/features/settings/QuestionSettings";
@@ -66,16 +73,21 @@ interface ISettings {
 export default function GroupPage() {
     const params = useParams<{ groupId: string }>();
     const groupId = params ? params.groupId : "";
-    const {user} = useAuthRedirect();
-    const {toast} = useToast();
+    const { user } = useAuthRedirect();
+    const { toast } = useToast();
     const [settings, setSettings] = useState<ISettings | any>({});
     const [deleteInput, setDeleteInput] = useState("");
     const [memberToKick, setMemberToKick] = useState<string | null>(null);
     const router = useRouter();
 
-    const {data: group, isLoading, error, mutate} = useSWR<IGroupProcessed>(`/api/groups/${groupId}`, fetcher, {});
+    const {
+        data: group,
+        isLoading,
+        error,
+        mutate,
+    } = useSWR<IGroupProcessed>(`/api/groups/${groupId}`, fetcher, {});
 
-    const {data: globalFeatures} = useSWR<{
+    const { data: globalFeatures } = useSWR<{
         questions: { status: FeatureStatus };
         rallies: { status: FeatureStatus };
         jukebox: { status: FeatureStatus };
@@ -116,10 +128,13 @@ export default function GroupPage() {
     const userIsAdmin = group && group.userIsAdmin;
 
     const adminName = group?.admin
-        ? group.members.find((member) => member.user.toString() === group.admin.toString())?.name || "N/A"
+        ? group.members.find((member) => member.user.toString() === group.admin.toString())?.name ||
+          "N/A"
         : "N/A";
 
-    const currentMember = group?.members.find((member) => member.user.toString() === user?._id.toString());
+    const currentMember = group?.members.find(
+        (member) => member.user.toString() === user?._id.toString()
+    );
     const currentMemberName = currentMember?.name || "Member not found";
 
     const updateJukebox = (partial: any) => {
@@ -140,17 +155,17 @@ export default function GroupPage() {
 
     const saveSettings = async () => {
         try {
-            const payload: any = {...settings};
+            const payload: any = { ...settings };
             await fetch(`/api/groups/${groupId}`, {
                 method: "PUT",
-                headers: {"Content-Type": "application/json"},
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
             });
-            toast({title: "Group Settings saved"});
+            toast({ title: "Group Settings saved" });
             mutate();
         } catch (error) {
             console.error("Failed to save settings:", error);
-            toast({title: "Failed to save Settings", variant: "destructive"});
+            toast({ title: "Failed to save Settings", variant: "destructive" });
         }
     };
 
@@ -168,11 +183,11 @@ export default function GroupPage() {
             if (!response.ok) {
                 throw new Error("Failed to kick member");
             }
-            toast({title: "Member kicked"});
+            toast({ title: "Member kicked" });
             mutate();
         } catch (error) {
             console.error("Failed to kick member:", error);
-            toast({title: "Failed to kick member", variant: "destructive"});
+            toast({ title: "Failed to kick member", variant: "destructive" });
         } finally {
             setMemberToKick(null);
         }
@@ -180,39 +195,41 @@ export default function GroupPage() {
 
     const leaveGroup = async () => {
         try {
-            const res = await fetch(`/api/groups/${groupId}/members/${user._id}`, {method: "DELETE"});
+            const res = await fetch(`/api/groups/${groupId}/members/${user._id}`, {
+                method: "DELETE",
+            });
             if (!res.ok) {
-                toast({title: "Failed to leave group", variant: "destructive"});
+                toast({ title: "Failed to leave group", variant: "destructive" });
             }
             mutate();
-            toast({title: "You have left the group"});
+            toast({ title: "You have left the group" });
             router.push("/groups");
         } catch (error) {
             console.error("Failed to leave group:", error);
-            toast({title: "Something went wrong", variant: "destructive"});
+            toast({ title: "Something went wrong", variant: "destructive" });
         }
     };
 
     const deleteGroup = async () => {
         if (!userIsAdmin || deleteInput !== group?.name) return;
         try {
-            await fetch(`/api/groups/${groupId}`, {method: "DELETE"});
-            toast({title: "Group deleted successfully"});
+            await fetch(`/api/groups/${groupId}`, { method: "DELETE" });
+            toast({ title: "Group deleted successfully" });
             router.push("/groups");
         } catch (error) {
             console.error("Failed to delete group:", error);
-            toast({title: "Failed to delete group", variant: "destructive"});
+            toast({ title: "Failed to delete group", variant: "destructive" });
         }
     };
 
     return (
         <>
-            <Suspense fallback={<Skeleton className="h-8 w-40 mx-auto mb-4"/>}>
-                <Header title={group?.name || null}/>
+            <Suspense fallback={<Skeleton className="h-8 w-40 mx-auto mb-4" />}>
+                <Header title={group?.name || null} />
             </Suspense>
 
             {isLoading ? (
-                [...Array(10)].map((_, i) => <Skeleton className="h-12 mb-4 mt" key={i}/>)
+                [...Array(10)].map((_, i) => <Skeleton className="h-12 mb-4 mt" key={i} />)
             ) : group && user ? (
                 <div className="space-y-6 pb-12">
                     {/* Group Information Card */}
@@ -228,7 +245,9 @@ export default function GroupPage() {
                         <Card>
                             <CardHeader>
                                 <CardTitle>Feature Settings</CardTitle>
-                                <CardDescription>Manage features and their settings for this group</CardDescription>
+                                <CardDescription>
+                                    Manage features and their settings for this group
+                                </CardDescription>
                             </CardHeader>
                             <CardContent>
                                 <Accordion type="single" collapsible className="w-full">
@@ -240,10 +259,17 @@ export default function GroupPage() {
                                         description="Configure daily questions settings"
                                     >
                                         <QuestionSettings
-                                            questionCount={settings.features?.questions?.settings?.questionCount || 0}
+                                            questionCount={
+                                                settings.features?.questions?.settings
+                                                    ?.questionCount || 0
+                                            }
                                             lastQuestionDate={
-                                                group.features?.questions?.settings?.lastQuestionDate
-                                                    ? new Date(group.features.questions.settings.lastQuestionDate)
+                                                group.features?.questions?.settings
+                                                    ?.lastQuestionDate
+                                                    ? new Date(
+                                                          group.features.questions.settings
+                                                              .lastQuestionDate
+                                                      )
                                                     : null
                                             }
                                             onQuestionCountChange={(value) => {
@@ -272,8 +298,14 @@ export default function GroupPage() {
                                         description="Configure rally settings"
                                     >
                                         <RallySettings
-                                            rallyCount={settings.features?.rallies?.settings?.rallyCount || 0}
-                                            rallyGapDays={settings.features?.rallies?.settings?.rallyGapDays || 0}
+                                            rallyCount={
+                                                settings.features?.rallies?.settings?.rallyCount ||
+                                                0
+                                            }
+                                            rallyGapDays={
+                                                settings.features?.rallies?.settings
+                                                    ?.rallyGapDays || 0
+                                            }
                                             onRallyCountChange={(value) => {
                                                 setSettings((prev: any) => ({
                                                     ...prev,
@@ -315,10 +347,20 @@ export default function GroupPage() {
                                         description="Configure jukebox settings"
                                     >
                                         <JukeboxSettings
-                                            concurrent={settings.features?.jukebox?.settings?.concurrent || []}
-                                            activationDays={settings.features?.jukebox?.settings?.activationDays || []}
-                                            onConcurrentChange={(value) => updateJukebox({concurrent: value})}
-                                            onActivationDaysChange={(value) => updateJukebox({activationDays: value})}
+                                            concurrent={
+                                                settings.features?.jukebox?.settings?.concurrent ||
+                                                []
+                                            }
+                                            activationDays={
+                                                settings.features?.jukebox?.settings
+                                                    ?.activationDays || []
+                                            }
+                                            onConcurrentChange={(value) =>
+                                                updateJukebox({ concurrent: value })
+                                            }
+                                            onActivationDaysChange={(value) =>
+                                                updateJukebox({ activationDays: value })
+                                            }
                                         />
                                     </FeatureSettingsAccordionSimple>
                                 </Accordion>
@@ -346,13 +388,17 @@ export default function GroupPage() {
                                     <TableRow>
                                         <TableHead className="w-[150px]">Name</TableHead>
                                         <TableHead className="text-right">Joined At</TableHead>
-                                        {userIsAdmin && <TableHead className="text-right">Remove</TableHead>}
+                                        {userIsAdmin && (
+                                            <TableHead className="text-right">Remove</TableHead>
+                                        )}
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {group.members.map((member) => (
                                         <TableRow key={member.user.toString()}>
-                                            <TableCell className="font-medium">{member.name || "N/A"}</TableCell>
+                                            <TableCell className="font-medium">
+                                                {member.name || "N/A"}
+                                            </TableCell>
                                             <TableCell className="text-right">
                                                 {member.joinedAt
                                                     ? new Date(member.joinedAt).toLocaleDateString()
@@ -365,22 +411,29 @@ export default function GroupPage() {
                                                             <Button
                                                                 variant="destructive"
                                                                 onClick={() =>
-                                                                    confirmKickMember(member.user.toString())
+                                                                    confirmKickMember(
+                                                                        member.user.toString()
+                                                                    )
                                                                 }
                                                             >
-                                                                <UserRoundMinus size={20}/>
+                                                                <UserRoundMinus size={20} />
                                                             </Button>
                                                         </AlertDialogTrigger>
                                                         <AlertDialogContent>
                                                             <AlertDialogHeader>
-                                                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                                                <AlertDialogTitle>
+                                                                    Are you sure?
+                                                                </AlertDialogTitle>
                                                                 <AlertDialogDescription>
-                                                                    This action cannot be undone. This will remove{" "}
-                                                                    {member.name} from the group.
+                                                                    This action cannot be undone.
+                                                                    This will remove {member.name}{" "}
+                                                                    from the group.
                                                                 </AlertDialogDescription>
                                                             </AlertDialogHeader>
                                                             <AlertDialogFooter>
-                                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                                <AlertDialogCancel>
+                                                                    Cancel
+                                                                </AlertDialogCancel>
                                                                 <AlertDialogAction
                                                                     onClick={kickMember}
                                                                     className="bg-destructive"
@@ -407,21 +460,27 @@ export default function GroupPage() {
                         </CardHeader>
                         <CardContent className="space-y-3">
                             <Button variant="destructive" className="w-full">
-                                <DoorOpen/>
+                                <DoorOpen />
                                 <AlertDialog>
                                     <AlertDialogTrigger asChild>
                                         <span>Leave Group</span>
                                     </AlertDialogTrigger>
                                     <AlertDialogContent>
                                         <AlertDialogHeader>
-                                            <AlertDialogTitle>Are you sure you want to leave?</AlertDialogTitle>
+                                            <AlertDialogTitle>
+                                                Are you sure you want to leave?
+                                            </AlertDialogTitle>
                                             <AlertDialogDescription>
-                                                This action cannot be undone. You will lose access to this group.
+                                                This action cannot be undone. You will lose access
+                                                to this group.
                                             </AlertDialogDescription>
                                         </AlertDialogHeader>
                                         <AlertDialogFooter>
                                             <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                            <AlertDialogAction onClick={leaveGroup} className="bg-destructive">
+                                            <AlertDialogAction
+                                                onClick={leaveGroup}
+                                                className="bg-destructive"
+                                            >
                                                 Leave
                                             </AlertDialogAction>
                                         </AlertDialogFooter>
@@ -433,7 +492,7 @@ export default function GroupPage() {
                                 <AlertDialog>
                                     <AlertDialogTrigger asChild>
                                         <Button variant="destructive" className="w-full">
-                                            <Trash/>
+                                            <Trash />
                                             <span>Delete Group</span>
                                         </Button>
                                     </AlertDialogTrigger>

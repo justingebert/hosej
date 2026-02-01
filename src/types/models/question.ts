@@ -1,5 +1,5 @@
-import { Types } from "mongoose";
-import { ToDTO } from "@/types/common";
+import type { Types } from "mongoose";
+import type { ToDTO } from "@/types/common";
 
 export interface IQuestion {
     _id: Types.ObjectId;
@@ -19,7 +19,7 @@ export interface IQuestion {
 
     used: boolean;
     active: boolean;
-    usedAt?: Date
+    usedAt?: Date;
     submittedBy?: Types.ObjectId | null;
     templateId?: Types.ObjectId;
 

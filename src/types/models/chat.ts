@@ -1,5 +1,5 @@
-import { ToDTO } from "@/types/common";
-import { Types } from "mongoose";
+import type { ToDTO } from "@/types/common";
+import type { Types } from "mongoose";
 
 export interface IMessage {
     user: Types.ObjectId | string;

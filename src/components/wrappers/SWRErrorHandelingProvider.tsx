@@ -2,12 +2,12 @@
 
 import { SWRConfig } from "swr";
 import { useToast } from "@/hooks/use-toast";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { FetchError } from "@/lib/fetcher";
+import type { FetchError } from "@/lib/fetcher";
 
-export default function SWRErrorHandlingProvider({children}: { children: ReactNode }) {
-    const {toast} = useToast();
+export default function SWRErrorHandlingProvider({ children }: { children: ReactNode }) {
+    const { toast } = useToast();
     const router = useRouter();
 
     return (

@@ -1,10 +1,10 @@
 "use client";
 
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
-import { IQuestion } from "@/types/models/question";
+import type { IQuestion } from "@/types/models/question";
 
 export const columns: ColumnDef<IQuestion>[] = [
     {
@@ -14,13 +14,16 @@ export const columns: ColumnDef<IQuestion>[] = [
     {
         accessorKey: "answers",
         header: "Results",
-        cell: ({row}) => {
+        cell: ({ row }) => {
             const groupId = row.original.groupId;
             const questionId = row.original._id;
 
             return (
-                <Link href={`/groups/${groupId}/question/${questionId}/results`} className="flex justify-center">
-                    <ArrowRight/>
+                <Link
+                    href={`/groups/${groupId}/question/${questionId}/results`}
+                    className="flex justify-center"
+                >
+                    <ArrowRight />
                 </Link>
             );
         },

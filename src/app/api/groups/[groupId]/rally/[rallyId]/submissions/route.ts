@@ -3,11 +3,13 @@ import Rally from "@/db/models/rally";
 import User from "@/db/models/user";
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest} from "next/server";
+import { NextResponse } from "next/server";
 import Group from "@/db/models/Group";
 import { isUserInGroup } from "@/lib/userAuth";
 import { SUBMITTED_RALLY_POINTS } from "@/config/POINT_CONFIG";
-import { AuthedContext, withAuthAndErrors } from "@/lib/api/withAuth";
+import type { AuthedContext} from "@/lib/api/withAuth";
+import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 
 const s3 = new S3Client({
@@ -27,7 +29,7 @@ export const GET = withAuthAndErrors(
             params: { groupId: string; rallyId: string };
         }>
     ) => {
-        const {groupId, rallyId} = params;
+        const { groupId, rallyId } = params;
 
         await dbConnect();
         await isUserInGroup(userId, groupId);
@@ -54,9 +56,12 @@ export const GET = withAuthAndErrors(
                 let url;
                 try {
                     //@ts-ignore
-                    url = await getSignedUrl(s3, command, {expiresIn: 300});
+                    url = await getSignedUrl(s3, command, { expiresIn: 300 });
                 } catch (s3Error: any) {
-                    console.error(`Failed to generate pre-signed URL for ${submission.imageUrl}`, s3Error);
+                    console.error(
+                        `Failed to generate pre-signed URL for ${submission.imageUrl}`,
+                        s3Error
+                    );
                     throw new Error(`Failed to generate pre-signed URL: ${s3Error.message}`);
                 }
 
@@ -69,7 +74,7 @@ export const GET = withAuthAndErrors(
 
         submissions.sort((a, b) => b.votes.length - a.votes.length);
 
-        return NextResponse.json({submissions});
+        return NextResponse.json({ submissions });
     }
 );
 
@@ -84,12 +89,12 @@ export const POST = withAuthAndErrors(
             params: { groupId: string; rallyId: string };
         }>
     ) => {
-        const {groupId, rallyId} = params;
+        const { groupId, rallyId } = params;
 
         await dbConnect();
         await isUserInGroup(userId, groupId);
 
-        const {imageUrl} = await req.json();
+        const { imageUrl } = await req.json();
         if (!imageUrl) {
             throw new ValidationError("imageUrl is required");
         }
@@ -107,8 +112,8 @@ export const POST = withAuthAndErrors(
 
         const updatedRally = await Rally.findByIdAndUpdate(
             rallyId,
-            {$push: {submissions: newSubmission}},
-            {new: true, runValidators: true}
+            { $push: { submissions: newSubmission } },
+            { new: true, runValidators: true }
         );
 
         if (!updatedRally) {

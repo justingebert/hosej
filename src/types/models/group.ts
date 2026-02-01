@@ -1,5 +1,5 @@
-import { Types } from "mongoose";
-import { ToDTO } from "../common";
+import type { Types } from "mongoose";
+import type { ToDTO } from "../common";
 
 export interface IGroupMember {
     user: Types.ObjectId;
@@ -39,7 +39,7 @@ export interface IGroupFeatures {
 export interface IGroup {
     _id: Types.ObjectId;
     name: string;
-    admin: Types.ObjectId
+    admin: Types.ObjectId;
     members: IGroupMember[];
     features: IGroupFeatures;
     createdAt: Date;

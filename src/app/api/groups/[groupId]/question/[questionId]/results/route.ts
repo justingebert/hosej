@@ -1,11 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
+import type { NextRequest} from "next/server";
+import { NextResponse } from "next/server";
 import dbConnect from "@/db/dbConnect";
 import Question from "@/db/models/Question";
 import { isUserInGroup } from "@/lib/userAuth";
 import { generateSignedUrl } from "@/lib/generateSingledUrl";
 import Group from "@/db/models/Group";
 import User from "@/db/models/user";
-import { AuthedContext, withAuthAndErrors } from "@/lib/api/withAuth";
+import type { AuthedContext} from "@/lib/api/withAuth";
+import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { NotFoundError } from "@/lib/api/errorHandling";
 
 export const revalidate = 0;
@@ -13,9 +15,9 @@ export const revalidate = 0;
 export const GET = withAuthAndErrors(
     async (
         req: NextRequest,
-        {params, userId}: AuthedContext<{ params: { groupId: string; questionId: string } }>
+        { params, userId }: AuthedContext<{ params: { groupId: string; questionId: string } }>
     ) => {
-        const {groupId, questionId} = params;
+        const { groupId, questionId } = params;
 
         await dbConnect();
         await isUserInGroup(userId, groupId);
@@ -40,7 +42,7 @@ export const GET = withAuthAndErrors(
             const responses = Array.isArray(answer.response) ? answer.response : [answer.response];
             responses.forEach((response: any) => {
                 if (!acc[response]) {
-                    acc[response] = {count: 0, users: []};
+                    acc[response] = { count: 0, users: [] };
                 }
                 acc[response].count += 1;
                 acc[response].users.push(answer.user.username);
@@ -50,17 +52,17 @@ export const GET = withAuthAndErrors(
 
         // Calculate results with percentages
         const results = await Promise.all(
-            Object.entries(voteDetails).map(async ([option, {count, users}]: any) => {
+            Object.entries(voteDetails).map(async ([option, { count, users }]: any) => {
                 const percentage = Math.round((count / totalVotes) * 100);
                 let signedOption = option;
 
                 // Generate signed URLs for image responses
                 if (question.questionType.startsWith("image")) {
-                    const {url} = await generateSignedUrl(option);
+                    const { url } = await generateSignedUrl(option);
                     signedOption = url;
                 }
 
-                return {option: signedOption, count, percentage, users};
+                return { option: signedOption, count, percentage, users };
             })
         );
 
@@ -68,8 +70,8 @@ export const GET = withAuthAndErrors(
         results.sort((a, b) => b.count - a.count);
 
         return NextResponse.json(
-            {results, totalVotes, totalUsers, questionType: question.questionType},
-            {status: 200}
+            { results, totalVotes, totalUsers, questionType: question.questionType },
+            { status: 200 }
         );
     }
 );

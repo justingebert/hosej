@@ -8,7 +8,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Upload, AlertCircle, CheckCircle2 } from "lucide-react";
-import { validateTemplates, formatValidationErrors, type ValidationError } from "@/lib/template-questions/validateTemplateQuestions";
+import {
+    validateTemplates,
+    formatValidationErrors,
+    type ValidationError,
+} from "@/lib/template-questions/validateTemplateQuestions";
 
 interface UploadResult {
     success?: boolean;
@@ -68,7 +72,7 @@ export default function TemplateUploadCard() {
             setUploadResult({
                 loaded: 0,
                 skipped: Array.isArray(templates) ? templates.length : 0,
-                errors: validationResult.errors
+                errors: validationResult.errors,
             });
             return;
         }
@@ -133,11 +137,7 @@ export default function TemplateUploadCard() {
             <CardContent className="space-y-4">
                 <div className="space-y-2">
                     <Label htmlFor="packId">Pack ID</Label>
-                    <Input
-                        id="packId"
-                        value={packId}
-                        onChange={(e) => setPackId(e.target.value)}
-                    />
+                    <Input id="packId" value={packId} onChange={(e) => setPackId(e.target.value)} />
                 </div>
 
                 <div className="space-y-2">
@@ -166,7 +166,9 @@ export default function TemplateUploadCard() {
                             <div className="flex items-start gap-2 p-4 border rounded-lg bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800">
                                 <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400 mt-0.5" />
                                 <div className="flex-1 space-y-1 text-sm text-red-800 dark:text-red-200">
-                                    <p className="font-semibold">{uploadResult.skipped} template(s) skipped:</p>
+                                    <p className="font-semibold">
+                                        {uploadResult.skipped} template(s) skipped:
+                                    </p>
                                     <ul className="text-xs space-y-1 max-h-40 overflow-y-auto">
                                         {uploadResult.errors.slice(0, 10).map((err, idx) => (
                                             <li key={idx}>
@@ -174,7 +176,10 @@ export default function TemplateUploadCard() {
                                             </li>
                                         ))}
                                         {uploadResult.errors.length > 10 && (
-                                            <li>... and {uploadResult.errors.length - 10} more errors</li>
+                                            <li>
+                                                ... and {uploadResult.errors.length - 10} more
+                                                errors
+                                            </li>
                                         )}
                                     </ul>
                                 </div>

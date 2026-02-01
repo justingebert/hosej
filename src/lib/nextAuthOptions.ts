@@ -21,16 +21,16 @@ export const authOptions = {
         CredentialsProvider({
             name: "Device ID",
             credentials: {
-                deviceId: {label: "Device ID", type: "text"},
+                deviceId: { label: "Device ID", type: "text" },
             },
             //@ts-ignore
             async authorize(credentials) {
                 await dbConnect();
-                const {deviceId} = credentials!;
+                const { deviceId } = credentials!;
                 if (!deviceId) {
                     return null;
                 }
-                const userDoc = await User.findOne({deviceId: deviceId}).lean();
+                const userDoc = await User.findOne({ deviceId: deviceId }).lean();
                 if (!userDoc) {
                     return null;
                 }
@@ -39,10 +39,10 @@ export const authOptions = {
         }),
     ],
     callbacks: {
-        async jwt({token, user, account}: any) {
+        async jwt({ token, user, account }: any) {
             if (account?.provider === "google") {
                 await dbConnect();
-                const existingUser = await User.findOne({googleId: account.providerAccountId});
+                const existingUser = await User.findOne({ googleId: account.providerAccountId });
                 if (!existingUser) {
                     const newUser = new User({
                         googleId: account.providerAccountId,
@@ -59,7 +59,7 @@ export const authOptions = {
             }
             return token;
         },
-        async session({session, token}: any) {
+        async session({ session, token }: any) {
             session.userId = token.userId;
             await dbConnect();
             //exclude googleId and deviceId from the session

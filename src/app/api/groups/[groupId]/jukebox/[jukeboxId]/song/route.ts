@@ -1,10 +1,12 @@
 import dbConnect from "@/db/dbConnect";
 import { isUserInGroup } from "@/lib/userAuth";
 import Jukebox from "@/db/models/Jukebox";
-import { NextRequest, NextResponse } from "next/server";
-import { AuthedContext, withAuthAndErrors } from "@/lib/api/withAuth";
+import type { NextRequest} from "next/server";
+import { NextResponse } from "next/server";
+import type { AuthedContext} from "@/lib/api/withAuth";
+import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
-import { createSong, ISong } from "@/types/models/jukebox";
+import type { createSong, ISong } from "@/types/models/jukebox";
 
 export const revalidate = 0;
 
@@ -18,19 +20,19 @@ export const POST = withAuthAndErrors(
             params: { groupId: string; jukeboxId: string };
         }>
     ) => {
-        const {groupId, jukeboxId} = params;
+        const { groupId, jukeboxId } = params;
 
         await dbConnect();
         await isUserInGroup(userId, groupId);
 
         const body = await req.json();
-        const {spotifyTrackId, title, artist, album, coverImageUrl} = body;
+        const { spotifyTrackId, title, artist, album, coverImageUrl } = body;
 
         if (!spotifyTrackId || !title || !artist) {
             throw new ValidationError("spotifyTrackId, title, and artist are required");
         }
 
-        const jukebox = await Jukebox.findOne({_id: jukeboxId, groupId, active: true});
+        const jukebox = await Jukebox.findOne({ _id: jukeboxId, groupId, active: true });
         if (!jukebox) {
             throw new NotFoundError("Jukebox not found");
         }
@@ -49,6 +51,9 @@ export const POST = withAuthAndErrors(
 
         await jukebox.save();
 
-        return NextResponse.json({message: "Song added to jukebox", data: jukebox}, {status: 201});
+        return NextResponse.json(
+            { message: "Song added to jukebox", data: jukebox },
+            { status: 201 }
+        );
     }
 );

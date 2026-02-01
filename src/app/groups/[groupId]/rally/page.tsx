@@ -8,22 +8,22 @@ import { Card } from "@/components/ui/card";
 import BackLink from "@/components/ui/custom/BackLink";
 import { RallyTabs } from "./RallyTabs";
 import fetcher from "@/lib/fetcher";
-import { IRallyJson } from "@/types/models/rally";
+import type { IRallyJson } from "@/types/models/rally";
 import { useEffect, useMemo, useState } from "react";
-import { GroupDTO } from "@/types/models/group";
+import type { GroupDTO } from "@/types/models/group";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const RallyPage = () => {
-    const {user} = useAuthRedirect();
+    const { user } = useAuthRedirect();
     const params = useParams<{ groupId: string }>();
     const groupId = params?.groupId;
     const router = useRouter();
     const [userHasVoted, setUserHasVoted] = useState<Record<string, boolean>>({});
     const [userHasUploaded, setUserHasUploaded] = useState<Record<string, boolean>>({});
 
-    const {data: group} = useSWR<GroupDTO>(`/api/groups/${groupId}`, fetcher, {});
-    const {data, isLoading} = useSWR<{ rallies: IRallyJson[] }>(
+    const { data: group } = useSWR<GroupDTO>(`/api/groups/${groupId}`, fetcher, {});
+    const { data, isLoading } = useSWR<{ rallies: IRallyJson[] }>(
         user ? `/api/groups/${groupId}/rally` : null,
         fetcher
     );
@@ -57,14 +57,14 @@ const RallyPage = () => {
         return (
             <div>
                 <Header
-                    leftComponent={<BackLink href={`/groups/${groupId}/dashboard`}/>}
+                    leftComponent={<BackLink href={`/groups/${groupId}/dashboard`} />}
                     title="Rallies"
                 />
                 <div>
-                    <Skeleton className="w-full h-10 mb-4"/>
-                    <Skeleton className="w-full h-20 mb-20"/>
-                    <Skeleton className="w-full h-96 mb-20"/>
-                    <Skeleton className="w-full h-12 mb-6"/>
+                    <Skeleton className="w-full h-10 mb-4" />
+                    <Skeleton className="w-full h-20 mb-20" />
+                    <Skeleton className="w-full h-96 mb-20" />
+                    <Skeleton className="w-full h-12 mb-6" />
                 </div>
             </div>
         );
@@ -74,7 +74,7 @@ const RallyPage = () => {
         return (
             <div className="flex flex-col h-[100dvh]">
                 <Header
-                    leftComponent={<BackLink href={`/groups/${groupId}/dashboard`}/>}
+                    leftComponent={<BackLink href={`/groups/${groupId}/dashboard`} />}
                     title="Rallies"
                 />
                 <div className="flex flex-grow justify-center items-center">
@@ -103,7 +103,7 @@ const RallyPage = () => {
     return (
         <div>
             <Header
-                leftComponent={<BackLink href={`/groups/${groupId}/dashboard`}/>}
+                leftComponent={<BackLink href={`/groups/${groupId}/dashboard`} />}
                 title="Rallies"
             />
             <RallyTabs

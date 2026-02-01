@@ -33,11 +33,7 @@ export default function DeviceAuth() {
                 />
 
                 <div className="space-y-4 w-full max-w-sm">
-                    <Button
-                        onClick={handleStart}
-                        className="w-full"
-                        disabled={!deviceID}
-                    >
+                    <Button onClick={handleStart} className="w-full" disabled={!deviceID}>
                         Start
                     </Button>
                 </div>

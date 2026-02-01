@@ -1,5 +1,5 @@
-import { createContext, useContext, useEffect, useState } from 'react';
-import { useSession } from 'next-auth/react';
+import { createContext, useContext, useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 
 // Define the interface for session data
 interface SessionData {
@@ -9,22 +9,18 @@ interface SessionData {
 
 const SessionContext = createContext<SessionData | null>(null);
 
-export function SessionProvider({children}: any) {
-    const {data: session, status} = useSession();
+export function SessionProvider({ children }: any) {
+    const { data: session, status } = useSession();
     const [sessionData, setSessionData] = useState<SessionData>({
         session: null,
-        status: 'loading',
+        status: "loading",
     });
 
     useEffect(() => {
-        setSessionData({session, status});
+        setSessionData({ session, status });
     }, [session, status]);
 
-    return (
-        <SessionContext.Provider value={sessionData}>
-            {children}
-        </SessionContext.Provider>
-    );
+    return <SessionContext.Provider value={sessionData}>{children}</SessionContext.Provider>;
 }
 
 // Custom hook to use the session context
