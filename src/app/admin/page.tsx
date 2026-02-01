@@ -3,18 +3,15 @@
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, Shield } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
 import { FeatureStatus } from "@/types/models/appConfig";
 import TemplateUploadCard from "@/components/admin/TemplateUploadCard";
+import GlobalFeatureControl from "@/components/admin/GlobalFeatureControl";
 
 interface GlobalConfig {
     features: {
@@ -149,108 +146,13 @@ export default function AdminPage() {
                 </div>
             </div>
 
-            <Card>
-                <CardHeader>
-                    <div className="flex items-center justify-between">
-                        <CardTitle>Global Feature Control</CardTitle>
-                    </div>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                    <div className="space-y-4">
-                        <div className="p-3 md:p-4 border rounded-lg space-y-3">
-                            <div className="space-y-0.5">
-                                <Label className="text-base font-semibold">
-                                    Questions
-                                </Label>
-                            </div>
-                            <RadioGroup
-                                value={localConfig.features.questions.status}
-                                onValueChange={(value) => updateFeature('questions', value as FeatureStatus)}
-                                className="flex flex-col sm:flex-row gap-3 sm:gap-4"
-                            >
-                                <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="enabled" id="q-enabled" />
-                                    <Label htmlFor="q-enabled" className="cursor-pointer">Enabled</Label>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="comingSoon" id="q-coming" />
-                                    <Label htmlFor="q-coming" className="cursor-pointer">Coming Soon</Label>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="disabled" id="q-disabled" />
-                                    <Label htmlFor="q-disabled" className="cursor-pointer">Disabled</Label>
-                                </div>
-                            </RadioGroup>
-                        </div>
-
-                        <div className="p-3 md:p-4 border rounded-lg space-y-3">
-                            <div className="space-y-0.5">
-                                <Label className="text-base font-semibold">
-                                    Rallies
-                                </Label>
-                            </div>
-                            <RadioGroup
-                                value={localConfig.features.rallies.status}
-                                onValueChange={(value) => updateFeature('rallies', value as FeatureStatus)}
-                                className="flex flex-col sm:flex-row gap-3 sm:gap-4"
-                            >
-                                <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="enabled" id="r-enabled" />
-                                    <Label htmlFor="r-enabled" className="cursor-pointer">Enabled</Label>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="comingSoon" id="r-coming" />
-                                    <Label htmlFor="r-coming" className="cursor-pointer">Coming Soon</Label>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="disabled" id="r-disabled" />
-                                    <Label htmlFor="r-disabled" className="cursor-pointer">Disabled</Label>
-                                </div>
-                            </RadioGroup>
-                        </div>
-
-                        <div className="p-3 md:p-4 border rounded-lg space-y-3">
-                            <div className="space-y-0.5">
-                                <Label className="text-base font-semibold">
-                                    Jukebox
-                                </Label>
-                            </div>
-                            <RadioGroup
-                                value={localConfig.features.jukebox.status}
-                                onValueChange={(value) => updateFeature('jukebox', value as FeatureStatus)}
-                                className="flex flex-col sm:flex-row gap-3 sm:gap-4"
-                            >
-                                <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="enabled" id="j-enabled" />
-                                    <Label htmlFor="j-enabled" className="cursor-pointer">Enabled</Label>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="comingSoon" id="j-coming" />
-                                    <Label htmlFor="j-coming" className="cursor-pointer">Coming Soon</Label>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="disabled" id="j-disabled" />
-                                    <Label htmlFor="j-disabled" className="cursor-pointer">Disabled</Label>
-                                </div>
-                            </RadioGroup>
-                        </div>
-                    </div>
-
-                    <div className="flex flex-col gap-2 pt-4 border-t">
-                        <Button
-                            onClick={saveSettings}
-                            disabled={saving}
-                            size="lg"
-                            className="w-full"
-                        >
-                            {saving ? "Saving..." : "Save Global Settings"}
-                        </Button>
-                        <p className="text-xs text-muted-foreground text-center">
-                            Last updated: {new Date(config.updatedAt).toLocaleString()}
-                        </p>
-                    </div>
-                </CardContent>
-            </Card>
+            <GlobalFeatureControl
+                config={config}
+                localConfig={localConfig}
+                onUpdateFeature={updateFeature}
+                onSave={saveSettings}
+                saving={saving}
+            />
 
             <TemplateUploadCard />
         </div>

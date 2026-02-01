@@ -135,20 +135,16 @@ export default function TemplateUploadCard() {
                     <Label htmlFor="packId">Pack ID</Label>
                     <Input
                         id="packId"
-                        placeholder="e.g., starter-pack, holiday-questions"
                         value={packId}
                         onChange={(e) => setPackId(e.target.value)}
                     />
-                    <p className="text-xs text-muted-foreground">
-                        Unique identifier for this question pack
-                    </p>
                 </div>
 
                 <div className="space-y-2">
                     <Label htmlFor="templates">Templates JSON</Label>
                     <Textarea
                         id="templates"
-                        placeholder={`[\n  {\n    "category": "Daily",\n    "questionType": "users-select-one",\n    "question": "Who is the most...",\n    "options": []\n  }\n]`}
+                        placeholder={`[\n  {\n    ...\n  }\n]`}
                         value={templatesJson}
                         onChange={(e) => setTemplatesJson(e.target.value)}
                         rows={12}
