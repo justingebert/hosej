@@ -1,7 +1,6 @@
 import dbConnect from "@/db/dbConnect";
 import Question from "@/db/models/Question";
 import { type NextRequest, NextResponse } from "next/server";
-import Chat from "@/db/models/Chat";
 import Group from "@/db/models/Group";
 import { isUserInGroup } from "@/lib/userAuth";
 import { CREATED_QUESTION_POINTS } from "@/config/POINT_CONFIG";
@@ -9,58 +8,39 @@ import { ValidationError } from "@/lib/api/errorHandling";
 import { AuthedContext, withAuthAndErrors } from "@/lib/api/withAuth";
 import { generateSignedUrl } from "@/lib/generateSingledUrl";
 import { QuestionDTO } from "@/types/models/question";
+import { createQuestionInGroup } from "@/lib/question/createQuestion";
 
 export const revalidate = 0;
 
 export const POST = withAuthAndErrors(
-    async (req: NextRequest, {params, userId}: { params: { groupId: string }; userId: string }) => {
-        const {groupId} = params;
+    async (req: NextRequest, { params, userId }: { params: { groupId: string }; userId: string }) => {
+        const { groupId } = params;
 
         await dbConnect();
         await isUserInGroup(userId, groupId);
 
         const data = await req.json();
-        const {category, questionType, question, submittedBy, image} = data;
+        const { category, questionType, question, submittedBy, image } = data;
         if (!groupId || !category || !questionType || !question || !submittedBy) {
             throw new ValidationError("Missing required fields");
         }
 
-        // Populate options based on question type
         let options = data.options || [];
-        if (questionType.startsWith("users-") && options.length === 0) {
-            const group = await Group.findById(groupId).orFail();
-            options = group.members.map((member: any) => member.name);
-        } else if (questionType.startsWith("rating") && options.length === 0) {
-            options = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
-        }
 
-        const newQuestion = new Question({
-            groupId: groupId,
-            category: category,
-            questionType: questionType,
-            question: question,
-            image: image,
-            options: options,
-            submittedBy: submittedBy,
-        });
-
-        await newQuestion.save();
-
-        const newChat = new Chat({
-            group: groupId,
-            entity: newQuestion._id,
-            entityModel: "Question",
-            messages: [],
-        });
-
-        await newChat.save();
-        newQuestion.chat = newChat._id;
-        await newQuestion.save();
+        const newQuestion = await createQuestionInGroup(
+            groupId,
+            category,
+            questionType,
+            question,
+            image,
+            options,
+            submittedBy
+        );
 
         const group = await Group.findById(groupId).orFail();
         await group.addPoints(userId, CREATED_QUESTION_POINTS);
 
-        return NextResponse.json({newQuestion}, {status: 201});
+        return NextResponse.json({ newQuestion }, { status: 201 });
     }
 );
 
@@ -71,7 +51,7 @@ type QuestionWithUserState = QuestionDTO & {
     userRating: UserRating;
 };
 
-// Return active daily questions
+// Return active questions
 export const GET = withAuthAndErrors(
     async (
         req: NextRequest,
@@ -82,20 +62,19 @@ export const GET = withAuthAndErrors(
             params: { groupId: string };
         }>
     ) => {
-        const {groupId} = params;
+        const { groupId } = params;
 
         await dbConnect();
         await isUserInGroup(userId, groupId);
 
         let questions = await Question.find({
             groupId: groupId,
-            category: "Daily",
             used: true,
             active: true,
         }).lean();
 
         if (!questions || questions.length === 0) {
-            return NextResponse.json({questions: [], message: "No questions available"});
+            return NextResponse.json({ questions: [], message: "No questions available" });
         }
 
         const group = await Group.findById(groupId).orFail();
@@ -115,13 +94,13 @@ export const GET = withAuthAndErrors(
                         : null;
 
             // return a new object with computed fields
-            return {...q, userHasVoted, userRating};
+            return { ...q, userHasVoted, userRating };
         });
 
         const questionsWithImages = await Promise.all(
             questionsPopulated.map(async (question) => {
                 if (question.image) {
-                    const {url} = await generateSignedUrl(new URL(question.image).pathname);
+                    const { url } = await generateSignedUrl(new URL(question.image).pathname);
                     question.imageUrl = url;
                 }
                 if (question.questionType.startsWith("image")) {
@@ -136,6 +115,6 @@ export const GET = withAuthAndErrors(
             })
         );
 
-        return NextResponse.json({questions: questionsWithImages, completionPercentage});
+        return NextResponse.json({ questions: questionsWithImages, completionPercentage });
     }
 );

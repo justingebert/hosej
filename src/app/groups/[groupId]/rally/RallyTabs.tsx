@@ -15,7 +15,7 @@ export function RallyTabs({
                               setUserHasUploaded,
                           }: any) {
     const searchParams = useSearchParams();
-    const defaultTab = searchParams.get("returnTo") || (rallies.length > 0 ? rallies[0]._id : undefined);
+    const defaultTab = searchParams?.get("returnTo") || (rallies.length > 0 ? rallies[0]._id : undefined);
 
     return (
         <Tabs defaultValue={defaultTab}>

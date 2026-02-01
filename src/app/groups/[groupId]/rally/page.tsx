@@ -16,7 +16,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const RallyPage = () => {
     const {user} = useAuthRedirect();
-    const {groupId} = useParams<{ groupId: string }>();
+    const params = useParams<{ groupId: string }>();
+    const groupId = params?.groupId;
     const router = useRouter();
     const [userHasVoted, setUserHasVoted] = useState<Record<string, boolean>>({});
     const [userHasUploaded, setUserHasUploaded] = useState<Record<string, boolean>>({});

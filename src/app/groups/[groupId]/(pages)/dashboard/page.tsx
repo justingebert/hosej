@@ -1,10 +1,9 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { BarChartBig, CircleSlash, Clock, Info, MousePointerClick, ScanSearch, Users } from "lucide-react";
-import { CompletionChart } from "@/components/features/charts/CompletionChart";
-import confetti from "canvas-confetti";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import useSWR, { useSWRConfig } from "swr";
@@ -16,26 +15,35 @@ import { useHaptic } from "use-haptic";
 import { QuestionDTO } from "@/types/models/question";
 import { FeatureStatus } from "@/types/models/appConfig";
 
+// Lazy load CompletionChart (uses recharts ~200KB)
+const CompletionChart = dynamic(
+    () => import("@/components/features/charts/CompletionChart").then(mod => ({ default: mod.CompletionChart })),
+    {
+        loading: () => <div className="w-24 h-24 bg-muted rounded-lg animate-pulse" />,
+        ssr: false
+    }
+);
+
 export default function Dashboard() {
     const router = useRouter();
-    const {mutate} = useSWRConfig();
-    const {triggerHaptic} = useHaptic();
+    const { mutate } = useSWRConfig();
+    const { triggerHaptic } = useHaptic();
     const params = useParams<{ groupId: string }>();
     const groupId = params?.groupId;
-    const {data: group, isLoading: groupLoading} = useSWR<GroupDTO>(
+    const { data: group, isLoading: groupLoading } = useSWR<GroupDTO>(
         groupId ? `/api/groups/${groupId}` : null,
         fetcher
     );
-    const {data: globalFeatures} = useSWR<{
+    const { data: globalFeatures } = useSWR<{
         questions: { status: FeatureStatus };
         rallies: { status: FeatureStatus };
         jukebox: { status: FeatureStatus };
     }>("/api/features/status", fetcher);
-    const {data: questionsData, isLoading: questionLoading} = useSWR<{
+    const { data: questionsData, isLoading: questionLoading } = useSWR<{
         questions: QuestionDTO[];
         completionPercentage: number;
     }>(globalFeatures?.questions?.status === "enabled" ? `/api/groups/${groupId}/question` : null, fetcher);
-    const {data: ralliesData, isLoading: rallyLoading} = useSWR<{ rallies: IRally[] }>(
+    const { data: ralliesData, isLoading: rallyLoading } = useSWR<{ rallies: IRally[] }>(
         globalFeatures?.rallies?.status === "enabled" ? `/api/groups/${groupId}/rally` : null,
         fetcher
     );
@@ -43,35 +51,7 @@ export default function Dashboard() {
     const questions = questionsData?.questions || [];
     const rallies = ralliesData?.rallies || [];
 
-    const triggerConfetti = () => {
-        const scalar = 2;
-        const hose = confetti.shapeFromText({text: "👖", scalar});
-        confetti({
-            particleCount: 100,
-            spread: 70,
-            origin: {y: 0.6},
-            shapes: [hose],
-            scalar,
-        });
-    };
-
     const DailyCompletion = questionsData ? questionsData.completionPercentage : 0;
-    if (DailyCompletion === 100) {
-        const lastConfetti = localStorage.getItem("confetti");
-        if (lastConfetti) {
-            const lastConfettiDate = new Date(lastConfetti);
-            const now = new Date();
-            if (
-                now.getDate() === lastConfettiDate.getDate() &&
-                now.getMonth() === lastConfettiDate.getMonth() &&
-                now.getFullYear() === lastConfettiDate.getFullYear()
-            ) {
-                return;
-            }
-            triggerConfetti();
-            localStorage.setItem("confetti", new Date().toISOString());
-        }
-    }
 
     const titleClass = group?.name && group.name.length > 15 ? "text-2xl" : "text-4xl";
 
@@ -79,12 +59,12 @@ export default function Dashboard() {
         <>
             <div className="flex justify-between items-center">
                 <Button variant="outline" size="icon" onClick={() => router.push(`/groups`)}>
-                    <Users/>
+                    <Users />
                 </Button>
                 <h1 className={`flex-grow ${titleClass} font-bold text-center break-words`}>{group?.name}</h1>
                 {/* <Link href={`/groups/${groupId}/settings`}> */}
                 <Button variant="outline" size="icon">
-                    <Info/>
+                    <Info />
                 </Button>
                 {/* </Link> */}
             </div>
@@ -96,7 +76,7 @@ export default function Dashboard() {
                         <Card className="border-dashed">
                             <CardHeader className="text-center">
                                 <div className="flex items-center justify-center gap-2 mb-2">
-                                    <Clock className="h-5 w-5"/>
+                                    <Clock className="h-5 w-5" />
                                     <CardTitle>Daily Questions</CardTitle>
                                 </div>
                                 <Badge variant="secondary" className="mx-auto">
@@ -128,11 +108,11 @@ export default function Dashboard() {
                                             <div className="font-bold text-2xl">Daily</div>
                                         </div>
                                         <div className="w-24 h-24 rounded-lg">
-                                            <CompletionChart completion={DailyCompletion}/>
+                                            <CompletionChart completion={DailyCompletion} />
                                         </div>
                                     </div>
                                 ) : (
-                                    <Skeleton className="h-32"/>
+                                    <Skeleton className="h-32" />
                                 )}
                             </>
                         )
@@ -143,7 +123,7 @@ export default function Dashboard() {
                         <Card className="border-dashed">
                             <CardHeader className="text-center">
                                 <div className="flex items-center justify-center gap-2 mb-2">
-                                    <Clock className="h-5 w-5"/>
+                                    <Clock className="h-5 w-5" />
                                     <CardTitle>Rallies</CardTitle>
                                 </div>
                                 <Badge variant="secondary" className="mx-auto">
@@ -174,23 +154,23 @@ export default function Dashboard() {
                                         <div className="w-24 h-24 rounded-lg flex items-center justify-center">
                                             {/* Rally icons */}
                                             {rallies.length > 0 && rallies[0].votingOpen && (
-                                                <MousePointerClick className="w-full h-full p-4"/>
+                                                <MousePointerClick className="w-full h-full p-4" />
                                             )}
                                             {rallies.length > 0 && rallies[0].resultsShowing && (
-                                                <BarChartBig className="w-full h-full p-4"/>
+                                                <BarChartBig className="w-full h-full p-4" />
                                             )}
                                             {rallies.length > 0 &&
                                                 !rallies[0].votingOpen &&
                                                 !rallies[0].resultsShowing && (
-                                                    <ScanSearch className="w-full h-full p-4"/>
+                                                    <ScanSearch className="w-full h-full p-4" />
                                                 )}
                                             {rallies.length === 0 && (
-                                                <CircleSlash className="w-full h-full p-4 text-secondary"/>
+                                                <CircleSlash className="w-full h-full p-4 text-secondary" />
                                             )}
                                         </div>
                                     </div>
                                 ) : (
-                                    <Skeleton className="h-32"/>
+                                    <Skeleton className="h-32" />
                                 )}
                             </>
                         )
@@ -203,7 +183,7 @@ export default function Dashboard() {
                                 <Card className="border-dashed">
                                     <CardHeader className="text-center">
                                         <div className="flex items-center justify-center gap-2 mb-2">
-                                            <Clock className="h-5 w-5"/>
+                                            <Clock className="h-5 w-5" />
                                             <CardTitle>Jukebox</CardTitle>
                                         </div>
                                         <Badge variant="secondary" className="mx-auto">
@@ -236,7 +216,7 @@ export default function Dashboard() {
                             )}
                         </>
                     ) : (
-                        <Skeleton className="h-32"/>
+                        <Skeleton className="h-32" />
                     )}
                 </div>
             </div>
