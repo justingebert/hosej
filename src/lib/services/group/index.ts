@@ -1,0 +1,1 @@
+export { addPointsToMember } from "./addPoints";

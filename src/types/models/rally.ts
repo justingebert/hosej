@@ -1,20 +1,23 @@
-import type { Document, Types } from "mongoose";
-import type { AsJson } from "../common";
+import type { HydratedDocument, Types } from "mongoose";
+import type { ToDTO } from "../common";
 
 export interface IPictureSubmission {
     _id: Types.ObjectId;
     userId: Types.ObjectId;
     username: string;
     imageUrl: string;
-    votes: [
-        {
-            user: Types.ObjectId;
-            time: Date;
-        },
-    ];
+    votes: {
+        user: Types.ObjectId;
+        time: Date;
+    }[];
 }
 
-export interface IRally extends Document {
+/**
+ * Plain data interface for Rally documents.
+ * Does NOT include Mongoose methods like save().
+ */
+export interface IRally {
+    _id: Types.ObjectId;
     groupId: Types.ObjectId;
     task: string;
     submissions: IPictureSubmission[];
@@ -30,5 +33,13 @@ export interface IRally extends Document {
     createdAt: Date;
 }
 
-export type IRallyJson = AsJson<IRally>;
-export type IPictureSubmissionJson = AsJson<IPictureSubmission>;
+export type RallyDocument = HydratedDocument<IRally>;
+
+export type RallyDTO = ToDTO<IRally>;
+export type PictureSubmissionDTO = ToDTO<IPictureSubmission>;
+
+// Backward-compatible aliases (prefer new names above)
+/** @deprecated Use RallyDTO instead */
+export type IRallyJson = RallyDTO;
+/** @deprecated Use PictureSubmissionDTO instead */
+export type IPictureSubmissionJson = PictureSubmissionDTO;

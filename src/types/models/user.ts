@@ -1,10 +1,8 @@
-import type { Types } from "mongoose";
+import type { HydratedDocument, Types } from "mongoose";
 import type { ToDTO } from "../common";
 
 export interface IUser {
     _id: Types.ObjectId;
-    email: string;
-    image?: string;
     username: string;
     groups: (Types.ObjectId | string)[];
 
@@ -15,5 +13,6 @@ export interface IUser {
 
     createdAt: Date;
 }
+export type UserDocument = HydratedDocument<IUser>;
 
 export type UserDTO = ToDTO<IUser>;

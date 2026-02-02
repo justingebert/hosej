@@ -32,7 +32,7 @@ export const POST = withAuthAndErrors(
         if (!rally) {
             return NextResponse.json({ message: "Rally not found" }, { status: 404 });
         }
-        const submission = rally.submissions.id(submissionId);
+        const submission = rally.submissions.find((s) => s._id.toString() === submissionId);
         if (!submission) {
             return NextResponse.json({ message: "Submission not found" });
         }
@@ -40,7 +40,7 @@ export const POST = withAuthAndErrors(
         if (userVoted) {
             return NextResponse.json({ message: "User already voted" }, { status: 304 });
         }
-        submission.votes.push({ user: user._id, time: Date.now() });
+        submission.votes.push({ user: user._id, time: new Date() });
 
         await rally.save();
 

@@ -44,6 +44,7 @@ export const GET = withAuthAndErrors(
         }
 
         for (const rally of rallies) {
+            if (!rally.endTime || !rally.startTime) continue;
             const endTime = new Date(rally.endTime);
             const startTime = new Date(rally.startTime);
 
@@ -132,7 +133,9 @@ export const GET = withAuthAndErrors(
             }
         }
         // return rallies that are currently running and are not in gaptime
-        const currentRallies = rallies.filter((rally) => currentTime >= new Date(rally.startTime));
+        const currentRallies = rallies.filter(
+            (rally) => rally.startTime && currentTime >= new Date(rally.startTime)
+        );
 
         return NextResponse.json({ rallies: currentRallies });
     }

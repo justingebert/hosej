@@ -1,5 +1,5 @@
+import type { HydratedDocument, Types } from "mongoose";
 import type { ToDTO } from "@/types/common";
-import type { Types } from "mongoose";
 
 export interface IMessage {
     user: Types.ObjectId | string;
@@ -7,7 +7,7 @@ export interface IMessage {
     createdAt: Date;
 }
 
-enum EntityModel {
+export enum EntityModel {
     Question = "Question",
     Rally = "Rally",
     Jukebox = "Jukebox",
@@ -21,5 +21,7 @@ export interface IChat {
     entityModel: EntityModel;
     createdAt: Date;
 }
+
+export type ChatDocument = HydratedDocument<IChat>;
 
 export type ChatDTO = ToDTO<IChat>;

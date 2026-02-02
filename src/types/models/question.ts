@@ -1,4 +1,4 @@
-import type { Types } from "mongoose";
+import type { HydratedDocument, Types } from "mongoose";
 import type { ToDTO } from "@/types/common";
 
 export interface IQuestion {
@@ -9,7 +9,7 @@ export interface IQuestion {
     question: string;
     image?: string;
 
-    options?: any;
+    options?: unknown[];
     answers: IAnswer[];
     rating: {
         good: Types.ObjectId[];
@@ -44,7 +44,7 @@ export enum QuestionType {
 
 export interface IAnswer {
     user: Types.ObjectId;
-    response: any; //Record<string, unknown> | string | number;
+    response: string | string[] | Record<string, unknown>;
     time: Date;
 }
 
@@ -54,5 +54,7 @@ export interface IResult {
     percentage: number;
     users: string[];
 }
+
+export type QuestionDocument = HydratedDocument<IQuestion>;
 
 export type QuestionDTO = ToDTO<IQuestion>;
