@@ -1,7 +1,6 @@
 name: CI
 
 on:
-  push:
   pull_request:
 
 # Prevent duplicate runs - cancel in-progress runs when new commits arrive
