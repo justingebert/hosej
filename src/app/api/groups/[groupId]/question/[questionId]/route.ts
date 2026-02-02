@@ -3,7 +3,7 @@ import Question from "@/db/models/Question";
 import { type NextRequest, NextResponse } from "next/server";
 import { isUserInGroup } from "@/lib/userAuth";
 import { generateSignedUrl } from "@/lib/generateSingledUrl";
-import type { AuthedContext} from "@/lib/api/withAuth";
+import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { NotFoundError } from "@/lib/api/errorHandling";
 
@@ -30,7 +30,7 @@ export const GET = withAuthAndErrors(
             (question as any).imageUrl = url;
         }
 
-        if (question.questionType.startsWith("image")) {
+        if (question.questionType.startsWith("image") && question.options) {
             question.options = await Promise.all(
                 question.options.map(async (option: any) => {
                     if (!option.key) throw new Error("Option is empty");

@@ -1,11 +1,11 @@
 import dbConnect from "@/db/dbConnect";
 import { isUserInGroup } from "@/lib/userAuth";
-import type { NextRequest} from "next/server";
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import Jukebox from "@/db/models/Jukebox";
 import type { IJukebox, IRating, ISong } from "@/types/models/jukebox";
-import User from "@/db/models/user";
-import type { AuthedContext} from "@/lib/api/withAuth";
+import User from "@/db/models/User";
+import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
 import type { IUser } from "@/types/models/user";
 import Group from "@/db/models/Group";

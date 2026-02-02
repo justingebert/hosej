@@ -1,10 +1,10 @@
 import dbConnect from "@/db/dbConnect";
-import Rally from "@/db/models/rally";
-import type { NextRequest} from "next/server";
+import Rally from "@/db/models/Rally";
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import Group from "@/db/models/Group";
 import { isUserAdmin } from "@/lib/userAuth";
-import type { AuthedContext} from "@/lib/api/withAuth";
+import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { NotFoundError } from "@/lib/api/errorHandling";
 

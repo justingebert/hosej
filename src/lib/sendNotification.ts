@@ -1,5 +1,5 @@
 import dbConnect from "@/db/dbConnect";
-import User from "@/db/models/user"; // Assuming the user model is defined in this path
+import User from "@/db/models/User"; // Assuming the user model is defined in this path
 import admin from "firebase-admin";
 import type { Types } from "mongoose";
 

@@ -1,4 +1,4 @@
-import type { Types } from "mongoose";
+import type { HydratedDocument, Types } from "mongoose";
 import type { ToDTO } from "../common";
 
 export interface IGroupMember {
@@ -36,6 +36,10 @@ export interface IGroupFeatures {
     };
 }
 
+/**
+ * Plain data interface for Group documents.
+ * Does NOT include Mongoose methods like save().
+ */
 export interface IGroup {
     _id: Types.ObjectId;
     name: string;
@@ -43,9 +47,16 @@ export interface IGroup {
     members: IGroupMember[];
     features: IGroupFeatures;
     createdAt: Date;
-
-    addPoints(userId: string | Types.ObjectId, points: number): Promise<void>;
 }
+
+/**
+ * Instance methods defined on Group documents.
+ */
+export interface IGroupMethods {
+    addPoints(userId: string, points: number): Promise<void>;
+}
+
+export type GroupDocument = HydratedDocument<IGroup, IGroupMethods>;
 
 export type GroupMemberDTO = ToDTO<IGroupMember>;
 export type GroupDTO = ToDTO<IGroup>;

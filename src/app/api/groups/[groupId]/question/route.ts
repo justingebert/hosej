@@ -5,7 +5,7 @@ import Group from "@/db/models/Group";
 import { isUserInGroup } from "@/lib/userAuth";
 import { CREATED_QUESTION_POINTS } from "@/config/POINT_CONFIG";
 import { ValidationError } from "@/lib/api/errorHandling";
-import type { AuthedContext} from "@/lib/api/withAuth";
+import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { generateSignedUrl } from "@/lib/generateSingledUrl";
 import type { QuestionDTO } from "@/types/models/question";
@@ -112,7 +112,7 @@ export const GET = withAuthAndErrors(
                     const { url } = await generateSignedUrl(new URL(question.image).pathname);
                     question.imageUrl = url;
                 }
-                if (question.questionType.startsWith("image")) {
+                if (question.questionType.startsWith("image") && question.options) {
                     question.options = await Promise.all(
                         question.options.map(async (option: any) => {
                             if (!option.key) throw new Error("Option is empty");

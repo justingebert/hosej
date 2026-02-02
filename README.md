@@ -41,6 +41,55 @@ HoseJ is a Next.js 14 App Router application. The UI is built with client compon
 - Charts/Visuals: recharts, framer-motion
 - Deployment: Vercel
 
+---
+
+## Quick Start
+
+```bash
+# Clone the repository
+git clone <repo-url> && cd hosej
+
+# Install dependencies
+npm install
+
+# Copy environment variables
+cp .env.example .env.local
+# Edit .env.local with your actual values
+
+# Run development server
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) to view the app.
+
+---
+
+## Project Structure
+
+```
+src/
+├── app/                    # Next.js App Router pages and API routes
+│   ├── api/               # API route handlers
+│   ├── groups/            # Group-related pages
+│   └── ...
+├── components/
+│   ├── ui/                # shadcn/ui components
+│   ├── features/          # Feature-specific components
+│   └── wrappers/          # Context providers and wrappers
+├── db/
+│   ├── models/            # Mongoose schemas
+│   └── dbConnect.ts       # Database connection utility
+├── lib/
+│   ├── api/               # API utilities (auth, error handling)
+│   ├── services/          # Business logic layer
+│   └── ...
+├── hooks/                 # Custom React hooks
+├── types/                 # TypeScript type definitions
+│   └── models/            # Model interfaces and DTOs
+└── middleware.ts          # Auth middleware
+```
+
+---
 
 ## Environment Variables
 
@@ -79,3 +128,4 @@ Misc:
 - ENV  // set to "dev" to disable notifications and certain PWA behaviors in development
 
 ---
+

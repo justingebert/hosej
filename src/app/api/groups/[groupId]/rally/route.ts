@@ -1,14 +1,14 @@
 import dbConnect from "@/db/dbConnect";
-import Rally from "@/db/models/rally";
-import type { NextRequest} from "next/server";
+import Rally from "@/db/models/Rally";
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import User from "@/db/models/user";
+import User from "@/db/models/User";
 import { sendNotification } from "@/lib/sendNotification";
 import Chat from "@/db/models/Chat";
 import Group from "@/db/models/Group";
 import { isUserInGroup } from "@/lib/userAuth";
 import { CREATED_RALLY_POINTS } from "@/config/POINT_CONFIG";
-import type { AuthedContext} from "@/lib/api/withAuth";
+import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 
@@ -44,6 +44,7 @@ export const GET = withAuthAndErrors(
         }
 
         for (const rally of rallies) {
+            if (!rally.endTime || !rally.startTime) continue;
             const endTime = new Date(rally.endTime);
             const startTime = new Date(rally.startTime);
 
@@ -132,7 +133,9 @@ export const GET = withAuthAndErrors(
             }
         }
         // return rallies that are currently running and are not in gaptime
-        const currentRallies = rallies.filter((rally) => currentTime >= new Date(rally.startTime));
+        const currentRallies = rallies.filter(
+            (rally) => rally.startTime && currentTime >= new Date(rally.startTime)
+        );
 
         return NextResponse.json({ rallies: currentRallies });
     }
@@ -182,7 +185,7 @@ export const POST = withAuthAndErrors(
         newRally.chat = newChat._id;
         await newRally.save();
 
-        await group.addPoints(submittingUser._id, CREATED_RALLY_POINTS);
+        await group.addPoints(submittingUser._id.toString(), CREATED_RALLY_POINTS);
 
         return NextResponse.json({ message: "Rally created successfully" });
     }

@@ -1,4 +1,4 @@
-import type { Types } from "mongoose";
+import type { HydratedDocument, Types } from "mongoose";
 import type { ToDTO } from "../common";
 import type { UserDTO } from "./user";
 
@@ -30,6 +30,10 @@ export interface IJukebox {
     chat: Types.ObjectId;
     createdAt: Date;
 }
+
+export type JukeboxDocument = HydratedDocument<IJukebox>;
+
+export type SongDocument = HydratedDocument<ISong>;
 
 export type RatingDTO = ToDTO<IRating>;
 export type SongDTO = ToDTO<ISong>;

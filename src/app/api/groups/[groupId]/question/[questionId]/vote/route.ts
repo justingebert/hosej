@@ -1,12 +1,12 @@
 import dbConnect from "@/db/dbConnect";
 import Question from "@/db/models/Question";
-import type { NextRequest} from "next/server";
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import User from "@/db/models/user";
+import User from "@/db/models/User";
 import Group from "@/db/models/Group";
 import { isUserInGroup } from "@/lib/userAuth";
 import { VOTED_QUESTION_POINTS } from "@/config/POINT_CONFIG";
-import type { AuthedContext} from "@/lib/api/withAuth";
+import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 
@@ -58,7 +58,7 @@ export const POST = withAuthAndErrors(
 
         const group = await Group.findById(groupId);
         if (!group) throw new NotFoundError("Group not found");
-        await group.addPoints(user._id, VOTED_QUESTION_POINTS);
+        await group.addPoints(user._id.toString(), VOTED_QUESTION_POINTS);
 
         return NextResponse.json({ message: "Vote submitted" }, { status: 200 });
     }

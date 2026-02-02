@@ -1,7 +1,7 @@
-import type { IRally } from "@/types/models/rally";
 import mongoose from "mongoose";
+import type { IRally, IPictureSubmission } from "@/types/models/rally";
 
-const pictureSubmissionSchema = new mongoose.Schema({
+const pictureSubmissionSchema = new mongoose.Schema<IPictureSubmission>({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     username: { type: String },
     imageUrl: { type: String, required: true },
@@ -13,7 +13,7 @@ const pictureSubmissionSchema = new mongoose.Schema({
     ],
 });
 
-const rallySchema = new mongoose.Schema({
+const rallySchema = new mongoose.Schema<IRally>({
     groupId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Group",
@@ -35,6 +35,8 @@ const rallySchema = new mongoose.Schema({
 
 rallySchema.index({ groupId: 1 });
 
-const Rally = mongoose.models.Rally || mongoose.model<IRally>("Rally", rallySchema);
+const Rally =
+    (mongoose.models.Rally as mongoose.Model<IRally>) ||
+    mongoose.model<IRally>("Rally", rallySchema);
 
 export default Rally;

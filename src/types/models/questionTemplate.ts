@@ -1,4 +1,5 @@
-import type { Types } from "mongoose";
+import type { HydratedDocument, Types } from "mongoose";
+import type { ToDTO } from "../common";
 import type { QuestionType } from "@/types/models/question";
 
 export interface IQuestionTemplate {
@@ -7,6 +8,10 @@ export interface IQuestionTemplate {
     category: string;
     questionType: QuestionType;
     question: string;
-    options?: any;
+    options?: unknown[];
     createdAt: Date;
 }
+
+export type QuestionTemplateDocument = HydratedDocument<IQuestionTemplate>;
+
+export type QuestionTemplateDTO = ToDTO<IQuestionTemplate>;

@@ -1,14 +1,14 @@
 import dbConnect from "@/db/dbConnect";
-import Rally from "@/db/models/rally";
-import User from "@/db/models/user";
+import Rally from "@/db/models/Rally";
+import User from "@/db/models/User";
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import type { NextRequest} from "next/server";
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import Group from "@/db/models/Group";
 import { isUserInGroup } from "@/lib/userAuth";
 import { SUBMITTED_RALLY_POINTS } from "@/config/POINT_CONFIG";
-import type { AuthedContext} from "@/lib/api/withAuth";
+import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 
@@ -120,7 +120,7 @@ export const POST = withAuthAndErrors(
             throw new NotFoundError("Rally not found");
         }
 
-        await group.addPoints(sendUser._id, SUBMITTED_RALLY_POINTS);
+        await group.addPoints(sendUser._id.toString(), SUBMITTED_RALLY_POINTS);
 
         return NextResponse.json({
             message: "Picture submission added successfully",
