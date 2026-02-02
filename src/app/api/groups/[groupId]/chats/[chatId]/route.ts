@@ -1,10 +1,10 @@
-import type { NextRequest} from "next/server";
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import dbConnect from "@/db/dbConnect";
 import Chat from "@/db/models/Chat";
-import User from "@/db/models/user";
+import User from "@/db/models/User";
 import { isUserInGroup } from "@/lib/userAuth";
-import type { AuthedContext} from "@/lib/api/withAuth";
+import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { NotFoundError } from "@/lib/api/errorHandling";
 

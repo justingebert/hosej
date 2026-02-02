@@ -1,12 +1,12 @@
 import dbConnect from "@/db/dbConnect";
-import Rally from "@/db/models/rally";
-import type { NextRequest} from "next/server";
+import Rally from "@/db/models/Rally";
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import User from "@/db/models/user";
+import User from "@/db/models/User";
 import Group from "@/db/models/Group";
 import { isUserInGroup } from "@/lib/userAuth";
 import { VOTED_RALLY_POINTS } from "@/config/POINT_CONFIG";
-import type { AuthedContext} from "@/lib/api/withAuth";
+import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
 
 //vote on a submission
@@ -44,7 +44,7 @@ export const POST = withAuthAndErrors(
 
         await rally.save();
 
-        await group.addPoints(user._id, VOTED_RALLY_POINTS);
+        await group.addPoints(user._id.toString(), VOTED_RALLY_POINTS);
 
         return NextResponse.json("Vote added successfully");
     }

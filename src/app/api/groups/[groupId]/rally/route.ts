@@ -1,14 +1,14 @@
 import dbConnect from "@/db/dbConnect";
-import Rally from "@/db/models/rally";
-import type { NextRequest} from "next/server";
+import Rally from "@/db/models/Rally";
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import User from "@/db/models/user";
+import User from "@/db/models/User";
 import { sendNotification } from "@/lib/sendNotification";
 import Chat from "@/db/models/Chat";
 import Group from "@/db/models/Group";
 import { isUserInGroup } from "@/lib/userAuth";
 import { CREATED_RALLY_POINTS } from "@/config/POINT_CONFIG";
-import type { AuthedContext} from "@/lib/api/withAuth";
+import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 
@@ -182,7 +182,7 @@ export const POST = withAuthAndErrors(
         newRally.chat = newChat._id;
         await newRally.save();
 
-        await group.addPoints(submittingUser._id, CREATED_RALLY_POINTS);
+        await group.addPoints(submittingUser._id.toString(), CREATED_RALLY_POINTS);
 
         return NextResponse.json({ message: "Rally created successfully" });
     }

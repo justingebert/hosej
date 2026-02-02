@@ -1,8 +1,8 @@
-import type { NextRequest} from "next/server";
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import dbConnect from "@/db/dbConnect";
-import User from "@/db/models/user";
-import type { AuthedContext} from "@/lib/api/withAuth";
+import User from "@/db/models/User";
+import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 

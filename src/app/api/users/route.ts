@@ -1,14 +1,14 @@
-import type { NextRequest} from "next/server";
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import dbConnect from "@/db/dbConnect";
-import User from "@/db/models/user";
+import User from "@/db/models/User";
 import {
     ConflictError,
     NotFoundError,
     ValidationError,
     withErrorHandling,
 } from "@/lib/api/errorHandling";
-import type { AuthedContext} from "@/lib/api/withAuth";
+import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
 
 interface CreateUserRequest {
