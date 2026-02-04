@@ -11,7 +11,6 @@ describe("FeatureSettingsAccordionSimple", () => {
                     featureName="Questions"
                     featureKey="questions"
                     globalStatus="comingSoon"
-                    description="desc"
                 >
                     <div>Child</div>
                 </FeatureSettingsAccordionSimple>
@@ -28,7 +27,6 @@ describe("FeatureSettingsAccordionSimple", () => {
                     featureName="Questions"
                     featureKey="questions"
                     globalStatus="enabled"
-                    description="Configure questions"
                 >
                     <div>Child content</div>
                 </FeatureSettingsAccordionSimple>

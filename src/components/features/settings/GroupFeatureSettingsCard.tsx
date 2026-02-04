@@ -39,7 +39,6 @@ export function GroupFeatureSettingsCard({
                         featureName="Questions"
                         featureKey="questions"
                         globalStatus={globalFeatures?.questions?.status}
-                        description=""
                     >
                         <QuestionSettings
                             questionCount={features.questions.settings.questionCount}
