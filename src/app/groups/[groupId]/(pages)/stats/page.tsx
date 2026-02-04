@@ -181,38 +181,6 @@ const StatsPage = () => {
                             </TableRow>
                         </TableBody>
                     </Table>
-
-                    <Separator className="my-6" />
-
-                    <h2 className="text-xl font-bold text-center">Users</h2>
-                    <Table className="w-full max-w-md mx-auto">
-                        <TableBody>
-                            <TableRow>
-                                <TableCell className="font-medium px-4 py-2 text-left">
-                                    User Count
-                                </TableCell>
-                                <TableCell className="px-4 py-2 text-right">
-                                    {stats.group.members.length}
-                                </TableCell>
-                            </TableRow>
-                        </TableBody>
-                    </Table>
-
-                    <Separator className="my-6" />
-
-                    <h2 className="text-xl font-bold mb-4 text-center">Messages</h2>
-                    <Table className="w-full max-w-md mx-auto mb-6">
-                        <TableBody>
-                            <TableRow>
-                                <TableCell className="font-medium px-4 py-2 text-left">
-                                    Message Count
-                                </TableCell>
-                                <TableCell className="px-4 py-2 text-right">
-                                    {stats.messagesCount}
-                                </TableCell>
-                            </TableRow>
-                        </TableBody>
-                    </Table>
                 </>
             )}
         </>

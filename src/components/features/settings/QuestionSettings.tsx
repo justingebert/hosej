@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 
 interface QuestionSettingsProps {
     questionCount: number;
-    lastQuestionDate: Date | null;
+    lastQuestionDate: string | null;
     onQuestionCountChange: (value: number) => void;
 }
 
