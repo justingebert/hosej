@@ -38,8 +38,6 @@ export enum QuestionType {
     Rating = "rating",
     ImageSelectOne = "image-select-one",
     ImageSelectMultiple = "image-select-multiple",
-    // CollectAndVoteOne = "collect-and-vote-one",
-    // CollectAndVoteMultiple = "collect-and-vote-multiple",
 }
 
 export interface IAnswer {
@@ -55,6 +53,25 @@ export interface IResult {
     users: string[];
 }
 
+export type QuestionDTO = ToDTO<IQuestion>;
+
 export type QuestionDocument = HydratedDocument<IQuestion>;
 
-export type QuestionDTO = ToDTO<IQuestion>;
+export type UserRating = "good" | "ok" | "bad" | null;
+
+export type SignedUrlDTO = { key: string; url: string };
+
+export type QuestionOptionDTO = string | SignedUrlDTO;
+
+export type QuestionWithUserStateDTO = Omit<QuestionDTO, "options"> & {
+    options?: QuestionOptionDTO[];
+    userHasVoted: boolean;
+    userRating: UserRating;
+};
+
+export type QuestionResultsDTO = {
+    results: IResult[];
+    totalVotes: number;
+    totalUsers: number;
+    questionType: QuestionType;
+};

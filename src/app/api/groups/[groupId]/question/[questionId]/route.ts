@@ -25,20 +25,30 @@ export const GET = withAuthAndErrors(
         const question = await Question.findOne({ groupId, _id: questionId });
         if (!question) throw new NotFoundError("Question not found");
 
-        if (question.image) {
-            const { url } = await generateSignedUrl(new URL(question.image).pathname);
-            (question as any).imageUrl = url;
+        const questionJson = question.toObject();
+
+        if (questionJson.image) {
+            const { url } = await generateSignedUrl(new URL(questionJson.image).pathname);
+            questionJson.imageUrl = url;
         }
 
-        if (question.questionType.startsWith("image") && question.options) {
-            question.options = await Promise.all(
-                question.options.map(async (option: any) => {
-                    if (!option.key) throw new Error("Option is empty");
-                    return await generateSignedUrl(option.key, 60);
+        if (questionJson.questionType.startsWith("image") && Array.isArray(questionJson.options)) {
+            questionJson.options = await Promise.all(
+                questionJson.options.map(async (option: unknown) => {
+                    if (typeof option !== "object" || option === null || !("key" in option)) {
+                        throw new Error("Option is empty");
+                    }
+
+                    const { key } = option as { key: unknown };
+                    if (typeof key !== "string" || key.length === 0) {
+                        throw new Error("Option key is empty");
+                    }
+
+                    return await generateSignedUrl(key, 60);
                 })
             );
         }
 
-        return NextResponse.json(question);
+        return NextResponse.json(questionJson);
     }
 );
