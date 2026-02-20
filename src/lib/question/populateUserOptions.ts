@@ -1,8 +1,6 @@
 import Group from "@/db/models/Group";
-import Question from "@/db/models/Question";
-import { Types } from "mongoose";
-import { HydratedDocument } from "mongoose";
-import { IQuestion } from "@/types/models/question";
+import type { HydratedDocument } from "mongoose";
+import type { IQuestion } from "@/types/models/question";
 
 /**
  * Populate user options for questions with "users-" question types
@@ -18,7 +16,7 @@ export async function populateUserOptions(
     }
 
     const group = await Group.findById(question.groupId).orFail();
-    const userOptions = group.members.map((member: any) => member.name);
+    const userOptions = group.members.map((member) => member.name);
 
     question.options = userOptions;
     await question.save();

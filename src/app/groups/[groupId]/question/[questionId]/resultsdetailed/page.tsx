@@ -8,7 +8,7 @@ import BackLink from "@/components/ui/custom/BackLink";
 import fetcher from "@/lib/fetcher";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import type { IResult } from "@/types/models/question";
+import type { IResult, QuestionResultsDTO } from "@/types/models/question";
 
 export default function ResultsDetailPage({
     params,
@@ -20,7 +20,7 @@ export default function ResultsDetailPage({
     const { questionId, groupId } = params;
     const { returnTo } = searchParams || {};
 
-    const { data, isLoading } = useSWR<any>(
+    const { data, isLoading } = useSWR<QuestionResultsDTO>(
         `/api/groups/${groupId}/question/${questionId}/results`,
         fetcher
     );
@@ -37,6 +37,11 @@ export default function ResultsDetailPage({
                 ))}
             </>
         );
+
+    //TODO this should never happen -> should redirect back
+    if (!data) {
+        return null;
+    }
 
     const { results, questionType } = data;
 

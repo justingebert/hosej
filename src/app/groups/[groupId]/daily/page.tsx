@@ -12,7 +12,7 @@ import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
 import QuestionsTabs from "./QuestionTabs";
 
-import type { QuestionDTO } from "@/types/models/question";
+import type { QuestionWithUserStateDTO } from "@/types/models/question";
 
 const DailyQuestionPage = () => {
     const { user } = useAuthRedirect();
@@ -20,7 +20,7 @@ const DailyQuestionPage = () => {
     const groupId = params ? params.groupId : "";
     const router = useRouter();
 
-    const { data, error, isLoading } = useSWR<{ questions: QuestionDTO[] }>(
+    const { data, isLoading } = useSWR<{ questions: QuestionWithUserStateDTO[] }>(
         user ? `/api/groups/${groupId}/question` : null,
         fetcher
     );

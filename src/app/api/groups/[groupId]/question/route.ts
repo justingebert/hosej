@@ -8,7 +8,7 @@ import { ValidationError } from "@/lib/api/errorHandling";
 import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { generateSignedUrl } from "@/lib/generateSingledUrl";
-import type { QuestionDTO } from "@/types/models/question";
+import type { UserRating } from "@/types/models/question";
 import { createQuestionInGroup } from "@/lib/question/createQuestion";
 
 export const revalidate = 0;
@@ -48,13 +48,6 @@ export const POST = withAuthAndErrors(
     }
 );
 
-type UserRating = "good" | "ok" | "bad" | null;
-
-type QuestionWithUserState = QuestionDTO & {
-    userHasVoted: boolean;
-    userRating: UserRating;
-};
-
 // Return active questions
 export const GET = withAuthAndErrors(
     async (
@@ -87,8 +80,8 @@ export const GET = withAuthAndErrors(
             (acc, question) => acc + (question.answers?.length || 0),
             0
         );
-        const completionPercentage = ((totalVotes / (questions.length * userCount)) * 100).toFixed(
-            0
+        const completionPercentage = Math.round(
+            (totalVotes / (questions.length * userCount)) * 100
         );
 
         const questionsPopulated = questions.map((q) => {
@@ -112,11 +105,23 @@ export const GET = withAuthAndErrors(
                     const { url } = await generateSignedUrl(new URL(question.image).pathname);
                     question.imageUrl = url;
                 }
-                if (question.questionType.startsWith("image") && question.options) {
+                if (question.questionType.startsWith("image") && Array.isArray(question.options)) {
                     question.options = await Promise.all(
-                        question.options.map(async (option: any) => {
-                            if (!option.key) throw new Error("Option is empty");
-                            return await generateSignedUrl(option.key, 60);
+                        question.options.map(async (option: unknown) => {
+                            if (
+                                typeof option !== "object" ||
+                                option === null ||
+                                !("key" in option)
+                            ) {
+                                throw new Error("Option is empty");
+                            }
+
+                            const { key } = option as { key: unknown };
+                            if (typeof key !== "string" || key.length === 0) {
+                                throw new Error("Option key is empty");
+                            }
+
+                            return await generateSignedUrl(key, 60);
                         })
                     );
                 }

@@ -9,6 +9,7 @@ import { VOTED_QUESTION_POINTS } from "@/config/POINT_CONFIG";
 import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
+import { parseQuestionVoteResponse } from "@/lib/question/parseQuestionVoteResponse";
 
 export const revalidate = 0;
 
@@ -28,14 +29,12 @@ export const POST = withAuthAndErrors(
         await dbConnect();
         await isUserInGroup(userId, groupId);
 
-        const data = await req.json();
-        const { response } = data as { response: any };
-        if (
-            response === undefined ||
-            response === null ||
-            (Array.isArray(response) && response.length === 0)
-        ) {
-            throw new ValidationError("response is required");
+        const data = (await req.json()) as { response?: unknown };
+        let response: string[];
+        try {
+            response = parseQuestionVoteResponse(data.response);
+        } catch (err) {
+            throw new ValidationError(err instanceof Error ? err.message : "response is invalid");
         }
 
         const question = await Question.findById(questionId);
@@ -45,7 +44,7 @@ export const POST = withAuthAndErrors(
         const user = await User.findById(userId);
         if (!user) throw new NotFoundError("User not found");
 
-        const hasVoted = question.answers.some((answer: any) => answer.user.equals(user._id));
+        const hasVoted = question.answers.some((answer) => answer.user.equals(user._id));
         if (hasVoted) {
             return NextResponse.json({ message: "You have already voted" }, { status: 304 });
         }

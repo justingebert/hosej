@@ -1,12 +1,12 @@
 import Question from "@/db/models/Question";
 import type { Types } from "mongoose";
 import { populateUserOptions } from "./populateUserOptions";
-import type { IQuestion } from "@/types/models/question";
+import type { IQuestion, QuestionDocument } from "@/types/models/question";
 
 /**
  * Activates a single question: populates user options and marks as active/used
  */
-async function activateQuestion(question: any): Promise<void> {
+async function activateQuestion(question: QuestionDocument): Promise<void> {
     await populateUserOptions(question);
     question.active = true;
     question.used = true;

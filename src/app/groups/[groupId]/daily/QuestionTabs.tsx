@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
+import type { Dispatch, SetStateAction } from "react";
 import VoteOptions from "@/components/features/question/VotingOptions.client";
 import VoteResults from "@/components/features/question/VoteResults.client";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -20,47 +21,25 @@ import Image from "next/image";
 import { mutate } from "swr";
 import { CheckCheck } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import type { UserDTO } from "@/types/models/user";
+import type {
+    QuestionOptionDTO,
+    QuestionWithUserStateDTO,
+    UserRating,
+} from "@/types/models/question";
+import { buildFlatQuestionList } from "@/components/features/question/questionTabsUtils";
 
-// Get display category for a question
-function getDisplayCategory(question: any): string {
-    if (question.submittedBy) return "Custom";
-    return question.category || "Other";
-}
+type RateValue = Exclude<UserRating, null>;
 
-// Build flat list of questions with display labels (Custom first, then others)
-// Returns: [{ question, label: "Custom 1" }, { question, label: "Starter 1" }, ...]
-function buildFlatQuestionList(questions: any[]): { question: any; label: string }[] {
-    // Group by category
-    const grouped: Record<string, any[]> = {};
-    for (const q of questions) {
-        const cat = getDisplayCategory(q);
-        if (!grouped[cat]) grouped[cat] = [];
-        grouped[cat].push(q);
-    }
-
-    // Sort categories: Custom first, then alphabetically
-    const categories = Object.keys(grouped).sort((a, b) => {
-        if (a === "Custom") return -1;
-        if (b === "Custom") return 1;
-        return a.localeCompare(b);
-    });
-
-    // Build flat list with labels
-    const result: { question: any; label: string }[] = [];
-    for (const cat of categories) {
-        const catQuestions = grouped[cat];
-        catQuestions.forEach((q, idx) => {
-            result.push({
-                question: q,
-                label: catQuestions.length === 1 ? cat : `${cat} ${idx + 1}`,
-            });
-        });
-    }
-
-    return result;
-}
-
-export default function QuestionsTabs({ user, groupId, questions }: any) {
+export default function QuestionsTabs({
+    user,
+    groupId,
+    questions,
+}: {
+    user: UserDTO;
+    groupId: string;
+    questions: QuestionWithUserStateDTO[];
+}) {
     const [drawerOpen, setDrawerOpen] = useState(false);
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -73,7 +52,7 @@ export default function QuestionsTabs({ user, groupId, questions }: any) {
     const defaultTab =
         returnToParam || (flatList.length > 0 ? flatList[0].question._id : undefined);
 
-    const rateQuestion = async (questionId: string, rating: string) => {
+    const rateQuestion = async (questionId: string, rating: RateValue) => {
         await fetch(`/api/groups/${groupId}/question/${questionId}/rate`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -134,12 +113,12 @@ function QuestionContent({
     rateQuestion,
     handleDrawer,
 }: {
-    user: any;
+    user: UserDTO;
     groupId: string;
-    question: any;
+    question: QuestionWithUserStateDTO;
     drawerOpen: boolean;
-    setDrawerOpen: React.Dispatch<React.SetStateAction<boolean>>;
-    rateQuestion: (questionId: string, rating: string) => Promise<void>;
+    setDrawerOpen: Dispatch<SetStateAction<boolean>>;
+    rateQuestion: (questionId: string, rating: RateValue) => Promise<void>;
     handleDrawer: () => void;
 }) {
     return (
@@ -189,9 +168,9 @@ function RatingDrawer({
     rateQuestion,
 }: {
     drawerOpen: boolean;
-    setDrawerOpen: React.Dispatch<React.SetStateAction<boolean>>;
-    question: any;
-    rateQuestion: (questionId: string, rating: string) => Promise<void>;
+    setDrawerOpen: Dispatch<SetStateAction<boolean>>;
+    question: QuestionWithUserStateDTO;
+    rateQuestion: (questionId: string, rating: RateValue) => Promise<void>;
 }) {
     return (
         <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
@@ -214,29 +193,34 @@ function RatingDrawer({
                             <div className="grid grid-cols-2 gap-4">
                                 {question.questionType.startsWith("image") &&
                                     question.options &&
-                                    question.options.map((option: any, index: number) => (
-                                        <div
-                                            key={index}
-                                            className="text-primary-foreground rounded-lg w-full max-w-md h-40"
-                                        >
-                                            <Image
-                                                src={option.url}
-                                                alt={`Option ${index + 1}`}
-                                                className="object-cover w-full h-full rounded-lg"
-                                                width={300}
-                                                height={300}
-                                                priority={index === 0}
-                                            />
-                                        </div>
-                                    ))}
+                                    question.options.map((option: QuestionOptionDTO, index) => {
+                                        if (typeof option === "string") return null;
+                                        return (
+                                            <div
+                                                key={index}
+                                                className="text-primary-foreground rounded-lg w-full max-w-md h-40"
+                                            >
+                                                <Image
+                                                    src={option.url}
+                                                    alt={`Option ${index + 1}`}
+                                                    className="object-cover w-full h-full rounded-lg"
+                                                    width={300}
+                                                    height={300}
+                                                    priority={index === 0}
+                                                />
+                                            </div>
+                                        );
+                                    })}
                                 {!question.questionType.startsWith("image") &&
                                     question.options &&
-                                    question.options.map((option: any, index: number) => (
+                                    question.options.map((option: QuestionOptionDTO, index) => (
                                         <div
                                             key={index}
                                             className="text-sm p-2 bg-secondary rounded-lg max-w-md text-center flex items-center justify-center overflow-hidden"
                                         >
-                                            <span className="line-clamp-3">{option}</span>
+                                            <span className="line-clamp-3">
+                                                {typeof option === "string" ? option : option.key}
+                                            </span>
                                         </div>
                                     ))}
                             </div>

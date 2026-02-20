@@ -9,6 +9,8 @@ import User from "@/db/models/User";
 import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { NotFoundError } from "@/lib/api/errorHandling";
+import type { IAnswer } from "@/types/models/question";
+import type { IUser } from "@/types/models/user";
 
 export const revalidate = 0;
 
@@ -22,10 +24,14 @@ export const GET = withAuthAndErrors(
         await dbConnect();
         await isUserInGroup(userId, groupId);
 
-        const question = await Question.findById(questionId).populate({
+        type PopulatedAnswer = Omit<IAnswer, "user"> & { user: Pick<IUser, "username"> | null };
+
+        const question = await Question.findById(questionId).populate<{
+            answers: PopulatedAnswer[];
+        }>({
             path: "answers.user",
             model: User,
-            select: "-googleId -spotifyAccessToken -spotifyRefreshToken -spotifyTokenExpiresAt -deviceId",
+            select: "username",
         });
 
         if (!question) {
@@ -37,23 +43,29 @@ export const GET = withAuthAndErrors(
 
         const totalVotes = question.answers.length || 0;
 
-        // Group answers by response with usernames
-        const voteDetails = question.answers.reduce((acc: any, answer: any) => {
-            const responses = Array.isArray(answer.response) ? answer.response : [answer.response];
-            responses.forEach((response: any) => {
-                if (!acc[response]) {
-                    acc[response] = { count: 0, users: [] };
-                }
-                acc[response].count += 1;
-                acc[response].users.push(answer.user.username);
-            });
-            return acc;
-        }, {});
+        type VoteDetail = { count: number; users: string[] };
+
+        const voteDetails: Record<string, VoteDetail> = {};
+        for (const answer of question.answers) {
+            const username = answer.user?.username ?? "Unknown";
+
+            const rawResponses = Array.isArray(answer.response)
+                ? answer.response
+                : [answer.response];
+            for (const response of rawResponses) {
+                if (typeof response !== "string" || response.length === 0) continue;
+
+                voteDetails[response] = voteDetails[response] || { count: 0, users: [] };
+                voteDetails[response].count += 1;
+                voteDetails[response].users.push(username);
+            }
+        }
 
         // Calculate results with percentages
         const results = await Promise.all(
-            Object.entries(voteDetails).map(async ([option, { count, users }]: any) => {
-                const percentage = Math.round((count / totalVotes) * 100);
+            Object.entries(voteDetails).map(async ([option, detail]) => {
+                const percentage =
+                    totalVotes === 0 ? 0 : Math.round((detail.count / totalVotes) * 100);
                 let signedOption = option;
 
                 // Generate signed URLs for image responses
@@ -62,7 +74,12 @@ export const GET = withAuthAndErrors(
                     signedOption = url;
                 }
 
-                return { option: signedOption, count, percentage, users };
+                return {
+                    option: signedOption,
+                    count: detail.count,
+                    percentage,
+                    users: detail.users,
+                };
             })
         );
 

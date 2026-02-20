@@ -14,7 +14,7 @@ export type createRallyData = {
 export type createQuestionData = {
     question: string;
     questionType: string;
-    options: any[];
+    options: string[];
     mainImageFile: File | null;
     optionFiles: (File | null)[];
 };

@@ -1,7 +1,7 @@
-import { QuestionType } from "@/types/models/question";
+import type { QuestionType } from "@/types/models/question";
 import Question from "@/db/models/Question";
 import Chat from "@/db/models/Chat";
-import { Types } from "mongoose";
+import type { Types } from "mongoose";
 
 export async function createQuestionInGroup(
     groupId: string | Types.ObjectId,
@@ -9,7 +9,7 @@ export async function createQuestionInGroup(
     questionType: QuestionType,
     question: string,
     image: string,
-    options: any[] | null | undefined,
+    options: unknown[] | null | undefined,
     submittedBy: string | Types.ObjectId | null = null,
     templateId?: Types.ObjectId
 ) {

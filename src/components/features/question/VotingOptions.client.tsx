@@ -1,32 +1,41 @@
 "use client";
 
-import React, { useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
+import type { QuestionOptionDTO, QuestionWithUserStateDTO } from "@/types/models/question";
 
-const VoteOptions = ({ question, onVote }: any) => {
-    // Check if the question allows multiple selections
-    const multiple = question.questionType.includes("multiple");
-    const text = question.questionType === "text";
+function optionResponseValue(option: QuestionOptionDTO): string {
+    return typeof option === "string" ? option : option.key;
+}
+
+const VoteOptions = ({
+    question,
+    onVote,
+}: {
+    question: Pick<QuestionWithUserStateDTO, "_id" | "groupId" | "questionType" | "options">;
+    onVote: () => void;
+}) => {
+    const isMultipleSelection = question.questionType.includes("multiple");
+    const isText = question.questionType === "text";
+    const options = useMemo(() => question.options ?? [], [question.options]);
 
     const [textResponse, setTextResponse] = useState<string>("");
-    const [selectedOptions, setSelectedOptions] = useState<any[]>(multiple ? [] : [null]);
+    const [selectedResponses, setSelectedResponses] = useState<string[]>([]);
 
-    const toggleOption = (option: any) => {
-        setSelectedOptions((prev) => {
-            if (multiple) {
-                return prev.includes(option)
-                    ? prev.filter((o) => o !== option) // Remove option if already selected
-                    : [...prev, option]; // Add option if not selected
+    const toggleOption = (option: QuestionOptionDTO) => {
+        const value = optionResponseValue(option);
+        setSelectedResponses((prev) => {
+            if (isMultipleSelection) {
+                return prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value];
             }
-            return [option]; // Replace with the selected option for single selection
+            return [value];
         });
     };
 
     const submitVote = async () => {
-        const response = text ? [textResponse] : selectedOptions;
-        const processedResponse = response.map((res: any) => (res.key ? res.key : res));
+        const response = isText ? [textResponse] : selectedResponses;
 
         await fetch(`/api/groups/${question.groupId}/question/${question._id}/vote`, {
             method: "POST",
@@ -34,7 +43,7 @@ const VoteOptions = ({ question, onVote }: any) => {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                response: processedResponse,
+                response,
             }),
         });
 
@@ -43,7 +52,7 @@ const VoteOptions = ({ question, onVote }: any) => {
 
     return (
         <div className="flex flex-col">
-            {text ? (
+            {isText ? (
                 <div className="flex-grow overflow-auto pb-28">
                     <Textarea
                         value={textResponse}
@@ -54,23 +63,31 @@ const VoteOptions = ({ question, onVote }: any) => {
                 </div>
             ) : (
                 <div className={`grid grid-cols-2 gap-4 pb-32`}>
-                    {question.options.map((option: any, index: number) => (
+                    {options.map((option: QuestionOptionDTO, index) => (
                         <Button
                             key={index}
                             onClick={() => toggleOption(option)}
-                            variant={selectedOptions.includes(option) ? "default" : "secondary"}
+                            variant={
+                                selectedResponses.includes(optionResponseValue(option))
+                                    ? "default"
+                                    : "secondary"
+                            }
                             className="p-2 text-sm md:text-base lg:text-lg h-auto whitespace-normal"
                         >
                             {question.questionType.startsWith("image") ? (
-                                <Image
-                                    src={option.url}
-                                    alt={`Option ${index + 1}`}
-                                    width={100}
-                                    height={100}
-                                    className="w-full h-full object-cover rounded-sm"
-                                />
-                            ) : (
+                                typeof option === "string" ? null : (
+                                    <Image
+                                        src={option.url}
+                                        alt={`Option ${index + 1}`}
+                                        width={100}
+                                        height={100}
+                                        className="w-full h-full object-cover rounded-sm"
+                                    />
+                                )
+                            ) : typeof option === "string" ? (
                                 option
+                            ) : (
+                                optionResponseValue(option)
                             )}
                         </Button>
                     ))}
@@ -82,8 +99,8 @@ const VoteOptions = ({ question, onVote }: any) => {
                     onClick={() => {
                         const hasResponse =
                             question.questionType === "text"
-                                ? textResponse
-                                : selectedOptions.length > 0;
+                                ? textResponse.trim().length > 0
+                                : selectedResponses.length > 0;
 
                         if (hasResponse) submitVote();
                     }}

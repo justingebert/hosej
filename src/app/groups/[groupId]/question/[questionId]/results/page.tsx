@@ -11,7 +11,9 @@ import fetcher from "@/lib/fetcher";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import type { QuestionDTO } from "@/types/models/question";
+import type { QuestionDTO, QuestionOptionDTO } from "@/types/models/question";
+
+type QuestionDetailsDTO = Omit<QuestionDTO, "options"> & { options?: QuestionOptionDTO[] };
 
 const ResultsPage = () => {
     const { user } = useAuthRedirect();
@@ -23,7 +25,7 @@ const ResultsPage = () => {
         data: question,
         error,
         isLoading,
-    } = useSWR<QuestionDTO>(
+    } = useSWR<QuestionDetailsDTO>(
         questionId ? `/api/groups/${groupId}/question/${questionId}` : null,
         fetcher
     );
@@ -56,29 +58,32 @@ const ResultsPage = () => {
                     <div className="flex flex-col items-center mb-10">
                         {question.questionType.startsWith("image") &&
                             question.options &&
-                            question.options.map((option: any, index: number) => (
-                                <div
-                                    key={index}
-                                    className="p-4 m-2 bg-primary text-primary-foreground rounded-lg w-full max-w-md"
-                                >
-                                    <Image
-                                        src={option.url}
-                                        alt={`Option ${index + 1}`}
-                                        className="object-cover w-full h-full rounded-lg"
-                                        width={300}
-                                        height={300}
-                                        priority={index === 0}
-                                    />
-                                </div>
-                            ))}
+                            question.options.map((option: QuestionOptionDTO, index: number) => {
+                                if (typeof option === "string") return null;
+                                return (
+                                    <div
+                                        key={index}
+                                        className="p-4 m-2 bg-primary text-primary-foreground rounded-lg w-full max-w-md"
+                                    >
+                                        <Image
+                                            src={option.url}
+                                            alt={`Option ${index + 1}`}
+                                            className="object-cover w-full h-full rounded-lg"
+                                            width={300}
+                                            height={300}
+                                            priority={index === 0}
+                                        />
+                                    </div>
+                                );
+                            })}
                         {!question.questionType.startsWith("image") &&
                             question.options &&
-                            question.options.map((option: any, index: number) => (
+                            question.options.map((option: QuestionOptionDTO, index: number) => (
                                 <div
                                     key={index}
                                     className="p-4 m-2 bg-secondary rounded-lg w-full max-w-md"
                                 >
-                                    {option}
+                                    {typeof option === "string" ? option : option.key}
                                 </div>
                             ))}
                     </div>
