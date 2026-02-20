@@ -6,8 +6,10 @@ import { buildFlatQuestionList } from "@/components/features/question/questionTa
 function makeQuestion(
     overrides: Partial<QuestionWithUserStateDTO> & Pick<QuestionWithUserStateDTO, "_id">
 ): QuestionWithUserStateDTO {
+    const { _id, ...rest } = overrides;
+
     return {
-        _id: overrides._id,
+        _id,
         groupId: "g1",
         category: "Daily",
         questionType: QuestionType.CustomSelectOne,
@@ -19,7 +21,7 @@ function makeQuestion(
         createdAt: new Date(0).toISOString(),
         userHasVoted: false,
         userRating: null,
-        ...overrides,
+        ...rest,
     };
 }
 
