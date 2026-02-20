@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import type { MouseEvent } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,6 +26,8 @@ interface CreateQuestionProps {
     questionData: createQuestionData;
     setQuestionData: React.Dispatch<React.SetStateAction<createQuestionData>>;
 }
+
+type UploadedFileData = { key: string; url: string };
 
 const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) => {
     const params = useParams<{ groupId: string }>();
@@ -85,11 +88,36 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                 ...prev,
                 questionType: value,
                 options: group?.members.map((member) => member.name) || [],
+                optionFiles: [],
             }));
-        } else if (value.startsWith("custom") || value.startsWith("image")) {
-            setQuestionData((prev) => ({ ...prev, questionType: value, options: [""] }));
+        } else if (value.startsWith("custom")) {
+            setQuestionData((prev) => ({
+                ...prev,
+                questionType: value,
+                options: [""],
+                optionFiles: [],
+            }));
+        } else if (value.startsWith("image-select")) {
+            setQuestionData((prev) => ({
+                ...prev,
+                questionType: value,
+                options: ["", ""],
+                optionFiles: [null, null],
+            }));
+        } else if (value.startsWith("rating")) {
+            setQuestionData((prev) => ({
+                ...prev,
+                questionType: value,
+                options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
+                optionFiles: [],
+            }));
         } else {
-            setQuestionData((prev) => ({ ...prev, questionType: value, options: [] }));
+            setQuestionData((prev) => ({
+                ...prev,
+                questionType: value,
+                options: [],
+                optionFiles: [],
+            }));
         }
     };
 
@@ -140,16 +168,17 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
         setClearImageInput(true);
     };
 
-    const handleSubmit = async (e: any) => {
+    const handleSubmit = async (e: MouseEvent<HTMLButtonElement>) => {
         setIsSubmitting(true);
         e.preventDefault();
 
-        console.log(questionData.options);
         const trimmedOptions = questionData.options
             .map((option) => option.trim())
             .filter((option) => option !== "");
 
-        const trimmedOptionsFiles = questionData.optionFiles.filter((file) => file !== null);
+        const trimmedOptionsFiles = questionData.optionFiles.filter(
+            (file): file is File => file !== null
+        );
 
         if (questionData.questionType.startsWith("custom") && trimmedOptions.length < 2) {
             toast({
@@ -235,20 +264,20 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                 questionData.questionType === "image-select-multiple"
             ) {
                 // Upload option images and update the options array
-                const compressedFiles = await compressImages(
-                    questionData.optionFiles.filter(Boolean) as File[]
-                );
-                const optionImageUrls = await handleImageUpload(
+                const compressedFiles = await compressImages(trimmedOptionsFiles);
+                const optionImageUrls = (await handleImageUpload(
                     groupId,
                     "question-option",
                     newQuestion._id,
                     user._id,
                     compressedFiles
-                );
+                )) as UploadedFileData[] | null;
 
-                const updatedOptions = questionData.options.map((option, index) => {
-                    return (optionImageUrls as any)[index] || option;
-                });
+                if (!optionImageUrls || optionImageUrls.length === 0) {
+                    toast({ title: "Failed to upload option images", variant: "destructive" });
+                    setIsSubmitting(false);
+                    return;
+                }
 
                 // Update the question with options
                 const res = await fetch(
@@ -258,7 +287,7 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                         headers: {
                             "Content-Type": "application/json",
                         },
-                        body: JSON.stringify({ options: updatedOptions }),
+                        body: JSON.stringify({ options: optionImageUrls }),
                     }
                 );
                 if (!res.ok) {
@@ -269,10 +298,11 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
             }
 
             resetForm();
-        } catch (err: any) {
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : "Unknown error";
             toast({
                 title: "Error",
-                description: err.message,
+                description: message,
                 variant: "destructive",
             });
         } finally {

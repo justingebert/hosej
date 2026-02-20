@@ -20,7 +20,7 @@ import type { GroupDTO } from "@/types/models/group";
 import type { IRally } from "@/types/models/rally";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useHaptic } from "use-haptic";
-import type { QuestionDTO } from "@/types/models/question";
+import type { QuestionWithUserStateDTO } from "@/types/models/question";
 import type { FeatureStatus } from "@/types/models/appConfig";
 
 // Lazy load CompletionChart (uses recharts ~200KB)
@@ -51,7 +51,7 @@ export default function Dashboard() {
         jukebox: { status: FeatureStatus };
     }>("/api/features/status", fetcher);
     const { data: questionsData, isLoading: questionLoading } = useSWR<{
-        questions: QuestionDTO[];
+        questions: QuestionWithUserStateDTO[];
         completionPercentage: number;
     }>(
         globalFeatures?.questions?.status === "enabled" ? `/api/groups/${groupId}/question` : null,

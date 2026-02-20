@@ -10,7 +10,7 @@ import fetcher from "@/lib/fetcher";
 import type { UserDTO } from "@/types/models/user";
 import { useHaptic } from "use-haptic";
 
-import type { QuestionDTO } from "@/types/models/question";
+import type { IResult, QuestionDTO, QuestionResultsDTO } from "@/types/models/question";
 import { Badge } from "@/components/ui/badge";
 import ChatComponent from "@/components/features/chat/Chat.client";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -25,7 +25,7 @@ type VoteResultsProps = {
 const VoteResults = ({ user, question, available, returnTo }: VoteResultsProps) => {
     const [animationTriggered, setAnimationTriggered] = useState(false);
     const { triggerHaptic } = useHaptic();
-    const { data, error } = useSWR<any>(
+    const { data, error } = useSWR<QuestionResultsDTO>(
         `/api/groups/${question.groupId}/question/${question._id}/results/`,
         fetcher
     );
@@ -49,7 +49,7 @@ const VoteResults = ({ user, question, available, returnTo }: VoteResultsProps) 
         <div>
             <div className="flex justify-center">{numOfVotes}</div>
             <div>
-                {results.map((result: any, index: number) => (
+                {results.map((result: IResult, index: number) => (
                     <Link
                         key={index}
                         href={`/groups/${question.groupId}/question/${question._id}/resultsdetailed/?returnTo=${returnTo}`}
@@ -102,7 +102,7 @@ const VoteResults = ({ user, question, available, returnTo }: VoteResultsProps) 
 
 export default VoteResults;
 
-const CountUpBadge = ({ targetPercentage }: { targetPercentage: number }) => {
+export const CountUpBadge = ({ targetPercentage }: { targetPercentage: number }) => {
     const [currentPercentage, setCurrentPercentage] = useState(0);
 
     useEffect(() => {

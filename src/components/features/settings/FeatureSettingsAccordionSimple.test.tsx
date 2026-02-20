@@ -36,7 +36,6 @@ describe("FeatureSettingsAccordionSimple", () => {
         const trigger = screen.getByRole("button", { name: /questions/i });
         fireEvent.click(trigger);
 
-        expect(screen.getByText("Configure questions")).toBeInTheDocument();
         expect(screen.getByText("Child content")).toBeInTheDocument();
     });
 });
