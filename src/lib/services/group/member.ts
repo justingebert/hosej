@@ -87,7 +87,7 @@ export async function removeMember(
     }
     await group.save();
 
-    member.groups = member.groups.filter((g) => g !== groupId);
+    member.groups = member.groups.filter((g) => g.toString() !== groupId);
     await member.save();
 
     if (group.members.length === 0) {
