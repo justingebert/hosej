@@ -1,4 +1,3 @@
-import dbConnect from "@/db/dbConnect";
 import QuestionTemplate from "@/db/models/QuestionTemplate";
 import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 import type { QuestionType } from "@/types/models/question";
@@ -21,8 +20,6 @@ export async function createTemplatesFromArray(
     skipped: number;
     errors: { index: number; field: string; message: string }[];
 }> {
-    await dbConnect();
-
     let loaded = 0;
     let skipped = 0;
 
@@ -70,8 +67,6 @@ export async function addTemplatePackToGroup(
     groupId: string | Types.ObjectId,
     packId: string
 ): Promise<void> {
-    await dbConnect();
-
     const templates = await QuestionTemplate.find({ packId });
 
     if (templates.length === 0) {

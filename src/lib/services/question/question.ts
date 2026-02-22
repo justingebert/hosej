@@ -1,4 +1,3 @@
-import dbConnect from "@/db/dbConnect";
 import Question from "@/db/models/Question";
 import Chat from "@/db/models/Chat";
 import Group from "@/db/models/Group";
@@ -71,8 +70,6 @@ export async function createQuestion(
         options?: unknown[];
     }
 ): Promise<IQuestion> {
-    await dbConnect();
-
     const { category, questionType, question, submittedBy, image, options } = data;
     if (!category || !questionType || !question || !submittedBy) {
         throw new ValidationError("Missing required fields");
@@ -123,8 +120,6 @@ export async function createQuestionFromTemplate(
     options: unknown[] | null | undefined,
     templateId?: Types.ObjectId
 ): Promise<IQuestion> {
-    await dbConnect();
-
     let finalOptions = options || [];
     if (questionType === QuestionType.Rating && finalOptions.length === 0) {
         finalOptions = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
@@ -160,8 +155,6 @@ export async function getActiveQuestions(
     groupId: string,
     userId: string
 ): Promise<{ questions: Record<string, unknown>[]; completionPercentage: number }> {
-    await dbConnect();
-
     const questions = await Question.find({
         groupId,
         used: true,
@@ -205,8 +198,6 @@ export async function getActiveQuestions(
 }
 
 export async function getQuestionById(groupId: string, questionId: string): Promise<IQuestion> {
-    await dbConnect();
-
     const question = await Question.findOne({ groupId, _id: questionId });
     if (!question) throw new NotFoundError("Question not found");
 
@@ -230,8 +221,6 @@ export async function voteOnQuestion(
     userId: string,
     rawResponse: unknown
 ): Promise<{ alreadyVoted: boolean }> {
-    await dbConnect();
-
     const response = parseVoteResponse(rawResponse);
 
     const question = await Question.findById(questionId);
@@ -262,9 +251,7 @@ export async function rateQuestion(
     questionId: string,
     userId: string,
     rating: string
-): Promise<{ alreadyRated: boolean }> {
-    await dbConnect();
-
+): Promise<{ previousRating: UserRating; newRating: "good" | "ok" | "bad" }> {
     if (!["good", "ok", "bad"].includes(rating)) {
         throw new ValidationError("rating must be one of good | ok | bad");
     }
@@ -273,20 +260,25 @@ export async function rateQuestion(
     if (!question) throw new NotFoundError("Question not found");
 
     const userObjectId = new Types.ObjectId(userId);
+    const ratingKey = rating as "good" | "ok" | "bad";
 
-    const alreadyRated =
-        question.rating.good.some((id) => id.equals(userObjectId)) ||
-        question.rating.ok.some((id) => id.equals(userObjectId)) ||
-        question.rating.bad.some((id) => id.equals(userObjectId));
-
-    if (alreadyRated) {
-        return { alreadyRated: true };
+    // Find and remove existing rating if any
+    const categories = ["good", "ok", "bad"] as const;
+    let previousRating: UserRating = null;
+    for (const cat of categories) {
+        const idx = question.rating[cat].findIndex((id) => id.equals(userObjectId));
+        if (idx !== -1) {
+            previousRating = cat;
+            question.rating[cat].splice(idx, 1);
+            break;
+        }
     }
 
-    question.rating[rating as "good" | "ok" | "bad"].push(userObjectId);
+    // Add to new category
+    question.rating[ratingKey].push(userObjectId);
     await question.save();
 
-    return { alreadyRated: false };
+    return { previousRating, newRating: ratingKey };
 }
 
 export async function getQuestionResults(questionId: string): Promise<{
@@ -295,8 +287,6 @@ export async function getQuestionResults(questionId: string): Promise<{
     totalUsers: number;
     questionType: QuestionType;
 }> {
-    await dbConnect();
-
     type PopulatedAnswer = Omit<IAnswer, "user"> & { user: Pick<IUser, "username"> | null };
 
     const question = await Question.findById(questionId).populate<{
@@ -357,8 +347,6 @@ export async function attachImage(
     questionId: string,
     imageUrl: string
 ): Promise<void> {
-    await dbConnect();
-
     if (!imageUrl) throw new ValidationError("Image URL is required");
 
     const question = await Question.findOne({ groupId, _id: questionId });
@@ -373,8 +361,6 @@ export async function attachOptions(
     questionId: string,
     options: unknown[]
 ): Promise<void> {
-    await dbConnect();
-
     if (!options || !Array.isArray(options) || options.length === 0) {
         throw new ValidationError("Options are required");
     }
@@ -389,8 +375,6 @@ export async function attachOptions(
 // ─── Activation (cron) ──────────────────────────────────────────────────────
 
 export async function deactivateCurrentQuestions(groupId: Types.ObjectId): Promise<void> {
-    await dbConnect();
-
     const currentQuestions = await Question.find({ groupId, active: true });
     for (const question of currentQuestions) {
         question.active = false;
@@ -403,8 +387,6 @@ export async function deactivateCurrentQuestions(groupId: Types.ObjectId): Promi
  * and one template question if available.
  */
 export async function activateSmartQuestions(groupId: Types.ObjectId): Promise<IQuestion[]> {
-    await dbConnect();
-
     await deactivateCurrentQuestions(groupId);
 
     const activatedQuestions: IQuestion[] = [];

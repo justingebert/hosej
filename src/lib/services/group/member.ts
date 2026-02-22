@@ -1,4 +1,3 @@
-import dbConnect from "@/db/dbConnect";
 import Group from "@/db/models/Group";
 import User from "@/db/models/User";
 import type { Types } from "mongoose";
@@ -10,7 +9,6 @@ import { isUserInGroup } from "./group";
 // ─── Members ─────────────────────────────────────────────────
 
 export async function getGroupMembers(userId: string, groupId: string) {
-    await dbConnect();
     await isUserInGroup(userId, groupId);
 
     const group = await Group.findById(groupId).populate({ path: "members", model: User });
@@ -26,8 +24,6 @@ export async function joinGroup(
     userId: string,
     groupId: string
 ): Promise<{ group: GroupDocument; username: string }> {
-    await dbConnect();
-
     const user = await User.findById(userId);
     if (!user) throw new NotFoundError("User not found");
 
@@ -65,8 +61,6 @@ export async function removeMember(
     groupId: string,
     memberId: string
 ): Promise<{ deleted: boolean; group?: GroupDocument }> {
-    await dbConnect();
-
     const group = await Group.findById(groupId);
     if (!group) throw new NotFoundError("Group not found");
 

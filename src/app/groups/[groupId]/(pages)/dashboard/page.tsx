@@ -112,7 +112,7 @@ export default function Dashboard() {
                                         onClick={() => {
                                             triggerHaptic();
                                             mutate(`/api/groups/${groupId}/question`);
-                                            router.push(`/groups/${groupId}/daily`);
+                                            router.push(`/groups/${groupId}/question`);
                                         }}
                                     >
                                         {questions.length > 0 && (

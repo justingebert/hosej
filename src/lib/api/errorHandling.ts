@@ -1,6 +1,7 @@
-import type { NextRequest} from "next/server";
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { Error as mongooseError } from "mongoose";
+import dbConnect from "@/db/dbConnect";
 
 export type ApiRoute<TContext = {}> = (
     req: NextRequest,
@@ -87,6 +88,7 @@ function errorResponse(req: NextRequest, error: Error): NextResponse {
 export function withErrorHandling<TContext = {}>(fn: ApiRoute<TContext>): ApiRoute<TContext> {
     return async (req: NextRequest, context: TContext): Promise<NextResponse> => {
         try {
+            await dbConnect();
             return await fn(req, context);
         } catch (error: any) {
             return errorResponse(req, error);

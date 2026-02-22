@@ -15,12 +15,8 @@ export const POST = withAuthAndErrors(
         await isUserInGroup(userId, groupId);
 
         const data = await req.json();
-        const { alreadyRated } = await rateQuestion(questionId, userId, data.rating);
+        const result = await rateQuestion(questionId, userId, data.rating);
 
-        if (alreadyRated) {
-            return NextResponse.json({ message: "User already rated" }, { status: 304 });
-        }
-
-        return NextResponse.json({ message: "Rating added" });
+        return NextResponse.json(result);
     }
 );

@@ -6,7 +6,6 @@ vi.mock("@/db/models/User");
 vi.mock("@/db/models/Question");
 vi.mock("@/db/models/Rally");
 vi.mock("@/db/models/Chat");
-vi.mock("@/db/dbConnect");
 vi.mock("@/lib/services/question");
 
 import {
@@ -25,7 +24,6 @@ import User from "@/db/models/User";
 import Question from "@/db/models/Question";
 import Rally from "@/db/models/Rally";
 import Chat from "@/db/models/Chat";
-import dbConnect from "@/db/dbConnect";
 import { addTemplatePackToGroup, activateSmartQuestions } from "@/lib/services/question";
 import { ForbiddenError, NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 
@@ -71,7 +69,6 @@ function createMockUser(overrides = {}) {
 
 beforeEach(() => {
     vi.clearAllMocks();
-    (dbConnect as Mock).mockResolvedValue(undefined);
     (addTemplatePackToGroup as Mock).mockResolvedValue(undefined);
     (activateSmartQuestions as Mock).mockResolvedValue([]);
 });

@@ -4,12 +4,10 @@ import { Types } from "mongoose";
 // Mock dependencies before importing the module under test
 vi.mock("@/db/models/Group");
 vi.mock("@/db/models/AppConfig");
-vi.mock("@/db/dbConnect");
 
 // Now import the modules
 import Group from "@/db/models/Group";
 import AppConfig from "@/db/models/AppConfig";
-import dbConnect from "@/db/dbConnect";
 import { ForbiddenError, NotFoundError } from "@/lib/api/errorHandling";
 import { isUserAdmin, isUserInGroup } from "@/lib/services/group";
 import { getGlobalConfig, isGlobalAdmin, updateGlobalConfig } from "@/lib/services/user/admin";
@@ -20,7 +18,6 @@ describe("admin", () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
-        (dbConnect as Mock).mockResolvedValue(undefined);
     });
 
     describe("isUserInGroup", () => {
@@ -96,7 +93,6 @@ describe("admin", () => {
             const result = await isGlobalAdmin(mockUserId);
 
             expect(result).toBe(true);
-            expect(dbConnect).toHaveBeenCalled();
         });
 
         it("should return false when user is not in adminUsers", async () => {
@@ -141,7 +137,6 @@ describe("admin", () => {
             const result = await getGlobalConfig();
 
             expect(result).toEqual(mockConfig);
-            expect(dbConnect).toHaveBeenCalled();
         });
 
         it("should throw when config does not exist", async () => {

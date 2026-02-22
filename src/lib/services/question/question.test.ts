@@ -5,7 +5,6 @@ vi.mock("@/db/models/Question");
 vi.mock("@/db/models/Chat");
 vi.mock("@/db/models/Group");
 vi.mock("@/db/models/User");
-vi.mock("@/db/dbConnect");
 vi.mock("@/lib/generateSingledUrl");
 
 import {
@@ -26,7 +25,6 @@ import Question from "@/db/models/Question";
 import Chat from "@/db/models/Chat";
 import Group from "@/db/models/Group";
 import User from "@/db/models/User";
-import dbConnect from "@/db/dbConnect";
 import { generateSignedUrl } from "@/lib/generateSingledUrl";
 import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 import { QuestionType } from "@/types/models/question";
@@ -92,7 +90,6 @@ function mockConstructors(questionOverrides = {}) {
 
 beforeEach(() => {
     vi.clearAllMocks();
-    (dbConnect as Mock).mockResolvedValue(undefined);
     (generateSignedUrl as Mock).mockResolvedValue({ key: "test-key", url: "https://signed.url" });
 });
 
@@ -112,7 +109,6 @@ describe("createQuestion", () => {
             options: ["A", "B"],
         });
 
-        expect(dbConnect).toHaveBeenCalled();
         expect(mockQuestion.save).toHaveBeenCalled();
         expect(mockChat.save).toHaveBeenCalled();
         expect(mockGroup.addPoints).toHaveBeenCalledWith(mockUserId, expect.any(Number));
@@ -328,18 +324,19 @@ describe("voteOnQuestion", () => {
 // ─── rateQuestion ───────────────────────────────────────────────────────────
 
 describe("rateQuestion", () => {
-    it("should add a rating", async () => {
+    it("should add a new rating", async () => {
         const mockQuestion = createMockQuestion();
         (Question.findById as Mock).mockResolvedValue(mockQuestion);
 
         const result = await rateQuestion(mockQuestionId, mockUserId, "good");
 
-        expect(result.alreadyRated).toBe(false);
+        expect(result.previousRating).toBeNull();
+        expect(result.newRating).toBe("good");
         expect(mockQuestion.rating.good).toHaveLength(1);
         expect(mockQuestion.save).toHaveBeenCalled();
     });
 
-    it("should return alreadyRated=true when user already rated", async () => {
+    it("should change rating from good to ok", async () => {
         const userOid = new Types.ObjectId(mockUserId);
         userOid.equals = (id: Types.ObjectId) => id.toString() === mockUserId;
 
@@ -350,8 +347,28 @@ describe("rateQuestion", () => {
 
         const result = await rateQuestion(mockQuestionId, mockUserId, "ok");
 
-        expect(result.alreadyRated).toBe(true);
-        expect(mockQuestion.save).not.toHaveBeenCalled();
+        expect(result.previousRating).toBe("good");
+        expect(result.newRating).toBe("ok");
+        expect(mockQuestion.rating.good).toHaveLength(0);
+        expect(mockQuestion.rating.ok).toHaveLength(1);
+        expect(mockQuestion.save).toHaveBeenCalled();
+    });
+
+    it("should handle re-submitting the same rating", async () => {
+        const userOid = new Types.ObjectId(mockUserId);
+        userOid.equals = (id: Types.ObjectId) => id.toString() === mockUserId;
+
+        const mockQuestion = createMockQuestion({
+            rating: { good: [], ok: [userOid], bad: [] },
+        });
+        (Question.findById as Mock).mockResolvedValue(mockQuestion);
+
+        const result = await rateQuestion(mockQuestionId, mockUserId, "ok");
+
+        expect(result.previousRating).toBe("ok");
+        expect(result.newRating).toBe("ok");
+        expect(mockQuestion.rating.ok).toHaveLength(1);
+        expect(mockQuestion.save).toHaveBeenCalled();
     });
 
     it("should throw ValidationError for invalid rating", async () => {

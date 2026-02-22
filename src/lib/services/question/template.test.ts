@@ -4,17 +4,14 @@ import { Types } from "mongoose";
 vi.mock("@/db/models/QuestionTemplate");
 vi.mock("@/db/models/Question");
 vi.mock("@/db/models/Chat");
-vi.mock("@/db/dbConnect");
 
 import { createTemplatesFromArray, addTemplatePackToGroup } from "./template";
 import QuestionTemplate from "@/db/models/QuestionTemplate";
-import dbConnect from "@/db/dbConnect";
 import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 import { QuestionType } from "@/types/models/question";
 
 beforeEach(() => {
     vi.clearAllMocks();
-    (dbConnect as Mock).mockResolvedValue(undefined);
 });
 
 // ─── createTemplatesFromArray ───────────────────────────────────────────────
