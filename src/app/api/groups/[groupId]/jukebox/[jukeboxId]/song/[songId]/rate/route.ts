@@ -1,12 +1,9 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import dbConnect from "@/db/dbConnect";
-import Jukebox from "@/db/models/Jukebox";
 import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
-import { ConflictError, NotFoundError } from "@/lib/api/errorHandling";
-import type { ISong } from "@/types/models/jukebox";
 import { isUserInGroup } from "@/lib/services/group";
+import { rateSong } from "@/lib/services/jukebox";
 
 export const POST = withAuthAndErrors(
     async (
@@ -20,32 +17,10 @@ export const POST = withAuthAndErrors(
     ) => {
         const { groupId, jukeboxId, songId } = params;
         const { rating } = await req.json();
-        await dbConnect();
+
         await isUserInGroup(userId, groupId);
 
-        const jukebox = await Jukebox.findById(jukeboxId);
-        if (!jukebox) {
-            throw new NotFoundError("Jukebox not found");
-        }
-
-        const song = jukebox.songs.find((s: ISong) => s._id.toString() === songId);
-        if (!song) {
-            throw new NotFoundError("Song not found");
-        }
-
-        if (song.submittedBy.toString() === userId) {
-            throw new ConflictError("You cannot rate your own song");
-        }
-
-        // Check if user has already rated the song
-        const existingRating = song.ratings.find((r: any) => r.userId.toString() === userId);
-        if (existingRating) {
-            throw new ConflictError("User has already rated this song");
-        }
-
-        song.ratings.push({ userId: userId, rating: rating });
-
-        await jukebox.save();
+        const song = await rateSong(jukeboxId, songId, userId, rating);
 
         return NextResponse.json(
             { message: "Rating submitted successfully", data: song },

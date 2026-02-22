@@ -1,53 +1,19 @@
 import dbConnect from "@/db/dbConnect";
-import Chat from "@/db/models/Chat";
 import Group from "@/db/models/Group";
-import Jukebox from "@/db/models/Jukebox";
 import { withErrorHandling } from "@/lib/api/errorHandling";
 import { activateSmartQuestions } from "@/lib/services/question";
+import { activateJukeboxes } from "@/lib/services/jukebox";
 import { sendNotification } from "@/lib/sendNotification";
-import type { IGroup } from "@/types/models/group";
 import { NextResponse } from "next/server";
 
 export const revalidate = 0;
-/**
- * this deactivates active jukeboxes and actives new ones on the first of every month
- * @param group
- */
-async function handleJukebox(group: IGroup) {
-    const today = new Date();
-    if (group.features.jukebox.settings.activationDays.includes(today.getDate())) {
-        await Jukebox.updateMany({ active: true, groupId: group._id }, { active: false });
-
-        for (let i = 0; i < group.features.jukebox.settings.concurrent.length; i++) {
-            const newJukebox = await new Jukebox({
-                groupId: group._id,
-                date: today,
-                active: true,
-                title: group.features.jukebox.settings.concurrent[i],
-            }).save();
-
-            const newChat = await new Chat({
-                group: group._id,
-                entityModel: "Jukebox",
-                entity: newJukebox._id,
-            }).save();
-
-            newJukebox.chat = newChat._id;
-            await newJukebox.save();
-            await newChat.save();
-        }
-
-        const monthName = new Intl.DateTimeFormat("en-US", { month: "long" }).format(today);
-        await sendNotification(`🎶JUKEBOX - ${monthName} 🎶`, "🎶SUBMIT YOUR SONGS🎶", group._id);
-    }
-}
 
 //gets, populates and returns daily questions
 export const GET = withErrorHandling(async () => {
     await dbConnect();
 
     const groups = await Group.find({});
-    //TODO this sends multiple notifications to one user this is wrong
+    //TODO this sends multiple notifications to one user could get spammy over time - somehow layer notifications into group?
     for (const group of groups) {
         // Smart activation: 1 custom + 1 template question
         const questions = await activateSmartQuestions(group._id);
@@ -70,7 +36,7 @@ export const GET = withErrorHandling(async () => {
 
         //jukebox logic
         if (group.features.jukebox.enabled) {
-            await handleJukebox(group);
+            await activateJukeboxes(group);
         }
     }
 
