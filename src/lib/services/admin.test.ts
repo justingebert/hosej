@@ -7,13 +7,14 @@ vi.mock("@/db/models/AppConfig");
 vi.mock("@/db/dbConnect");
 
 // Now import the modules
-import { isUserInGroup, isUserAdmin, isGlobalAdmin, getGlobalConfig } from "./userAuth";
 import Group from "@/db/models/Group";
 import AppConfig from "@/db/models/AppConfig";
 import dbConnect from "@/db/dbConnect";
 import { ForbiddenError, NotFoundError } from "@/lib/api/errorHandling";
+import { isUserAdmin, isUserInGroup } from "@/lib/services/group";
+import { getGlobalConfig, isGlobalAdmin, updateGlobalConfig } from "@/lib/services/admin";
 
-describe("userAuth", () => {
+describe("admin", () => {
     const mockUserId = new Types.ObjectId().toString();
     const mockGroupId = new Types.ObjectId().toString();
 
@@ -149,6 +150,53 @@ describe("userAuth", () => {
             });
 
             await expect(getGlobalConfig()).rejects.toThrow();
+        });
+    });
+
+    describe("updateGlobalConfig", () => {
+        it("should update features and save config", async () => {
+            const mockConfig = {
+                configKey: "global_features",
+                features: {
+                    questions: { status: "enabled" },
+                    rallies: { status: "enabled" },
+                    jukebox: { status: "enabled" },
+                },
+                adminUsers: [],
+                updatedAt: new Date(),
+                save: vi.fn().mockResolvedValue(undefined),
+            };
+            (AppConfig.findOne as Mock).mockResolvedValue(mockConfig);
+
+            const result = await updateGlobalConfig({
+                features: { questions: { status: "disabled" } },
+            });
+
+            expect(mockConfig.features.questions.status).toBe("disabled");
+            expect(mockConfig.save).toHaveBeenCalled();
+            expect(result).toBe(mockConfig);
+        });
+
+        it("should save without changes when no features provided", async () => {
+            const mockConfig = {
+                configKey: "global_features",
+                features: { questions: { status: "enabled" } },
+                save: vi.fn().mockResolvedValue(undefined),
+            };
+            (AppConfig.findOne as Mock).mockResolvedValue(mockConfig);
+
+            await updateGlobalConfig({});
+
+            expect(mockConfig.save).toHaveBeenCalled();
+        });
+
+        it("should throw NotFoundError when config does not exist", async () => {
+            const { NotFoundError } = await import("@/lib/api/errorHandling");
+            (AppConfig.findOne as Mock).mockResolvedValue(null);
+
+            await expect(updateGlobalConfig({ features: {} as any })).rejects.toThrow(
+                NotFoundError
+            );
         });
     });
 });

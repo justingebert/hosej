@@ -45,8 +45,8 @@ export default function SettingsPage() {
         );
         if (!confirmation) return;
 
-        await fetch("/api/auth/google/disconnect", {
-            method: "POST",
+        await fetch("/api/users/google", {
+            method: "DELETE",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ userId: user._id, deviceId }),
         });
@@ -70,7 +70,7 @@ export default function SettingsPage() {
         if (!notificationsEnabled) {
             const token = await requestPermissionReturnToken();
             if (token) {
-                await fetch(`/api/users/register-push`, {
+                await fetch(`/api/users/push-token`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ token }),
@@ -81,8 +81,8 @@ export default function SettingsPage() {
         } else {
             const token = localStorage.getItem("lastSentFcmToken");
             if (token) {
-                await fetch(`/api/users/unregister-push`, {
-                    method: "POST",
+                await fetch(`/api/users/push-token`, {
+                    method: "DELETE",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ token }),
                 });

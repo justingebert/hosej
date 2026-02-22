@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import dbConnect from "@/db/dbConnect";
 import Question from "@/db/models/Question";
-import { isUserInGroup } from "@/lib/userAuth";
+import { isUserInGroup } from "@/lib/services/admin";
 import { generateSignedUrl } from "@/lib/generateSingledUrl";
 import Group from "@/db/models/Group";
 import User from "@/db/models/User";

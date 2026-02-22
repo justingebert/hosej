@@ -1,7 +1,7 @@
 import dbConnect from "@/db/dbConnect";
 import Question from "@/db/models/Question";
 import { type NextRequest, NextResponse } from "next/server";
-import { isUserInGroup } from "@/lib/userAuth";
+import { isUserInGroup } from "@/lib/services/admin";
 import { generateSignedUrl } from "@/lib/generateSingledUrl";
 import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";

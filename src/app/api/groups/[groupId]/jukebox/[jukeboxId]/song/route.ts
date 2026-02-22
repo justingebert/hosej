@@ -1,9 +1,9 @@
 import dbConnect from "@/db/dbConnect";
-import { isUserInGroup } from "@/lib/userAuth";
+import { isUserInGroup } from "@/lib/services/admin";
 import Jukebox from "@/db/models/Jukebox";
-import type { NextRequest} from "next/server";
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import type { AuthedContext} from "@/lib/api/withAuth";
+import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 import type { createSong, ISong } from "@/types/models/jukebox";

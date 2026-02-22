@@ -2,7 +2,7 @@ import dbConnect from "@/db/dbConnect";
 import Question from "@/db/models/Question";
 import { type NextRequest, NextResponse } from "next/server";
 import Group from "@/db/models/Group";
-import { isUserInGroup } from "@/lib/userAuth";
+import { isUserInGroup } from "@/lib/services/admin";
 import { CREATED_QUESTION_POINTS } from "@/config/POINT_CONFIG";
 import { ValidationError } from "@/lib/api/errorHandling";
 import type { AuthedContext } from "@/lib/api/withAuth";

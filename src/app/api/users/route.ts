@@ -1,66 +1,24 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import dbConnect from "@/db/dbConnect";
-import User from "@/db/models/User";
-import {
-    ConflictError,
-    NotFoundError,
-    ValidationError,
-    withErrorHandling,
-} from "@/lib/api/errorHandling";
+import { withErrorHandling } from "@/lib/api/errorHandling";
 import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
-
-interface CreateUserRequest {
-    deviceId: string;
-    userName: string;
-}
+import { getUserById, createDeviceUser, updateUser } from "@/lib/services/user";
+import type { UpdateUserData } from "@/types/models/user";
 
 export const GET = withAuthAndErrors(async (req: NextRequest, { userId }: AuthedContext) => {
-    await dbConnect();
-
-    const user = await User.findById(userId);
-    if (!user) {
-        throw new NotFoundError("User not found");
-    }
-
+    const user = await getUserById(userId);
     return NextResponse.json(user, { status: 200 });
 });
 
 export const POST = withErrorHandling(async (req: NextRequest) => {
-    await dbConnect();
-
-    const { deviceId, userName }: CreateUserRequest = await req.json();
-    if (!deviceId || !userName) {
-        throw new ValidationError("Device ID and username are required");
-    }
-
-    const existingUser = await User.findOne({ deviceId });
-    if (existingUser) {
-        throw new ConflictError("User with this device ID already exists");
-    }
-
-    const newUser = new User({
-        username: userName,
-        deviceId,
-    });
-    await newUser.save();
-
-    return NextResponse.json(newUser, { status: 201 });
+    const { deviceId, userName } = await req.json();
+    const user = await createDeviceUser(deviceId, userName);
+    return NextResponse.json(user, { status: 201 });
 });
 
 export const PUT = withAuthAndErrors(async (req: NextRequest, { userId }: AuthedContext) => {
-    await dbConnect();
-
-    const { ...data } = await req.json();
-
-    // Do not allow deviceId to be updated
-    delete data.deviceId;
-
-    const updatedUser = await User.findByIdAndUpdate(userId, data, { new: true });
-    if (!updatedUser) {
-        throw new NotFoundError("User not found");
-    }
-
-    return NextResponse.json(updatedUser, { status: 200 });
+    const body: UpdateUserData = await req.json();
+    const user = await updateUser(userId, body);
+    return NextResponse.json(user, { status: 200 });
 });

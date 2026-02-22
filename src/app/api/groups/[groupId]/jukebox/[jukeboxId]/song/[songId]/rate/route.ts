@@ -1,9 +1,9 @@
-import type { NextRequest} from "next/server";
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import dbConnect from "@/db/dbConnect";
 import Jukebox from "@/db/models/Jukebox";
-import { isUserInGroup } from "@/lib/userAuth";
-import type { AuthedContext} from "@/lib/api/withAuth";
+import { isUserInGroup } from "@/lib/services/admin";
+import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { ConflictError, NotFoundError } from "@/lib/api/errorHandling";
 import type { ISong } from "@/types/models/jukebox";
