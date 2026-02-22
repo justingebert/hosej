@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { withErrorHandling } from "@/lib/api/errorHandling";
 import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
-import { getUserById, createDeviceUser, updateUser } from "@/lib/services/user";
+import { getUserById, createDeviceUser, updateUser } from "@/lib/services/user/user";
 import type { UpdateUserData } from "@/types/models/user";
 
 export const GET = withAuthAndErrors(async (req: NextRequest, { userId }: AuthedContext) => {

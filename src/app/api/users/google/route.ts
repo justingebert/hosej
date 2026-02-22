@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
-import { connectGoogleAccount, disconnectGoogleAccount } from "@/lib/services/user";
+import { connectGoogleAccount, disconnectGoogleAccount } from "@/lib/services/user/user";
 
 export const POST = withAuthAndErrors(async (req: NextRequest, { userId }: AuthedContext) => {
     const { deviceId } = await req.json();

@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
 import { Types } from "mongoose";
 
 vi.mock("@/db/models/User");
-vi.mock("@/db/dbConnect");
 
 import {
     getUserById,
@@ -14,7 +13,6 @@ import {
     disconnectGoogleAccount,
 } from "./user";
 import User from "@/db/models/User";
-import dbConnect from "@/db/dbConnect";
 import { ConflictError, NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 
 const mockUserId = new Types.ObjectId().toString();
@@ -35,7 +33,6 @@ function createMockUser(overrides = {}) {
 
 beforeEach(() => {
     vi.clearAllMocks();
-    (dbConnect as Mock).mockResolvedValue(undefined);
 });
 
 describe("getUserById", () => {
@@ -46,7 +43,6 @@ describe("getUserById", () => {
         const result = await getUserById(mockUserId);
 
         expect(result).toEqual(mockUser);
-        expect(dbConnect).toHaveBeenCalled();
     });
 
     it("should throw NotFoundError when user not found", async () => {

@@ -1,5 +1,4 @@
 import { Types } from "mongoose";
-import dbConnect from "@/db/dbConnect";
 import Group from "@/db/models/Group";
 import User from "@/db/models/User";
 import Question from "@/db/models/Question";
@@ -7,8 +6,7 @@ import Rally from "@/db/models/Rally";
 import Chat from "@/db/models/Chat";
 import type { GroupDocument, IGroup, IGroupMember, GroupStatsDTO } from "@/types/models/group";
 import { ForbiddenError, NotFoundError, ValidationError } from "@/lib/api/errorHandling";
-import { addTemplatePackToGroup } from "@/lib/template-questions/addPackToGroup";
-import { activateSmartQuestions } from "@/lib/question/activateQuestion";
+import { addTemplatePackToGroup, activateSmartQuestions } from "@/lib/services/question";
 
 // ─── Authorization helpers ───────────────────────────────────
 
@@ -52,8 +50,6 @@ export async function isUserAdmin(
 // ─── Group CRUD ──────────────────────────────────────────────
 
 export async function createGroup(userId: string, name: string): Promise<GroupDocument> {
-    await dbConnect();
-
     if (!name) throw new ValidationError("Group name is required");
 
     const userAdmin = await User.findById(userId);
@@ -77,7 +73,6 @@ export async function createGroup(userId: string, name: string): Promise<GroupDo
 }
 
 export async function getUserGroups(userId: string) {
-    await dbConnect();
     const user = await User.findById(userId).populate({ path: "groups", model: Group });
     if (!user) throw new NotFoundError("User not found");
     return user.groups;
@@ -91,8 +86,6 @@ export async function getGroupWithAdminFlag(
     userId: string,
     groupId: string
 ): Promise<IGroup & { userIsAdmin: boolean }> {
-    await dbConnect();
-
     const groupDoc = await Group.findById(groupId);
     if (!groupDoc) throw new NotFoundError("Group not found");
 
@@ -107,8 +100,6 @@ export async function updateGroup(
     groupId: string,
     data: Partial<IGroup>
 ): Promise<GroupDocument> {
-    await dbConnect();
-
     const group = await Group.findById(groupId);
     if (!group) throw new NotFoundError("Group not found");
 
@@ -126,8 +117,6 @@ export async function updateGroup(
  * TODO this should also delete all related documents (questions, rallies, chats)
  */
 export async function deleteGroup(userId: string, groupId: string): Promise<void> {
-    await dbConnect();
-
     const group = await Group.findById(groupId);
     if (!group) throw new NotFoundError("Group not found");
 
@@ -143,7 +132,6 @@ export async function deleteGroup(userId: string, groupId: string): Promise<void
 // ─── Stats ───────────────────────────────────────────────────
 
 export async function getGroupStats(userId: string, groupId: string): Promise<GroupStatsDTO> {
-    await dbConnect();
     await isUserInGroup(userId, groupId);
 
     const group = await Group.findById(groupId);
@@ -216,7 +204,6 @@ export async function getGroupHistory(
     limit: number,
     offset: number
 ) {
-    await dbConnect();
     await isUserInGroup(userId, groupId);
 
     return Question.find({

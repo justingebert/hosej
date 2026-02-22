@@ -6,9 +6,7 @@ vi.mock("@/db/models/User");
 vi.mock("@/db/models/Question");
 vi.mock("@/db/models/Rally");
 vi.mock("@/db/models/Chat");
-vi.mock("@/db/dbConnect");
-vi.mock("@/lib/template-questions/addPackToGroup");
-vi.mock("@/lib/question/activateQuestion");
+vi.mock("@/lib/services/question");
 
 import {
     isUserInGroup,
@@ -26,9 +24,7 @@ import User from "@/db/models/User";
 import Question from "@/db/models/Question";
 import Rally from "@/db/models/Rally";
 import Chat from "@/db/models/Chat";
-import dbConnect from "@/db/dbConnect";
-import { addTemplatePackToGroup } from "@/lib/template-questions/addPackToGroup";
-import { activateSmartQuestions } from "@/lib/question/activateQuestion";
+import { addTemplatePackToGroup, activateSmartQuestions } from "@/lib/services/question";
 import { ForbiddenError, NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 
 const mockUserId = new Types.ObjectId().toString();
@@ -73,7 +69,6 @@ function createMockUser(overrides = {}) {
 
 beforeEach(() => {
     vi.clearAllMocks();
-    (dbConnect as Mock).mockResolvedValue(undefined);
     (addTemplatePackToGroup as Mock).mockResolvedValue(undefined);
     (activateSmartQuestions as Mock).mockResolvedValue([]);
 });

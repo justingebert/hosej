@@ -56,11 +56,10 @@ export default function QuestionsTabs({
         await fetch(`/api/groups/${groupId}/question/${questionId}/rate`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ rating: rating }),
+            body: JSON.stringify({ rating }),
         });
 
         mutate(`/api/groups/${groupId}/question`);
-        handleDrawer();
     };
 
     const handleDrawer = () => {
@@ -68,7 +67,7 @@ export default function QuestionsTabs({
     };
 
     const handleTabChange = (tabValue: string) => {
-        router.push(`/groups/${groupId}/daily?returnTo=${tabValue}`);
+        router.push(`/groups/${groupId}/question?returnTo=${tabValue}`);
     };
 
     return (
@@ -239,7 +238,7 @@ function RatingDrawer({
                             className="text-3xl flex-1 py-8"
                             variant={question.userRating === "bad" ? "default" : "secondary"}
                             onClick={() => rateQuestion(question._id, "bad")}
-                            disabled={Boolean(question.userRating)}
+                            disabled={question.userRating === "bad"}
                         >
                             🐟
                         </Button>
@@ -247,7 +246,7 @@ function RatingDrawer({
                             className="text-3xl flex-1 py-8"
                             variant={question.userRating === "ok" ? "default" : "secondary"}
                             onClick={() => rateQuestion(question._id, "ok")}
-                            disabled={Boolean(question.userRating)}
+                            disabled={question.userRating === "ok"}
                         >
                             👍
                         </Button>
@@ -255,7 +254,7 @@ function RatingDrawer({
                             className="text-3xl flex-1 py-8"
                             variant={question.userRating === "good" ? "default" : "secondary"}
                             onClick={() => rateQuestion(question._id, "good")}
-                            disabled={Boolean(question.userRating)}
+                            disabled={question.userRating === "good"}
                         >
                             🐐
                         </Button>

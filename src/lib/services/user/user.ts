@@ -1,19 +1,15 @@
-import dbConnect from "@/db/dbConnect";
 import User from "@/db/models/User";
 import type { UserDocument } from "@/types/models/user";
 import type { UpdateUserData } from "@/types/models/user";
 import { ConflictError, NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 
 export async function getUserById(userId: string): Promise<UserDocument> {
-    await dbConnect();
     const user = await User.findById(userId);
     if (!user) throw new NotFoundError("User not found");
     return user;
 }
 
 export async function createDeviceUser(deviceId: string, username: string): Promise<UserDocument> {
-    await dbConnect();
-
     if (!deviceId || !username) {
         throw new ValidationError("Device ID and username are required");
     }
@@ -32,8 +28,6 @@ export async function createDeviceUser(deviceId: string, username: string): Prom
  * Update allowed user fields. Only accepts allowlisted fields via UpdateUserData.
  */
 export async function updateUser(userId: string, data: UpdateUserData): Promise<UserDocument> {
-    await dbConnect();
-
     const updatePayload: Partial<UpdateUserData> = {};
     if (data.username !== undefined) {
         updatePayload.username = data.username;
@@ -48,8 +42,6 @@ export async function registerPushToken(
     userId: string,
     token: string
 ): Promise<{ alreadyRegistered: boolean }> {
-    await dbConnect();
-
     if (!token) throw new ValidationError("Token is required");
 
     const user = await User.findById(userId);
@@ -65,8 +57,6 @@ export async function registerPushToken(
 }
 
 export async function unregisterPushToken(userId: string, token: string): Promise<void> {
-    await dbConnect();
-
     if (!token) throw new ValidationError("Token is required");
 
     const user = await User.findById(userId);
@@ -82,8 +72,6 @@ export async function unregisterPushToken(userId: string, token: string): Promis
  * TODO: Add transaction when replica set is available.
  */
 export async function connectGoogleAccount(googleUserId: string, deviceId: string): Promise<void> {
-    await dbConnect();
-
     if (!deviceId) throw new ValidationError("No deviceId provided");
 
     const googleUser = await User.findById(googleUserId);
@@ -105,8 +93,6 @@ export async function connectGoogleAccount(googleUserId: string, deviceId: strin
  * Unlink a Google account from a user, re-establishing device auth.
  */
 export async function disconnectGoogleAccount(userId: string, deviceId: string): Promise<void> {
-    await dbConnect();
-
     if (!deviceId) throw new ValidationError("No deviceId provided");
 
     const user = await User.findById(userId);

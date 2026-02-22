@@ -2,10 +2,10 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import dbConnect from "@/db/dbConnect";
 import Chat from "@/db/models/Chat";
-import { isUserInGroup } from "@/lib/services/admin";
 import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
+import { isUserInGroup } from "@/lib/services/group";
 
 export const POST = withAuthAndErrors(
     async (

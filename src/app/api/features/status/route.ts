@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
 
-import { getGlobalConfig } from "@/lib/services/admin";
+import { getGlobalConfig } from "@/lib/services/user/admin";
 
 export const revalidate = 0;
 

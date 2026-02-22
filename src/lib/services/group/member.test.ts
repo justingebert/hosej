@@ -3,14 +3,12 @@ import { Types } from "mongoose";
 
 vi.mock("@/db/models/Group");
 vi.mock("@/db/models/User");
-vi.mock("@/db/dbConnect");
 vi.mock("./group");
 
 import { getGroupMembers, joinGroup, removeMember, addPointsToMember } from "./member";
 import { isUserInGroup } from "./group";
 import Group from "@/db/models/Group";
 import User from "@/db/models/User";
-import dbConnect from "@/db/dbConnect";
 import { ConflictError, ForbiddenError, NotFoundError } from "@/lib/api/errorHandling";
 
 const mockUserId = new Types.ObjectId().toString();
@@ -52,7 +50,6 @@ function createMockUser(overrides = {}) {
 
 beforeEach(() => {
     vi.clearAllMocks();
-    (dbConnect as Mock).mockResolvedValue(undefined);
     (isUserInGroup as Mock).mockResolvedValue({ isAuthorized: true });
 });
 

@@ -1,5 +1,5 @@
 import dbConnect from "@/db/dbConnect";
-import { isUserInGroup } from "@/lib/services/admin";
+import { isUserInGroup } from "@/lib/services/group";
 import Jukebox from "@/db/models/Jukebox";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
