@@ -6,7 +6,7 @@ import User from "@/db/models/User";
 import { sendNotification } from "@/lib/sendNotification";
 import Chat from "@/db/models/Chat";
 import Group from "@/db/models/Group";
-import { isUserInGroup } from "@/lib/userAuth";
+import { isUserInGroup } from "@/lib/services/admin";
 import { CREATED_RALLY_POINTS } from "@/config/POINT_CONFIG";
 import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";

@@ -60,3 +60,17 @@ export type GroupDocument = HydratedDocument<IGroup, IGroupMethods>;
 
 export type GroupMemberDTO = ToDTO<IGroupMember>;
 export type GroupDTO = ToDTO<IGroup>;
+
+/** API response type for GET /groups/[groupId] — includes computed field */
+export type GroupWithAdminDTO = GroupDTO & { userIsAdmin: boolean };
+
+export interface GroupStatsDTO {
+    group: IGroup;
+    questionsUsedCount: number;
+    questionsLeftCount: number;
+    questionsByType: { _id: string; count: number }[];
+    questionsByUser: { username: string; count: number }[];
+    RalliesUsedCount: number;
+    RalliesLeftCount: number;
+    messagesCount: number;
+}

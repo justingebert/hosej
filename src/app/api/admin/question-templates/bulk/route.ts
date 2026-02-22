@@ -1,10 +1,10 @@
-import type { NextRequest} from "next/server";
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import dbConnect from "@/db/dbConnect";
-import type { AuthedContext} from "@/lib/api/withAuth";
+import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { ForbiddenError, ValidationError } from "@/lib/api/errorHandling";
-import { isGlobalAdmin } from "@/lib/userAuth";
+import { isGlobalAdmin } from "@/lib/services/admin";
 import { createQuestionTemplatesFromArray } from "@/lib/template-questions/createTemplateQuestions";
 
 export const revalidate = 0;

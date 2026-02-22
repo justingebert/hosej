@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/db/dbConnect";
 import Chat from "@/db/models/Chat";
 import User from "@/db/models/User";
-import { isUserInGroup } from "@/lib/userAuth";
+import { isUserInGroup } from "@/lib/services/admin";
 import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { NotFoundError } from "@/lib/api/errorHandling";

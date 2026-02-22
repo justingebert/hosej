@@ -1,18 +1,14 @@
-import type { NextRequest} from "next/server";
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import type { AuthedContext} from "@/lib/api/withAuth";
+import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { ForbiddenError } from "@/lib/api/errorHandling";
-import AppConfig from "@/db/models/AppConfig";
-import dbConnect from "@/db/dbConnect";
-import { getGlobalConfig, isGlobalAdmin } from "@/lib/userAuth";
+import { getGlobalConfig, isGlobalAdmin, updateGlobalConfig } from "@/lib/services/admin";
 
 export const revalidate = 0;
 
 // Get admin config
-export const GET = withAuthAndErrors(async (req: NextRequest, { userId }: AuthedContext) => {
-    await dbConnect();
-
+export const GET = withAuthAndErrors(async (_req: NextRequest, { userId }: AuthedContext) => {
     const isAdmin = await isGlobalAdmin(userId);
     if (!isAdmin) {
         throw new ForbiddenError();
@@ -32,29 +28,13 @@ export const GET = withAuthAndErrors(async (req: NextRequest, { userId }: Authed
 
 // Update admin config
 export const PUT = withAuthAndErrors(async (req: NextRequest, { userId }: AuthedContext) => {
-    await dbConnect();
-
     const isAdmin = await isGlobalAdmin(userId);
     if (!isAdmin) {
         throw new ForbiddenError();
     }
 
     const data = await req.json();
-    const config = await AppConfig.findOne({ configKey: "global_features" });
-
-    if (!config) {
-        throw new Error("Config not found");
-    }
-
-    // Update only the features if provided
-    if (data.features) {
-        config.features = {
-            ...config.features,
-            ...data.features,
-        };
-    }
-
-    await config.save();
+    const config = await updateGlobalConfig(data);
 
     return NextResponse.json(
         {

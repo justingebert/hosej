@@ -16,3 +16,8 @@ export interface IUser {
 export type UserDocument = HydratedDocument<IUser>;
 
 export type UserDTO = ToDTO<IUser>;
+
+/** Fields that can be updated via PUT /users */
+export interface UpdateUserData {
+    username?: string;
+}
