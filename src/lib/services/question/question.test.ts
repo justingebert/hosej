@@ -2,10 +2,10 @@ import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
 import { Types } from "mongoose";
 
 vi.mock("@/db/models/Question");
-vi.mock("@/db/models/Chat");
 vi.mock("@/db/models/Group");
 vi.mock("@/db/models/User");
 vi.mock("@/lib/generateSingledUrl");
+vi.mock("@/lib/services/chat");
 
 import {
     createQuestion,
@@ -15,16 +15,15 @@ import {
     voteOnQuestion,
     rateQuestion,
     getQuestionResults,
-    attachImage,
-    attachOptions,
+    updateQuestionAttachments,
     activateSmartQuestions,
     deactivateCurrentQuestions,
     parseVoteResponse,
 } from "./question";
 import Question from "@/db/models/Question";
-import Chat from "@/db/models/Chat";
 import Group from "@/db/models/Group";
 import User from "@/db/models/User";
+import { createChatForEntity } from "@/lib/services/chat";
 import { generateSignedUrl } from "@/lib/generateSingledUrl";
 import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 import { QuestionType } from "@/types/models/question";
@@ -71,7 +70,7 @@ function createMockGroup(overrides = {}) {
     };
 }
 
-/** Sets up Question + Chat constructor mocks so `new Question(data)` / `new Chat(data)` work. */
+/** Sets up Question constructor mock + createChatForEntity mock. */
 function mockConstructors(questionOverrides = {}) {
     const mockQuestion = createMockQuestion(questionOverrides);
     const mockChat = { _id: mockChatId, save: vi.fn().mockResolvedValue(undefined) };
@@ -80,10 +79,7 @@ function mockConstructors(questionOverrides = {}) {
         Object.assign(this, mockQuestion, data);
         return this;
     } as any);
-    vi.mocked(Chat).mockImplementation(function (this: any, data: any) {
-        Object.assign(this, mockChat, data);
-        return this;
-    } as any);
+    (createChatForEntity as Mock).mockResolvedValue(mockChat);
 
     return { mockQuestion, mockChat };
 }
@@ -110,7 +106,7 @@ describe("createQuestion", () => {
         });
 
         expect(mockQuestion.save).toHaveBeenCalled();
-        expect(mockChat.save).toHaveBeenCalled();
+        expect(createChatForEntity).toHaveBeenCalled();
         expect(mockGroup.addPoints).toHaveBeenCalledWith(mockUserId, expect.any(Number));
         expect(result).toBeDefined();
     });
@@ -133,10 +129,10 @@ describe("createQuestion", () => {
             Object.assign(this, createMockQuestion(), data, savedData);
             return this;
         } as any);
-        vi.mocked(Chat).mockImplementation(function (this: any) {
-            Object.assign(this, { _id: mockChatId, save: vi.fn().mockResolvedValue(undefined) });
-            return this;
-        } as any);
+        (createChatForEntity as Mock).mockResolvedValue({
+            _id: mockChatId,
+            save: vi.fn().mockResolvedValue(undefined),
+        });
         (Group.findById as Mock).mockReturnValue({ orFail: () => createMockGroup() });
 
         await createQuestion(mockGroupId, mockUserId, {
@@ -445,57 +441,67 @@ describe("getQuestionResults", () => {
     });
 });
 
-// ─── attachImage ────────────────────────────────────────────────────────────
+// ─── updateQuestionAttachments ──────────────────────────────────────────────
 
-describe("attachImage", () => {
+describe("updateQuestionAttachments", () => {
     it("should attach an image to a question", async () => {
         const mockQuestion = createMockQuestion();
         (Question.findOne as Mock).mockResolvedValue(mockQuestion);
 
-        await attachImage(mockGroupId, mockQuestionId, "https://s3.example.com/img.jpg");
+        await updateQuestionAttachments(mockGroupId, mockQuestionId, {
+            imageUrl: "https://s3.example.com/img.jpg",
+        });
 
         expect(mockQuestion.image).toBe("https://s3.example.com/img.jpg");
         expect(mockQuestion.save).toHaveBeenCalled();
     });
 
-    it("should throw ValidationError when imageUrl is empty", async () => {
-        await expect(attachImage(mockGroupId, mockQuestionId, "")).rejects.toThrow(ValidationError);
+    it("should attach options to a question", async () => {
+        const mockQuestion = createMockQuestion();
+        (Question.findOne as Mock).mockResolvedValue(mockQuestion);
+
+        await updateQuestionAttachments(mockGroupId, mockQuestionId, {
+            options: ["X", "Y", "Z"],
+        });
+
+        expect(mockQuestion.options).toEqual(["X", "Y", "Z"]);
+        expect(mockQuestion.save).toHaveBeenCalled();
+    });
+
+    it("should attach both image and options in one call", async () => {
+        const mockQuestion = createMockQuestion();
+        (Question.findOne as Mock).mockResolvedValue(mockQuestion);
+
+        await updateQuestionAttachments(mockGroupId, mockQuestionId, {
+            imageUrl: "https://s3.example.com/img.jpg",
+            options: ["A", "B"],
+        });
+
+        expect(mockQuestion.image).toBe("https://s3.example.com/img.jpg");
+        expect(mockQuestion.options).toEqual(["A", "B"]);
+        expect(mockQuestion.save).toHaveBeenCalledTimes(1);
+    });
+
+    it("should throw ValidationError when neither imageUrl nor options provided", async () => {
+        await expect(updateQuestionAttachments(mockGroupId, mockQuestionId, {})).rejects.toThrow(
+            ValidationError
+        );
+    });
+
+    it("should throw ValidationError when options is empty array", async () => {
+        await expect(
+            updateQuestionAttachments(mockGroupId, mockQuestionId, { options: [] })
+        ).rejects.toThrow(ValidationError);
     });
 
     it("should throw NotFoundError when question not found", async () => {
         (Question.findOne as Mock).mockResolvedValue(null);
 
         await expect(
-            attachImage(mockGroupId, mockQuestionId, "https://s3.example.com/img.jpg")
+            updateQuestionAttachments(mockGroupId, mockQuestionId, {
+                imageUrl: "https://s3.example.com/img.jpg",
+            })
         ).rejects.toThrow(NotFoundError);
-    });
-});
-
-// ─── attachOptions ──────────────────────────────────────────────────────────
-
-describe("attachOptions", () => {
-    it("should attach options to a question", async () => {
-        const mockQuestion = createMockQuestion();
-        (Question.findOne as Mock).mockResolvedValue(mockQuestion);
-
-        await attachOptions(mockGroupId, mockQuestionId, ["X", "Y", "Z"]);
-
-        expect(mockQuestion.options).toEqual(["X", "Y", "Z"]);
-        expect(mockQuestion.save).toHaveBeenCalled();
-    });
-
-    it("should throw ValidationError when options is empty", async () => {
-        await expect(attachOptions(mockGroupId, mockQuestionId, [])).rejects.toThrow(
-            ValidationError
-        );
-    });
-
-    it("should throw NotFoundError when question not found", async () => {
-        (Question.findOne as Mock).mockResolvedValue(null);
-
-        await expect(attachOptions(mockGroupId, mockQuestionId, ["X"])).rejects.toThrow(
-            NotFoundError
-        );
     });
 });
 

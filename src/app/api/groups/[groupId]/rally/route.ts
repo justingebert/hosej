@@ -7,7 +7,7 @@ import { sendNotification } from "@/lib/sendNotification";
 import Chat from "@/db/models/Chat";
 import Group from "@/db/models/Group";
 import { isUserInGroup } from "@/lib/services/group";
-import { CREATED_RALLY_POINTS } from "@/config/POINT_CONFIG";
+import { CREATED_RALLY_POINTS } from "@/lib/utils/POINT_CONFIG";
 import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
