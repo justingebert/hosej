@@ -7,8 +7,7 @@ import Rally from "@/db/models/Rally";
 import Chat from "@/db/models/Chat";
 import type { GroupDocument, IGroup, IGroupMember, GroupStatsDTO } from "@/types/models/group";
 import { ForbiddenError, NotFoundError, ValidationError } from "@/lib/api/errorHandling";
-import { addTemplatePackToGroup } from "@/lib/template-questions/addPackToGroup";
-import { activateSmartQuestions } from "@/lib/question/activateQuestion";
+import { addTemplatePackToGroup, activateSmartQuestions } from "@/lib/services/question";
 
 // ─── Authorization helpers ───────────────────────────────────
 

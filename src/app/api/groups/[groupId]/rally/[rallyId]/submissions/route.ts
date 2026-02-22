@@ -6,7 +6,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import Group from "@/db/models/Group";
-import { isUserInGroup } from "@/lib/services/admin";
+import { isUserInGroup } from "@/lib/services/group";
 import { SUBMITTED_RALLY_POINTS } from "@/config/POINT_CONFIG";
 import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";

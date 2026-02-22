@@ -12,7 +12,7 @@ import AppConfig from "@/db/models/AppConfig";
 import dbConnect from "@/db/dbConnect";
 import { ForbiddenError, NotFoundError } from "@/lib/api/errorHandling";
 import { isUserAdmin, isUserInGroup } from "@/lib/services/group";
-import { getGlobalConfig, isGlobalAdmin, updateGlobalConfig } from "@/lib/services/admin";
+import { getGlobalConfig, isGlobalAdmin, updateGlobalConfig } from "@/lib/services/user/admin";
 
 describe("admin", () => {
     const mockUserId = new Types.ObjectId().toString();

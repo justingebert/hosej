@@ -1,39 +1,21 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import dbConnect from "@/db/dbConnect";
-import Question from "@/db/models/Question";
-import { isUserInGroup } from "@/lib/services/admin";
+import { isUserInGroup } from "@/lib/services/group";
 import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
-import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
+import { attachOptions } from "@/lib/services/question";
 
 export const POST = withAuthAndErrors(
     async (
         req: NextRequest,
-        {
-            params,
-            userId,
-        }: AuthedContext<{
-            params: { groupId: string; questionId: string };
-        }>
+        { params, userId }: AuthedContext<{ params: { groupId: string; questionId: string } }>
     ) => {
         const { groupId, questionId } = params;
-
-        await dbConnect();
         await isUserInGroup(userId, groupId);
+
         const { options } = await req.json();
-        if (!options || !Array.isArray(options) || options.length === 0) {
-            throw new ValidationError("Options are required");
-        }
+        await attachOptions(groupId, questionId, options);
 
-        const question = await Question.findOne({ groupId, _id: questionId });
-        if (!question) {
-            throw new NotFoundError("Question not found");
-        }
-
-        question.options = options;
-        await question.save();
-
-        return NextResponse.json({ message: "Image attached successfully" }, { status: 200 });
+        return NextResponse.json({ message: "Options attached successfully" }, { status: 200 });
     }
 );

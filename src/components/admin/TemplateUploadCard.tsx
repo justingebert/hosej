@@ -12,7 +12,7 @@ import {
     validateTemplates,
     formatValidationErrors,
     type ValidationError,
-} from "@/lib/template-questions/validateTemplateQuestions";
+} from "@/lib/services/question/validateTemplateQuestions";
 
 interface UploadResult {
     success?: boolean;

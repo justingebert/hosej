@@ -3,7 +3,7 @@ import Chat from "@/db/models/Chat";
 import Group from "@/db/models/Group";
 import Jukebox from "@/db/models/Jukebox";
 import { withErrorHandling } from "@/lib/api/errorHandling";
-import { activateSmartQuestions } from "@/lib/question/activateQuestion";
+import { activateSmartQuestions } from "@/lib/services/question";
 import { sendNotification } from "@/lib/sendNotification";
 import type { IGroup } from "@/types/models/group";
 import { NextResponse } from "next/server";

@@ -4,8 +4,6 @@ import type { Types } from "mongoose";
 import type { IAppConfig, AppConfigDocument } from "@/types/models/appConfig";
 import { NotFoundError } from "@/lib/api/errorHandling";
 
-export { isUserInGroup, isUserAdmin } from "@/lib/services/group/group";
-
 /**
  * Check if a user is a global admin
  */

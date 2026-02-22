@@ -1,37 +1,20 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import dbConnect from "@/db/dbConnect";
-import Question from "@/db/models/Question";
-import { isUserInGroup } from "@/lib/services/admin";
+import { isUserInGroup } from "@/lib/services/group";
 import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
-import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
+import { attachImage } from "@/lib/services/question";
 
 export const POST = withAuthAndErrors(
     async (
         req: NextRequest,
-        {
-            params,
-            userId,
-        }: AuthedContext<{
-            params: { groupId: string; questionId: string };
-        }>
+        { params, userId }: AuthedContext<{ params: { groupId: string; questionId: string } }>
     ) => {
         const { groupId, questionId } = params;
-
-        await dbConnect();
         await isUserInGroup(userId, groupId);
-        const { imageUrl } = await req.json();
-        if (!imageUrl) {
-            throw new ValidationError("Image URL is required");
-        }
-        const question = await Question.findOne({ groupId, _id: questionId });
-        if (!question) {
-            throw new NotFoundError("Question not found");
-        }
 
-        question.image = imageUrl;
-        await question.save();
+        const { imageUrl } = await req.json();
+        await attachImage(groupId, questionId, imageUrl);
 
         return NextResponse.json({ message: "Image attached successfully" });
     }

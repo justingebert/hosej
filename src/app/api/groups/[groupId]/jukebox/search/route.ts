@@ -1,4 +1,4 @@
-import { isUserInGroup } from "@/lib/services/admin";
+import { isUserInGroup } from "@/lib/services/group";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import type { AuthedContext } from "@/lib/api/withAuth";
