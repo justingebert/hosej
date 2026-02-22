@@ -144,7 +144,7 @@ function QuestionContent({
                         user={user}
                         question={question}
                         available={true}
-                        returnTo={`daily?returnTo=${question._id}`}
+                        returnTo={`?returnTo=${question._id}`}
                     />
                 ) : (
                     <VoteOptions
