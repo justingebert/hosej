@@ -17,7 +17,8 @@ vi.mock("@aws-sdk/s3-request-presigner", () => ({
 }));
 
 import {
-    getRalliesWithStateTransitions,
+    getActiveRallies,
+    processRallyStateTransitions,
     createRally,
     activateRallies,
     getSubmissions,
@@ -105,28 +106,81 @@ beforeEach(() => {
     (addPointsToMember as Mock).mockResolvedValue(undefined);
 });
 
-// ─── getRalliesWithStateTransitions ────────────────────────────────────────
+// ─── getActiveRallies ─────────────────────────────────────────────────────
 
-describe("getRalliesWithStateTransitions", () => {
+describe("getActiveRallies", () => {
     it("returns empty array when no active rallies exist", async () => {
         (Rally.find as Mock).mockResolvedValue([]);
         (Group.findById as Mock).mockResolvedValue(createMockGroup());
 
-        const result = await getRalliesWithStateTransitions(mockUserId, mockGroupId);
+        const result = await getActiveRallies(mockUserId, mockGroupId);
 
         expect(result.rallies).toEqual([]);
         expect(result.message).toBe("No active rallies");
     });
 
-    it("returns currently running rallies without state change", async () => {
+    it("returns currently running rallies (past start time)", async () => {
         const rally = createMockRally();
         (Rally.find as Mock).mockResolvedValue([rally]);
         (Group.findById as Mock).mockResolvedValue(createMockGroup());
 
-        const result = await getRalliesWithStateTransitions(mockUserId, mockGroupId);
+        const result = await getActiveRallies(mockUserId, mockGroupId);
 
         expect(result.rallies).toHaveLength(1);
         expect(result.rallies[0]).toBe(rally);
+    });
+
+    it("filters out rallies that haven't started yet", async () => {
+        const futureRally = createMockRally({
+            startTime: new Date(Date.now() + 86400000), // starts tomorrow
+        });
+        (Rally.find as Mock).mockResolvedValue([futureRally]);
+        (Group.findById as Mock).mockResolvedValue(createMockGroup());
+
+        const result = await getActiveRallies(mockUserId, mockGroupId);
+
+        expect(result.rallies).toEqual([]);
+        expect(result.message).toBe("No rallies left");
+    });
+
+    it("does not mutate rally state", async () => {
+        const rally = createMockRally({
+            used: false,
+            startTime: new Date(Date.now() - 1000),
+            endTime: new Date(Date.now() + 86400000),
+        });
+        (Rally.find as Mock).mockResolvedValue([rally]);
+        (Group.findById as Mock).mockResolvedValue(createMockGroup());
+
+        await getActiveRallies(mockUserId, mockGroupId);
+
+        expect(rally.save).not.toHaveBeenCalled();
+        expect(sendNotification).not.toHaveBeenCalled();
+    });
+
+    it("throws NotFoundError when group doesn't exist", async () => {
+        (Group.findById as Mock).mockResolvedValue(null);
+
+        await expect(getActiveRallies(mockUserId, mockGroupId)).rejects.toThrow(NotFoundError);
+    });
+});
+
+// ─── processRallyStateTransitions ─────────────────────────────────────────
+
+describe("processRallyStateTransitions", () => {
+    it("silently returns when group not found", async () => {
+        (Group.findById as Mock).mockResolvedValue(null);
+
+        await expect(processRallyStateTransitions(mockGroupId)).resolves.toBeUndefined();
+        expect(Rally.find).not.toHaveBeenCalled();
+    });
+
+    it("silently returns when no active rallies", async () => {
+        (Group.findById as Mock).mockResolvedValue(createMockGroup());
+        (Rally.find as Mock).mockResolvedValue([]);
+
+        await expect(processRallyStateTransitions(mockGroupId)).resolves.toBeUndefined();
+        expect(sendNotification).not.toHaveBeenCalled();
     });
 
     it("marks rally as used when start time arrives", async () => {
@@ -138,7 +192,7 @@ describe("getRalliesWithStateTransitions", () => {
         (Rally.find as Mock).mockResolvedValue([rally]);
         (Group.findById as Mock).mockResolvedValue(createMockGroup());
 
-        await getRalliesWithStateTransitions(mockUserId, mockGroupId);
+        await processRallyStateTransitions(mockGroupId);
 
         expect(rally.used).toBe(true);
         expect(rally.save).toHaveBeenCalled();
@@ -159,7 +213,7 @@ describe("getRalliesWithStateTransitions", () => {
         (Rally.find as Mock).mockResolvedValue([rally]);
         (Group.findById as Mock).mockResolvedValue(createMockGroup());
 
-        await getRalliesWithStateTransitions(mockUserId, mockGroupId);
+        await processRallyStateTransitions(mockGroupId);
 
         expect(rally.votingOpen).toBe(true);
         expect(rally.save).toHaveBeenCalled();
@@ -180,7 +234,7 @@ describe("getRalliesWithStateTransitions", () => {
         (Rally.find as Mock).mockResolvedValue([rally]);
         (Group.findById as Mock).mockResolvedValue(createMockGroup());
 
-        await getRalliesWithStateTransitions(mockUserId, mockGroupId);
+        await processRallyStateTransitions(mockGroupId);
 
         expect(rally.votingOpen).toBe(false);
         expect(rally.resultsShowing).toBe(true);
@@ -210,7 +264,7 @@ describe("getRalliesWithStateTransitions", () => {
         (Rally.findOne as Mock).mockResolvedValue(nextRally);
         (Group.findById as Mock).mockResolvedValue(createMockGroup());
 
-        await getRalliesWithStateTransitions(mockUserId, mockGroupId);
+        await processRallyStateTransitions(mockGroupId);
 
         expect(rally.active).toBe(false);
         expect(rally.resultsShowing).toBe(false);
@@ -218,14 +272,6 @@ describe("getRalliesWithStateTransitions", () => {
         expect(nextRally.startTime).toBeTruthy();
         expect(nextRally.endTime).toBeTruthy();
         expect(nextRally.save).toHaveBeenCalled();
-    });
-
-    it("throws NotFoundError when group doesn't exist", async () => {
-        (Group.findById as Mock).mockResolvedValue(null);
-
-        await expect(getRalliesWithStateTransitions(mockUserId, mockGroupId)).rejects.toThrow(
-            NotFoundError
-        );
     });
 });
 

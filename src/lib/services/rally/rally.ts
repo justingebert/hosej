@@ -115,9 +115,10 @@ async function advanceRallyStates(
 // ─── Service Functions ──────────────────────────────────────────────────────
 
 /**
- * Get active rallies for a group, advancing the state machine as needed.
+ * Get active rallies for a group (pure read — no state mutation).
+ * Returns only rallies that are past their start time.
  */
-export async function getRalliesWithStateTransitions(
+export async function getActiveRallies(
     userId: string,
     groupId: string
 ): Promise<{ rallies: RallyDocument[]; message?: string }> {
@@ -132,11 +133,9 @@ export async function getRalliesWithStateTransitions(
         return { message: "No active rallies", rallies: [] };
     }
 
-    const currentRallies = await advanceRallyStates(
-        rallies,
-        groupId,
-        group.name,
-        group.features.rallies.settings.rallyGapDays
+    const currentTime = new Date();
+    const currentRallies = rallies.filter(
+        (rally) => rally.startTime && currentTime >= new Date(rally.startTime)
     );
 
     if (currentRallies.length === 0) {
@@ -144,6 +143,27 @@ export async function getRalliesWithStateTransitions(
     }
 
     return { rallies: currentRallies };
+}
+
+/**
+ * Cron entry point: advance rally state machine for a group.
+ * Loads group + active rallies, runs state transitions, sends notifications.
+ */
+export async function processRallyStateTransitions(groupId: string): Promise<void> {
+    await dbConnect();
+
+    const group = await Group.findById(groupId);
+    if (!group) return;
+
+    const rallies = await Rally.find({ groupId, active: true });
+    if (rallies.length === 0) return;
+
+    await advanceRallyStates(
+        rallies,
+        groupId,
+        group.name,
+        group.features.rallies.settings.rallyGapDays
+    );
 }
 
 /**

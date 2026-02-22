@@ -1,5 +1,6 @@
 export {
-    getRalliesWithStateTransitions,
+    getActiveRallies,
+    processRallyStateTransitions,
     createRally,
     activateRallies,
     getSubmissions,

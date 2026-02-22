@@ -3,6 +3,8 @@ import Group from "@/db/models/Group";
 import { withErrorHandling } from "@/lib/api/errorHandling";
 import { activateSmartQuestions } from "@/lib/services/question";
 import { activateJukeboxes } from "@/lib/services/jukebox";
+import { processRallyStateTransitions } from "@/lib/services/rally";
+import { getGlobalConfig } from "@/lib/services/user";
 import { sendNotification } from "@/lib/sendNotification";
 import { NextResponse } from "next/server";
 
@@ -12,31 +14,42 @@ export const revalidate = 0;
 export const GET = withErrorHandling(async () => {
     await dbConnect();
 
+    const globalConfig = await getGlobalConfig();
     const groups = await Group.find({});
     //TODO this sends multiple notifications to one user could get spammy over time - somehow layer notifications into group?
     for (const group of groups) {
         // Smart activation: 1 custom + 1 template question
-        const questions = await activateSmartQuestions(group._id);
-        if (questions.length === 0) {
-            await sendNotification(
-                "🥗DA HABEN WIR DEN SALAT🥗",
-                `${group.name} HAT KEINE FRAGEN MEHR, AN DIE ARBEIT!!`,
-                group._id
-            );
-            await group.save();
-        } else {
-            await sendNotification(
-                `🚨Neue ${group.name} Fragen!!🚨`,
-                "🚨JETZT VOTEN DU FISCH🚨",
-                group._id
-            );
-            group.features.questions.settings.lastQuestionDate = new Date();
-            await group.save();
+        if (
+            globalConfig.features.questions.status === "enabled" &&
+            group.features.rallies.enabled
+        ) {
+            const questions = await activateSmartQuestions(group._id);
+            if (questions.length === 0) {
+                await sendNotification(
+                    "🥗DA HABEN WIR DEN SALAT🥗",
+                    `${group.name} HAT KEINE FRAGEN MEHR, AN DIE ARBEIT!!`,
+                    group._id
+                );
+                await group.save();
+            } else {
+                await sendNotification(
+                    `🚨Neue ${group.name} Fragen!!🚨`,
+                    "🚨JETZT VOTEN DU FISCH🚨",
+                    group._id
+                );
+                group.features.questions.settings.lastQuestionDate = new Date();
+                await group.save();
+            }
         }
 
         //jukebox logic
-        if (group.features.jukebox.enabled) {
+        if (globalConfig.features.jukebox.status === "enabled" && group.features.jukebox.enabled) {
             await activateJukeboxes(group);
+        }
+
+        // Rally state transitions
+        if (globalConfig.features.rallies.status === "enabled" && group.features.rallies.enabled) {
+            await processRallyStateTransitions(group._id.toString());
         }
     }
 

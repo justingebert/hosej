@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
-import { getRalliesWithStateTransitions, createRally } from "@/lib/services/rally";
+import { getActiveRallies, createRally } from "@/lib/services/rally";
 
 export const revalidate = 0;
 
@@ -16,7 +16,7 @@ export const GET = withAuthAndErrors(
             params: { groupId: string };
         }>
     ) => {
-        const result = await getRalliesWithStateTransitions(userId, params.groupId);
+        const result = await getActiveRallies(userId, params.groupId);
         return NextResponse.json(result);
     }
 );
