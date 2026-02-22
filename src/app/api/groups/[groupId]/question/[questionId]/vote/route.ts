@@ -19,7 +19,7 @@ export const POST = withAuthAndErrors(
         const { alreadyVoted } = await voteOnQuestion(groupId, questionId, userId, data.response);
 
         if (alreadyVoted) {
-            return NextResponse.json({ message: "You have already voted" }, { status: 304 });
+            return NextResponse.json({ message: "You have already voted" }, { status: 409 });
         }
 
         return NextResponse.json({ message: "Vote submitted" }, { status: 200 });

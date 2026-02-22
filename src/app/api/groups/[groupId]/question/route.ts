@@ -29,12 +29,8 @@ export const GET = withAuthAndErrors(
         const { groupId } = params;
         await isUserInGroup(userId, groupId);
 
-        const { questions, completionPercentage } = await getActiveQuestions(groupId, userId);
+        const result = await getActiveQuestions(groupId, userId);
 
-        if (questions.length === 0) {
-            return NextResponse.json({ questions: [], message: "No questions available" });
-        }
-
-        return NextResponse.json({ questions, completionPercentage });
+        return NextResponse.json(result);
     }
 );

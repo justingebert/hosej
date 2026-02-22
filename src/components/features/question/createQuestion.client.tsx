@@ -241,9 +241,9 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                 if (imageUrl && imageUrl.length > 0) {
                     // Attach the main image to the question
                     const response = await fetch(
-                        `/api/groups/${groupId}/question/${newQuestion._id}/attachImage`,
+                        `/api/groups/${groupId}/question/${newQuestion._id}`,
                         {
-                            method: "POST",
+                            method: "PATCH",
                             headers: {
                                 "Content-Type": "application/json",
                             },
@@ -280,16 +280,13 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                 }
 
                 // Update the question with options
-                const res = await fetch(
-                    `/api/groups/${groupId}/question/${newQuestion._id}/attachOptions`,
-                    {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({ options: optionImageUrls }),
-                    }
-                );
+                const res = await fetch(`/api/groups/${groupId}/question/${newQuestion._id}`, {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ options: optionImageUrls }),
+                });
                 if (!res.ok) {
                     toast({ title: "Failed to create question", variant: "destructive" });
                     setIsSubmitting(false);

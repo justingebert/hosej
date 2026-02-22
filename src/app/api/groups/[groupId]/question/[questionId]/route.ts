@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { isUserInGroup } from "@/lib/services/group";
 import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
-import { getQuestionById } from "@/lib/services/question";
+import { getQuestionById, updateQuestionAttachments } from "@/lib/services/question";
 
 export const GET = withAuthAndErrors(
     async (
@@ -15,5 +15,20 @@ export const GET = withAuthAndErrors(
         const question = await getQuestionById(groupId, questionId);
 
         return NextResponse.json(question);
+    }
+);
+
+export const PATCH = withAuthAndErrors(
+    async (
+        req: NextRequest,
+        { params, userId }: AuthedContext<{ params: { groupId: string; questionId: string } }>
+    ) => {
+        const { groupId, questionId } = params;
+        await isUserInGroup(userId, groupId);
+
+        const data = await req.json();
+        await updateQuestionAttachments(groupId, questionId, data);
+
+        return NextResponse.json({ message: "Question updated" });
     }
 );

@@ -3,7 +3,7 @@ import { Types } from "mongoose";
 
 vi.mock("@/db/models/QuestionTemplate");
 vi.mock("@/db/models/Question");
-vi.mock("@/db/models/Chat");
+vi.mock("@/lib/services/chat");
 
 import { createTemplatesFromArray, addTemplatePackToGroup } from "./template";
 import QuestionTemplate from "@/db/models/QuestionTemplate";
@@ -113,9 +113,9 @@ describe("addTemplatePackToGroup", () => {
         ];
         (QuestionTemplate.find as Mock).mockResolvedValue(templates);
 
-        // Mock Question and Chat constructors for createQuestionFromTemplate
+        // Mock Question constructor + createChatForEntity for createQuestionFromTemplate
         const Question = (await import("@/db/models/Question")).default;
-        const Chat = (await import("@/db/models/Chat")).default;
+        const { createChatForEntity } = await import("@/lib/services/chat");
 
         vi.mocked(Question).mockImplementation(function (this: any, data: any) {
             Object.assign(this, { _id: new Types.ObjectId() }, data, {
@@ -123,12 +123,10 @@ describe("addTemplatePackToGroup", () => {
             });
             return this;
         } as any);
-        vi.mocked(Chat).mockImplementation(function (this: any, data: any) {
-            Object.assign(this, { _id: new Types.ObjectId() }, data, {
-                save: vi.fn().mockResolvedValue(undefined),
-            });
-            return this;
-        } as any);
+        (createChatForEntity as Mock).mockResolvedValue({
+            _id: new Types.ObjectId(),
+            save: vi.fn().mockResolvedValue(undefined),
+        });
 
         const groupId = new Types.ObjectId();
         await addTemplatePackToGroup(groupId, "test-pack");

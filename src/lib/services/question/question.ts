@@ -1,11 +1,12 @@
 import Question from "@/db/models/Question";
-import Chat from "@/db/models/Chat";
 import Group from "@/db/models/Group";
 import User from "@/db/models/User";
 import { Types } from "mongoose";
 import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 import { generateSignedUrl } from "@/lib/generateSingledUrl";
-import { CREATED_QUESTION_POINTS, VOTED_QUESTION_POINTS } from "@/config/POINT_CONFIG";
+import { CREATED_QUESTION_POINTS, VOTED_QUESTION_POINTS } from "@/lib/utils/POINT_CONFIG";
+import { createChatForEntity } from "@/lib/services/chat";
+import { EntityModel } from "@/types/models/chat";
 import type { IAnswer, IQuestion, QuestionDocument, UserRating } from "@/types/models/question";
 import { QuestionType } from "@/types/models/question";
 import type { IUser } from "@/types/models/user";
@@ -91,14 +92,7 @@ export async function createQuestion(
     });
     await newQuestion.save();
 
-    const newChat = new Chat({
-        group: groupId,
-        entity: newQuestion._id,
-        entityModel: "Question",
-        messages: [],
-    });
-    await newChat.save();
-
+    const newChat = await createChatForEntity(groupId, newQuestion._id, EntityModel.Question);
     newQuestion.chat = newChat._id;
     await newQuestion.save();
 
@@ -137,14 +131,7 @@ export async function createQuestionFromTemplate(
     });
     await newQuestion.save();
 
-    const newChat = new Chat({
-        group: groupId,
-        entity: newQuestion._id,
-        entityModel: "Question",
-        messages: [],
-    });
-    await newChat.save();
-
+    const newChat = await createChatForEntity(groupId, newQuestion._id, EntityModel.Question);
     newQuestion.chat = newChat._id;
     await newQuestion.save();
 
@@ -342,33 +329,28 @@ export async function getQuestionResults(questionId: string): Promise<{
     return { results, totalVotes, totalUsers, questionType: question.questionType };
 }
 
-export async function attachImage(
+export async function updateQuestionAttachments(
     groupId: string,
     questionId: string,
-    imageUrl: string
+    data: { imageUrl?: string; options?: unknown[] }
 ): Promise<void> {
-    if (!imageUrl) throw new ValidationError("Image URL is required");
-
-    const question = await Question.findOne({ groupId, _id: questionId });
-    if (!question) throw new NotFoundError("Question not found");
-
-    question.image = imageUrl;
-    await question.save();
-}
-
-export async function attachOptions(
-    groupId: string,
-    questionId: string,
-    options: unknown[]
-): Promise<void> {
-    if (!options || !Array.isArray(options) || options.length === 0) {
-        throw new ValidationError("Options are required");
+    if (!data.imageUrl && !data.options) {
+        throw new ValidationError("At least one of imageUrl or options is required");
+    }
+    if (data.options && (!Array.isArray(data.options) || data.options.length === 0)) {
+        throw new ValidationError("Options must be a non-empty array");
     }
 
     const question = await Question.findOne({ groupId, _id: questionId });
     if (!question) throw new NotFoundError("Question not found");
 
-    question.options = options;
+    if (data.imageUrl) {
+        question.image = data.imageUrl;
+    }
+    if (data.options) {
+        question.options = data.options;
+    }
+
     await question.save();
 }
 
