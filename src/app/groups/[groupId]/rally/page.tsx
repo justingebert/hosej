@@ -38,7 +38,7 @@ const RallyPage = () => {
         const HasVoted = rallies.reduce((acc: Record<string, boolean>, rally) => {
             const rallyId = rally._id.toString(); // Ensure _id is a string
             acc[rallyId] = rally.submissions.some((submission) =>
-                submission.votes.some((vote: any) => vote.user === user._id)
+                submission.votes.some((vote: any) => vote.user === user?._id)
             );
             return acc;
         }, {});
@@ -46,7 +46,7 @@ const RallyPage = () => {
         const HasUploaded = rallies.reduce((acc: Record<string, boolean>, rally) => {
             const rallyId = rally._id.toString(); // Ensure _id is a string
             acc[rallyId] = rally.submissions.some(
-                (submission) => submission.username === user.username
+                (submission) => submission.username === user?.username
             );
             return acc;
         }, {});

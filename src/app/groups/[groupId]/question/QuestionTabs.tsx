@@ -21,7 +21,7 @@ import Image from "next/image";
 import { mutate } from "swr";
 import { CheckCheck } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import type { UserDTO } from "@/types/models/user";
+import type { Session } from "next-auth";
 import type {
     QuestionOptionDTO,
     QuestionWithUserStateDTO,
@@ -36,7 +36,7 @@ export default function QuestionsTabs({
     groupId,
     questions,
 }: {
-    user: UserDTO;
+    user: Session["user"];
     groupId: string;
     questions: QuestionWithUserStateDTO[];
 }) {
@@ -117,7 +117,7 @@ function QuestionContent({
     rateQuestion,
     handleDrawer,
 }: {
-    user: UserDTO;
+    user: Session["user"];
     groupId: string;
     question: QuestionWithUserStateDTO;
     drawerOpen: boolean;

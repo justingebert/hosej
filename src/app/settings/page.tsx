@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { requestPermissionReturnToken } from "@/hooks/useFcmToken";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { FcGoogle } from "react-icons/fc";
-import type { UserDTO } from "@/types/models/user";
+import type { Session } from "next-auth";
 import { Skeleton } from "@/components/ui/skeleton";
 import BackLink from "@/components/ui/custom/BackLink";
 
@@ -29,7 +29,8 @@ export default function SettingsPage() {
         if (status === "authenticated" && user) {
             setGoogleConnected(user.googleConnected);
             const notificationSetting =
-                localStorage.getItem("notificationsEnabled") === "true" || !!user.fcmToken;
+                localStorage.getItem("notificationsEnabled") === "true" ||
+                !!localStorage.getItem("lastSentFcmToken");
             setNotificationsEnabled(notificationSetting);
         }
     }, [status, user]);
@@ -126,12 +127,19 @@ export default function SettingsPage() {
     );
 }
 
-function UserDataTable({ user, googleConnected }: { user: UserDTO; googleConnected: boolean }) {
+function UserDataTable({
+    user,
+    googleConnected,
+}: {
+    user: Session["user"];
+    googleConnected: boolean;
+}) {
     const formattedDate = new Date(user.createdAt).toLocaleDateString(undefined, {
         year: "numeric",
         month: "numeric",
         day: "numeric",
     });
+    const deviceId = typeof window !== "undefined" ? localStorage.getItem("deviceId") : null;
 
     return (
         <Table>
@@ -148,10 +156,10 @@ function UserDataTable({ user, googleConnected }: { user: UserDTO; googleConnect
                     <TableCell className="font-medium">Joined</TableCell>
                     <TableCell>{formattedDate}</TableCell>
                 </TableRow>
-                {user.deviceId && (
+                {deviceId && (
                     <TableRow>
                         <TableCell className="font-medium">Device ID</TableCell>
-                        <TableCell>{user.deviceId}</TableCell>
+                        <TableCell>{deviceId}</TableCell>
                     </TableRow>
                 )}
             </TableBody>

@@ -11,7 +11,7 @@ import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
 import { useToast } from "@/hooks/use-toast";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
-import type { UserDTO } from "@/types/models/user";
+import type { Session } from "next-auth";
 import { useEffect, useState } from "react";
 
 export default function GroupsPage() {
@@ -56,7 +56,7 @@ function GroupsList({
 }: {
     router: ReturnType<typeof useRouter>;
     copyFn: (text: string) => void;
-    user: UserDTO;
+    user?: Session["user"];
 }) {
     const [starredGroupId, setStarredGroupId] = useState<string | null>(null);
 

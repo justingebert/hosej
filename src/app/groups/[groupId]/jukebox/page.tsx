@@ -12,7 +12,7 @@ import useSWR, { mutate } from "swr";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { UserDTO } from "@/types/models/user";
+import type { Session } from "next-auth";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Slider } from "@/components/ui/slider";
 import { FoldVertical, Loader, Search, UnfoldVertical } from "lucide-react";
@@ -129,7 +129,7 @@ const JukeboxPage = () => {
                                         {hasSubmitted ? (
                                             <JukeboxSubmissions
                                                 jukebox={j}
-                                                user={user}
+                                                user={user!}
                                                 toast={toast}
                                             />
                                         ) : (
@@ -155,7 +155,7 @@ const JukeboxPage = () => {
                             jukeboxes[0].userHasSubmitted) ? (
                                 <JukeboxSubmissions
                                     jukebox={jukeboxes[0]}
-                                    user={user}
+                                    user={user!}
                                     toast={toast}
                                 />
                             ) : (
@@ -360,7 +360,7 @@ function JukeboxSubmissions({
     toast,
 }: {
     jukebox: IJukeboxProcessed;
-    user: UserDTO;
+    user: Session["user"];
     toast: any;
 }) {
     const [selectedSong, setSelectedSong] = useState<IProcessedSong | null>(null);
@@ -571,7 +571,7 @@ function JukeboxSubmissions({
                 </div>
             </div>
             <Separator className="my-2" />
-            <ChatComponent user={user} entity={jukebox} available={true} />
+            <ChatComponent user={user!} entity={jukebox} available={true} />
 
             <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
                 <DrawerContent className="p-4">

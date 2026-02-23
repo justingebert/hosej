@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
-import type { UserDTO } from "@/types/models/user";
+import type { Session } from "next-auth";
 import { useHaptic } from "use-haptic";
 
 import type { IResult, QuestionDTO, QuestionResultsDTO } from "@/types/models/question";
@@ -16,7 +16,7 @@ import ChatComponent from "@/components/features/chat/Chat.client";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type VoteResultsProps = {
-    user: UserDTO;
+    user: Session["user"];
     question: QuestionDTO;
     available: boolean;
     returnTo?: string;

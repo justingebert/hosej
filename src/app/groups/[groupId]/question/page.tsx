@@ -40,7 +40,7 @@ const DailyQuestionPage = () => {
                     <Skeleton className="w-full h-[300px] mb-6" />
                 </div>
             ) : data.questions && data.questions.length > 0 ? (
-                <QuestionsTabs user={user} groupId={groupId} questions={data.questions} />
+                <QuestionsTabs user={user!} groupId={groupId} questions={data.questions} />
             ) : (
                 <div className="flex flex-grow justify-center items-center">
                     <Card className="w-full">
