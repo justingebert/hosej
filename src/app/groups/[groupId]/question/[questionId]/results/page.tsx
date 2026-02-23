@@ -88,7 +88,7 @@ const ResultsPage = () => {
                             ))}
                     </div>
                     <VoteResults
-                        user={user}
+                        user={user!}
                         question={question}
                         available={false}
                         returnTo={`question/${questionId}/results`}

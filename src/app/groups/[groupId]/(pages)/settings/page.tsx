@@ -133,7 +133,7 @@ export default function GroupSettingsPage() {
 
     const leaveGroup = async () => {
         try {
-            const res = await fetch(`/api/groups/${groupId}/members/${user._id}`, {
+            const res = await fetch(`/api/groups/${groupId}/members/${user?._id}`, {
                 method: "DELETE",
             });
             if (!res.ok) {

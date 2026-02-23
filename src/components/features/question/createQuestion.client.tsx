@@ -207,7 +207,7 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
             questionType: questionData.questionType,
             question: questionData.question,
             options: questionData.questionType.startsWith("custom") ? trimmedOptions : [],
-            submittedBy: user._id,
+            submittedBy: user!._id,
         };
 
         try {
@@ -234,7 +234,7 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                     groupId,
                     "question",
                     newQuestion._id,
-                    user._id,
+                    user!._id,
                     [compressedMainImage]
                 );
 
@@ -269,7 +269,7 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                     groupId,
                     "question-option",
                     newQuestion._id,
-                    user._id,
+                    user!._id,
                     compressedFiles
                 )) as UploadedFileData[] | null;
 
