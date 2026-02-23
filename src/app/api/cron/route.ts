@@ -18,40 +18,50 @@ export const GET = withErrorHandling(async () => {
     const groups = await Group.find({});
     //TODO this sends multiple notifications to one user could get spammy over time - somehow layer notifications into group?
     for (const group of groups) {
-        // Smart activation: 1 custom + 1 template question
-        if (
-            globalConfig.features.questions.status === "enabled" &&
-            group.features.rallies.enabled
-        ) {
-            const questions = await activateSmartQuestions(group._id);
-            if (questions.length === 0) {
-                await sendNotification(
-                    "🥗DA HABEN WIR DEN SALAT🥗",
-                    `${group.name} HAT KEINE FRAGEN MEHR, AN DIE ARBEIT!!`,
-                    group._id
-                );
-                await group.save();
-            } else {
-                await sendNotification(
-                    `🚨Neue ${group.name} Fragen!!🚨`,
-                    "🚨JETZT VOTEN DU FISCH🚨",
-                    group._id
-                );
-                group.features.questions.settings.lastQuestionDate = new Date();
-                await group.save();
+        try {
+            // Smart activation: 1 custom + 1 template question
+            if (
+                globalConfig.features.questions.status === "enabled" &&
+                group.features.questions.enabled
+            ) {
+                const questions = await activateSmartQuestions(group._id);
+                if (questions.length === 0) {
+                    await sendNotification(
+                        "🥗DA HABEN WIR DEN SALAT🥗",
+                        `${group.name} HAT KEINE FRAGEN MEHR, AN DIE ARBEIT!!`,
+                        group._id
+                    );
+                    await group.save();
+                } else {
+                    await sendNotification(
+                        `🚨Neue ${group.name} Fragen!!🚨`,
+                        "🚨JETZT VOTEN DU FISCH🚨",
+                        group._id
+                    );
+                    group.features.questions.settings.lastQuestionDate = new Date();
+                    await group.save();
+                }
             }
-        }
 
-        //jukebox logic
-        if (globalConfig.features.jukebox.status === "enabled" && group.features.jukebox.enabled) {
-            await activateJukeboxes(group);
-        }
+            //jukebox logic
+            if (
+                globalConfig.features.jukebox.status === "enabled" &&
+                group.features.jukebox.enabled
+            ) {
+                await activateJukeboxes(group);
+            }
 
-        // Rally state transitions
-        if (globalConfig.features.rallies.status === "enabled" && group.features.rallies.enabled) {
-            await processRallyStateTransitions(group._id.toString());
+            // Rally state transitions
+            if (
+                globalConfig.features.rallies.status === "enabled" &&
+                group.features.rallies.enabled
+            ) {
+                await processRallyStateTransitions(group._id.toString());
+            }
+        } catch (error) {
+            console.error(`Cron failed for group ${group._id} (${group.name}):`, error);
         }
     }
 
-    return NextResponse.json({ message: "cron exceuted successfully" }, { status: 200 });
+    return NextResponse.json({ message: "cron executed successfully" }, { status: 200 });
 });
