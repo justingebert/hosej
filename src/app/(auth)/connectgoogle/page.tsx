@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import SpinningLoader from "@/components/ui/custom/SpinningLoader";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
@@ -11,13 +11,13 @@ export default function GoogleCallbackPage() {
     const { session, status, user } = useAuthRedirect();
     const router = useRouter();
     const { toast } = useToast();
+    const [isLinking, setIsLinking] = useState(false);
 
     useEffect(() => {
         const mergeGoogleAccount = async () => {
             const deviceId = localStorage.getItem("deviceId");
-            console.log("Device ID:", deviceId);
-            console.log(user);
             if (deviceId && status === "authenticated") {
+                setIsLinking(true);
                 try {
                     const response = await fetch("/api/users/google", {
                         method: "POST",
@@ -26,13 +26,10 @@ export default function GoogleCallbackPage() {
                     });
 
                     const result = await response.json();
-                    console.log("Google account link response:", result);
 
                     if (response.ok) {
-                        console.log("Google account linked successfully.");
                         toast({ title: "Google account linked successfully." });
                         await signIn("google", { callbackUrl: `/groups` });
-                        console.log("Redirecting to groups page");
                     } else {
                         console.error("Failed to link Google account:", result.message);
                     }
@@ -49,6 +46,15 @@ export default function GoogleCallbackPage() {
 
     if (status === "loading") {
         return <SpinningLoader loading={true} />;
+    }
+
+    if (isLinking) {
+        return (
+            <div className="flex flex-col items-center justify-center gap-4">
+                <SpinningLoader loading={true} />
+                <p className="text-muted-foreground">Linking Google account...</p>
+            </div>
+        );
     }
 
     return <SpinningLoader loading={true} />;

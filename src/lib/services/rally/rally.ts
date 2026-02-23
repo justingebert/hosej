@@ -2,9 +2,9 @@ import dbConnect from "@/db/dbConnect";
 import Rally from "@/db/models/Rally";
 import Group from "@/db/models/Group";
 import User from "@/db/models/User";
-import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { Types } from "mongoose";
 import { ConflictError, NotFoundError, ValidationError } from "@/lib/api/errorHandling";
+import { generateSignedUrl } from "@/lib/s3";
 import { isUserAdmin, isUserInGroup, addPointsToMember } from "@/lib/services/group";
 import { createChatForEntity } from "@/lib/services/chat";
 import { EntityModel } from "@/types/models/chat";
@@ -15,12 +15,6 @@ import {
     VOTED_RALLY_POINTS,
 } from "@/lib/utils/POINT_CONFIG";
 import type { RallyDocument } from "@/types/models/rally";
-
-// ─── S3 Client (module-scoped) ──────────────────────────────────────────────
-
-const s3 = new S3Client({
-    region: process.env.AWS_REGION,
-});
 
 // ─── State Machine ──────────────────────────────────────────────────────────
 
@@ -254,29 +248,8 @@ export async function getSubmissions(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         rally.submissions.map(async (submission: any) => {
             const urlObject = new URL(submission.imageUrl);
-            let s3Key = urlObject.pathname;
-            if (s3Key.startsWith("/")) {
-                s3Key = s3Key.substring(2);
-            }
-
-            const command = new GetObjectCommand({
-                Bucket: process.env.AWS_BUCKET_NAME,
-                Key: s3Key,
-                ResponseCacheControl: "max-age=86400, public",
-            });
-
-            let url;
-            try {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                url = await getSignedUrl(s3 as any, command, { expiresIn: 300 });
-            } catch (s3Error: unknown) {
-                const message = s3Error instanceof Error ? s3Error.message : "Unknown S3 error";
-                console.error(
-                    `Failed to generate pre-signed URL for ${submission.imageUrl}`,
-                    s3Error
-                );
-                throw new Error(`Failed to generate pre-signed URL: ${message}`);
-            }
+            const s3Key = urlObject.pathname;
+            const { url } = await generateSignedUrl(s3Key, 300);
 
             return {
                 ...submission.toObject(),
@@ -379,7 +352,7 @@ export async function voteOnSubmission(
     }
 
     submission.votes.push({
-        user: userId as unknown as import("mongoose").Types.ObjectId,
+        user: new Types.ObjectId(userId),
         time: new Date(),
     });
     await rally.save();

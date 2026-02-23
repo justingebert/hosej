@@ -16,7 +16,7 @@ export async function sendNotification(
     groupId: string | Types.ObjectId = ""
 ) {
     if (process.env.ENV === "dev") {
-        console.log("NOTIFICATION", title, body, groupId);
+        console.warn("NOTIFICATION [dev]", title, body, groupId);
         return { success: true, successCount: 0, failureCount: 0 };
     }
     try {
@@ -35,7 +35,7 @@ export async function sendNotification(
         const tokens = users.map((user) => user.fcmToken).filter((token) => token !== undefined);
 
         if (tokens.length === 0) {
-            console.log("No tokens available to send messages");
+            console.warn("No tokens available to send messages");
             return;
         }
 
@@ -55,8 +55,8 @@ export async function sendNotification(
             }
         });
 
-        console.log(`${response.successCount} messages were sent successfully`);
-        console.log(`${response.failureCount} messages failed`);
+        console.warn(`${response.successCount} messages were sent successfully`);
+        console.warn(`${response.failureCount} messages failed`);
 
         return {
             success: true,

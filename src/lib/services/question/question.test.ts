@@ -4,7 +4,7 @@ import { Types } from "mongoose";
 vi.mock("@/db/models/Question");
 vi.mock("@/db/models/Group");
 vi.mock("@/db/models/User");
-vi.mock("@/lib/generateSingledUrl");
+vi.mock("@/lib/s3");
 vi.mock("@/lib/services/chat");
 
 import {
@@ -24,7 +24,7 @@ import Question from "@/db/models/Question";
 import Group from "@/db/models/Group";
 import User from "@/db/models/User";
 import { createChatForEntity } from "@/lib/services/chat";
-import { generateSignedUrl } from "@/lib/generateSingledUrl";
+import { generateSignedUrl } from "@/lib/s3";
 import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 import { QuestionType } from "@/types/models/question";
 
