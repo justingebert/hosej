@@ -86,9 +86,7 @@ const VoteResults = ({ user, question, available, returnTo }: VoteResultsProps) 
                                         {result.option}
                                     </span>
                                 )}
-                                <Badge>
-                                    <CountUpBadge targetPercentage={result.percentage} />
-                                </Badge>
+                                <Badge>{result.percentage} %</Badge>
                             </div>
                         </div>
                     </Link>
@@ -101,27 +99,3 @@ const VoteResults = ({ user, question, available, returnTo }: VoteResultsProps) 
 };
 
 export default VoteResults;
-
-export const CountUpBadge = ({ targetPercentage }: { targetPercentage: number }) => {
-    const [currentPercentage, setCurrentPercentage] = useState(0);
-
-    useEffect(() => {
-        const duration = 1000; // duration of the count up in milliseconds
-        const intervalTime = 16; // update interval in milliseconds
-        const totalSteps = duration / intervalTime;
-        const increment = targetPercentage / totalSteps;
-
-        let currentStep = 0;
-        const interval = setInterval(() => {
-            currentStep++;
-            setCurrentPercentage((prev) => Math.min(prev + increment, targetPercentage));
-            if (currentStep >= totalSteps) {
-                clearInterval(interval);
-            }
-        }, intervalTime);
-
-        return () => clearInterval(interval);
-    }, [targetPercentage]);
-
-    return <span>{Math.round(currentPercentage)} %</span>;
-};

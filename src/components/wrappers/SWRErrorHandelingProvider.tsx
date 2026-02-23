@@ -13,6 +13,9 @@ export default function SWRErrorHandlingProvider({ children }: { children: React
     return (
         <SWRConfig
             value={{
+                dedupingInterval: 10_000,
+                focusThrottleInterval: 30_000,
+                keepPreviousData: true,
                 onError: (error: FetchError, key) => {
                     // Handle 404 errors - redirect to groups page
                     if (error.status === 404) {

@@ -52,6 +52,8 @@ export default function QuestionsTabs({
     const defaultTab =
         returnToParam || (flatList.length > 0 ? flatList[0].question._id : undefined);
 
+    const [activeTab, setActiveTab] = useState(defaultTab);
+
     const rateQuestion = async (questionId: string, rating: RateValue) => {
         await fetch(`/api/groups/${groupId}/question/${questionId}/rate`, {
             method: "POST",
@@ -67,6 +69,7 @@ export default function QuestionsTabs({
     };
 
     const handleTabChange = (tabValue: string) => {
+        setActiveTab(tabValue);
         router.push(`/groups/${groupId}/question?returnTo=${tabValue}`);
     };
 
@@ -87,15 +90,17 @@ export default function QuestionsTabs({
 
             {flatList.map(({ question }) => (
                 <TabsContent key={question._id} value={question._id}>
-                    <QuestionContent
-                        user={user}
-                        groupId={groupId}
-                        question={question}
-                        drawerOpen={drawerOpen}
-                        setDrawerOpen={setDrawerOpen}
-                        rateQuestion={rateQuestion}
-                        handleDrawer={handleDrawer}
-                    />
+                    {question._id === activeTab && (
+                        <QuestionContent
+                            user={user}
+                            groupId={groupId}
+                            question={question}
+                            drawerOpen={drawerOpen}
+                            setDrawerOpen={setDrawerOpen}
+                            rateQuestion={rateQuestion}
+                            handleDrawer={handleDrawer}
+                        />
+                    )}
                 </TabsContent>
             ))}
         </Tabs>

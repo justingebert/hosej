@@ -1,5 +1,5 @@
 import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
-import { disableDevLogs, Serwist } from "serwist";
+import { CacheFirst, disableDevLogs, ExpirationPlugin, NetworkFirst, Serwist } from "serwist";
 import { defaultCache } from "@serwist/next/worker";
 
 disableDevLogs();
@@ -21,7 +21,33 @@ const serwist = new Serwist({
     skipWaiting: true,
     clientsClaim: true,
     navigationPreload: true,
-    runtimeCaching: defaultCache,
+    runtimeCaching: [
+        ...defaultCache,
+        {
+            matcher: /^https:\/\/hosej-rally-bucket\.s3\.eu-central-1\.amazonaws\.com\/.*/,
+            handler: new CacheFirst({
+                cacheName: "s3-images",
+                plugins: [
+                    new ExpirationPlugin({
+                        maxEntries: 100,
+                        maxAgeSeconds: 24 * 60 * 60,
+                    }),
+                ],
+            }),
+        },
+        {
+            matcher: /^\/api\/groups\/.*/,
+            handler: new NetworkFirst({
+                cacheName: "api-data",
+                plugins: [
+                    new ExpirationPlugin({
+                        maxEntries: 50,
+                        maxAgeSeconds: 5 * 60,
+                    }),
+                ],
+            }),
+        },
+    ],
 });
 
 serwist.addEventListeners();

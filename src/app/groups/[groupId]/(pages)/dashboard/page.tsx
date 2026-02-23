@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import useSWR, { useSWRConfig } from "swr";
+import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
 import type { GroupDTO } from "@/types/models/group";
 import type { IRally } from "@/types/models/rally";
@@ -37,7 +37,6 @@ const CompletionChart = dynamic(
 
 export default function Dashboard() {
     const router = useRouter();
-    const { mutate } = useSWRConfig();
     const { triggerHaptic } = useHaptic();
     const params = useParams<{ groupId: string }>();
     const groupId = params?.groupId;
@@ -111,7 +110,6 @@ export default function Dashboard() {
                                         className="relative bg-primary-foreground px-6 py-4 flex items-center justify-between rounded-lg cursor-pointer hover:bg-primary-foreground/80 transition-colors"
                                         onClick={() => {
                                             triggerHaptic();
-                                            mutate(`/api/groups/${groupId}/question`);
                                             router.push(`/groups/${groupId}/question`);
                                         }}
                                     >

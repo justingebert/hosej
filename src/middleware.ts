@@ -1,11 +1,11 @@
 import { getToken } from "next-auth/jwt";
-import type { NextRequest} from "next/server";
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 export async function middleware(req: NextRequest) {
     const { pathname } = req.nextUrl;
 
-    const publicRoutes = [
+    const publicRoutes = new Set([
         "/api/auth/session",
         "/api/auth/providers",
         "/api/auth/csrf",
@@ -20,8 +20,8 @@ export async function middleware(req: NextRequest) {
         "/terms",
         "/privacy",
         "/",
-    ];
-    if (publicRoutes.includes(pathname) || (pathname == "/api/users" && req.method === "POST")) {
+    ]);
+    if (publicRoutes.has(pathname) || (pathname == "/api/users" && req.method === "POST")) {
         return NextResponse.next();
     }
 
