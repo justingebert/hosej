@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import type { IAnswer, IQuestion} from "@/types/models/question";
+import type { IAnswer, IQuestion } from "@/types/models/question";
 import { QuestionType } from "@/types/models/question";
 
 const answerSchema = new mongoose.Schema<IAnswer>({
@@ -47,7 +47,7 @@ const questionSchema = new mongoose.Schema<IQuestion>({
     createdAt: { type: Date, default: Date.now },
 });
 
-questionSchema.index({ groupId: 1 });
+questionSchema.index({ groupId: 1, active: 1 });
 
 const Question =
     (mongoose.models.Question as mongoose.Model<IQuestion>) ||

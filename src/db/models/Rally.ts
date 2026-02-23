@@ -33,7 +33,7 @@ const rallySchema = new mongoose.Schema<IRally>({
     createdAt: { type: Date, default: Date.now },
 });
 
-rallySchema.index({ groupId: 1 });
+rallySchema.index({ groupId: 1, active: 1 });
 
 const Rally =
     (mongoose.models.Rally as mongoose.Model<IRally>) ||

@@ -52,6 +52,8 @@ const jukeboxSchema = new mongoose.Schema<IJukebox>({
     createdAt: { type: Date, default: Date.now },
 });
 
+jukeboxSchema.index({ groupId: 1, active: 1 });
+
 const Jukebox =
     (mongoose.models.Jukebox as mongoose.Model<IJukebox>) ||
     mongoose.model<IJukebox>("Jukebox", jukeboxSchema);

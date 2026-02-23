@@ -40,6 +40,8 @@ const chatSchema = new mongoose.Schema<IChat>({
     },
 });
 
+chatSchema.index({ group: 1, entity: 1 });
+
 const Chat =
     (mongoose.models.Chat as mongoose.Model<IChat>) || mongoose.model<IChat>("Chat", chatSchema);
 
