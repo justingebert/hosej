@@ -25,7 +25,7 @@ CI runs on PRs: `npm run lint` → `npx tsc --noEmit` → `npm test` → `npm bu
 
 ## Architecture
 
-**Next.js 14 App Router** — all frontend pages are client components; all application logic lives in API routes.
+**Next.js 16 App Router** — all frontend pages are client components; all application logic lives in API routes.
 
 ### Layer Structure
 
@@ -53,7 +53,7 @@ Models (src/db/models/)    → Mongoose schemas, MongoDB
 
 **Database connection:** `src/db/dbConnect.ts` caches the Mongoose connection across serverless invocations. Services call `dbConnect()` internally — routes don't need to.
 
-**Auth middleware:** `src/middleware.ts` protects all routes except auth endpoints, `/`, terms, privacy, and cron. API routes get 401; pages redirect to `/`.
+**Auth proxy:** `src/proxy.ts` protects all routes except auth endpoints, `/`, terms, privacy, and cron. API routes get 401; pages redirect to `/`.
 
 **Group authorization:** `isUserInGroup()` and `isUserAdmin()` live in `src/lib/services/group/group.ts` and are re-exported from `src/lib/admin.ts` for backwards compatibility. They accept an optional pre-loaded group document to avoid redundant DB calls.
 
@@ -67,7 +67,7 @@ Models (src/db/models/)    → Mongoose schemas, MongoDB
 
 ## Tech Stack
 
-- **Framework:** Next.js 14 (App Router), TypeScript, React 18
+- **Framework:** Next.js 16 (App Router), TypeScript, React 19
 - **Styling:** Tailwind CSS + shadcn/ui (Radix primitives)
 - **Data fetching:** SWR
 - **Auth:** NextAuth (Google OAuth + device credentials)

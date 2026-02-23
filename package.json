@@ -42,12 +42,12 @@
     "browser-image-compression": "^2.0.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
-    "cmdk": "^1.0.0",
+    "cmdk": "^1.1.1",
     "embla-carousel-react": "^8.1.3",
     "firebase": "^10.12.4",
     "firebase-admin": "^12.2.0",
     "framer-motion": "^12.34.3",
-    "lucide-react": "^0.368.0",
+    "lucide-react": "^0.575.0",
     "mongoose": "^8.3.1",
     "next": "^16",
     "next-auth": "^4.24.7",
@@ -56,7 +56,7 @@
     "react-dom": "^19",
     "react-icons": "^5.5.0",
     "react-modal": "^3.16.1",
-    "react-spinners": "^0.14.1",
+    "react-spinners": "^0.15.0",
     "recharts": "^2.12.7",
     "sharp": "^0.33.5",
     "swr": "^2.2.5",
@@ -64,7 +64,7 @@
     "tailwindcss-animate": "^1.0.7",
     "use-haptic": "^1.1.11",
     "uuid": "^9.0.1",
-    "vaul": "^0.9.0"
+    "vaul": "^1.1.0"
   },
   "devDependencies": {
     "@testing-library/dom": "^10.4.1",
