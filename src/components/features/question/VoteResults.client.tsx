@@ -52,7 +52,7 @@ const VoteResults = ({ user, question, available, returnTo }: VoteResultsProps) 
                 {results.map((result: IResult, index: number) => (
                     <Link
                         key={index}
-                        href={`/groups/${question.groupId}/question/${question._id}/resultsdetailed/?returnTo=${returnTo}`}
+                        href={`/groups/${question.groupId}/question/${question._id}/resultsdetailed/?returnTo=${encodeURIComponent(returnTo || "")}`}
                         onClick={triggerHaptic}
                     >
                         <div className="bg-secondary my-2 rounded-md relative">

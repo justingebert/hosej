@@ -144,7 +144,7 @@ function QuestionContent({
                         user={user}
                         question={question}
                         available={true}
-                        returnTo={`?returnTo=${question._id}`}
+                        returnTo={`question?returnTo=${question._id}`}
                     />
                 ) : (
                     <VoteOptions
