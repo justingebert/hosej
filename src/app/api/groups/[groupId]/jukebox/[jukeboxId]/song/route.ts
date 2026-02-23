@@ -5,8 +5,6 @@ import { NextResponse } from "next/server";
 import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
 
-export const revalidate = 0;
-
 export const POST = withAuthAndErrors(
     async (
         req: NextRequest,

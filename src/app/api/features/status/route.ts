@@ -5,8 +5,6 @@ import { withAuthAndErrors } from "@/lib/api/withAuth";
 
 import { getGlobalConfig } from "@/lib/services/user/admin";
 
-export const revalidate = 0;
-
 export const GET = withAuthAndErrors(async (req: NextRequest, { userId }: AuthedContext) => {
     const config = await getGlobalConfig();
 

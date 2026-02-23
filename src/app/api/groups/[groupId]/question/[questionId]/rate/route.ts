@@ -4,8 +4,6 @@ import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { rateQuestion } from "@/lib/services/question";
 
-export const revalidate = 0;
-
 export const POST = withAuthAndErrors(
     async (
         req: NextRequest,

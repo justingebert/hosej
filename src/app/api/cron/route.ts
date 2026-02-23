@@ -8,8 +8,6 @@ import { getGlobalConfig } from "@/lib/services/user";
 import { sendNotification } from "@/lib/sendNotification";
 import { NextResponse } from "next/server";
 
-export const revalidate = 0;
-
 //gets, populates and returns daily questions
 export const GET = withErrorHandling(async () => {
     await dbConnect();

@@ -8,6 +8,12 @@ export type ApiRoute<TContext = {}> = (
     context: TContext
 ) => Promise<NextResponse>;
 
+// Next.js 16 route handler type — uses `any` for context so the build-time
+// route-signature validation passes (params is a Promise at runtime, but our
+// wrapper resolves it before forwarding to the inner handler).
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type NextRouteHandler = (req: NextRequest, context: any) => Promise<NextResponse>;
+
 export class AppError extends Error {
     constructor(
         public code: string,
@@ -85,13 +91,19 @@ function errorResponse(req: NextRequest, error: Error): NextResponse {
     );
 }
 
-export function withErrorHandling<TContext = {}>(fn: ApiRoute<TContext>): ApiRoute<TContext> {
+export function withErrorHandling<TContext = {}>(fn: ApiRoute<TContext>): NextRouteHandler {
     return async (req: NextRequest, context: TContext): Promise<NextResponse> => {
         try {
             await dbConnect();
+            // Next.js 16: params is now async and must be awaited
+            if (context && typeof context === "object" && "params" in context) {
+                (context as Record<string, unknown>).params = await (
+                    context as Record<string, unknown>
+                ).params;
+            }
             return await fn(req, context);
-        } catch (error: any) {
-            return errorResponse(req, error);
+        } catch (error: unknown) {
+            return errorResponse(req, error as Error);
         }
     };
 }

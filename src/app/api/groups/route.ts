@@ -4,8 +4,6 @@ import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { createGroup, getUserGroups } from "@/lib/services/group";
 
-export const revalidate = 0;
-
 export const POST = withAuthAndErrors(async (req: NextRequest, { userId }: AuthedContext) => {
     const { name } = await req.json();
     const group = await createGroup(userId, name);

@@ -6,8 +6,6 @@ import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { isGlobalAdmin } from "@/lib/services/user/admin";
 import { createTemplatesFromArray } from "@/lib/services/question";
 
-export const revalidate = 0;
-
 export const POST = withAuthAndErrors(async (req: NextRequest, { userId }: AuthedContext) => {
     const isAdmin = await isGlobalAdmin(userId);
     if (!isAdmin) {

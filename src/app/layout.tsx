@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
     return (
-        <html lang="en">
+        <html lang="en" suppressHydrationWarning>
             <head>
                 <link rel="manifest" href="/manifest.json" />
                 <link rel="apple-touch-icon" href="/AppIcons/new/web/apple-touch-icon.png" />

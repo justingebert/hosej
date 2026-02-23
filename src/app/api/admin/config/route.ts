@@ -5,8 +5,6 @@ import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { ForbiddenError } from "@/lib/api/errorHandling";
 import { getGlobalConfig, isGlobalAdmin, updateGlobalConfig } from "@/lib/services/user/admin";
 
-export const revalidate = 0;
-
 // Get admin config
 export const GET = withAuthAndErrors(async (_req: NextRequest, { userId }: AuthedContext) => {
     const isAdmin = await isGlobalAdmin(userId);

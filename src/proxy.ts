@@ -2,7 +2,7 @@ import { getToken } from "next-auth/jwt";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
     const { pathname } = req.nextUrl;
 
     const publicRoutes = new Set([
@@ -38,7 +38,7 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
 }
 
-// Middleware configuration to match relevant routes
+// Proxy configuration to match relevant routes
 export const config = {
     matcher: ["/((?!_next/static|_next/image|favicon.ico|assets|public|manifest.json|AppIcons).*)"],
 };

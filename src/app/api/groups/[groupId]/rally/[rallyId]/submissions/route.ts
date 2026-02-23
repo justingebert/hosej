@@ -4,8 +4,6 @@ import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { getSubmissions, addSubmission } from "@/lib/services/rally";
 
-export const revalidate = 0;
-
 export const GET = withAuthAndErrors(
     async (
         req: NextRequest,

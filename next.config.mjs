@@ -12,6 +12,10 @@ const withSerwist = withSerwistInit({
 const dev = process.env.ENV === "dev"
 
 export default withSerwist({
+    // Empty turbopack config silences the "webpack config found" error
+    // for `next dev` (Turbopack). Serwist is disabled in dev anyway.
+    // Production builds use --webpack where Serwist needs webpack.
+    turbopack: {},
     logging: {
         fetches:{
             fullUrl: !dev,
@@ -26,8 +30,4 @@ export default withSerwist({
           ],
           unoptimized: true,
     },
-    // webpack(config) {
-    //   config.infrastructureLogging = { debug: /PackFileCache/ }
-    //   return config;
-    // }
 });

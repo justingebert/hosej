@@ -5,8 +5,6 @@ import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { ValidationError } from "@/lib/api/errorHandling";
 import { getGroupHistory } from "@/lib/services/group";
 
-export const revalidate = 0;
-
 export const GET = withAuthAndErrors(
     async (
         req: NextRequest,

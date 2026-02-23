@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
-import type { ApiRoute } from "./errorHandling";
+import type { ApiRoute, NextRouteHandler } from "./errorHandling";
 import { AuthError, withErrorHandling } from "./errorHandling";
 
 export type AuthedContext<T = {}> = T & { userId: string };
@@ -25,6 +25,6 @@ export function withAuth<TCtx = {}>(handler: ApiRoute<AuthedContext<TCtx>>): Api
  */
 export function withAuthAndErrors<TCtx = {}>(
     handler: ApiRoute<AuthedContext<TCtx>>
-): ApiRoute<TCtx> {
+): NextRouteHandler {
     return withErrorHandling(withAuth(handler));
 }

@@ -7,18 +7,16 @@ import Image from "next/image";
 import BackLink from "@/components/ui/custom/BackLink";
 import fetcher from "@/lib/fetcher";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useParams, useSearchParams } from "next/navigation";
 
 import type { IResult, QuestionResultsDTO } from "@/types/models/question";
 
-export default function ResultsDetailPage({
-    params,
-    searchParams,
-}: {
-    params: { groupId: string; questionId: string };
-    searchParams?: { [key: string]: string | string[] | undefined };
-}) {
-    const { questionId, groupId } = params;
-    const { returnTo } = searchParams || {};
+export default function ResultsDetailPage() {
+    const params = useParams<{ groupId: string; questionId: string }>();
+    const searchParams = useSearchParams();
+    const groupId = params?.groupId ?? "";
+    const questionId = params?.questionId ?? "";
+    const returnTo = searchParams?.get("returnTo") ?? "";
 
     const { data, isLoading } = useSWR<QuestionResultsDTO>(
         `/api/groups/${groupId}/question/${questionId}/results`,

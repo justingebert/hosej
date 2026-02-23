@@ -4,8 +4,6 @@ import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { getGroupWithAdminFlag, updateGroup, deleteGroup } from "@/lib/services/group";
 
-export const revalidate = 0;
-
 export const GET = withAuthAndErrors(
     async (
         req: NextRequest,
