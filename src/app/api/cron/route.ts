@@ -1,6 +1,7 @@
+import type { NextRequest } from "next/server";
 import dbConnect from "@/db/dbConnect";
 import Group from "@/db/models/Group";
-import { withErrorHandling } from "@/lib/api/errorHandling";
+import { AuthError, withErrorHandling } from "@/lib/api/errorHandling";
 import { activateSmartQuestions } from "@/lib/services/question";
 import { activateJukeboxes } from "@/lib/services/jukebox";
 import { processRallyStateTransitions } from "@/lib/services/rally";
@@ -9,7 +10,11 @@ import { sendNotification } from "@/lib/sendNotification";
 import { NextResponse } from "next/server";
 
 //gets, populates and returns daily questions
-export const GET = withErrorHandling(async () => {
+export const GET = withErrorHandling(async (req: NextRequest) => {
+    const authHeader = req.headers.get("authorization");
+    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+        throw new AuthError("Invalid cron secret");
+    }
     await dbConnect();
 
     const globalConfig = await getGlobalConfig();
