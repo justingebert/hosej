@@ -187,11 +187,16 @@ describe("connectGoogleAccount", () => {
 
         await connectGoogleAccount(mockUserId, "device-456");
 
-        expect(User.deleteOne).toHaveBeenCalled();
         expect(deviceUser.googleId).toBe("google-123");
         expect(deviceUser.googleConnected).toBe(true);
         expect(deviceUser.deviceId).toBeUndefined();
+        // Save must happen before delete (safer: orphan over lost identity)
         expect(deviceUser.save).toHaveBeenCalled();
+        expect(User.deleteOne).toHaveBeenCalled();
+
+        const saveOrder = deviceUser.save.mock.invocationCallOrder[0];
+        const deleteOrder = (User.deleteOne as Mock).mock.invocationCallOrder[0];
+        expect(saveOrder).toBeLessThan(deleteOrder);
     });
 
     it("should throw ValidationError when deviceId is missing", async () => {

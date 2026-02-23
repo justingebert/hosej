@@ -80,13 +80,14 @@ export async function connectGoogleAccount(googleUserId: string, deviceId: strin
     const deviceUser = await User.findOne({ deviceId });
     if (!deviceUser) throw new NotFoundError("User with deviceId not found");
 
-    const googleId = googleUser.googleId;
-    await User.deleteOne({ _id: googleUserId });
-
-    deviceUser.googleId = googleId;
+    // Update device user FIRST (safer — if delete fails, orphan is harmless)
+    deviceUser.googleId = googleUser.googleId;
     deviceUser.googleConnected = true;
     deviceUser.deviceId = undefined;
     await deviceUser.save();
+
+    // Then clean up the temporary Google-only user
+    await User.deleteOne({ _id: googleUserId });
 }
 
 /**
