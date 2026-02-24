@@ -116,7 +116,6 @@ export async function getActiveRallies(
     userId: string,
     groupId: string
 ): Promise<{ rallies: RallyDocument[]; message?: string }> {
-    await dbConnect();
     await isUserInGroup(userId, groupId);
 
     const group = await Group.findById(groupId);
@@ -144,8 +143,6 @@ export async function getActiveRallies(
  * Loads group + active rallies, runs state transitions, sends notifications.
  */
 export async function processRallyStateTransitions(groupId: string): Promise<void> {
-    await dbConnect();
-
     const group = await Group.findById(groupId);
     if (!group) return;
 
@@ -168,7 +165,6 @@ export async function createRally(
     groupId: string,
     data: { task: string; lengthInDays: number }
 ): Promise<void> {
-    await dbConnect();
     await isUserInGroup(userId, groupId);
 
     const { task, lengthInDays } = data;
@@ -203,7 +199,6 @@ export async function activateRallies(
     userId: string,
     groupId: string
 ): Promise<{ message: string; rallies: RallyDocument[] }> {
-    await dbConnect();
     await isUserAdmin(userId, groupId);
 
     const group = await Group.findById(groupId);
@@ -238,7 +233,6 @@ export async function getSubmissions(
     groupId: string,
     rallyId: string
 ): Promise<Record<string, unknown>[]> {
-    await dbConnect();
     await isUserInGroup(userId, groupId);
 
     const rally = await Rally.findById(rallyId);
@@ -273,7 +267,6 @@ export async function addSubmission(
     rallyId: string,
     imageUrl: string
 ): Promise<RallyDocument> {
-    await dbConnect();
     await isUserInGroup(userId, groupId);
 
     if (!imageUrl) {
@@ -323,7 +316,6 @@ export async function voteOnSubmission(
     rallyId: string,
     submissionId: string
 ): Promise<void> {
-    await dbConnect();
     await isUserInGroup(userId, groupId);
 
     const group = await Group.findById(groupId);

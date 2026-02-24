@@ -1,9 +1,8 @@
 import dbConnect from "@/db/dbConnect";
 import Jukebox from "@/db/models/Jukebox";
-import Chat from "@/db/models/Chat";
 import User from "@/db/models/User";
 import Group from "@/db/models/Group";
-import type { IJukebox, IRating, ISong, createSong } from "@/types/models/jukebox";
+import type { createSong, IJukebox, IRating, ISong } from "@/types/models/jukebox";
 import type { IUser } from "@/types/models/user";
 import type { IGroup } from "@/types/models/group";
 import { ConflictError, NotFoundError, ValidationError } from "@/lib/api/errorHandling";
@@ -54,8 +53,6 @@ export async function getJukeboxes(
     groupId: string,
     options?: { isActive?: boolean }
 ) {
-    await dbConnect();
-
     const group = await Group.findById(groupId).orFail();
 
     const query: Partial<IJukebox> = { groupId: groupId as any };
@@ -107,8 +104,6 @@ export async function addSong(
         coverImageUrl?: string;
     }
 ) {
-    await dbConnect();
-
     const { spotifyTrackId, title, artist, album, coverImageUrl } = songData;
 
     if (!spotifyTrackId || !title || !artist) {
@@ -144,8 +139,6 @@ export async function addSong(
 }
 
 export async function rateSong(jukeboxId: string, songId: string, userId: string, rating: number) {
-    await dbConnect();
-
     if (typeof rating !== "number" || rating <= 0 || rating > 100) {
         throw new ValidationError("Rating must be a number between 1 and 100");
     }
@@ -176,8 +169,6 @@ export async function rateSong(jukeboxId: string, songId: string, userId: string
 }
 
 export async function activateJukeboxes(group: IGroup) {
-    await dbConnect();
-
     const today = new Date();
     if (!group.features.jukebox.settings.activationDays.includes(today.getDate())) {
         return;
@@ -203,6 +194,5 @@ export async function activateJukeboxes(group: IGroup) {
 }
 
 export async function deactivateGroupJukeboxes(groupId: string) {
-    await dbConnect();
     await Jukebox.updateMany({ active: true, groupId }, { active: false });
 }
