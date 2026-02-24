@@ -76,8 +76,10 @@ export async function jwtCallback({
         token.createdAt = u.createdAt ?? "";
     }
 
-    // Refresh user data when update() is called (e.g. after profile changes)
-    if (trigger === "update" && token.userId) {
+    // Refresh user data when update() is called or when token is missing fields
+    // (e.g. JWT created before auth refactor that lacks username/createdAt/etc.)
+    const isStaleToken = token.userId && !token.createdAt;
+    if ((trigger === "update" || isStaleToken) && token.userId) {
         await dbConnect();
         const freshUser = await User.findById(token.userId).select("-googleId -deviceId").lean();
         if (freshUser) {
