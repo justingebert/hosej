@@ -1,11 +1,12 @@
 import { createPresignedPost } from "@aws-sdk/s3-presigned-post";
 import { S3Client } from "@aws-sdk/client-s3";
 import { v4 as uuidv4 } from "uuid";
-import type { NextRequest} from "next/server";
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import type { AuthedContext} from "@/lib/api/withAuth";
+import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { ValidationError } from "@/lib/api/errorHandling";
+import { env } from "@/env";
 
 // create a presigned URL for uploading images to S3
 export const POST = withAuthAndErrors(async (request: NextRequest, { userId }: AuthedContext) => {
@@ -17,10 +18,10 @@ export const POST = withAuthAndErrors(async (request: NextRequest, { userId }: A
         );
     }
 
-    const client = new S3Client({ region: process.env.AWS_REGION });
+    const client = new S3Client({ region: env.AWS_REGION });
     const key = `${groupId}/${entity}/${entityId}/${uuidv4()}`;
     const { url, fields } = await createPresignedPost(client, {
-        Bucket: process.env.AWS_BUCKET_NAME as string,
+        Bucket: env.AWS_BUCKET_NAME,
         Key: key,
         Conditions: [
             ["content-length-range", 0, 10485760], // up to 10 MB

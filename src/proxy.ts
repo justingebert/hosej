@@ -1,6 +1,7 @@
 import { getToken } from "next-auth/jwt";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { env } from "@/env";
 
 export async function proxy(req: NextRequest) {
     const { pathname } = req.nextUrl;
@@ -25,7 +26,7 @@ export async function proxy(req: NextRequest) {
         return NextResponse.next();
     }
 
-    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    const token = await getToken({ req, secret: env.NEXTAUTH_SECRET });
     if (!token) {
         if (pathname.startsWith("/api")) {
             return NextResponse.json({ message: "Unauthorized" }, { status: 401 });

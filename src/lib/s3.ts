@@ -1,8 +1,9 @@
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { env } from "@/env";
 
 export const s3 = new S3Client({
-    region: process.env.AWS_REGION,
+    region: env.AWS_REGION,
 });
 
 export async function generateSignedUrl(s3Key: string, expiresIn: number = 180) {
@@ -10,7 +11,7 @@ export async function generateSignedUrl(s3Key: string, expiresIn: number = 180) 
         s3Key = s3Key.substring(2); // Remove leading '/'
     }
     const command = new GetObjectCommand({
-        Bucket: process.env.AWS_BUCKET_NAME,
+        Bucket: env.AWS_BUCKET_NAME,
         Key: s3Key,
         ResponseCacheControl: "max-age=86400, public",
     });

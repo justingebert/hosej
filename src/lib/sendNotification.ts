@@ -1,10 +1,11 @@
 import dbConnect from "@/db/dbConnect";
-import User from "@/db/models/User"; // Assuming the user model is defined in this path
+import User from "@/db/models/User";
 import admin from "firebase-admin";
 import type { Types } from "mongoose";
+import { env } from "@/env";
 
 if (!admin.apps.length) {
-    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT as string);
+    const serviceAccount = JSON.parse(env.FIREBASE_SERVICE_ACCOUNT);
     admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),
     });

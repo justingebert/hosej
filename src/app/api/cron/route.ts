@@ -8,11 +8,12 @@ import { processRallyStateTransitions } from "@/lib/services/rally";
 import { getGlobalConfig } from "@/lib/services/user";
 import { sendNotification } from "@/lib/sendNotification";
 import { NextResponse } from "next/server";
+import { env } from "@/env";
 
 //gets, populates and returns daily questions
 export const GET = withErrorHandling(async (req: NextRequest) => {
     const authHeader = req.headers.get("authorization");
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    if (authHeader !== `Bearer ${env.CRON_SECRET}`) {
         throw new AuthError("Invalid cron secret");
     }
     await dbConnect();

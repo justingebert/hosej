@@ -2,12 +2,13 @@ import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import type { AuthOptions } from "next-auth";
 import { authorizeDevice, jwtCallback, sessionCallback } from "@/lib/auth/callbacks";
+import { env } from "@/env";
 
 export const authOptions: AuthOptions = {
     providers: [
         GoogleProvider({
-            clientId: process.env.AUTH_GOOGLE_ID!,
-            clientSecret: process.env.AUTH_GOOGLE_SECRET!,
+            clientId: env.AUTH_GOOGLE_ID,
+            clientSecret: env.AUTH_GOOGLE_SECRET,
             httpOptions: {
                 timeout: 10000,
             },
@@ -27,5 +28,5 @@ export const authOptions: AuthOptions = {
     pages: {
         signIn: "/",
     },
-    secret: process.env.NEXTAUTH_SECRET,
+    secret: env.NEXTAUTH_SECRET,
 };
