@@ -58,6 +58,26 @@ export interface IGroupMethods {
 
 export type GroupDocument = HydratedDocument<IGroup, IGroupMethods>;
 
+export interface UpdateGroupFeatures {
+    questions?: {
+        enabled: boolean;
+        settings?: Partial<IGroupFeatures["questions"]["settings"]>;
+    };
+    rallies?: {
+        enabled: boolean;
+        settings?: Partial<IGroupFeatures["rallies"]["settings"]>;
+    };
+    jukebox?: {
+        enabled: boolean;
+        settings?: Partial<IGroupJukeboxSettings>;
+    };
+}
+
+export interface UpdateGroupData {
+    name?: string;
+    features?: UpdateGroupFeatures;
+}
+
 export type GroupMemberDTO = ToDTO<IGroupMember>;
 export type GroupDTO = ToDTO<IGroup>;
 

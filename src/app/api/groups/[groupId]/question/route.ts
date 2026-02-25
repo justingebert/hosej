@@ -3,6 +3,8 @@ import { isUserInGroup } from "@/lib/services/group";
 import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { createQuestion, getActiveQuestions } from "@/lib/services/question";
+import { parseBody } from "@/lib/validation/parseBody";
+import { CreateQuestionSchema } from "@/lib/validation/question";
 
 export const POST = withAuthAndErrors(
     async (
@@ -12,7 +14,7 @@ export const POST = withAuthAndErrors(
         const { groupId } = params;
         await isUserInGroup(userId, groupId);
 
-        const data = await req.json();
+        const data = await parseBody(req, CreateQuestionSchema);
         const newQuestion = await createQuestion(groupId, userId, data);
 
         return NextResponse.json({ newQuestion }, { status: 201 });

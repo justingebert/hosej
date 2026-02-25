@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { getGroupWithAdminFlag, updateGroup, deleteGroup } from "@/lib/services/group";
+import { parseBody } from "@/lib/validation/parseBody";
+import { UpdateGroupSchema } from "@/lib/validation/groups";
 
 export const GET = withAuthAndErrors(
     async (
@@ -19,7 +21,7 @@ export const PUT = withAuthAndErrors(
         req: NextRequest,
         { params, userId }: AuthedContext<{ params: { groupId: string } }>
     ) => {
-        const data = await req.json();
+        const data = await parseBody(req, UpdateGroupSchema);
         const group = await updateGroup(userId, params.groupId, data);
         return NextResponse.json(group, { status: 200 });
     }

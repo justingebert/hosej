@@ -3,6 +3,8 @@ import { isUserInGroup } from "@/lib/services/group";
 import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { getQuestionById, updateQuestionAttachments } from "@/lib/services/question";
+import { parseBody } from "@/lib/validation/parseBody";
+import { UpdateQuestionAttachmentsSchema } from "@/lib/validation/question";
 
 export const GET = withAuthAndErrors(
     async (
@@ -26,7 +28,7 @@ export const PATCH = withAuthAndErrors(
         const { groupId, questionId } = params;
         await isUserInGroup(userId, groupId);
 
-        const data = await req.json();
+        const data = await parseBody(req, UpdateQuestionAttachmentsSchema);
         await updateQuestionAttachments(groupId, questionId, data);
 
         return NextResponse.json({ message: "Question updated" });

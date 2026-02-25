@@ -4,6 +4,8 @@ import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { ForbiddenError } from "@/lib/api/errorHandling";
 import { getGlobalConfig, isGlobalAdmin, updateGlobalConfig } from "@/lib/services/user/admin";
+import { parseBody } from "@/lib/validation/parseBody";
+import { UpdateAdminConfigSchema } from "@/lib/validation/admin";
 
 // Get admin config
 export const GET = withAuthAndErrors(async (_req: NextRequest, { userId }: AuthedContext) => {
@@ -31,7 +33,7 @@ export const PUT = withAuthAndErrors(async (req: NextRequest, { userId }: Authed
         throw new ForbiddenError();
     }
 
-    const data = await req.json();
+    const data = await parseBody(req, UpdateAdminConfigSchema);
     const config = await updateGlobalConfig(data);
 
     return NextResponse.json(

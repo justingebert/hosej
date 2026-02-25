@@ -4,6 +4,8 @@ import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { isUserInGroup } from "@/lib/services/group";
 import { rateSong } from "@/lib/services/jukebox";
+import { parseBody } from "@/lib/validation/parseBody";
+import { RateSongSchema } from "@/lib/validation/jukebox";
 
 export const POST = withAuthAndErrors(
     async (
@@ -16,7 +18,7 @@ export const POST = withAuthAndErrors(
         }>
     ) => {
         const { groupId, jukeboxId, songId } = params;
-        const { rating } = await req.json();
+        const { rating } = await parseBody(req, RateSongSchema);
 
         await isUserInGroup(userId, groupId);
 

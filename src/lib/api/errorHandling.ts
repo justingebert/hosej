@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { Error as mongooseError } from "mongoose";
+import { ZodError } from "zod";
 import dbConnect from "@/db/dbConnect";
 
 export type ApiRoute<TContext = {}> = (
@@ -64,6 +65,14 @@ function errorResponse(req: NextRequest, error: Error): NextResponse {
                 status: error.status,
                 headers: { "Content-Type": "application/json" },
             }
+        );
+    }
+
+    if (error instanceof ZodError) {
+        const messages = error.issues.map((issue) => issue.message);
+        return NextResponse.json(
+            { message: messages.join(", ") },
+            { status: 400, headers: { "Content-Type": "application/json" } }
         );
     }
 

@@ -4,6 +4,8 @@ import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { isUserInGroup } from "@/lib/services/group";
 import { addMessage } from "@/lib/services/chat";
+import { parseBody } from "@/lib/validation/parseBody";
+import { AddMessageSchema } from "@/lib/validation/chat";
 
 export const POST = withAuthAndErrors(
     async (
@@ -13,7 +15,7 @@ export const POST = withAuthAndErrors(
         const { groupId, chatId } = params;
         await isUserInGroup(userId, groupId);
 
-        const { message } = await req.json();
+        const { message } = await parseBody(req, AddMessageSchema);
         const newMessage = await addMessage(chatId, userId, message);
 
         return NextResponse.json(newMessage, { status: 201 });

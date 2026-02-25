@@ -5,18 +5,16 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
-import { ValidationError } from "@/lib/api/errorHandling";
 import { env } from "@/env";
+import { parseBody } from "@/lib/validation/parseBody";
+import { UploadImageSchema } from "@/lib/validation/uploadimage";
 
 // create a presigned URL for uploading images to S3
 export const POST = withAuthAndErrors(async (request: NextRequest, { userId }: AuthedContext) => {
-    const { filename, contentType, groupId, entity, entityId } = await request.json();
-
-    if (!filename || !contentType || !groupId || !entity || !entityId) {
-        throw new ValidationError(
-            "filename, contentType, groupId, entity, and entityId are required"
-        );
-    }
+    const { filename, contentType, groupId, entity, entityId } = await parseBody(
+        request,
+        UploadImageSchema
+    );
 
     const client = new S3Client({ region: env.AWS_REGION });
     const key = `${groupId}/${entity}/${entityId}/${uuidv4()}`;

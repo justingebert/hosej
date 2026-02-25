@@ -3,9 +3,11 @@ import { NextResponse } from "next/server";
 import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { createGroup, getUserGroups } from "@/lib/services/group";
+import { parseBody } from "@/lib/validation/parseBody";
+import { CreateGroupSchema } from "@/lib/validation/groups";
 
 export const POST = withAuthAndErrors(async (req: NextRequest, { userId }: AuthedContext) => {
-    const { name } = await req.json();
+    const { name } = await parseBody(req, CreateGroupSchema);
     const group = await createGroup(userId, name);
     return NextResponse.json(group, { status: 201 });
 });

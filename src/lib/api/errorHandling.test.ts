@@ -1,4 +1,5 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
+import { z } from "zod";
 import {
     AppError,
     ValidationError,
@@ -6,7 +7,10 @@ import {
     ForbiddenError,
     NotFoundError,
     ConflictError,
+    withErrorHandling,
 } from "./errorHandling";
+
+vi.mock("@/db/dbConnect", () => ({ default: vi.fn() }));
 
 describe("Error Classes", () => {
     describe("AppError", () => {
@@ -118,6 +122,29 @@ describe("Error Classes", () => {
             const error = new ConflictError("User already exists");
 
             expect(error.message).toBe("User already exists");
+        });
+    });
+
+    describe("ZodError handling via withErrorHandling", () => {
+        it("should return 400 with formatted messages for ZodError", async () => {
+            const schema = z.object({
+                name: z.string(),
+                task: z.string().min(1),
+            });
+
+            const handler = withErrorHandling(async () => {
+                schema.parse({}); // will throw ZodError with issues for both fields
+                throw new Error("unreachable");
+            });
+
+            const req = new Request(
+                "http://localhost/test"
+            ) as unknown as import("next/server").NextRequest;
+            const res = await handler(req, {});
+            const body = await res.json();
+
+            expect(res.status).toBe(400);
+            expect(body.message).toContain("string");
         });
     });
 

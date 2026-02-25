@@ -4,7 +4,13 @@ import User from "@/db/models/User";
 import Question from "@/db/models/Question";
 import Rally from "@/db/models/Rally";
 import Chat from "@/db/models/Chat";
-import type { GroupDocument, IGroup, IGroupMember, GroupStatsDTO } from "@/types/models/group";
+import type {
+    GroupDocument,
+    IGroup,
+    IGroupMember,
+    GroupStatsDTO,
+    UpdateGroupData,
+} from "@/types/models/group";
 import { ForbiddenError, NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 import { addTemplatePackToGroup, activateSmartQuestions } from "@/lib/services/question";
 
@@ -98,7 +104,7 @@ export async function getGroupWithAdminFlag(
 export async function updateGroup(
     userId: string,
     groupId: string,
-    data: Partial<IGroup>
+    data: UpdateGroupData
 ): Promise<GroupDocument> {
     const group = await Group.findById(groupId);
     if (!group) throw new NotFoundError("Group not found");
@@ -106,7 +112,9 @@ export async function updateGroup(
     await isUserInGroup(userId, groupId, group);
     await isUserAdmin(userId, groupId, group);
 
-    group.set(data);
+    if (data.name !== undefined) group.name = data.name;
+    if (data.features !== undefined) group.set("features", { ...group.features, ...data.features });
+
     await group.save();
     return group;
 }

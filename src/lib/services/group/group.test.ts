@@ -268,7 +268,7 @@ describe("updateGroup", () => {
 
         const result = await updateGroup(mockUserId, mockGroupId, { name: "New Name" });
 
-        expect(mockGroup.set).toHaveBeenCalledWith({ name: "New Name" });
+        expect(mockGroup.name).toBe("New Name");
         expect(mockGroup.save).toHaveBeenCalled();
         expect(result).toEqual(mockGroup);
     });
