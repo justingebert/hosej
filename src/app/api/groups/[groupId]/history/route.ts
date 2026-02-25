@@ -14,9 +14,6 @@ export const GET = withAuthAndErrors(
         const { limit, offset } = parseQuery(req.nextUrl.searchParams, GroupHistoryQuerySchema);
 
         const questions = await getGroupHistory(userId, params.groupId, limit, offset);
-        if (!questions) {
-            return NextResponse.json({ message: "No questions available" });
-        }
-        return NextResponse.json({ questions });
+        return NextResponse.json({ questions: questions || [] });
     }
 );
