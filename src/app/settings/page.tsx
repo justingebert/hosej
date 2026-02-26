@@ -76,7 +76,6 @@ export default function SettingsPage() {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ token }),
                 });
-                console.log("FCM token registered successfully.");
                 localStorage.setItem("lastSentFcmToken", token);
             }
         } else {

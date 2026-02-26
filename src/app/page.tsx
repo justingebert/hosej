@@ -63,7 +63,6 @@ function StartPage() {
 
             if (response.ok) {
                 localStorage.setItem("deviceId", deviceId);
-                console.log("User created successfully");
             } else {
                 console.error("Failed to create user:", await response.text());
             }
