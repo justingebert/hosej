@@ -15,6 +15,7 @@ import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { FcGoogle } from "react-icons/fc";
 import type { Session } from "next-auth";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SkeletonList } from "@/components/ui/custom/SkeletonList";
 import BackLink from "@/components/ui/custom/BackLink";
 
 export default function SettingsPage() {
@@ -206,9 +207,7 @@ function SettingsSkeleton() {
                     <span>Notifications</span>
                     <Skeleton className="h-6 w-10" />
                 </div>
-                {[...Array(4)].map((_, i) => (
-                    <Skeleton key={i} className="h-10" />
-                ))}
+                <SkeletonList count={4} className="h-10" />
             </div>
             <div className="mt-auto mb-14">
                 <Skeleton className="h-12 w-full" />
