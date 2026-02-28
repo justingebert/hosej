@@ -6,7 +6,7 @@ import Header from "@/components/ui/custom/Header";
 import Image from "next/image";
 import BackLink from "@/components/ui/custom/BackLink";
 import fetcher from "@/lib/fetcher";
-import { Skeleton } from "@/components/ui/skeleton";
+import { SkeletonList } from "@/components/ui/custom/SkeletonList";
 import { useParams, useSearchParams } from "next/navigation";
 
 import type { IResult, QuestionResultsDTO } from "@/types/models/question";
@@ -30,9 +30,7 @@ export default function ResultsDetailPage() {
                     leftComponent={<BackLink href={`/groups/${groupId}/${returnTo}`} />}
                     title={" "}
                 />
-                {[...Array(10)].map((_, i) => (
-                    <Skeleton key={i} className=" h-36 mb-6" />
-                ))}
+                <SkeletonList count={10} className="h-36 mb-6" />
             </>
         );
 
