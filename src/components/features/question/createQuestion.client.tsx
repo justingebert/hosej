@@ -15,7 +15,7 @@ import { useImageUploader } from "@/hooks/useImageUploader";
 import { useParams } from "next/navigation";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { useToast } from "@/hooks/use-toast";
-import type { createQuestionData } from "@/app/groups/[groupId]/(pages)/create/page";
+import type { createQuestionData } from "@/types/create";
 import useSWR from "swr";
 import type { GroupDTO } from "@/types/models/group";
 import fetcher from "@/lib/fetcher";

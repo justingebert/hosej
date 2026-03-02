@@ -1,25 +1,14 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import CreateQuestion from "@/components/features/question/createQuestion.client";
 import CreateRally from "@/components/features/rally/createRally.client";
 import Header from "@/components/ui/custom/Header";
 import { useState } from "react";
+import type { createQuestionData, createRallyData } from "@/types/create";
 
-export type createRallyData = {
-    task: string;
-    lengthInDays: number;
-};
-
-export type createQuestionData = {
-    question: string;
-    questionType: string;
-    options: string[];
-    mainImageFile: File | null;
-    optionFiles: (File | null)[];
-};
-
-const CreatePage = () => {
+export default function CreatePage() {
     const [questionData, setQuestionData] = useState<createQuestionData>({
         question: "",
         questionType: "",
@@ -54,6 +43,4 @@ const CreatePage = () => {
             </div>
         </>
     );
-};
-
-export default CreatePage;
+}

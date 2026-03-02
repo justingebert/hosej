@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import type { createRallyData } from "@/app/groups/[groupId]/(pages)/create/page";
+import type { createRallyData } from "@/types/create";
 
 interface CreateRallyProps {
     rallyData: createRallyData;
