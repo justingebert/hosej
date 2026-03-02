@@ -2,11 +2,14 @@
 
 import dynamic from "next/dynamic";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import CreateQuestion from "@/components/features/question/createQuestion.client";
-import CreateRally from "@/components/features/rally/createRally.client";
 import Header from "@/components/ui/custom/Header";
 import { useState } from "react";
 import type { createQuestionData, createRallyData } from "@/types/create";
+
+const CreateQuestion = dynamic(
+    () => import("@/components/features/question/createQuestion.client")
+);
+const CreateRally = dynamic(() => import("@/components/features/rally/createRally.client"));
 
 export default function CreatePage() {
     const [questionData, setQuestionData] = useState<createQuestionData>({
