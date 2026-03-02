@@ -33,7 +33,7 @@ export default function GroupsPage() {
 
     return (
         <div className="relative min-h-screen flex flex-col">
-            <Header router={router} />
+            <GroupsHeader router={router} />
 
             <GroupsList router={router} copyFn={copyToClipboard} user={user} />
 
@@ -167,7 +167,7 @@ function GroupListSkeleton() {
     );
 }
 
-function Header({ router }: { router: ReturnType<typeof useRouter> }) {
+function GroupsHeader({ router }: { router: ReturnType<typeof useRouter> }) {
     return (
         <div className="flex justify-between items-center w-full">
             <Button variant="outline" size="icon" onClick={() => router.push(`/help`)}>

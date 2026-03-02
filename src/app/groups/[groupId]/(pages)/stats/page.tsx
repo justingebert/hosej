@@ -19,7 +19,7 @@ import type { GroupDTO, GroupMemberDTO } from "@/types/models/group";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type Statistics = {
-    group: any;
+    group: { _id: string; name: string };
     userCount: number;
     questionsUsedCount: number;
     questionsLeftCount: number;

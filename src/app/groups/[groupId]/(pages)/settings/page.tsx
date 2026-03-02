@@ -2,7 +2,7 @@
 
 import Header from "@/components/ui/custom/Header";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+import { SkeletonList } from "@/components/ui/custom/SkeletonList";
 import type { GroupDTO } from "@/types/models/group";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { useParams, useRouter } from "next/navigation";
@@ -165,11 +165,11 @@ export default function GroupSettingsPage() {
             <Header title={group?.name || null} />
 
             {isLoading ? (
-                [...Array(10)].map((_, i) => <Skeleton className="h-12 mb-4 mt" key={i} />)
+                <SkeletonList count={10} className="h-12 mb-4" />
             ) : !group ? (
                 <p>Group not found.</p>
             ) : !user || !features ? (
-                [...Array(10)].map((_, i) => <Skeleton className="h-12 mb-4 mt" key={i} />)
+                <SkeletonList count={10} className="h-12 mb-4" />
             ) : (
                 <div className="space-y-6 pb-12">
                     <GroupInfoCard

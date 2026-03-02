@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import { Send } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import useSWR from "swr";
@@ -6,18 +6,35 @@ import fetcher from "@/lib/fetcher";
 
 import type { ChatDTO } from "@/types/models/chat";
 import { Button } from "@/components/ui/button";
+import type { Session } from "next-auth";
 
-function ChatComponent({ user, entity, available }: any) {
+interface ChatEntity {
+    groupId: string;
+    chat?: string;
+}
+
+interface ChatComponentProps {
+    user: Session["user"];
+    entity: ChatEntity;
+    available: boolean;
+}
+
+//TODO check this
+// Messages come back with populated user objects from the API,
+// but the DTO types user as a string ID. Cast to the runtime shape.
+type PopulatedMessage = { user?: { _id: string; username: string }; message: string };
+
+function ChatComponent({ user, entity, available }: ChatComponentProps) {
     const [newMessage, setNewMessage] = useState("");
     const [sending, setSending] = useState(false);
-    const messagesEndRef = useRef<null | HTMLDivElement>(null);
 
     const { data, error, mutate } = useSWR<ChatDTO>(
         entity.chat ? `/api/groups/${entity.groupId}/chats/${entity.chat}` : null,
-        fetcher
+        fetcher,
+        { onError: () => {} }
     );
 
-    const messages = data?.messages || [];
+    const messages = (data?.messages || []) as unknown as PopulatedMessage[];
 
     const handleSendMessage = async () => {
         if (!newMessage.trim()) return;
@@ -65,14 +82,15 @@ function ChatComponent({ user, entity, available }: any) {
         }
     };
 
-    if (error) return <div className="text-destructive text-center">Failed to load messages</div>;
+    if (error)
+        return <p className="text-sm text-muted-foreground text-center py-4">Error loading chat</p>;
 
     return (
         <div className={`flex flex-col min-h-[70dvh]`}>
             <div className="flex-1">
                 {messages.length > 0 ? (
                     <>
-                        {messages.map((msg: any, index: number) => (
+                        {messages.map((msg, index) => (
                             <div
                                 key={index}
                                 className={`flex mb-2 ${
@@ -97,14 +115,11 @@ function ChatComponent({ user, entity, available }: any) {
                                 </div>
                             </div>
                         ))}
-                        {available && <div ref={messagesEndRef} />}{" "}
-                        {/* Empty div to keep track of the bottom */}
                     </>
                 ) : (
                     <div className="flex-grow"></div> /* Empty space to push input to bottom */
                 )}
             </div>
-            {/*{available && <div className="h-12" />}*/}
             {available && (
                 <div className="sticky bottom-0 -mx-6 px-6 py-4 backdrop-blur-md">
                     <div className="mx-auto max-w-screen-sm flex gap-x-2">

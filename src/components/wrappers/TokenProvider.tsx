@@ -15,8 +15,7 @@ const sendTokenToServer = async (token: string) => {
         });
 
         if (response.ok) {
-            console.log("Token sent to server");
-            localStorage.setItem("lastSentFcmToken", token); // Store the token locally
+            localStorage.setItem("lastSentFcmToken", token);
         } else {
             console.error("Failed to send token to server.");
         }
@@ -35,7 +34,6 @@ export function TokenProvider({ children }: { children: React.ReactNode }) {
         if (isAuthenticated && fcmToken && isRegistered) {
             const lastSentToken = localStorage.getItem("lastSentFcmToken");
             if (fcmToken !== lastSentToken) {
-                console.log("Sending token to server...");
                 sendTokenToServer(fcmToken);
             }
         }

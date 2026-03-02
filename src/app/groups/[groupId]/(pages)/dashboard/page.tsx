@@ -77,11 +77,9 @@ export default function Dashboard() {
                 <h1 className={`flex-grow ${titleClass} font-bold text-center break-words`}>
                     {group?.name}
                 </h1>
-                {/* <Link href={`/groups/${groupId}/settings`}> */}
                 <Button variant="outline" size="icon">
                     <Info />
                 </Button>
-                {/* </Link> */}
             </div>
 
             <div className="flex flex-col h-[80vh] justify-center">
