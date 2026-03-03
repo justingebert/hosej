@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import * as TabsPrimitive from "@radix-ui/react-tabs";
+import { Tabs as TabsPrimitive } from "radix-ui";
 import { type AppHapticType, useAppHaptics } from "@/hooks/useAppHaptics";
 
 import { cn } from "@/lib/utils/utils";

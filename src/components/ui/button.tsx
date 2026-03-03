@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Slot } from "@radix-ui/react-slot";
+import { Slot as SlotPrimitive } from "radix-ui";
 import { cva, type VariantProps } from "class-variance-authority";
 import { type AppHapticType, useAppHaptics } from "@/hooks/useAppHaptics";
 
@@ -42,7 +42,7 @@ export interface ButtonProps
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ({ className, variant, size, asChild = false, onClick, haptic = "tap", ...props }, ref) => {
-        const Comp = asChild ? Slot : "button";
+        const Comp = asChild ? SlotPrimitive.Slot : "button";
         const { play } = useAppHaptics();
         const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
             play(haptic);
