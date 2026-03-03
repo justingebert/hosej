@@ -13,7 +13,7 @@ export default function HelpPage() {
         <>
             <Header leftComponent={<BackLink href={`/groups`} />} title={"Help"} />
 
-            <div className="flex flex-col items-center justify-center px-4 py-8 gap-6 max-w-sm mx-auto">
+            <div className="flex flex-col items-center justify-center gap-6 max-w-sm mx-auto">
                 <Image src={cat} alt="cat" className="rounded-xl" priority />
 
                 <p className="text-center text-muted-foreground text-sm">

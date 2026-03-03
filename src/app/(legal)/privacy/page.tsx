@@ -5,164 +5,189 @@ export default function PrivacyPage() {
     return (
         <>
             <Header leftComponent={<BackLink href={`/help`} />} title={"Privacy"} />
-            <p>This is a private app in development </p>
-            <div style={{ padding: "20px", lineHeight: "1.6" }}>
-                <h1>Privacy Policy</h1>
-                <p>
-                    <strong>Last updated:</strong> 2024/10/27
-                </p>
 
-                <h2>Introduction</h2>
-                <p>
-                    Welcome to HoseJ! Your privacy is very important to us. This Privacy Policy
-                    explains how we collect, use, and protect your information when you use our web
-                    application (&quotApp&quot). We comply with the General Data Protection
-                    Regulation (GDPR) and other applicable privacy laws.
-                </p>
+            <div className="max-w-2xl mx-auto space-y-6 text-sm leading-relaxed">
+                {/* Alpha Banner */}
+                <div className="rounded-lg border border-yellow-400 bg-yellow-50 dark:bg-yellow-950 dark:border-yellow-600 p-3 text-yellow-800 dark:text-yellow-200 text-xs">
+                    <strong>Alpha software.</strong> hosej is an experimental side project. Data may
+                    be reset or deleted at any time without notice.
+                </div>
 
-                <h2>1. Information We Collect</h2>
+                <div>
+                    <h1 className="text-2xl font-bold mb-1">Privacy Policy</h1>
+                    <p className="text-xs text-muted-foreground">
+                        Last updated: {new Date().toISOString().split("T")[0]}
+                    </p>
+                </div>
 
-                <h3>Personal Data</h3>
-                <p>We collect only the data you provide based on your usage preference:</p>
-                <ul>
-                    <li>
-                        <strong>Using the App Without an Account:</strong> If you choose to use the
-                        app without logging in, no personally identifiable information is collected.
-                        The app is only accessible on the device on which it was installed and will
-                        retain locally stored data, such as the username you may provide within the
-                        app, which is saved on your device alone.
-                    </li>
-                    <li>
-                        <strong>Using the App with a Google Login:</strong> If you choose to connect
-                        with your Google account, we collect your <strong>Google ID</strong>. This
-                        allows us to enable cross-device access, so you can use the app on multiple
-                        devices while keeping your data and app settings consistent. No additional
-                        information from your Google account, such as your email or other profile
-                        data, is collected.
-                    </li>
-                </ul>
+                <section className="space-y-2">
+                    <h2 className="text-base font-semibold">1. Who We Are</h2>
+                    <p>
+                        hosej is a personal side project by Justin, an individual developer based in
+                        Berlin, Germany. It is not a registered company or commercial entity.
+                    </p>
+                </section>
 
-                <h3>Automatically Collected Data</h3>
-                <p>
-                    No other personal data is automatically collected. We do not use cookies,
-                    analytics, or tracking tools in the app.
-                </p>
+                <section className="space-y-2">
+                    <h2 className="text-base font-semibold">2. Data We Collect</h2>
 
-                <h2>2. How We Use Your Data</h2>
-                <p>The data we collect is used solely for these purposes:</p>
-                <ul>
-                    <li>
-                        <strong>User Identification and Login:</strong> If you use the app without
-                        an account, we identify your app session based solely on the device
-                        installation. If you log in with Google, we use your Google ID to enable
-                        secure, multi-device access to your account.
-                    </li>
-                    <li>
-                        <strong>Functionality:</strong> We use either the locally stored username or
-                        Google ID (if logged in) to recognize you within the app and to provide a
-                        customized experience.
-                    </li>
-                </ul>
+                    <h3 className="font-medium">Data you provide</h3>
+                    <ul className="list-disc pl-5 space-y-1">
+                        <li>Display name or username</li>
+                        <li>Profile photo (if uploaded)</li>
+                        <li>
+                            Content you create: questions, answers, photos, chat messages, jukebox
+                            submissions
+                        </li>
+                        <li>
+                            Google account information (name, email, profile picture) — only if you
+                            sign in with Google
+                        </li>
+                    </ul>
 
-                <h2>3. Legal Basis for Processing Personal Data</h2>
-                <p>
-                    We collect and process data based on your <strong>consent</strong>:
-                </p>
-                <ul>
-                    <li>
-                        By choosing to enter a username and using the app without logging in, you
-                        consent to us saving it locally on your device.
-                    </li>
-                    <li>
-                        By choosing to log in with Google, you consent to the collection and use of
-                        your Google ID for account management and multi-device functionality.
-                    </li>
-                </ul>
+                    <h3 className="font-medium mt-2">Collected automatically</h3>
+                    <ul className="list-disc pl-5 space-y-1">
+                        <li>
+                            Device credentials for passwordless authentication (a device-bound
+                            identifier stored in our database)
+                        </li>
+                        <li>
+                            Firebase Cloud Messaging (FCM) tokens — stored to deliver push
+                            notifications you have opted into
+                        </li>
+                        <li>
+                            Session cookies set by NextAuth to keep you logged in across page loads
+                        </li>
+                        <li>Basic server logs and error traces</li>
+                    </ul>
 
-                <h2>4. Data Storage and Security</h2>
-                <p>
-                    We take your data security seriously. When a username is provided without Google
-                    login, it is stored only on your device. For Google login users, your Google ID
-                    is securely stored on our servers to enable cross-device functionality. We use
-                    industry-standard security measures to protect this data.
-                </p>
+                    <h3 className="font-medium mt-2">What we do NOT collect</h3>
+                    <ul className="list-disc pl-5 space-y-1">
+                        <li>Payment or financial information</li>
+                        <li>Precise GPS location</li>
+                        <li>Contacts or address book</li>
+                    </ul>
+                </section>
 
-                <h2>5. User Rights Under GDPR</h2>
-                <p>
-                    If you are located in the European Union, you have certain rights regarding your
-                    personal data:
-                </p>
-                <ul>
-                    <li>
-                        <strong>Right to Access:</strong> You may request a copy of the data we hold
-                        about you.
-                    </li>
-                    <li>
-                        <strong>Right to Rectification:</strong> You may request correction of any
-                        inaccurate data.
-                    </li>
-                    <li>
-                        <strong>Right to Erasure:</strong> You may request deletion of your locally
-                        stored username or Google ID.
-                    </li>
-                    <li>
-                        <strong>Right to Restrict Processing:</strong> You may request restricted
-                        processing in certain cases.
-                    </li>
-                    <li>
-                        <strong>Right to Data Portability:</strong> You may request a copy of your
-                        Google ID in a machine-readable format.
-                    </li>
-                    <li>
-                        <strong>Right to Withdraw Consent:</strong> You may withdraw your consent at
-                        any time by contacting us.
-                    </li>
-                </ul>
+                <section className="space-y-2">
+                    <h2 className="text-base font-semibold">3. How We Use Your Data</h2>
+                    <p>We use your data solely to:</p>
+                    <ul className="list-disc pl-5 space-y-1">
+                        <li>Operate the hosej service and authenticate your device or account</li>
+                        <li>Display your profile and content to members of your group</li>
+                        <li>Send push notifications you have opted into</li>
+                    </ul>
+                    <p>
+                        We do not sell, rent, or share your personal data with any third party for
+                        marketing or commercial purposes.
+                    </p>
+                </section>
 
-                <h2>6. Data Sharing and Third-Party Services</h2>
-                <p>
-                    We do not share any personal data with third parties. The app may use Vercel as
-                    a hosting provider, which does not process personal data beyond hosting. No
-                    tracking, cookies, or analytics are used.
-                </p>
+                <section className="space-y-2">
+                    <h2 className="text-base font-semibold">4. Third-Party Services</h2>
+                    <p>hosej relies on the following third-party services:</p>
+                    <ul className="list-disc pl-5 space-y-1">
+                        <li>
+                            <strong>Google OAuth</strong> — optional sign-in (Google LLC)
+                        </li>
+                        <li>
+                            <strong>Firebase Cloud Messaging</strong> — push notifications (Google
+                            LLC)
+                        </li>
+                        <li>
+                            <strong>Amazon S3</strong> — photo and media storage (Amazon Web
+                            Services)
+                        </li>
+                        <li>
+                            <strong>MongoDB Atlas</strong> — database hosting
+                        </li>
+                        <li>
+                            <strong>Vercel</strong> — application hosting and edge infrastructure
+                        </li>
+                    </ul>
+                    <p>
+                        Each provider has its own privacy policy which we encourage you to review.
+                    </p>
+                </section>
 
-                <h2>7. Use of Cookies</h2>
-                <p>
-                    Our App does not use cookies or similar tracking technologies for analytics,
-                    advertising, or any non-essential purpose.
-                </p>
+                <section className="space-y-2">
+                    <h2 className="text-base font-semibold">5. Cookies</h2>
+                    <p>
+                        hosej uses session cookies set by NextAuth solely to maintain your login
+                        state. We do not use cookies for advertising, analytics, or tracking.
+                    </p>
+                </section>
 
-                <h2>8. International Data Transfers</h2>
-                <p>
-                    Our servers may be located outside your country of residence, which may involve
-                    transferring your personal data across borders. We ensure compliance with GDPR
-                    through safeguards to protect your data.
-                </p>
+                <section className="space-y-2">
+                    <h2 className="text-base font-semibold">6. Data Retention</h2>
+                    <p>
+                        We retain your data for as long as your account exists and the service is
+                        operational. During the alpha phase, data may be deleted at any time as part
+                        of resets, migrations, or maintenance — potentially without prior notice.
+                    </p>
+                </section>
 
-                <h2>9. Privacy of Minors</h2>
-                <p>
-                    Our App is not intended for individuals under the age of 18. We do not knowingly
-                    collect data from children. If we learn that we have collected data from a child
-                    under 18, we will delete it promptly.
-                </p>
+                <section className="space-y-2">
+                    <h2 className="text-base font-semibold">7. Data Security</h2>
+                    <p>
+                        We use HTTPS encryption in transit and apply standard access controls on our
+                        database. However, as alpha software operated by an individual developer, we
+                        cannot guarantee the security of your data. Use hosej at your own risk.
+                    </p>
+                </section>
 
-                <h2>10. Changes to This Privacy Policy</h2>
-                <p>
-                    We may update this Privacy Policy periodically. The latest version will always
-                    be available on this page, with the effective date noted at the top. If we make
-                    significant changes, we will notify you via email or a notice on our App.
-                </p>
+                <section className="space-y-2">
+                    <h2 className="text-base font-semibold">8. Your Rights (GDPR)</h2>
+                    <p>
+                        If you are in the European Economic Area, you have the following rights
+                        under the GDPR:
+                    </p>
+                    <ul className="list-disc pl-5 space-y-1">
+                        <li>Right to access the personal data we hold about you</li>
+                        <li>Right to correct inaccurate data</li>
+                        <li>Right to erasure (&quot;right to be forgotten&quot;)</li>
+                        <li>Right to restrict processing</li>
+                        <li>Right to data portability</li>
+                        <li>Right to withdraw consent at any time</li>
+                    </ul>
+                    <p>
+                        To exercise any of these rights, contact us at the address below. As this is
+                        a personal project, responses may take up to 30 days.
+                    </p>
+                </section>
 
-                <h2>11. Contact Us</h2>
-                <p>
-                    If you have questions about this Privacy Policy or wish to exercise your data
-                    rights, please contact us at:
-                </p>
-                <address>
-                    {/*  <strong>[Your Company Name]</strong><br /> */}
-                    {/* Email: <br /> */}
-                    {/* Address: [Your Company Address] */}
-                </address>
+                <section className="space-y-2">
+                    <h2 className="text-base font-semibold">9. Minors</h2>
+                    <p>
+                        hosej is not intended for individuals under 16. We do not knowingly collect
+                        personal data from children. If you believe a child has provided data,
+                        contact us and we will delete it promptly.
+                    </p>
+                </section>
+
+                <section className="space-y-2">
+                    <h2 className="text-base font-semibold">10. Changes to This Policy</h2>
+                    <p>
+                        We may update this Privacy Policy as the product evolves. The &quot;Last
+                        updated&quot; date at the top will reflect any changes. Continued use of
+                        hosej constitutes acceptance of the updated policy.
+                    </p>
+                </section>
+
+                <section className="space-y-2">
+                    <h2 className="text-base font-semibold">11. Contact</h2>
+                    <p>
+                        For privacy questions or to exercise your GDPR rights, contact:
+                        <br />
+                        <strong>Justin </strong> —{" "}
+                        <a
+                            href="mailto:pregame_acid_9o@icloud.com"
+                            className="underline text-primary"
+                        >
+                            pregame_acid_9o@icloud.com
+                        </a>
+                    </p>
+                </section>
             </div>
         </>
     );
