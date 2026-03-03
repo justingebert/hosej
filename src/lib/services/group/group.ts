@@ -85,6 +85,20 @@ export async function getUserGroups(userId: string) {
 }
 
 /**
+ * Returns all groups (id + name + member count). Admin-only — caller must verify.
+ */
+export async function getAllGroups(): Promise<
+    { _id: string; name: string; memberCount: number }[]
+> {
+    const groups = await Group.find({}, { name: 1, members: 1 }).lean();
+    return groups.map((g) => ({
+        _id: g._id.toString(),
+        name: g.name,
+        memberCount: g.members.length,
+    }));
+}
+
+/**
  * Get a single group with a computed userIsAdmin flag.
  * Returns a plain object with the extra field, properly typed.
  */

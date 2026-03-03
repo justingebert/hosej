@@ -4,6 +4,7 @@ export {
     isUserAdmin,
     createGroup,
     getUserGroups,
+    getAllGroups,
     getGroupWithAdminFlag,
     updateGroup,
     deleteGroup,

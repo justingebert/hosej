@@ -5,6 +5,9 @@ export { UpdateAdminConfigSchema } from "./groups";
 
 export const BulkCreateTemplatesSchema = z.object({
     packId: z.string().min(1, "packId is required"),
+    name: z.string().min(1).optional(),
+    description: z.string().optional(),
+    category: z.string().optional(),
     templates: z.array(
         z.object({
             category: z.string().min(1),
@@ -13,4 +16,8 @@ export const BulkCreateTemplatesSchema = z.object({
             options: z.array(z.unknown()).optional(),
         })
     ),
+});
+
+export const AddPackToGroupSchema = z.object({
+    packId: z.string().min(1, "packId is required"),
 });

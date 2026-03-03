@@ -181,6 +181,7 @@ export default function GroupSettingsPage() {
 
                     {userIsAdmin && (
                         <GroupFeatureSettingsCard
+                            groupId={groupId}
                             features={features}
                             globalFeatures={globalFeatures}
                             onQuestionCountChange={(value) =>

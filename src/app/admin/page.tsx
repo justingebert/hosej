@@ -12,6 +12,9 @@ import fetcher from "@/lib/fetcher";
 import type { FeatureStatus } from "@/types/models/appConfig";
 import TemplateUploadCard from "@/components/admin/TemplateUploadCard";
 import GlobalFeatureControl from "@/components/admin/GlobalFeatureControl";
+import GroupPackManager from "@/components/admin/GroupPackManager";
+import Header from "@/components/ui/custom/Header";
+import BackLink from "@/components/ui/custom/BackLink";
 
 interface GlobalConfig {
     features: {
@@ -131,28 +134,22 @@ export default function AdminPage() {
     }
 
     return (
-        <div className="container max-w-4xl mx-auto py-4 md:py-8 px-4 space-y-4 md:space-y-6">
-            <div className="flex items-center gap-2 md:gap-4">
-                <Button variant="outline" size="icon" onClick={() => router.push("/groups")}>
-                    <ArrowLeft />
-                </Button>
-                <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                        <Shield className="h-5 w-5 md:h-6 md:w-6" />
-                        <h1 className="text-2xl md:text-3xl font-bold">Admin Panel</h1>
-                    </div>
-                </div>
+        <>
+            <Header title="Admin Panel" leftComponent={<BackLink href={`/settings`} />} />
+
+            <div className="space-y-4">
+                <GlobalFeatureControl
+                    config={config}
+                    localConfig={localConfig}
+                    onUpdateFeature={updateFeature}
+                    onSave={saveSettings}
+                    saving={saving}
+                />
+
+                <GroupPackManager />
+
+                <TemplateUploadCard />
             </div>
-
-            <GlobalFeatureControl
-                config={config}
-                localConfig={localConfig}
-                onUpdateFeature={updateFeature}
-                onSave={saveSettings}
-                saving={saving}
-            />
-
-            <TemplateUploadCard />
-        </div>
+        </>
     );
 }

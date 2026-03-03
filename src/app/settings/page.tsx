@@ -8,6 +8,9 @@ import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { useEffect, useState } from "react";
 import { signIn, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { Shield } from "lucide-react";
+import useSWR from "swr";
+import fetcher from "@/lib/fetcher";
 import { v4 as uuidv4 } from "uuid";
 import { useToast } from "@/hooks/use-toast";
 import { requestPermissionReturnToken } from "@/hooks/useFcmToken";
@@ -25,6 +28,12 @@ export default function SettingsPage() {
 
     const [notificationsEnabled, setNotificationsEnabled] = useState(false);
     const [googleConnected, setGoogleConnected] = useState(false);
+
+    const { data: adminConfig } = useSWR(user ? "/api/admin/config" : null, fetcher, {
+        onError: () => {},
+        shouldRetryOnError: false,
+    });
+    const isGlobalAdmin = !!adminConfig;
 
     useEffect(() => {
         if (status === "authenticated" && user) {
@@ -117,6 +126,17 @@ export default function SettingsPage() {
                     onDisconnect={handlegoogleDisconnect}
                     className="mt-4"
                 />
+
+                {isGlobalAdmin && (
+                    <Button
+                        variant="outline"
+                        className="w-full mt-4"
+                        onClick={() => router.push("/admin")}
+                    >
+                        <Shield className="h-4 w-4 mr-2" />
+                        Admin Dashboard
+                    </Button>
+                )}
             </div>
             <div className="mt-auto mb-14">
                 <Button onClick={handleLogout} variant="destructive" className="w-full">

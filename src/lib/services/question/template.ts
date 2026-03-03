@@ -1,6 +1,9 @@
 import QuestionTemplate from "@/db/models/QuestionTemplate";
-import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
+import QuestionPack from "@/db/models/QuestionPack";
+import Group from "@/db/models/Group";
+import { ConflictError, NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 import type { QuestionType } from "@/types/models/question";
+import type { IQuestionPack } from "@/types/models/questionPack";
 import { createQuestionFromTemplate } from "./question";
 import { validateTemplates } from "./validateTemplateQuestions";
 import type { Types } from "mongoose";
@@ -14,15 +17,12 @@ export type { TemplateInput, ValidationResult } from "./validateTemplateQuestion
 
 export async function createTemplatesFromArray(
     packId: string,
-    templates: { category: string; questionType: string; question: string; options?: unknown[] }[]
+    templates: { category: string; questionType: string; question: string; options?: unknown[] }[],
+    packMeta?: { name?: string; description?: string; category?: string }
 ): Promise<{
     loaded: number;
-    skipped: number;
     errors: { index: number; field: string; message: string }[];
 }> {
-    let loaded = 0;
-    let skipped = 0;
-
     if (!packId || packId.trim() === "") {
         throw new ValidationError("packId is required and cannot be empty");
     }
@@ -32,41 +32,55 @@ export async function createTemplatesFromArray(
     if (!validationResult.valid) {
         return {
             loaded: 0,
-            skipped: templates.length,
             errors: validationResult.errors,
         };
     }
 
-    const errors: { index: number; field: string; message: string }[] = [];
-    for (let i = 0; i < templates.length; i++) {
-        const template = templates[i];
-        try {
-            const newTemplate = new QuestionTemplate({
-                packId,
-                category: template.category.trim(),
-                questionType: template.questionType as QuestionType,
-                question: template.question.trim(),
-                options: template.options || [],
-            });
-            await newTemplate.save();
-            loaded++;
-        } catch (error) {
-            errors.push({
-                index: i,
-                field: "database",
-                message: error instanceof Error ? error.message : String(error),
-            });
-            skipped++;
-        }
-    }
+    // Build all documents upfront, then insert atomically
+    const docs = templates.map((t) => ({
+        packId,
+        category: t.category.trim(),
+        questionType: t.questionType as QuestionType,
+        question: t.question.trim(),
+        options: t.options || [],
+    }));
 
-    return { loaded, skipped, errors };
+    const inserted = await QuestionTemplate.insertMany(docs);
+
+    // Only create/update the QuestionPack after all templates succeeded
+    const totalCount = await QuestionTemplate.countDocuments({ packId });
+    await QuestionPack.findOneAndUpdate(
+        { packId },
+        {
+            $set: {
+                packId,
+                name: packMeta?.name || packId,
+                description: packMeta?.description || "",
+                category: packMeta?.category || "",
+                questionCount: totalCount,
+            },
+        },
+        { upsert: true }
+    );
+
+    return { loaded: inserted.length, errors: [] };
 }
 
 export async function addTemplatePackToGroup(
     groupId: string | Types.ObjectId,
     packId: string
 ): Promise<void> {
+    // Check if pack is already added to this group
+    const group = await Group.findById(groupId);
+    if (!group) {
+        throw new NotFoundError("Group not found");
+    }
+
+    const existingPacks = group.features.questions.settings.packs || [];
+    if (existingPacks.includes(packId)) {
+        throw new ConflictError(`Pack "${packId}" is already added to this group`);
+    }
+
     const templates = await QuestionTemplate.find({ packId });
 
     if (templates.length === 0) {
@@ -84,4 +98,32 @@ export async function addTemplatePackToGroup(
             template._id
         );
     }
+
+    // Track the pack on the group
+    await Group.findByIdAndUpdate(groupId, {
+        $push: { "features.questions.settings.packs": packId },
+    });
+}
+
+// ─── Pack queries ───────────────────────────────────────────────────────────
+
+export async function getAvailablePacks(): Promise<IQuestionPack[]> {
+    return QuestionPack.find().sort({ name: 1 }).lean();
+}
+
+export async function getGroupPacks(
+    groupId: string
+): Promise<(IQuestionPack & { added: boolean })[]> {
+    const group = await Group.findById(groupId);
+    if (!group) {
+        throw new NotFoundError("Group not found");
+    }
+
+    const addedPacks = group.features.questions.settings.packs || [];
+    const allPacks = await QuestionPack.find().sort({ name: 1 }).lean();
+
+    return allPacks.map((pack) => ({
+        ...pack,
+        added: addedPacks.includes(pack.packId),
+    }));
 }

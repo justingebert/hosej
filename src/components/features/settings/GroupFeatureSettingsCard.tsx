@@ -12,6 +12,7 @@ import type { GroupDTO } from "@/types/models/group";
 type GlobalFeatures = Partial<Record<keyof GroupDTO["features"], { status: FeatureStatus }>>;
 
 export function GroupFeatureSettingsCard({
+    groupId,
     features,
     globalFeatures,
     onQuestionCountChange,
@@ -20,6 +21,7 @@ export function GroupFeatureSettingsCard({
     onJukeboxConcurrentChange,
     onJukeboxActivationDaysChange,
 }: {
+    groupId: string;
     features: GroupDTO["features"];
     globalFeatures?: GlobalFeatures;
     onQuestionCountChange: (value: number) => void;
@@ -41,6 +43,7 @@ export function GroupFeatureSettingsCard({
                         globalStatus={globalFeatures?.questions?.status}
                     >
                         <QuestionSettings
+                            groupId={groupId}
                             questionCount={features.questions.settings.questionCount}
                             lastQuestionDate={features.questions.settings.lastQuestionDate}
                             onQuestionCountChange={onQuestionCountChange}

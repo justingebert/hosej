@@ -17,13 +17,15 @@ import {
 interface UploadResult {
     success?: boolean;
     loaded?: number;
-    skipped?: number;
     errors?: ValidationError[];
 }
 
 export default function TemplateUploadCard() {
     const { toast } = useToast();
     const [packId, setPackId] = useState("");
+    const [packName, setPackName] = useState("");
+    const [packDescription, setPackDescription] = useState("");
+    const [packCategory, setPackCategory] = useState("");
     const [templatesJson, setTemplatesJson] = useState("");
     const [uploading, setUploading] = useState(false);
     const [uploadResult, setUploadResult] = useState<UploadResult | null>(null);
@@ -71,7 +73,6 @@ export default function TemplateUploadCard() {
             });
             setUploadResult({
                 loaded: 0,
-                skipped: Array.isArray(templates) ? templates.length : 0,
                 errors: validationResult.errors,
             });
             return;
@@ -84,6 +85,9 @@ export default function TemplateUploadCard() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     packId: packId.trim(),
+                    name: packName.trim() || undefined,
+                    description: packDescription.trim() || undefined,
+                    category: packCategory.trim() || undefined,
                     templates,
                 }),
             });
@@ -105,8 +109,8 @@ export default function TemplateUploadCard() {
 
             if (result.errors && result.errors.length > 0) {
                 toast({
-                    title: "Some Errors Occurred",
-                    description: `${result.skipped} template(s) skipped due to errors`,
+                    title: "Validation Errors",
+                    description: `${result.errors.length} validation error(s) — no templates were created`,
                     variant: "destructive",
                 });
             }
@@ -141,6 +145,36 @@ export default function TemplateUploadCard() {
                 </div>
 
                 <div className="space-y-2">
+                    <Label htmlFor="packName">Pack Name</Label>
+                    <Input
+                        id="packName"
+                        placeholder="e.g. Starter Pack"
+                        value={packName}
+                        onChange={(e) => setPackName(e.target.value)}
+                    />
+                </div>
+
+                <div className="space-y-2">
+                    <Label htmlFor="packDescription">Description</Label>
+                    <Input
+                        id="packDescription"
+                        placeholder="Short description of the pack"
+                        value={packDescription}
+                        onChange={(e) => setPackDescription(e.target.value)}
+                    />
+                </div>
+
+                <div className="space-y-2">
+                    <Label htmlFor="packCategory">Category</Label>
+                    <Input
+                        id="packCategory"
+                        placeholder="e.g. icebreaker, deep, fun"
+                        value={packCategory}
+                        onChange={(e) => setPackCategory(e.target.value)}
+                    />
+                </div>
+
+                <div className="space-y-2">
                     <Label htmlFor="templates">Templates JSON</Label>
                     <Textarea
                         id="templates"
@@ -167,7 +201,7 @@ export default function TemplateUploadCard() {
                                 <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400 mt-0.5" />
                                 <div className="flex-1 space-y-1 text-sm text-red-800 dark:text-red-200">
                                     <p className="font-semibold">
-                                        {uploadResult.skipped} template(s) skipped:
+                                        Validation errors (no templates created):
                                     </p>
                                     <ul className="text-xs space-y-1 max-h-40 overflow-y-auto">
                                         {uploadResult.errors.slice(0, 10).map((err, idx) => (

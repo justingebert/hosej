@@ -45,7 +45,10 @@ function createMockGroup(overrides = {}) {
             },
         ],
         features: {
-            questions: { enabled: true, settings: { questionCount: 1, lastQuestionDate: null } },
+            questions: {
+                enabled: true,
+                settings: { questionCount: 1, lastQuestionDate: null, packs: [] },
+            },
             rallies: { enabled: true, settings: { rallyCount: 1, rallyGapDays: 14 } },
             jukebox: { enabled: true, settings: { concurrent: ["Jukebox"], activationDays: [1] } },
         },

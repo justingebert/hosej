@@ -26,6 +26,7 @@ const groupSchema = new mongoose.Schema<
             settings: {
                 questionCount: { type: Number, default: 1 },
                 lastQuestionDate: { type: Date, default: null },
+                packs: { type: [String], default: [] },
             },
         },
         rallies: {

@@ -21,6 +21,7 @@ export interface IGroupFeatures {
         settings: {
             questionCount: number;
             lastQuestionDate: Date | null;
+            packs: string[];
         };
     };
     rallies: {

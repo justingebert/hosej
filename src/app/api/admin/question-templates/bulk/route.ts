@@ -14,8 +14,15 @@ export const POST = withAuthAndErrors(async (req: NextRequest, { userId }: Authe
         throw new ForbiddenError("Global admin access required");
     }
 
-    const { packId, templates } = await parseBody(req, BulkCreateTemplatesSchema);
-    const result = await createTemplatesFromArray(packId, templates);
+    const { packId, name, description, category, templates } = await parseBody(
+        req,
+        BulkCreateTemplatesSchema
+    );
+    const result = await createTemplatesFromArray(packId, templates, {
+        name,
+        description,
+        category,
+    });
 
     return NextResponse.json({ success: true, packId, ...result }, { status: 201 });
 });

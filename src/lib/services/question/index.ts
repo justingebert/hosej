@@ -17,6 +17,8 @@ export {
     addTemplatePackToGroup,
     validateTemplates,
     formatValidationErrors,
+    getAvailablePacks,
+    getGroupPacks,
 } from "./template";
 
 export type { TemplateInput, ValidationResult } from "./validateTemplateQuestions";

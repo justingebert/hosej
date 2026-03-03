@@ -16,6 +16,7 @@ const GroupFeaturesSchema = z
             settings: z
                 .object({
                     questionCount: z.number().int().min(1),
+                    packs: z.array(z.string()).optional(),
                 })
                 .partial()
                 .optional(),
