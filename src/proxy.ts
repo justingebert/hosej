@@ -2,9 +2,33 @@ import { getToken } from "next-auth/jwt";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { env } from "@/env";
+import { generalLimiter, authLimiter, rateLimitEnabled } from "@/lib/rateLimit";
 
 export async function proxy(req: NextRequest) {
     const { pathname } = req.nextUrl;
+
+    // --- IP-based rate limiting for API routes ---
+    if (rateLimitEnabled && pathname.startsWith("/api")) {
+        const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+        const limiter = pathname.startsWith("/api/auth") ? authLimiter : generalLimiter;
+
+        if (limiter) {
+            const { success, reset } = await limiter.limit(ip);
+            if (!success) {
+                const retryAfter = Math.max(Math.ceil((reset - Date.now()) / 1000), 1);
+                return NextResponse.json(
+                    { message: "Too many requests" },
+                    {
+                        status: 429,
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Retry-After": String(retryAfter),
+                        },
+                    }
+                );
+            }
+        }
+    }
 
     const publicRoutes = new Set([
         "/api/auth/session",

@@ -13,6 +13,15 @@ function requireEnv(name: string): string {
     return value;
 }
 
+function optionalEnv(name: string): string | undefined {
+    if (!process.env[name]) {
+        console.warn(
+            `Warning: Optional environment variable ${name} is not set. This may disable certain features or cause unexpected behavior.`
+        );
+    }
+    return process.env[name] || undefined;
+}
+
 /** Validated server env — import and use instead of raw process.env */
 export const env = {
     // Database
@@ -36,4 +45,8 @@ export const env = {
 
     // Cron
     CRON_SECRET: requireEnv("CRON_SECRET"),
+
+    // Upstash (optional — rate limiting disabled when missing)
+    UPSTASH_REDIS_REST_URL: optionalEnv("UPSTASH_REDIS_REST_URL"),
+    UPSTASH_REDIS_REST_TOKEN: optionalEnv("UPSTASH_REDIS_REST_TOKEN"),
 } as const;

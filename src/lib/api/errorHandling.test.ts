@@ -7,6 +7,7 @@ import {
     ForbiddenError,
     NotFoundError,
     ConflictError,
+    RateLimitError,
     withErrorHandling,
 } from "./errorHandling";
 
@@ -125,6 +126,41 @@ describe("Error Classes", () => {
         });
     });
 
+    describe("RateLimitError", () => {
+        it("should have correct defaults", () => {
+            const error = new RateLimitError(30);
+
+            expect(error.code).toBe("RATE_LIMITED");
+            expect(error.message).toBe("Too many requests");
+            expect(error.status).toBe(429);
+            expect(error.retryAfter).toBe(30);
+            expect(error.name).toBe("RateLimitError");
+        });
+
+        it("should accept custom message", () => {
+            const error = new RateLimitError(60, "Slow down");
+
+            expect(error.message).toBe("Slow down");
+            expect(error.retryAfter).toBe(60);
+        });
+
+        it("should return 429 with Retry-After header via withErrorHandling", async () => {
+            const handler = withErrorHandling(async () => {
+                throw new RateLimitError(45);
+            });
+
+            const req = new Request(
+                "http://localhost/test"
+            ) as unknown as import("next/server").NextRequest;
+            const res = await handler(req, {});
+            const body = await res.json();
+
+            expect(res.status).toBe(429);
+            expect(res.headers.get("Retry-After")).toBe("45");
+            expect(body.message).toBe("Too many requests");
+        });
+    });
+
     describe("ZodError handling via withErrorHandling", () => {
         it("should return 400 with formatted messages for ZodError", async () => {
             const schema = z.object({
@@ -155,6 +191,7 @@ describe("Error Classes", () => {
             expect(new ForbiddenError()).toBeInstanceOf(AppError);
             expect(new NotFoundError()).toBeInstanceOf(AppError);
             expect(new ConflictError()).toBeInstanceOf(AppError);
+            expect(new RateLimitError(30)).toBeInstanceOf(AppError);
         });
 
         it("all errors should be instances of Error", () => {
@@ -163,6 +200,7 @@ describe("Error Classes", () => {
             expect(new ForbiddenError()).toBeInstanceOf(Error);
             expect(new NotFoundError()).toBeInstanceOf(Error);
             expect(new ConflictError()).toBeInstanceOf(Error);
+            expect(new RateLimitError(30)).toBeInstanceOf(Error);
         });
     });
 });

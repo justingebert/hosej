@@ -57,7 +57,28 @@ export class ConflictError extends AppError {
     }
 }
 
+export class RateLimitError extends AppError {
+    public retryAfter: number;
+    constructor(retryAfter: number, message = "Too many requests") {
+        super("RATE_LIMITED", message, 429);
+        this.retryAfter = retryAfter;
+    }
+}
+
 function errorResponse(req: NextRequest, error: Error): NextResponse {
+    if (error instanceof RateLimitError) {
+        return NextResponse.json(
+            { message: error.message },
+            {
+                status: 429,
+                headers: {
+                    "Content-Type": "application/json",
+                    "Retry-After": String(error.retryAfter),
+                },
+            }
+        );
+    }
+
     if (error instanceof AppError) {
         return NextResponse.json(
             { message: error.message },

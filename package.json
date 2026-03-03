@@ -40,6 +40,8 @@
     "@radix-ui/react-toast": "^1.2.1",
     "@serwist/next": "^9.0.5",
     "@tanstack/react-table": "^8.20.5",
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.36.3",
     "@vercel/analytics": "^1.2.2",
     "@vercel/speed-insights": "^1.0.10",
     "browser-image-compression": "^2.0.2",
