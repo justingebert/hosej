@@ -28,6 +28,7 @@ import type {
     UserRating,
 } from "@/types/models/question";
 import { buildFlatQuestionList } from "@/components/features/question/questionTabsUtils";
+import { useAppHaptics } from "@/hooks/useAppHaptics";
 
 type RateValue = Exclude<UserRating, null>;
 
@@ -40,6 +41,7 @@ export default function QuestionsTabs({
     groupId: string;
     questions: QuestionWithUserStateDTO[];
 }) {
+    const { play } = useAppHaptics();
     const [drawerOpen, setDrawerOpen] = useState(false);
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -62,9 +64,11 @@ export default function QuestionsTabs({
         });
 
         mutate(`/api/groups/${groupId}/question`);
+        play("success");
     };
 
     const handleDrawer = () => {
+        play("selection");
         setDrawerOpen(!drawerOpen);
     };
 
@@ -176,9 +180,11 @@ function RatingDrawer({
     question: QuestionWithUserStateDTO;
     rateQuestion: (questionId: string, rating: RateValue) => Promise<void>;
 }) {
+    const { play } = useAppHaptics();
+
     return (
         <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
-            <DrawerTrigger className="w-full">
+            <DrawerTrigger className="w-full" onClick={() => play("selection")}>
                 <Card className="relative bg-foreground text-center">
                     <h2 className="font-bold p-6 text-secondary">{question.question}</h2>
                     {question.questionType.includes("multiple") && (

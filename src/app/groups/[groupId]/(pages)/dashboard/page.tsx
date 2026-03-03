@@ -19,7 +19,7 @@ import fetcher from "@/lib/fetcher";
 import type { GroupDTO } from "@/types/models/group";
 import type { IRally } from "@/types/models/rally";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useHaptic } from "use-haptic";
+import { useAppHaptics } from "@/hooks/useAppHaptics";
 import type { QuestionWithUserStateDTO } from "@/types/models/question";
 import type { FeatureStatus } from "@/types/models/appConfig";
 
@@ -37,7 +37,7 @@ const CompletionChart = dynamic(
 
 export default function Dashboard() {
     const router = useRouter();
-    const { triggerHaptic } = useHaptic();
+    const { play } = useAppHaptics();
     const params = useParams<{ groupId: string }>();
     const groupId = params?.groupId;
     const { data: group, isLoading: groupLoading } = useSWR<GroupDTO>(
@@ -68,10 +68,20 @@ export default function Dashboard() {
 
     const titleClass = group?.name && group.name.length > 15 ? "text-2xl" : "text-4xl";
 
+    const navigateWithHaptics = (path: string) => {
+        play("navigation");
+        router.push(path);
+    };
+
     return (
         <>
             <div className="flex justify-between items-center">
-                <Button variant="outline" size="icon" onClick={() => router.push(`/groups`)}>
+                <Button
+                    variant="outline"
+                    size="icon"
+                    haptic="navigation"
+                    onClick={() => router.push(`/groups`)}
+                >
                     <Users />
                 </Button>
                 <h1 className={`flex-grow ${titleClass} font-bold text-center break-words`}>
@@ -106,10 +116,9 @@ export default function Dashboard() {
                                 {!questionLoading && questionsData ? (
                                     <div
                                         className="relative bg-primary-foreground px-6 py-4 flex items-center justify-between rounded-lg cursor-pointer hover:bg-primary-foreground/80 transition-colors"
-                                        onClick={() => {
-                                            triggerHaptic();
-                                            router.push(`/groups/${groupId}/question`);
-                                        }}
+                                        onClick={() =>
+                                            navigateWithHaptics(`/groups/${groupId}/question`)
+                                        }
                                     >
                                         {questions.length > 0 && (
                                             <div className="absolute -top-3 -right-3">
@@ -152,10 +161,9 @@ export default function Dashboard() {
                                 {!rallyLoading && ralliesData ? (
                                     <div
                                         className="relative bg-primary-foreground px-6 py-4 flex items-center justify-between rounded-lg cursor-pointer hover:bg-primary-foreground/80 transition-colors"
-                                        onClick={() => {
-                                            triggerHaptic();
-                                            router.push(`/groups/${groupId}/rally`);
-                                        }}
+                                        onClick={() =>
+                                            navigateWithHaptics(`/groups/${groupId}/rally`)
+                                        }
                                     >
                                         {rallies.length > 0 && (
                                             <div className="absolute -top-3 -right-3">
@@ -213,10 +221,9 @@ export default function Dashboard() {
                                 group?.features?.jukebox?.enabled && (
                                     <div
                                         className="relative bg-primary-foreground px-6 py-4 flex items-center justify-between rounded-lg cursor-pointer hover:bg-primary-foreground/80 transition-colors"
-                                        onClick={() => {
-                                            triggerHaptic();
-                                            router.push(`/groups/${groupId}/jukebox`);
-                                        }}
+                                        onClick={() =>
+                                            navigateWithHaptics(`/groups/${groupId}/jukebox`)
+                                        }
                                     >
                                         <div className="absolute -top-3 -right-3">
                                             <Badge>1</Badge>

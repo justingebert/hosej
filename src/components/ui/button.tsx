@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
-import { useHaptic } from "use-haptic";
+import { type AppHapticType, useAppHaptics } from "@/hooks/useAppHaptics";
 
 import { cn } from "@/lib/utils/utils";
 
@@ -37,14 +37,15 @@ const buttonVariants = cva(
 export interface ButtonProps
     extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
     asChild?: boolean;
+    haptic?: AppHapticType;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-    ({ className, variant, size, asChild = false, onClick, ...props }, ref) => {
+    ({ className, variant, size, asChild = false, onClick, haptic = "tap", ...props }, ref) => {
         const Comp = asChild ? Slot : "button";
-        const { triggerHaptic } = useHaptic();
+        const { play } = useAppHaptics();
         const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-            triggerHaptic();
+            play(haptic);
             if (onClick) {
                 onClick(event);
             }

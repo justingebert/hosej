@@ -88,5 +88,5 @@ Models (src/db/models/)    → Mongoose schemas, MongoDB
 
 - Framework: Vitest + @testing-library/react + jsdom
 - Test files: `src/**/*.{test,spec}.{ts,tsx}`
-- Setup file (`src/test/setup.ts`) mocks `next/link`, `next/image`, `next/navigation`, `use-haptic`, and `ResizeObserver`
+- Setup file (`src/test/setup.ts`) mocks `next/link`, `next/image`, `next/navigation`, `web-haptics/react`, and `ResizeObserver`
 - Test coverage is still being built out

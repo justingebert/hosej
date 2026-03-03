@@ -67,9 +67,9 @@
     "swr": "^2.2.5",
     "tailwind-merge": "^2.2.2",
     "tailwindcss-animate": "^1.0.7",
-    "use-haptic": "^1.1.11",
     "uuid": "^9.0.1",
     "vaul": "^1.1.0",
+    "web-haptics": "^0.0.6",
     "zod": "^4.3.6"
   },
   "devDependencies": {

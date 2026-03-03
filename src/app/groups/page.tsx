@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import type { Session } from "next-auth";
 import { useEffect, useState } from "react";
+import { useAppHaptics } from "@/hooks/useAppHaptics";
 
 export default function GroupsPage() {
     const { toast } = useToast();
@@ -58,6 +59,7 @@ function GroupsList({
     copyFn: (text: string) => void;
     user?: Session["user"];
 }) {
+    const { play } = useAppHaptics();
     const [starredGroupId, setStarredGroupId] = useState<string | null>(null);
 
     useEffect(() => {
@@ -105,7 +107,10 @@ function GroupsList({
                             <Card
                                 key={group._id}
                                 className="cursor-pointer"
-                                onClick={() => router.push(`/groups/${group._id}/dashboard`)}
+                                onClick={() => {
+                                    play("navigation");
+                                    router.push(`/groups/${group._id}/dashboard`);
+                                }}
                             >
                                 <CardContent className="flex justify-between items-center p-4">
                                     <div>
@@ -170,11 +175,21 @@ function GroupListSkeleton() {
 function GroupsHeader({ router }: { router: ReturnType<typeof useRouter> }) {
     return (
         <div className="flex justify-between items-center w-full">
-            <Button variant="outline" size="icon" onClick={() => router.push(`/help`)}>
+            <Button
+                variant="outline"
+                size="icon"
+                haptic="navigation"
+                onClick={() => router.push(`/help`)}
+            >
                 <CircleHelp />
             </Button>
             <h1 className="text-4xl font-bold">Groups</h1>
-            <Button variant="outline" size="icon" onClick={() => router.push(`/settings`)}>
+            <Button
+                variant="outline"
+                size="icon"
+                haptic="navigation"
+                onClick={() => router.push(`/settings`)}
+            >
                 <User />
             </Button>
         </div>

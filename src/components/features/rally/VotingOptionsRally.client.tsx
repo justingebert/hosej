@@ -17,8 +17,10 @@ import { X } from "lucide-react";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
 import type { IPictureSubmissionJson } from "@/types/models/rally";
+import { useAppHaptics } from "@/hooks/useAppHaptics";
 
 const RallyVoteCarousel = ({ user, rally, onVote }: any) => {
+    const { play } = useAppHaptics();
     const [selectedSubmission, setSelectedSubmission] = useState<string>("");
     const [api, setApi] = useState<CarouselApi | null>(null);
     const [hasVoted, setHasVoted] = useState(false);
@@ -126,7 +128,10 @@ const RallyVoteCarousel = ({ user, rally, onVote }: any) => {
                                             width={300}
                                             height={300}
                                             priority={index === 0} // Add priority to the first image
-                                            onClick={() => openModal(submission.imageUrl)}
+                                            onClick={() => {
+                                                play("selection");
+                                                openModal(submission.imageUrl);
+                                            }}
                                         />
                                     </div>
                                 </CardContent>

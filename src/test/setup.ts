@@ -26,9 +26,13 @@ afterEach(() => {
     vi.unstubAllGlobals();
 });
 
-// use-haptic brings its own React copy; mock to avoid invalid hook call in tests
-vi.mock("use-haptic", () => ({
-    useHaptic: () => ({ triggerHaptic: () => {} }),
+// Mock web-haptics hook used by client components
+vi.mock("web-haptics/react", () => ({
+    useWebHaptics: () => ({
+        trigger: vi.fn(),
+        cancel: vi.fn(),
+        isSupported: true,
+    }),
 }));
 
 // Mock next/link for component tests
@@ -60,11 +64,6 @@ vi.mock("next/image", () => ({
 
         return React.createElement("img", { ...props, src: resolvedSrc, alt });
     },
-}));
-
-// Mock haptics for tests
-vi.mock("use-haptic", () => ({
-    useHaptic: () => ({ triggerHaptic: vi.fn() }),
 }));
 
 // Radix (and other UI libs) may rely on ResizeObserver

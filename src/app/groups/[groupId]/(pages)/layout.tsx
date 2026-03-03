@@ -6,13 +6,13 @@ import { History, Home, PieChart, Plus, Settings } from "lucide-react";
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useHaptic } from "use-haptic";
+import { useAppHaptics } from "@/hooks/useAppHaptics";
 
 export default function TabsLayout({ children }: { children: React.ReactNode }) {
     const params = useParams<{ groupId: string }>();
     const groupId = params ? params.groupId : "";
     const currentPath = usePathname();
-    const { triggerHaptic } = useHaptic();
+    const { play } = useAppHaptics();
 
     // To store refs for each link
     const dashboardRef = useRef<HTMLAnchorElement>(null);
@@ -67,7 +67,7 @@ export default function TabsLayout({ children }: { children: React.ReactNode }) 
                     ref={dashboardRef}
                     href={`/groups/${groupId}/dashboard`}
                     className="p-4 z-10"
-                    onClick={triggerHaptic}
+                    onClick={() => play("navigation")}
                 >
                     <Home />
                 </Link>
@@ -75,14 +75,19 @@ export default function TabsLayout({ children }: { children: React.ReactNode }) 
                     ref={historyRef}
                     href={`/groups/${groupId}/history`}
                     className="p-4 z-10"
-                    onClick={triggerHaptic}
+                    onClick={() => play("navigation")}
                 >
                     <History />
                 </Link>
-                <Link ref={createRef} href={`/groups/${groupId}/create`} className="z-10">
+                <Link
+                    ref={createRef}
+                    href={`/groups/${groupId}/create`}
+                    className="z-10"
+                    onClick={() => play("navigation")}
+                >
                     <Button
                         className="flex items-center justify-center p-2 rounded-full bg-primary"
-                        onClick={triggerHaptic}
+                        haptic="none"
                     >
                         <Plus />
                     </Button>
@@ -91,7 +96,7 @@ export default function TabsLayout({ children }: { children: React.ReactNode }) 
                     ref={statsRef}
                     href={`/groups/${groupId}/stats`}
                     className="p-4 z-10"
-                    onClick={triggerHaptic}
+                    onClick={() => play("navigation")}
                 >
                     <PieChart />
                 </Link>
@@ -99,7 +104,7 @@ export default function TabsLayout({ children }: { children: React.ReactNode }) 
                     ref={settingsRef}
                     href={`/groups/${groupId}/settings`}
                     className="p-4 z-10"
-                    onClick={triggerHaptic}
+                    onClick={() => play("navigation")}
                 >
                     <Settings />
                 </Link>

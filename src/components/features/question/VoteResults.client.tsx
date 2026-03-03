@@ -8,7 +8,7 @@ import Image from "next/image";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
 import type { Session } from "next-auth";
-import { useHaptic } from "use-haptic";
+import { useAppHaptics } from "@/hooks/useAppHaptics";
 
 import type { IResult, QuestionDTO, QuestionResultsDTO } from "@/types/models/question";
 import { Badge } from "@/components/ui/badge";
@@ -24,7 +24,7 @@ type VoteResultsProps = {
 
 const VoteResults = ({ user, question, available, returnTo }: VoteResultsProps) => {
     const [animationTriggered, setAnimationTriggered] = useState(false);
-    const { triggerHaptic } = useHaptic();
+    const { play } = useAppHaptics();
     const { data, error } = useSWR<QuestionResultsDTO>(
         `/api/groups/${question.groupId}/question/${question._id}/results/`,
         fetcher
@@ -53,7 +53,7 @@ const VoteResults = ({ user, question, available, returnTo }: VoteResultsProps) 
                     <Link
                         key={index}
                         href={`/groups/${question.groupId}/question/${question._id}/resultsdetailed/?returnTo=${encodeURIComponent(returnTo || "")}`}
-                        onClick={triggerHaptic}
+                        onClick={() => play("selection")}
                     >
                         <div className="bg-secondary my-2 rounded-md relative">
                             <motion.div

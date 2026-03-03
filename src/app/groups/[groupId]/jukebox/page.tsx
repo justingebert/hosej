@@ -26,6 +26,7 @@ import { Separator } from "@/components/ui/separator";
 import { AnimatePresence, motion } from "framer-motion";
 import ChatComponent from "@/components/features/chat/Chat.client";
 import { Card } from "@/components/ui/card";
+import { useAppHaptics } from "@/hooks/useAppHaptics";
 
 function JukeboxPageLoading() {
     return (
@@ -187,6 +188,7 @@ function JukeboxSearch({
     toast: any;
     setUserHasSubmitted: React.SetStateAction<any>;
 }) {
+    const { play } = useAppHaptics();
     const params = useParams<{ groupId: string }>();
     const groupId = params ? params.groupId : "";
     const [searchQuery, setSearchQuery] = useState("");
@@ -250,6 +252,7 @@ function JukeboxSearch({
                 throw new Error(errorData.message || "Failed to submit song");
             }
             mutate(`/api/groups/${groupId}/jukebox?isActive=true`);
+            play("success");
 
             setSelectedTrack(null);
             setSearchResults(null);
@@ -318,7 +321,10 @@ function JukeboxSearch({
                                         ? "bg-primary text-primary-foreground"
                                         : "bg-secondary"
                                 }`}
-                                onClick={() => setSelectedTrack(track)}
+                                onClick={() => {
+                                    play("selection");
+                                    setSelectedTrack(track);
+                                }}
                             >
                                 <Image
                                     src={track.album.images[0]?.url || ""}
@@ -363,6 +369,7 @@ function JukeboxSubmissions({
     user: Session["user"];
     toast: any;
 }) {
+    const { play } = useAppHaptics();
     const [selectedSong, setSelectedSong] = useState<IProcessedSong | null>(null);
     const [ratingValue, setRatingValue] = useState(50);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -384,6 +391,7 @@ function JukeboxSubmissions({
     };
 
     const handleSongClick = (song: IProcessedSong) => {
+        play("selection");
         if (!song.userHasRated && song.submittedBy._id !== user._id) {
             setSelectedSong(song);
             setDrawerOpen(true);
@@ -416,6 +424,7 @@ function JukeboxSubmissions({
             }
 
             mutate(`/api/groups/${jukebox.groupId}/jukebox?isActive=true`);
+            play("success");
         } catch (error) {
             console.error("Error submitting rating:", error);
             toast({ title: "Error", description: "Something went wrong", variant: "destructive" });
@@ -431,6 +440,10 @@ function JukeboxSubmissions({
         hidden: { opacity: 0, y: -30 },
         visible: { opacity: 1, y: 0 },
         exit: { opacity: 0, y: -30 },
+    };
+
+    const handleExternalLinkTap = () => {
+        play("navigation");
     };
 
     return (
@@ -507,6 +520,7 @@ function JukeboxSubmissions({
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         className="flex items-center gap-1 text-black"
+                                                        onClick={handleExternalLinkTap}
                                                     >
                                                         <SiApplemusic size={32} color="#FF4E6B" />
                                                     </Link>
@@ -515,6 +529,7 @@ function JukeboxSubmissions({
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         className="flex items-center gap-1 text-green-500"
+                                                        onClick={handleExternalLinkTap}
                                                     >
                                                         <FaSpotify size={32} />
                                                     </Link>
@@ -525,6 +540,7 @@ function JukeboxSubmissions({
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         className="flex items-center gap-1 text-red-600"
+                                                        onClick={handleExternalLinkTap}
                                                     >
                                                         <FaYoutube size={32} />
                                                     </Link>
@@ -601,6 +617,7 @@ function JukeboxSubmissions({
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="flex items-center gap-1 text-black"
+                                    onClick={handleExternalLinkTap}
                                 >
                                     <SiApplemusic size={32} color="#FF4E6B" />
                                 </Link>
@@ -609,6 +626,7 @@ function JukeboxSubmissions({
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="flex items-center gap-1 text-green-500"
+                                    onClick={handleExternalLinkTap}
                                 >
                                     <FaSpotify size={32} />
                                 </Link>
@@ -619,6 +637,7 @@ function JukeboxSubmissions({
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="flex items-center gap-1 text-red-600"
+                                    onClick={handleExternalLinkTap}
                                 >
                                     <FaYoutube size={32} />
                                 </Link>
