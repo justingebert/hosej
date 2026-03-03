@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { CircleHelp, Copy, Star, User } from "lucide-react";
+import { ArrowDown, CircleHelp, Copy, Star, User, Users } from "lucide-react";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
 import type { GroupDTO } from "@/types/models/group";
 import { JoinGroupDrawer } from "@/components/features/group/joinGroupDrawer";
@@ -100,6 +100,8 @@ function GroupsList({
         <>
             {isLoading || !user ? (
                 <GroupListSkeleton />
+            ) : groups.length === 0 ? (
+                <EmptyGroupsGuide />
             ) : (
                 <div className="flex-grow overflow-y-auto py-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-24">
@@ -192,6 +194,61 @@ function GroupsHeader({ router }: { router: ReturnType<typeof useRouter> }) {
             >
                 <User />
             </Button>
+        </div>
+    );
+}
+
+function EmptyGroupsGuide() {
+    return (
+        <div className="flex-grow flex flex-col items-center justify-center pb-32 px-6">
+            <div className="flex flex-col items-center space-y-4 text-muted-foreground/50">
+                <Users className="w-16 h-16" />
+                <h2 className="text-2xl font-semibold text-muted-foreground/60">No groups yet</h2>
+                <p className="text-center text-sm text-muted-foreground/40 max-w-xs">
+                    Get started by creating your own group or joining an existing one with a group
+                    ID
+                </p>
+            </div>
+
+            <div className="mt-12 w-full max-w-sm">
+                <Card className="border-dashed border-muted-foreground/20 bg-muted/30">
+                    <CardContent className="flex justify-between items-center p-4">
+                        <div>
+                            <CardTitle className="text-muted-foreground/30">My Group</CardTitle>
+                            <CardDescription className="text-muted-foreground/20">
+                                Go Vote Now!
+                            </CardDescription>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <Button variant="ghost" size="icon" disabled className="opacity-30">
+                                <Star className="w-4 h-4" />
+                            </Button>
+                            <div className="relative">
+                                <Button variant="ghost" size="icon" disabled className="opacity-30">
+                                    <Copy className="w-4 h-4" />
+                                </Button>
+                                <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex flex-col items-center">
+                                    <span className="text-xs text-muted-foreground/40 whitespace-nowrap">
+                                        Share ID
+                                    </span>
+                                    <ArrowDown className="w-5 h-5 text-muted-foreground/30 -mt-0.5" />
+                                </div>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+
+            <div className="mt-16 flex w-full max-w-sm justify-between px-4">
+                <div className="flex flex-col items-center space-y-1">
+                    <span className="text-xs text-muted-foreground/40">Start fresh</span>
+                    <ArrowDown className="w-6 h-6 text-muted-foreground/30 animate-bounce" />
+                </div>
+                <div className="flex flex-col items-center space-y-1">
+                    <span className="text-xs text-muted-foreground/40">Have a code?</span>
+                    <ArrowDown className="w-6 h-6 text-muted-foreground/30 animate-bounce" />
+                </div>
+            </div>
         </div>
     );
 }

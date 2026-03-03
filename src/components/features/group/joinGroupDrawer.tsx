@@ -36,7 +36,7 @@ export function JoinGroupDrawer() {
             }
 
             mutate(user ? `/api/groups` : null);
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Failed to join group: ", error);
             toast({ title: "Failed to join group!", variant: "destructive" });
         } finally {
