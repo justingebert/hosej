@@ -74,7 +74,7 @@ export default function QuestionsTabs({
 
     const handleTabChange = (tabValue: string) => {
         setActiveTab(tabValue);
-        router.push(`/groups/${groupId}/question?returnTo=${tabValue}`);
+        router.replace(`/groups/${groupId}/question?returnTo=${tabValue}`);
     };
 
     return (
