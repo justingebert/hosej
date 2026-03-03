@@ -72,7 +72,7 @@ export async function createGroup(userId: string, name: string): Promise<GroupDo
     userAdmin.groups.push(newGroup._id);
     await userAdmin.save();
 
-    await addTemplatePackToGroup(newGroup._id, "starter-pack");
+    await addTemplatePackToGroup(newGroup._id, "trade-off-v1");
     await activateSmartQuestions(newGroup._id);
 
     return newGroup;
