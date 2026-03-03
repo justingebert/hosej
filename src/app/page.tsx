@@ -10,6 +10,7 @@ import { v4 as uuidv4 } from "uuid";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { HoseJLoader } from "@/components/ui/custom/HoseJLoader";
+import PWAInstallButton from "@/components/features/pwa/PWAInstallButton";
 
 function StartPage() {
     const { data: session, status } = useSession();
@@ -146,6 +147,7 @@ function SignInButtons({
                 <FcGoogle className="mr-2" size={24} />
                 Continue with Google
             </Button>
+            <PWAInstallButton variant="ghost" className="w-full" />
         </div>
     );
 }
