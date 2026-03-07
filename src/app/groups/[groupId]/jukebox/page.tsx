@@ -646,6 +646,7 @@ function JukeboxSubmissions({
                                 <p className="text-center text-xl font-bold mb-10">{ratingValue}</p>
                                 <Slider
                                     defaultValue={[50]}
+                                    min={1}
                                     max={100}
                                     step={1}
                                     onValueChange={(value) => {
