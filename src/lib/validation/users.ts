@@ -9,7 +9,7 @@ export const UpdateUserSchema = z.object({
     username: z.string().min(1, "username is required").max(50).optional(),
 });
 
-export const GoogleLinkSchema = z.object({
+export const GoogleDisconnectSchema = z.object({
     deviceId: z.string().min(1, "deviceId is required"),
 });
 

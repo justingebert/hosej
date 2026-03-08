@@ -1,7 +1,10 @@
+import crypto from "crypto";
 import User from "@/db/models/User";
 import type { UserDocument } from "@/types/models/user";
 import type { UpdateUserData } from "@/types/models/user";
 import { ConflictError, NotFoundError, ValidationError } from "@/lib/api/errorHandling";
+
+const CONNECT_TOKEN_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 export async function getUserById(userId: string): Promise<UserDocument> {
     const user = await User.findById(userId);
@@ -67,29 +70,20 @@ export async function unregisterPushToken(userId: string, token: string): Promis
 }
 
 /**
- * Link a Google account to an existing device user.
- * Deletes the Google-only user, migrates googleId to the device user.
- * TODO: Add transaction when replica set is available.
+ * Generate a short-lived connect token for the authenticated device user.
+ * Used to securely link a Google account without exposing deviceId.
  */
-export async function connectGoogleAccount(googleUserId: string, deviceId: string): Promise<void> {
-    if (!deviceId) throw new ValidationError("No deviceId provided");
+export async function generateConnectToken(userId: string): Promise<string> {
+    const user = await User.findById(userId);
+    if (!user) throw new NotFoundError("User not found");
+    if (!user.deviceId)
+        throw new ValidationError("Only device-authenticated users can generate a connect token");
 
-    const googleUser = await User.findById(googleUserId);
-    if (!googleUser) throw new NotFoundError("Google user not found");
-
-    const deviceUser = await User.findOne({ deviceId });
-    if (!deviceUser) throw new NotFoundError("User with deviceId not found");
-
-    const googleId = googleUser.googleId;
-
-    // Delete Google-only user FIRST to free the unique googleId
-    await User.deleteOne({ _id: googleUserId });
-
-    // Then migrate googleId to the device user
-    deviceUser.googleId = googleId;
-    deviceUser.googleConnected = true;
-    deviceUser.deviceId = undefined;
-    await deviceUser.save();
+    const token = crypto.randomUUID();
+    user.connectToken = token;
+    user.connectTokenExpiresAt = new Date(Date.now() + CONNECT_TOKEN_TTL_MS);
+    await user.save();
+    return token;
 }
 
 /**

@@ -61,12 +61,10 @@ export async function proxy(req: NextRequest) {
         return NextResponse.redirect(loginUrl);
     }
 
-    // Redirect new Google users to set their name, but not during
-    // the connect-google flow (existing device user linking Google)
+    // Redirect new Google users to set their name
     if (
         token.needsNameSetup &&
         pathname !== "/setup-name" &&
-        pathname !== "/connectgoogle" &&
         !pathname.startsWith("/api/auth") &&
         !pathname.startsWith("/api/users")
     ) {

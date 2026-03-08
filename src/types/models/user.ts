@@ -10,6 +10,8 @@ export interface IUser {
     fcmToken?: string;
     googleConnected: boolean;
     googleId?: string;
+    connectToken?: string;
+    connectTokenExpiresAt?: Date;
 
     createdAt: Date;
 }

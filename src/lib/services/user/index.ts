@@ -4,7 +4,7 @@ export {
     updateUser,
     registerPushToken,
     unregisterPushToken,
-    connectGoogleAccount,
+    generateConnectToken,
     disconnectGoogleAccount,
 } from "./user";
 

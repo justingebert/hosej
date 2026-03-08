@@ -33,6 +33,14 @@ const UserSchema = new Schema<IUser>({
         unique: true,
         sparse: true,
     },
+    connectToken: {
+        type: String,
+        unique: true,
+        sparse: true,
+    },
+    connectTokenExpiresAt: {
+        type: Date,
+    },
     createdAt: {
         type: Date,
         default: Date.now,

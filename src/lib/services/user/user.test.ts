@@ -9,7 +9,7 @@ import {
     updateUser,
     registerPushToken,
     unregisterPushToken,
-    connectGoogleAccount,
+    generateConnectToken,
     disconnectGoogleAccount,
 } from "./user";
 import User from "@/db/models/User";
@@ -26,6 +26,8 @@ function createMockUser(overrides = {}) {
         fcmToken: undefined,
         googleConnected: false,
         googleId: undefined,
+        connectToken: undefined,
+        connectTokenExpiresAt: undefined,
         save: vi.fn().mockResolvedValue(undefined),
         ...overrides,
     };
@@ -176,44 +178,32 @@ describe("unregisterPushToken", () => {
     });
 });
 
-describe("connectGoogleAccount", () => {
-    it("should migrate googleId from google user to device user", async () => {
-        const googleUser = createMockUser({ googleId: "google-123" });
-        const deviceUser = createMockUser({ deviceId: "device-456" });
+describe("generateConnectToken", () => {
+    it("should generate and store a connect token for device user", async () => {
+        const mockUser = createMockUser({ deviceId: "device-123" });
+        (User.findById as Mock).mockResolvedValue(mockUser);
 
-        (User.findById as Mock).mockResolvedValue(googleUser);
-        (User.findOne as Mock).mockResolvedValue(deviceUser);
-        (User.deleteOne as Mock).mockResolvedValue({ deletedCount: 1 });
+        const token = await generateConnectToken(mockUserId);
 
-        await connectGoogleAccount(mockUserId, "device-456");
-
-        expect(deviceUser.googleId).toBe("google-123");
-        expect(deviceUser.googleConnected).toBe(true);
-        expect(deviceUser.deviceId).toBeUndefined();
-        // Save must happen before delete (safer: orphan over lost identity)
-        expect(deviceUser.save).toHaveBeenCalled();
-        expect(User.deleteOne).toHaveBeenCalled();
-
-        const saveOrder = deviceUser.save.mock.invocationCallOrder[0];
-        const deleteOrder = (User.deleteOne as Mock).mock.invocationCallOrder[0];
-        expect(saveOrder).toBeLessThan(deleteOrder);
+        expect(token).toBeDefined();
+        expect(typeof token).toBe("string");
+        expect(token.length).toBeGreaterThan(0);
+        expect(mockUser.connectToken).toBe(token);
+        expect(mockUser.connectTokenExpiresAt).toBeInstanceOf(Date);
+        expect(mockUser.save).toHaveBeenCalled();
     });
 
-    it("should throw ValidationError when deviceId is missing", async () => {
-        await expect(connectGoogleAccount(mockUserId, "")).rejects.toThrow(ValidationError);
-    });
-
-    it("should throw NotFoundError when google user not found", async () => {
+    it("should throw NotFoundError when user not found", async () => {
         (User.findById as Mock).mockResolvedValue(null);
 
-        await expect(connectGoogleAccount(mockUserId, "device-456")).rejects.toThrow(NotFoundError);
+        await expect(generateConnectToken(mockUserId)).rejects.toThrow(NotFoundError);
     });
 
-    it("should throw NotFoundError when device user not found", async () => {
-        (User.findById as Mock).mockResolvedValue(createMockUser());
-        (User.findOne as Mock).mockResolvedValue(null);
+    it("should throw ValidationError for non-device user", async () => {
+        const mockUser = createMockUser({ deviceId: undefined });
+        (User.findById as Mock).mockResolvedValue(mockUser);
 
-        await expect(connectGoogleAccount(mockUserId, "device-456")).rejects.toThrow(NotFoundError);
+        await expect(generateConnectToken(mockUserId)).rejects.toThrow(ValidationError);
     });
 });
 

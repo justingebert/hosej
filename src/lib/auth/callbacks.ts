@@ -42,18 +42,43 @@ export async function jwtCallback({
         await dbConnect();
         const existingUser = await User.findOne({ googleId: account.providerAccountId });
         if (!existingUser) {
-            const newUser = new User({
-                googleId: account.providerAccountId,
-                googleConnected: true,
-                username: user?.name || "",
+            // Check if a device user is linking their Google account (connect flow).
+            // A valid connect token means an existing user initiated the link.
+            const deviceUser = await User.findOne({
+                connectToken: { $exists: true, $ne: null },
+                connectTokenExpiresAt: { $gt: new Date() },
             });
-            await newUser.save();
-            token.userId = newUser._id.toString();
-            token.username = newUser.username;
-            token.googleConnected = true;
-            token.groups = [];
-            token.createdAt = String(newUser.createdAt);
-            token.needsNameSetup = true;
+
+            if (deviceUser) {
+                // Connect flow: merge Google ID into the existing device user
+                deviceUser.googleId = account.providerAccountId;
+                deviceUser.googleConnected = true;
+                deviceUser.deviceId = undefined;
+                deviceUser.connectToken = undefined;
+                deviceUser.connectTokenExpiresAt = undefined;
+                await deviceUser.save();
+
+                token.userId = deviceUser._id.toString();
+                token.username = deviceUser.username;
+                token.googleConnected = true;
+                token.groups = deviceUser.groups.map(String);
+                token.createdAt = String(deviceUser.createdAt);
+                token.needsNameSetup = false;
+            } else {
+                // Fresh Google signup — create a new user
+                const newUser = new User({
+                    googleId: account.providerAccountId,
+                    googleConnected: true,
+                    username: user?.name || "",
+                });
+                await newUser.save();
+                token.userId = newUser._id.toString();
+                token.username = newUser.username;
+                token.googleConnected = true;
+                token.groups = [];
+                token.createdAt = String(newUser.createdAt);
+                token.needsNameSetup = true;
+            }
         } else {
             token.userId = existingUser._id.toString();
             token.username = existingUser.username;
