@@ -6,6 +6,7 @@ vi.mock("@/db/models/Jukebox");
 vi.mock("@/db/models/Chat");
 vi.mock("@/db/models/User");
 vi.mock("@/db/models/Group");
+vi.mock("@/db/models/ActivityEvent");
 vi.mock("firebase-admin", () => ({
     default: { apps: [], initializeApp: vi.fn(), credential: { cert: vi.fn() } },
 }));
@@ -100,6 +101,7 @@ describe("rateSong", () => {
     function createMockJukeboxWithSong(songSubmittedBy: string, existingRatings: any[] = []) {
         return {
             _id: mockJukeboxId,
+            groupId: new Types.ObjectId(mockGroupId),
             songs: [
                 {
                     _id: new Types.ObjectId(mockSongId),

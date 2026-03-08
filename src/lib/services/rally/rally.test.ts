@@ -5,6 +5,7 @@ vi.mock("@/db/dbConnect");
 vi.mock("@/db/models/Rally");
 vi.mock("@/db/models/Group");
 vi.mock("@/db/models/User");
+vi.mock("@/db/models/ActivityEvent");
 vi.mock("@/lib/services/group");
 vi.mock("@/lib/services/chat");
 vi.mock("@/lib/sendNotification");

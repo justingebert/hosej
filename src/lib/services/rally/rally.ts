@@ -15,6 +15,8 @@ import {
     VOTED_RALLY_POINTS,
 } from "@/lib/utils/POINT_CONFIG";
 import type { RallyDocument } from "@/types/models/rally";
+import { recordActivity } from "@/lib/services/activity";
+import { ActivityFeature, ActivityType } from "@/types/models/activityEvent";
 
 // ─── State Machine ──────────────────────────────────────────────────────────
 
@@ -42,6 +44,14 @@ async function advanceRallyStates(
         if (!rally.used && currentTime >= startTime && !rally.votingOpen && !rally.resultsShowing) {
             rally.used = true;
             await rally.save();
+
+            recordActivity({
+                groupId,
+                type: ActivityType.RallyActivated,
+                feature: ActivityFeature.Rally,
+                entityId: rally._id.toString(),
+                meta: { task: rally.task },
+            }).catch((err) => console.error("Activity log failed", err));
 
             await sendNotification(
                 `📷 New ${groupName} Rally Started! 📷`,
@@ -303,6 +313,14 @@ export async function addSubmission(
 
     await addPointsToMember(group, userId, SUBMITTED_RALLY_POINTS);
 
+    recordActivity({
+        groupId,
+        actorUser: userId,
+        type: ActivityType.RallySubmission,
+        feature: ActivityFeature.Rally,
+        entityId: rallyId,
+    }).catch((err) => console.error("Activity log failed", err));
+
     return updatedRally;
 }
 
@@ -350,4 +368,12 @@ export async function voteOnSubmission(
     await rally.save();
 
     await addPointsToMember(group, userId, VOTED_RALLY_POINTS);
+
+    recordActivity({
+        groupId,
+        actorUser: userId,
+        type: ActivityType.RallyVote,
+        feature: ActivityFeature.Rally,
+        entityId: rallyId,
+    }).catch((err) => console.error("Activity log failed", err));
 }

@@ -6,6 +6,8 @@ import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 import { generateSignedUrl } from "@/lib/s3";
 import { CREATED_QUESTION_POINTS, VOTED_QUESTION_POINTS } from "@/lib/utils/POINT_CONFIG";
 import { createChatForEntity } from "@/lib/services/chat";
+import { recordActivity } from "@/lib/services/activity";
+import { ActivityFeature, ActivityType } from "@/types/models/activityEvent";
 import { EntityModel } from "@/types/models/chat";
 import type { IAnswer, IQuestion, QuestionDocument, UserRating } from "@/types/models/question";
 import { QuestionType } from "@/types/models/question";
@@ -231,6 +233,14 @@ export async function voteOnQuestion(
     if (!group) throw new NotFoundError("Group not found");
     await group.addPoints(user._id.toString(), VOTED_QUESTION_POINTS);
 
+    recordActivity({
+        groupId,
+        actorUser: userId,
+        type: ActivityType.QuestionVoted,
+        feature: ActivityFeature.Question,
+        entityId: questionId,
+    }).catch((err) => console.error("Activity log failed", err));
+
     return { alreadyVoted: false };
 }
 
@@ -397,6 +407,15 @@ export async function activateSmartQuestions(groupId: Types.ObjectId): Promise<I
     if (templateQuestion) {
         await activateQuestion(templateQuestion);
         activatedQuestions.push(templateQuestion);
+    }
+
+    for (const q of activatedQuestions) {
+        recordActivity({
+            groupId: groupId.toString(),
+            type: ActivityType.QuestionActivated,
+            feature: ActivityFeature.Question,
+            entityId: q._id.toString(),
+        }).catch((err) => console.error("Activity log failed", err));
     }
 
     return activatedQuestions;

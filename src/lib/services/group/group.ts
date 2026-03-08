@@ -24,15 +24,14 @@ export async function isUserInGroup(
     userId: string,
     groupId: string,
     group?: GroupDocument | null
-): Promise<{ isAuthorized: boolean }> {
+): Promise<void> {
     const g = group ?? (await Group.findById(groupId));
     if (!g) throw new NotFoundError("Group not found");
 
     const isMember = g.members.some((member: IGroupMember) => member.user.toString() === userId);
     if (!isMember) {
-        throw new ForbiddenError("You are not a member of this group");
+        throw new ForbiddenError("User is not a member of this group");
     }
-    return { isAuthorized: true };
 }
 
 /**

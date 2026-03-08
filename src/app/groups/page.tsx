@@ -14,6 +14,7 @@ import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import type { Session } from "next-auth";
 import { useEffect, useState } from "react";
 import { useAppHaptics } from "@/hooks/useAppHaptics";
+import { Badge } from "@/components/ui/badge";
 
 export default function GroupsPage() {
     const { toast } = useToast();
@@ -96,6 +97,11 @@ function GroupsList({
     );
     const groups = data?.groups || [];
 
+    const { data: groupsActivity } = useSWR<Record<string, boolean>>(
+        user ? `/api/activity/groups` : null,
+        fetcher
+    );
+
     return (
         <>
             {isLoading || !user ? (
@@ -103,49 +109,54 @@ function GroupsList({
             ) : groups.length === 0 ? (
                 <EmptyGroupsGuide />
             ) : (
-                <div className="flex-grow overflow-y-auto py-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-24">
+                <div className="flex-grow py-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {groups.map((group) => (
-                            <Card
-                                key={group._id}
-                                className="cursor-pointer"
-                                onClick={() => {
-                                    play("navigation");
-                                    router.push(`/groups/${group._id}/dashboard`);
-                                }}
-                            >
-                                <CardContent className="flex justify-between items-center p-4">
-                                    <div>
-                                        <CardTitle>{group.name}</CardTitle>
-                                        <CardDescription>Go Vote Now!</CardDescription>
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={(e) => handleStar(group._id, e)}
-                                        >
-                                            <Star
-                                                className="w-4 h-4"
-                                                color={
-                                                    starredGroupId === group._id ? "gold" : "gray"
-                                                }
-                                            />
-                                        </Button>
+                            <div key={group._id} className="relative">
+                                {groupsActivity?.[group._id] && (
+                                    <Badge className="absolute -top-1.5 -right-1.5 z-10 h-4 w-4 rounded-full bg-destructive" />
+                                )}
+                                <Card
+                                    onClick={() => {
+                                        play("navigation");
+                                        router.push(`/groups/${group._id}/dashboard`);
+                                    }}
+                                >
+                                    <CardContent className="flex justify-between items-center p-4">
+                                        <div>
+                                            <CardTitle>{group.name}</CardTitle>
+                                            <CardDescription>Go Vote Now!</CardDescription>
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={(e) => handleStar(group._id, e)}
+                                            >
+                                                <Star
+                                                    className="w-4 h-4"
+                                                    color={
+                                                        starredGroupId === group._id
+                                                            ? "gold"
+                                                            : "gray"
+                                                    }
+                                                />
+                                            </Button>
 
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                copyFn(`${group._id}`);
-                                            }}
-                                        >
-                                            <Copy className="w-4 h-4" />
-                                        </Button>
-                                    </div>
-                                </CardContent>
-                            </Card>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    copyFn(`${group._id}`);
+                                                }}
+                                            >
+                                                <Copy className="w-4 h-4" />
+                                            </Button>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </div>
                         ))}
                     </div>
                 </div>

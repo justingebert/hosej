@@ -8,6 +8,7 @@ export interface IGroupMember {
     streak: number;
     lastPointDate: Date | null;
     joinedAt: Date;
+    lastDashboardVisitAt: Date | null;
 }
 
 export interface IGroupJukeboxSettings {

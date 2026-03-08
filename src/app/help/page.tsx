@@ -6,7 +6,6 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import BackLink from "@/components/ui/custom/BackLink";
 import PWAInstallButton from "@/components/features/pwa/PWAInstallButton";
-import cat from "../../../public/cat.jpg";
 
 export default function HelpPage() {
     return (
@@ -14,7 +13,14 @@ export default function HelpPage() {
             <Header leftComponent={<BackLink href={`/groups`} />} title={"Help"} />
 
             <div className="flex flex-col items-center justify-center gap-6 max-w-sm mx-auto">
-                <Image src={cat} alt="cat" className="rounded-xl" priority />
+                <Image
+                    src="/cat.jpg"
+                    alt="cat"
+                    width={500}
+                    height={500}
+                    className="rounded-xl"
+                    priority
+                />
 
                 <p className="text-center text-muted-foreground text-sm">
                     This is a private app in development

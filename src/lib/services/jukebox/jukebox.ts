@@ -9,6 +9,8 @@ import { ConflictError, NotFoundError, ValidationError } from "@/lib/api/errorHa
 import { sendNotification } from "@/lib/sendNotification";
 import { createChatForEntity } from "@/lib/services/chat";
 import { EntityModel } from "@/types/models/chat";
+import { recordActivity } from "@/lib/services/activity";
+import { ActivityFeature, ActivityType } from "@/types/models/activityEvent";
 
 // ─── Query helpers ───────────────────────────────────────────
 
@@ -135,6 +137,15 @@ export async function addSong(
     jukebox.songs.push(newSong as ISong);
     await jukebox.save();
 
+    recordActivity({
+        groupId,
+        actorUser: userId,
+        type: ActivityType.JukeboxSongAdded,
+        feature: ActivityFeature.Jukebox,
+        entityId: jukeboxId,
+        meta: { title, artist },
+    }).catch((err) => console.error("Activity log failed", err));
+
     return jukebox;
 }
 
@@ -165,6 +176,15 @@ export async function rateSong(jukeboxId: string, songId: string, userId: string
     song.ratings.push({ userId: userId, rating } as IRating);
     await jukebox.save();
 
+    recordActivity({
+        groupId: jukebox.groupId.toString(),
+        actorUser: userId,
+        type: ActivityType.JukeboxRated,
+        feature: ActivityFeature.Jukebox,
+        entityId: jukeboxId,
+        meta: { songId },
+    }).catch((err) => console.error("Activity log failed", err));
+
     return song;
 }
 
@@ -187,6 +207,14 @@ export async function activateJukeboxes(group: IGroup) {
         const newChat = await createChatForEntity(group._id, newJukebox._id, EntityModel.Jukebox);
         newJukebox.chat = newChat._id;
         await newJukebox.save();
+
+        recordActivity({
+            groupId: String(group._id),
+            type: ActivityType.JukeboxActivated,
+            feature: ActivityFeature.Jukebox,
+            entityId: String(newJukebox._id),
+            meta: { title: newJukebox.title },
+        }).catch((err) => console.error("Activity log failed", err));
     }
 
     const monthName = new Intl.DateTimeFormat("en-US", { month: "long" }).format(today);

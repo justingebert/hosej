@@ -10,6 +10,7 @@ const memberSchema = new mongoose.Schema<IGroupMember>({
     streak: { type: Number, default: 0 },
     lastPointDate: { type: Date, default: null },
     joinedAt: { type: Date, default: Date.now },
+    lastDashboardVisitAt: { type: Date, default: null },
 });
 
 const groupSchema = new mongoose.Schema<
