@@ -4,6 +4,8 @@
 
 @layer base {
     :root {
+        --radius: 1rem;
+
         --background: 0 0% 100%;
         --foreground: 222.2 84% 4.9%;
 
@@ -68,6 +70,7 @@
     }
 
     .dark {
+        --radius: 1rem;
         --background: 222.2 10% 4.9%;
         --foreground: 210 40% 98%;
 
