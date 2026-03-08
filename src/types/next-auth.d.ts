@@ -9,6 +9,7 @@ declare module "next-auth" {
             googleConnected: boolean;
             groups: string[];
             createdAt: string;
+            needsNameSetup?: boolean;
         };
     }
 }
@@ -20,5 +21,6 @@ declare module "next-auth/jwt" {
         googleConnected: boolean;
         groups: string[];
         createdAt: string;
+        needsNameSetup?: boolean;
     }
 }

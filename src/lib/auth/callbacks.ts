@@ -53,12 +53,14 @@ export async function jwtCallback({
             token.googleConnected = true;
             token.groups = [];
             token.createdAt = String(newUser.createdAt);
+            token.needsNameSetup = true;
         } else {
             token.userId = existingUser._id.toString();
             token.username = existingUser.username;
             token.googleConnected = existingUser.googleConnected;
             token.groups = existingUser.groups.map(String);
             token.createdAt = String(existingUser.createdAt);
+            token.needsNameSetup = false;
         }
     } else if (user) {
         // Device credentials sign-in — user object comes from authorizeDevice
@@ -87,6 +89,7 @@ export async function jwtCallback({
             token.googleConnected = freshUser.googleConnected;
             token.groups = freshUser.groups.map(String);
             token.createdAt = String(freshUser.createdAt);
+            token.needsNameSetup = false;
         }
     }
 
@@ -104,6 +107,7 @@ export async function sessionCallback({ session, token }: { session: Session; to
         googleConnected: token.googleConnected,
         groups: token.groups,
         createdAt: token.createdAt,
+        needsNameSetup: token.needsNameSetup,
     };
     return session;
 }

@@ -44,6 +44,7 @@ export async function proxy(req: NextRequest) {
         "/api/auth/callback/google",
         "/terms",
         "/privacy",
+        "/setup-name",
         "/",
     ]);
     if (publicRoutes.has(pathname) || (pathname == "/api/users" && req.method === "POST")) {
@@ -58,6 +59,19 @@ export async function proxy(req: NextRequest) {
 
         const loginUrl = new URL("/", req.url);
         return NextResponse.redirect(loginUrl);
+    }
+
+    // Redirect new Google users to set their name, but not during
+    // the connect-google flow (existing device user linking Google)
+    if (
+        token.needsNameSetup &&
+        pathname !== "/setup-name" &&
+        pathname !== "/connectgoogle" &&
+        !pathname.startsWith("/api/auth") &&
+        !pathname.startsWith("/api/users")
+    ) {
+        const setupUrl = new URL("/setup-name", req.url);
+        return NextResponse.redirect(setupUrl);
     }
 
     return NextResponse.next();

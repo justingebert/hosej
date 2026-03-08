@@ -16,33 +16,40 @@ export default function GoogleCallbackPage() {
     useEffect(() => {
         const mergeGoogleAccount = async () => {
             const deviceId = localStorage.getItem("deviceId");
-            if (deviceId && status === "authenticated") {
-                setIsLinking(true);
-                try {
-                    const response = await fetch("/api/users/google", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ deviceId: deviceId }),
-                    });
+            if (!deviceId) {
+                // No device user to merge — this is a fresh Google signup
+                router.replace("/settings");
+                return;
+            }
 
-                    const result = await response.json();
+            setIsLinking(true);
+            try {
+                const response = await fetch("/api/users/google", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ deviceId }),
+                });
 
-                    if (response.ok) {
-                        toast({ title: "Google account linked successfully." });
-                        await signIn("google", { callbackUrl: `/groups` });
-                    } else {
-                        console.error("Failed to link Google account:", result.message);
-                    }
-                } catch (error) {
-                    console.error("Error merging accounts:", error);
+                const result = await response.json();
+
+                if (response.ok) {
+                    localStorage.removeItem("deviceId");
+                    toast({ title: "Google account linked successfully." });
+                    await signIn("google", { callbackUrl: `/groups` });
+                } else {
+                    console.error("Failed to link Google account:", result.message);
+                    router.replace("/settings");
                 }
+            } catch (error) {
+                console.error("Error merging accounts:", error);
+                router.replace("/settings");
             }
         };
 
         if (status === "authenticated") {
             mergeGoogleAccount();
         }
-    }, [status, session, router]);
+    }, [status, session, router, toast]);
 
     if (status === "loading") {
         return <SpinningLoader loading={true} />;

@@ -20,6 +20,7 @@ import type { Session } from "next-auth";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SkeletonList } from "@/components/ui/custom/SkeletonList";
 import BackLink from "@/components/ui/custom/BackLink";
+import user from "@/db/models/User";
 
 export default function SettingsPage() {
     const { session, status, user, update } = useAuthRedirect();
@@ -205,9 +206,7 @@ function GoogleConnectButton({
                 </Button>
             ) : (
                 <Button
-                    onClick={async () => {
-                        await signIn("google", { callbackUrl: `/connectgoogle` });
-                    }}
+                    onClick={() => signIn("google", { callbackUrl: `/connectgoogle` })}
                     className="w-full"
                 >
                     <FcGoogle className="mr-2" />
