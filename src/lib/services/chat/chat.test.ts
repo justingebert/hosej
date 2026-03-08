@@ -3,6 +3,7 @@ import { Types } from "mongoose";
 
 vi.mock("@/db/models/Chat");
 vi.mock("@/db/models/User");
+vi.mock("@/db/models/ActivityEvent");
 
 import { createChatForEntity, getChatById, addMessage } from "./chat";
 import Chat from "@/db/models/Chat";

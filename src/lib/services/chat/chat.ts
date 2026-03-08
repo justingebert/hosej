@@ -3,6 +3,8 @@ import User from "@/db/models/User";
 import type { Types } from "mongoose";
 import type { ChatDocument, EntityModel, IMessage } from "@/types/models/chat";
 import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
+import { recordActivity } from "@/lib/services/activity";
+import { ActivityFeature, ActivityType } from "@/types/models/activityEvent";
 
 /**
  * Create a chat for any entity (Question, Rally, Jukebox).
@@ -52,6 +54,22 @@ export async function addMessage(
 
     chat.messages.push({ user: userId, message: message.trim(), createdAt: new Date() });
     await chat.save();
+
+    const featureMap: Record<string, ActivityFeature> = {
+        Question: ActivityFeature.Question,
+        Rally: ActivityFeature.Rally,
+        Jukebox: ActivityFeature.Jukebox,
+    };
+    const feature = featureMap[chat.entityModel] ?? ActivityFeature.System;
+
+    recordActivity({
+        groupId: chat.group.toString(),
+        actorUser: userId,
+        type: ActivityType.ChatMessage,
+        feature,
+        entityId: chat.entity.toString(),
+        meta: { chatId: chatId },
+    }).catch((err) => console.error("Activity log failed", err));
 
     return chat.messages[chat.messages.length - 1];
 }

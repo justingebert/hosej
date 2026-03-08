@@ -4,6 +4,7 @@ import { Types } from "mongoose";
 vi.mock("@/db/models/Question");
 vi.mock("@/db/models/Group");
 vi.mock("@/db/models/User");
+vi.mock("@/db/models/ActivityEvent");
 vi.mock("@/lib/s3");
 vi.mock("@/lib/services/chat");
 

@@ -83,9 +83,7 @@ describe("isUserInGroup", () => {
         const mockGroup = createMockGroup();
         (Group.findById as Mock).mockResolvedValue(mockGroup);
 
-        const result = await isUserInGroup(mockUserId, mockGroupId);
-
-        expect(result).toEqual({ isAuthorized: true });
+        await expect(isUserInGroup(mockUserId, mockGroupId)).resolves.toBeUndefined();
     });
 
     it("should throw NotFoundError when group not found", async () => {

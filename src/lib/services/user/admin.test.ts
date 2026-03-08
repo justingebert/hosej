@@ -27,9 +27,7 @@ describe("admin", () => {
             };
             (Group.findById as Mock).mockResolvedValue(mockGroup);
 
-            const result = await isUserInGroup(mockUserId, mockGroupId);
-
-            expect(result).toEqual({ isAuthorized: true });
+            await expect(isUserInGroup(mockUserId, mockGroupId)).resolves.toBeUndefined();
         });
 
         it("should throw NotFoundError when group does not exist", async () => {
@@ -48,7 +46,7 @@ describe("admin", () => {
 
             await expect(isUserInGroup(mockUserId, mockGroupId)).rejects.toThrow(ForbiddenError);
             await expect(isUserInGroup(mockUserId, mockGroupId)).rejects.toThrow(
-                "You are not a member of this group"
+                "User is not a member of this group"
             );
         });
     });

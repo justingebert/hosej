@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useParams, useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
     BarChartBig,
@@ -22,6 +23,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAppHaptics } from "@/hooks/useAppHaptics";
 import type { QuestionWithUserStateDTO } from "@/types/models/question";
 import type { FeatureStatus } from "@/types/models/appConfig";
+import { ActivityFeature } from "@/types/models/activityEvent";
+import type { MissedActivitySummary } from "@/types/models/activityEvent";
 
 // Lazy load CompletionChart (uses recharts ~200KB)
 const CompletionChart = dynamic(
@@ -40,6 +43,8 @@ export default function Dashboard() {
     const { play } = useAppHaptics();
     const params = useParams<{ groupId: string }>();
     const groupId = params?.groupId;
+    const seenMarkedRef = useRef(false);
+
     const { data: group, isLoading: groupLoading } = useSWR<GroupDTO>(
         groupId ? `/api/groups/${groupId}` : null,
         fetcher
@@ -60,6 +65,25 @@ export default function Dashboard() {
         globalFeatures?.rallies?.status === "enabled" ? `/api/groups/${groupId}/rally` : null,
         fetcher
     );
+    const { data: missedActivity } = useSWR<MissedActivitySummary>(
+        groupId ? `/api/groups/${groupId}/activity/missed` : null,
+        fetcher
+    );
+
+    // Mark dashboard as seen after 3 seconds
+    const markSeen = useCallback(() => {
+        if (!groupId || seenMarkedRef.current) return;
+        seenMarkedRef.current = true;
+        fetch(`/api/groups/${groupId}/activity/seen`, { method: "POST" }).catch(() => {
+            seenMarkedRef.current = false;
+        });
+    }, [groupId]);
+
+    useEffect(() => {
+        if (!missedActivity) return;
+        const timer = setTimeout(markSeen, 2000);
+        return () => clearTimeout(timer);
+    }, [missedActivity, markSeen]);
 
     const questions = questionsData?.questions || [];
     const rallies = ralliesData?.rallies || [];
@@ -120,11 +144,15 @@ export default function Dashboard() {
                                             navigateWithHaptics(`/groups/${groupId}/question`)
                                         }
                                     >
-                                        {questions.length > 0 && (
-                                            <div className="absolute -top-3 -right-3">
-                                                <Badge>{questions.length}</Badge>
-                                            </div>
-                                        )}
+                                        {missedActivity &&
+                                            missedActivity[ActivityFeature.Question] > 0 && (
+                                                <div className="absolute -top-3 -right-3">
+                                                    <Badge variant="destructive">
+                                                        {missedActivity[ActivityFeature.Question]}{" "}
+                                                        new
+                                                    </Badge>
+                                                </div>
+                                            )}
                                         <div className="flex flex-col justify-end">
                                             <div className="font-bold text-2xl">Daily</div>
                                         </div>
@@ -165,11 +193,14 @@ export default function Dashboard() {
                                             navigateWithHaptics(`/groups/${groupId}/rally`)
                                         }
                                     >
-                                        {rallies.length > 0 && (
-                                            <div className="absolute -top-3 -right-3">
-                                                <Badge>{rallies.length}</Badge>
-                                            </div>
-                                        )}
+                                        {missedActivity &&
+                                            missedActivity[ActivityFeature.Rally] > 0 && (
+                                                <div className="absolute -top-3 -right-3">
+                                                    <Badge variant="destructive">
+                                                        {missedActivity[ActivityFeature.Rally]} new
+                                                    </Badge>
+                                                </div>
+                                            )}
                                         <div className="flex flex-col justify-center">
                                             <div className="font-bold text-2xl">Rally</div>
                                         </div>
@@ -225,9 +256,15 @@ export default function Dashboard() {
                                             navigateWithHaptics(`/groups/${groupId}/jukebox`)
                                         }
                                     >
-                                        <div className="absolute -top-3 -right-3">
-                                            <Badge>1</Badge>
-                                        </div>
+                                        {missedActivity &&
+                                            missedActivity[ActivityFeature.Jukebox] > 0 && (
+                                                <div className="absolute -top-3 -right-3">
+                                                    <Badge variant="destructive">
+                                                        {missedActivity[ActivityFeature.Jukebox]}{" "}
+                                                        new
+                                                    </Badge>
+                                                </div>
+                                            )}
                                         <div className="flex flex-col justify-center">
                                             <div className="font-bold text-2xl">Jukebox</div>
                                         </div>
