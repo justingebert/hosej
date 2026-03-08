@@ -77,6 +77,24 @@ Models (src/db/models/)    → Mongoose schemas, MongoDB
 - **PWA:** Serwist service worker
 - **Deployment:** Vercel
 
+## Styling & Layout Patterns
+
+### Global layout (`src/app/layout.tsx`)
+The root layout wraps all content in `<div className="p-6 h-[100dvh]">`. This means **global `p-6` padding is already applied** — page components must NOT add their own outer padding/margin. Start page content directly without a wrapping padded container.
+
+### Full-height layout
+- Root layout: `h-[100dvh]` on the wrapper div
+- Pages that need full-height flex: `<div className="flex flex-col h-[100dvh]">`
+- Group tabs layout (`src/app/groups/[groupId]/(pages)/layout.tsx`): wraps children in `<div className="flex-grow pb-20">` to account for the fixed bottom nav (`pb-20`)
+
+### Header component (`src/components/ui/custom/Header.tsx`)
+- Use `<Header title="..." />` for all page titles — renders `mb-4` spacing below
+- Supports `leftComponent`, `rightComponent`, and `href` (auto-renders `<BackLink>` when `href` provided)
+- Pass `title={null}` to show a skeleton while loading
+
+### Bottom navigation
+- Fixed footer in the group tabs layout; pages inside that layout must use `pb-20` (already applied by the layout's flex child wrapper)
+
 ## Code Style
 
 - Path alias: `@/*` maps to `./src/*`

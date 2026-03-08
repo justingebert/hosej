@@ -32,6 +32,8 @@ export function CreateGroupDrawer() {
             }
 
             mutate(`/api/groups`);
+
+            toast({ title: "GroupId Copied to Clipboard!" });
         } catch (error) {
             console.error("Failed to create group: ", error);
             toast({ title: "Failed to create group!", variant: "destructive" });

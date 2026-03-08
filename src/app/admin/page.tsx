@@ -138,13 +138,13 @@ export default function AdminPage() {
             <Header title="Admin Panel" leftComponent={<BackLink href={`/settings`} />} />
 
             <div className="space-y-4">
-                <GlobalFeatureControl
-                    config={config}
-                    localConfig={localConfig}
-                    onUpdateFeature={updateFeature}
-                    onSave={saveSettings}
-                    saving={saving}
-                />
+                {/*<GlobalFeatureControl*/}
+                {/*    config={config}*/}
+                {/*    localConfig={localConfig}*/}
+                {/*    onUpdateFeature={updateFeature}*/}
+                {/*    onSave={saveSettings}*/}
+                {/*    saving={saving}*/}
+                {/*/>*/}
 
                 <GroupPackManager />
 

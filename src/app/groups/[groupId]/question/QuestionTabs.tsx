@@ -185,10 +185,10 @@ function RatingDrawer({
     return (
         <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
             <DrawerTrigger className="w-full" onClick={() => play("selection")}>
-                <Card className="relative bg-foreground text-center">
-                    <h2 className="font-bold p-6 text-secondary">{question.question}</h2>
+                <Card className="relative text-center">
+                    <h2 className="font-bold p-6 text-foreground">{question.question}</h2>
                     {question.questionType.includes("multiple") && (
-                        <CheckCheck className="absolute bottom-2 right-2 text-secondary w-4 h-4" />
+                        <CheckCheck className="absolute bottom-2 right-2 text-muted-foreground w-4 h-4" />
                     )}
                 </Card>
             </DrawerTrigger>

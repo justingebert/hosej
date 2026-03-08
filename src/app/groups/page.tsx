@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { ArrowDown, CircleHelp, Copy, Star, User, Users } from "lucide-react";
+import { ArrowDown, CircleHelp, Copy, Share, Star, User, Users } from "lucide-react";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
 import type { GroupDTO } from "@/types/models/group";
 import { JoinGroupDrawer } from "@/components/features/group/joinGroupDrawer";
@@ -109,36 +109,47 @@ function GroupsList({
             ) : groups.length === 0 ? (
                 <EmptyGroupsGuide />
             ) : (
-                <div className="flex-grow py-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="flex-grow py-6 max-w-5xl mx-auto w-full">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                         {groups.map((group) => (
-                            <div key={group._id} className="relative">
+                            <div key={group._id} className="relative group">
                                 {groupsActivity?.[group._id] && (
-                                    <Badge className="absolute -top-1.5 -right-1.5 z-10 h-4 w-4 rounded-full bg-destructive" />
+                                    <Badge className="absolute -top-1.5 -right-1.5 z-10 h-4 w-4 rounded-full bg-destructive animate-pulse shadow-sm shadow-destructive/20 border-border" />
                                 )}
                                 <Card
+                                    className="cursor-pointer bg-gradient-to-br from-background to-muted/50 border shadow-sm hover:shadow-md active:scale-[0.98] transition-all overflow-hidden rounded-2xl"
                                     onClick={() => {
                                         play("navigation");
                                         router.push(`/groups/${group._id}/dashboard`);
                                     }}
                                 >
-                                    <CardContent className="flex justify-between items-center p-4">
-                                        <div>
-                                            <CardTitle>{group.name}</CardTitle>
-                                            <CardDescription>Go Vote Now!</CardDescription>
+                                    <CardContent className="flex justify-between items-center p-5">
+                                        <div className="flex flex-col gap-1">
+                                            <CardTitle className="tracking-tight text-xl">
+                                                {group.name}
+                                            </CardTitle>
+                                            <CardDescription className="text-sm">
+                                                Go Vote Now!
+                                            </CardDescription>
                                         </div>
-                                        <div className="flex items-center space-x-2">
+                                        <div className="flex items-center space-x-1">
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
+                                                className="rounded-full hover:bg-primary/10 transition-colors"
                                                 onClick={(e) => handleStar(group._id, e)}
                                             >
                                                 <Star
-                                                    className="w-4 h-4"
+                                                    className="w-5 h-5 transition-all"
+                                                    fill={
+                                                        starredGroupId === group._id
+                                                            ? "currentColor"
+                                                            : "none"
+                                                    }
                                                     color={
                                                         starredGroupId === group._id
                                                             ? "gold"
-                                                            : "gray"
+                                                            : "currentColor"
                                                     }
                                                 />
                                             </Button>
@@ -146,12 +157,13 @@ function GroupsList({
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
+                                                className="rounded-full hover:bg-primary/10 transition-colors"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     copyFn(`${group._id}`);
                                                 }}
                                             >
-                                                <Copy className="w-4 h-4" />
+                                                <Share className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                                             </Button>
                                         </div>
                                     </CardContent>
@@ -167,16 +179,22 @@ function GroupsList({
 
 function GroupListSkeleton() {
     return (
-        <div className="flex-grow overflow-y-auto py-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-24">
+        <div className="flex-grow overflow-y-auto py-6 max-w-5xl mx-auto w-full">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 pb-24">
                 {[...Array(6)].map((_, i) => (
-                    <Card key={i} className="cursor-pointer">
-                        <CardContent className="flex justify-between items-center p-4">
-                            <div>
-                                <Skeleton className="h-6 w-32" />
-                                <Skeleton className="h-4 w-24 mt-1" />
+                    <Card
+                        key={i}
+                        className="cursor-pointer bg-gradient-to-br from-background to-muted/50 border shadow-sm rounded-2xl overflow-hidden"
+                    >
+                        <CardContent className="flex justify-between items-center p-5">
+                            <div className="flex flex-col gap-2">
+                                <Skeleton className="h-6 w-32 rounded-md" />
+                                <Skeleton className="h-4 w-24 rounded-md" />
                             </div>
-                            <Skeleton className="h-8 w-8" />
+                            <div className="flex space-x-2">
+                                <Skeleton className="h-9 w-9 rounded-full" />
+                                <Skeleton className="h-9 w-9 rounded-full" />
+                            </div>
                         </CardContent>
                     </Card>
                 ))}
@@ -187,23 +205,25 @@ function GroupListSkeleton() {
 
 function GroupsHeader({ router }: { router: ReturnType<typeof useRouter> }) {
     return (
-        <div className="flex justify-between items-center w-full">
+        <div className="flex justify-between items-center w-full shrink-0">
             <Button
-                variant="outline"
+                variant="ghost"
+                className="rounded-full bg-muted/50 hover:bg-muted"
                 size="icon"
                 haptic="navigation"
                 onClick={() => router.push(`/help`)}
             >
-                <CircleHelp />
+                <CircleHelp className="h-5 w-5" />
             </Button>
-            <h1 className="text-4xl font-bold">Groups</h1>
+            <h1 className="text-4xl font-bold tracking-tight px-4">Groups</h1>
             <Button
-                variant="outline"
+                variant="ghost"
+                className="rounded-full bg-muted/50 hover:bg-muted"
                 size="icon"
                 haptic="navigation"
                 onClick={() => router.push(`/settings`)}
             >
-                <User />
+                <User className="h-5 w-5" />
             </Button>
         </div>
     );
@@ -213,36 +233,52 @@ function EmptyGroupsGuide() {
     return (
         <div className="flex-grow flex flex-col items-center justify-center pb-32 px-6">
             <div className="flex flex-col items-center space-y-4 text-muted-foreground/50">
-                <Users className="w-16 h-16" />
-                <h2 className="text-2xl font-semibold text-muted-foreground/60">No groups yet</h2>
-                <p className="text-center text-sm text-muted-foreground/40 max-w-xs">
+                <div className="w-20 h-20 rounded-full bg-muted/30 flex items-center justify-center">
+                    <Users className="w-10 h-10" />
+                </div>
+                <h2 className="text-2xl font-semibold tracking-tight text-muted-foreground/60">
+                    No groups yet
+                </h2>
+                <p className="text-center text-sm text-muted-foreground/40 max-w-xs leading-relaxed">
                     Get started by creating your own group or joining an existing one with a group
                     ID
                 </p>
             </div>
 
-            <div className="mt-12 w-full max-w-sm">
-                <Card className="border-dashed border-muted-foreground/20 bg-muted/30">
-                    <CardContent className="flex justify-between items-center p-4">
-                        <div>
-                            <CardTitle className="text-muted-foreground/30">My Group</CardTitle>
-                            <CardDescription className="text-muted-foreground/20">
+            <div className="mt-12 w-full max-w-xs relative group">
+                <Card className="border-dashed border-2 border-muted-foreground/20 bg-gradient-to-br from-background to-muted/30 shadow-sm rounded-2xl">
+                    <CardContent className="flex justify-between items-center p-5">
+                        <div className="flex flex-col gap-1">
+                            <CardTitle className="text-muted-foreground/40 text-xl tracking-tight">
+                                My Group
+                            </CardTitle>
+                            <CardDescription className="text-muted-foreground/30 text-sm">
                                 Go Vote Now!
                             </CardDescription>
                         </div>
-                        <div className="flex items-center space-x-2">
-                            <Button variant="ghost" size="icon" disabled className="opacity-30">
-                                <Star className="w-4 h-4" />
+                        <div className="flex items-center space-x-1">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                disabled
+                                className="opacity-30 rounded-full"
+                            >
+                                <Star className="w-5 h-5" />
                             </Button>
                             <div className="relative">
-                                <Button variant="ghost" size="icon" disabled className="opacity-30">
-                                    <Copy className="w-4 h-4" />
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    disabled
+                                    className="opacity-30 rounded-full"
+                                >
+                                    <Share className="w-4 h-4" />
                                 </Button>
-                                <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex flex-col items-center">
-                                    <span className="text-xs text-muted-foreground/40 whitespace-nowrap">
+                                <div className="absolute -top-10 -left-1/4 -translate-x-1/2 flex flex-col items-center animate-bounce">
+                                    <span className="text-[10px] font-semibold uppercase tracking-wider text-primary/60 whitespace-nowrap bg-primary/10 px-2 py-0.5 rounded-full mb-1">
                                         Share ID
                                     </span>
-                                    <ArrowDown className="w-5 h-5 text-muted-foreground/30 -mt-0.5" />
+                                    <ArrowDown className="w-4 h-4 text-primary/40 -mt-1" />
                                 </div>
                             </div>
                         </div>
@@ -250,14 +286,18 @@ function EmptyGroupsGuide() {
                 </Card>
             </div>
 
-            <div className="mt-16 flex w-full max-w-sm justify-between px-4">
-                <div className="flex flex-col items-center space-y-1">
-                    <span className="text-xs text-muted-foreground/40">Start fresh</span>
-                    <ArrowDown className="w-6 h-6 text-muted-foreground/30 animate-bounce" />
+            <div className="mt-16 flex w-full max-w-sm justify-between px-8 relative">
+                <div className="flex flex-col items-center space-y-2 opacity-60 hover:opacity-100 transition-opacity">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                        Start fresh
+                    </span>
+                    <ArrowDown className="w-5 h-5 text-muted-foreground animate-bounce" />
                 </div>
-                <div className="flex flex-col items-center space-y-1">
-                    <span className="text-xs text-muted-foreground/40">Have a code?</span>
-                    <ArrowDown className="w-6 h-6 text-muted-foreground/30 animate-bounce" />
+                <div className="flex flex-col items-center space-y-2 opacity-60 hover:opacity-100 transition-opacity">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                        Have a code?
+                    </span>
+                    <ArrowDown className="w-5 h-5 text-muted-foreground animate-bounce" />
                 </div>
             </div>
         </div>

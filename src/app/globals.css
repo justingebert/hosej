@@ -40,43 +40,55 @@
 
         --radius: 0.5rem;
 
-        --chart-1: 220 55% 60%; /* Cooler blue */
-        --chart-2: 160 50% 50%; /* Softer green */
-        --chart-3: 30 70% 55%; /* Warm orange */
-        --chart-4: 280 50% 65%; /* Muted violet */
-        --chart-5: 340 65% 60%; /* Gentle pink */
-        --chart-6: 200 50% 65%; /* Cool cyan */
-        --chart-7: 120 45% 50%; /* Forest green */
-        --chart-8: 40 75% 60%; /* Golden yellow */
-        --chart-9: 250 45% 60%; /* Light purple */
-        --chart-10: 10 60% 60%; /* Coral red */
+        --chart-1: 220 55% 60%;
+        /* Cooler blue */
+        --chart-2: 160 50% 50%;
+        /* Softer green */
+        --chart-3: 30 70% 55%;
+        /* Warm orange */
+        --chart-4: 280 50% 65%;
+        /* Muted violet */
+        --chart-5: 340 65% 60%;
+        /* Gentle pink */
+        --chart-6: 200 50% 65%;
+        /* Cool cyan */
+        --chart-7: 120 45% 50%;
+        /* Forest green */
+        --chart-8: 40 75% 60%;
+        /* Golden yellow */
+        --chart-9: 250 45% 60%;
+        /* Light purple */
+        --chart-10: 10 60% 60%;
+        /* Coral red */
 
-        --shine-color: rgba(0, 0, 0, 0); /* Default shine color for light mode */
-        --shine-highlight: rgba(40, 40, 40, 0.4); /* Shine highlight for light mode */
+        --shine-color: rgba(0, 0, 0, 0);
+        /* Default shine color for light mode */
+        --shine-highlight: rgba(40, 40, 40, 0.4);
+        /* Shine highlight for light mode */
     }
 
     .dark {
         --background: 222.2 10% 4.9%;
         --foreground: 210 40% 98%;
 
-        --card: 222.2 84% 4.9%;
+        --card: 222.2 15% 6.5%;
         --card-foreground: 210 40% 98%;
 
-        --popover: 222.2 84% 4.9%;
+        --popover: 222.2 15% 6.5%;
         --popover-foreground: 210 40% 98%;
 
         --primary: 210 40% 98%;
         --primary-foreground: 222.2 47.4% 11.2%;
 
-        --secondary: 217.2 32.6% 17.5%;
+        --secondary: 222.2 15% 15%;
         --secondary-foreground: 210 40% 98%;
-        --secondary-transparent: rgba(217.2, 32.6%, 17.5%, 0.3);
+        --secondary-transparent: rgba(222.2, 15%, 15%, 0.3);
 
-        --secondary-darker: 217.2 32.6% 10.5%;
-        --secondary-darker-foreground: 217.2 32.6% 15.5%;
-        --secondary-dark-transparent: rgba(217.2, 32.6%, 10.5%, 0.3);
+        --secondary-darker: 222.2 15% 22%;
+        --secondary-darker-foreground: 210 40% 98%;
+        --secondary-dark-transparent: rgba(222.2, 15%, 22%, 0.3);
 
-        --muted: 217.2 32.6% 17.5%;
+        --muted: 222.2 15% 15%;
         --muted-foreground: 215 20.2% 65.1%;
 
         --accent: 217.2 32.6% 17.5%;
@@ -94,11 +106,16 @@
         --chart-3: 30 80% 55%;
         --chart-4: 280 65% 60%;
         --chart-5: 340 75% 55%;
-        --chart-6: 200 75% 50%; /* Added */
-        --chart-7: 120 55% 40%; /* Added */
-        --chart-8: 40 85% 50%; /* Added */
-        --chart-9: 250 60% 55%; /* Added */
-        --chart-10: 10 70% 55%; /* Added */
+        --chart-6: 200 75% 50%;
+        /* Added */
+        --chart-7: 120 55% 40%;
+        /* Added */
+        --chart-8: 40 85% 50%;
+        /* Added */
+        --chart-9: 250 60% 55%;
+        /* Added */
+        --chart-10: 10 70% 55%;
+        /* Added */
 
         --shine-color: rgba(255, 255, 255, 0.4);
         --shine-highlight: rgba(255, 255, 255, 1);
