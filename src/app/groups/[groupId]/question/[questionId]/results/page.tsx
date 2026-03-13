@@ -57,7 +57,7 @@ const ResultsPage = () => {
                         <Badge>🐐{question.rating.good?.length || 0}</Badge>
                     </div>
                     <div className="flex flex-col items-center mb-10">
-                        {question.questionType.startsWith("image") &&
+                        {question.questionType === "image" &&
                             question.options &&
                             question.options.map((option: QuestionOptionDTO, index: number) => {
                                 if (typeof option === "string") return null;
@@ -77,7 +77,8 @@ const ResultsPage = () => {
                                     </div>
                                 );
                             })}
-                        {!question.questionType.startsWith("image") &&
+                        {question.questionType !== "image" &&
+                            question.questionType !== "pairing" &&
                             question.options &&
                             question.options.map((option: QuestionOptionDTO, index: number) => (
                                 <div
@@ -85,6 +86,16 @@ const ResultsPage = () => {
                                     className="p-4 m-2 bg-secondary rounded-lg w-full max-w-md"
                                 >
                                     {typeof option === "string" ? option : option.key}
+                                </div>
+                            ))}
+                        {question.questionType === "pairing" &&
+                            question.pairingKeys &&
+                            question.pairingKeys.map((key: string, index: number) => (
+                                <div
+                                    key={index}
+                                    className="p-4 m-2 bg-secondary rounded-lg w-full max-w-md text-center"
+                                >
+                                    {key}
                                 </div>
                             ))}
                     </div>

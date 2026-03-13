@@ -1,10 +1,15 @@
-import { QuestionType } from "@/types/models/question";
+import { PairingKeySource, QuestionType } from "@/types/models/question";
 
 export interface TemplateInput {
     category: string;
     questionType: string;
     question: string;
+    multiSelect?: boolean;
     options?: any[];
+    pairingKeySource?: string;
+    pairingMode?: string;
+    pairingKeys?: string[];
+    pairingValues?: string[];
 }
 
 export interface ValidationError {
@@ -106,6 +111,54 @@ export function validateTemplates(templates: any): ValidationResult {
                 field: "options",
                 message: "Options must be an array if provided",
             });
+        }
+
+        // Validate multiSelect if present
+        if (
+            template.multiSelect !== undefined &&
+            template.multiSelect !== null &&
+            typeof template.multiSelect !== "boolean"
+        ) {
+            errors.push({
+                index: i,
+                field: "multiSelect",
+                message: "multiSelect must be a boolean if provided",
+            });
+        }
+
+        // Validate pairing fields
+        if (template.questionType === QuestionType.Pairing) {
+            if (!template.pairingMode) {
+                errors.push({
+                    index: i,
+                    field: "pairingMode",
+                    message: "pairingMode is required for pairing questions",
+                });
+            }
+            if (!template.pairingKeySource) {
+                errors.push({
+                    index: i,
+                    field: "pairingKeySource",
+                    message: "pairingKeySource is required for pairing questions",
+                });
+            }
+            if (
+                template.pairingKeySource === PairingKeySource.Custom &&
+                (!template.pairingKeys || template.pairingKeys.length < 2)
+            ) {
+                errors.push({
+                    index: i,
+                    field: "pairingKeys",
+                    message: "Custom pairing keys require at least 2 entries",
+                });
+            }
+            if (!template.pairingValues || template.pairingValues.length < 2) {
+                errors.push({
+                    index: i,
+                    field: "pairingValues",
+                    message: "Pairing questions require at least 2 values",
+                });
+            }
         }
     }
 

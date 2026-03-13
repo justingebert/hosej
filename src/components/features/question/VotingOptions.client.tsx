@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
 import type { QuestionOptionDTO, QuestionWithUserStateDTO } from "@/types/models/question";
+import PairingVoting from "./PairingVoting";
 
 function optionResponseValue(option: QuestionOptionDTO): string {
     return typeof option === "string" ? option : option.key;
@@ -14,11 +15,23 @@ const VoteOptions = ({
     question,
     onVote,
 }: {
-    question: Pick<QuestionWithUserStateDTO, "_id" | "groupId" | "questionType" | "options">;
+    question: Pick<
+        QuestionWithUserStateDTO,
+        | "_id"
+        | "groupId"
+        | "questionType"
+        | "multiSelect"
+        | "options"
+        | "pairingKeys"
+        | "pairingValues"
+        | "pairingMode"
+    >;
     onVote: () => void;
 }) => {
-    const isMultipleSelection = question.questionType.includes("multiple");
+    const isMultipleSelection = question.multiSelect;
     const isText = question.questionType === "text";
+    const isPairing = question.questionType === "pairing";
+    const isImage = question.questionType === "image";
     const options = useMemo(() => question.options ?? [], [question.options]);
 
     const [textResponse, setTextResponse] = useState<string>("");
@@ -50,6 +63,10 @@ const VoteOptions = ({
         onVote();
     };
 
+    if (isPairing) {
+        return <PairingVoting question={question} onVote={onVote} />;
+    }
+
     return (
         <div className="flex flex-col">
             {isText ? (
@@ -74,7 +91,7 @@ const VoteOptions = ({
                             }
                             className="p-2 text-sm md:text-base lg:text-lg h-auto whitespace-normal"
                         >
-                            {question.questionType.startsWith("image") ? (
+                            {isImage ? (
                                 typeof option === "string" ? null : (
                                     <Image
                                         src={option.url}

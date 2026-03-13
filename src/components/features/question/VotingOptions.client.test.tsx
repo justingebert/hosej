@@ -20,7 +20,8 @@ describe("VotingOptions", () => {
                 question={{
                     _id: "q1",
                     groupId: "g1",
-                    questionType: QuestionType.CustomSelectOne,
+                    questionType: QuestionType.Custom,
+                    multiSelect: false,
                     options: ["A", "B"],
                 }}
                 onVote={onVote}
@@ -48,7 +49,8 @@ describe("VotingOptions", () => {
                 question={{
                     _id: "q1",
                     groupId: "g1",
-                    questionType: QuestionType.CustomSelectMultiple,
+                    questionType: QuestionType.Custom,
+                    multiSelect: true,
                     options: ["A", "B", "C"],
                 }}
                 onVote={onVote}
@@ -79,7 +81,8 @@ describe("VotingOptions", () => {
                 question={{
                     _id: "q1",
                     groupId: "g1",
-                    questionType: QuestionType.ImageSelectOne,
+                    questionType: QuestionType.Image,
+                    multiSelect: false,
                     options,
                 }}
                 onVote={() => {}}
@@ -105,6 +108,7 @@ describe("VotingOptions", () => {
                     _id: "q1",
                     groupId: "g1",
                     questionType: QuestionType.Text,
+                    multiSelect: false,
                 }}
                 onVote={() => {}}
             />

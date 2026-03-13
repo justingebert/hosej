@@ -1,6 +1,6 @@
 import type { HydratedDocument, Types } from "mongoose";
 import type { ToDTO } from "../common";
-import type { QuestionType } from "@/types/models/question";
+import type { PairingKeySource, PairingMode, QuestionType } from "@/types/models/question";
 
 export interface IQuestionTemplate {
     _id: Types.ObjectId;
@@ -8,7 +8,14 @@ export interface IQuestionTemplate {
     category: string;
     questionType: QuestionType;
     question: string;
+    multiSelect: boolean;
     options?: unknown[];
+
+    pairingKeySource?: PairingKeySource;
+    pairingMode?: PairingMode;
+    pairingKeys?: string[];
+    pairingValues?: string[];
+
     createdAt: Date;
 }
 

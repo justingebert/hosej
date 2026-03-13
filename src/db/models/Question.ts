@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import type { IAnswer, IQuestion } from "@/types/models/question";
-import { QuestionType } from "@/types/models/question";
+import { PairingKeySource, PairingMode, QuestionType } from "@/types/models/question";
 
 const answerSchema = new mongoose.Schema<IAnswer>({
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
@@ -22,6 +22,7 @@ const questionSchema = new mongoose.Schema<IQuestion>({
     },
     question: { type: String, required: true },
     image: { type: String, required: false },
+    multiSelect: { type: Boolean, default: false },
     options: { type: mongoose.Schema.Types.Mixed, required: false },
     answers: [answerSchema],
     rating: {
@@ -29,6 +30,18 @@ const questionSchema = new mongoose.Schema<IQuestion>({
         ok: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
         bad: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     },
+    pairingKeySource: {
+        type: String,
+        enum: Object.values(PairingKeySource),
+        required: false,
+    },
+    pairingMode: {
+        type: String,
+        enum: Object.values(PairingMode),
+        required: false,
+    },
+    pairingKeys: { type: [String], required: false },
+    pairingValues: { type: [String], required: false },
     used: { type: Boolean, default: false },
     active: { type: Boolean, default: false },
     usedAt: { type: Date },

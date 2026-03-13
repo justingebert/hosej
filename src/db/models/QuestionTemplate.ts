@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { QuestionType } from "@/types/models/question";
+import { PairingKeySource, PairingMode, QuestionType } from "@/types/models/question";
 import type { IQuestionTemplate } from "@/types/models/questionTemplate";
 
 const questionTemplateSchema = new mongoose.Schema<IQuestionTemplate>({
@@ -11,7 +11,20 @@ const questionTemplateSchema = new mongoose.Schema<IQuestionTemplate>({
         required: true,
     },
     question: { type: String, required: true },
+    multiSelect: { type: Boolean, default: false },
     options: { type: mongoose.Schema.Types.Mixed, required: false },
+    pairingKeySource: {
+        type: String,
+        enum: Object.values(PairingKeySource),
+        required: false,
+    },
+    pairingMode: {
+        type: String,
+        enum: Object.values(PairingMode),
+        required: false,
+    },
+    pairingKeys: { type: [String], required: false },
+    pairingValues: { type: [String], required: false },
     createdAt: { type: Date, default: Date.now },
 });
 

@@ -9,7 +9,7 @@ import fetcher from "@/lib/fetcher";
 import { SkeletonList } from "@/components/ui/custom/SkeletonList";
 import { useParams, useSearchParams } from "next/navigation";
 
-import type { IResult, QuestionResultsDTO } from "@/types/models/question";
+import type { IPairingResult, IResult, QuestionResultsDTO } from "@/types/models/question";
 
 export default function ResultsDetailPage() {
     const params = useParams<{ groupId: string; questionId: string }>();
@@ -39,7 +39,9 @@ export default function ResultsDetailPage() {
         return null;
     }
 
-    const { results, questionType } = data;
+    const { results, pairingResults, questionType } = data;
+    const isPairing = questionType === "pairing";
+    const isImage = questionType === "image";
 
     return (
         <>
@@ -48,38 +50,59 @@ export default function ResultsDetailPage() {
                 title={" "}
             />
             <div className="grid grid-cols-1 gap-5 pb-20">
-                {results.map((result: IResult, index: number) => (
-                    <Card className="w-full max-w-md mx-auto text-center" key={index}>
-                        <CardHeader>
-                            <CardTitle>
-                                {questionType.startsWith("image") ? (
-                                    <Image
-                                        src={result.option}
-                                        alt={`Response ${index + 1}`}
-                                        width={350}
-                                        height={150}
-                                        className="object-cover rounded-lg mx-auto"
-                                        priority={index === 0}
-                                    />
-                                ) : (
-                                    result.option
-                                )}
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="grid grid-cols-2">
-                                {result.users.map((username: string, idx: number) => (
-                                    <div
-                                        key={idx}
-                                        className="m-2 p-2 bg-primary rounded-lg text-center text-primary-foreground font-bold"
-                                    >
-                                        {username}
-                                    </div>
-                                ))}
-                            </div>
-                        </CardContent>
-                    </Card>
-                ))}
+                {isPairing && pairingResults
+                    ? pairingResults.map((pr: IPairingResult, index: number) => (
+                          <Card className="w-full max-w-md mx-auto text-center" key={index}>
+                              <CardHeader>
+                                  <CardTitle>{pr.key}</CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                  {pr.valueCounts.map((vc, idx) => (
+                                      <div
+                                          key={idx}
+                                          className="flex justify-between items-center p-2 m-1 bg-secondary rounded-lg"
+                                      >
+                                          <span className="font-medium">{vc.value}</span>
+                                          <span className="text-sm text-muted-foreground">
+                                              {vc.count} ({vc.percentage}%)
+                                          </span>
+                                      </div>
+                                  ))}
+                              </CardContent>
+                          </Card>
+                      ))
+                    : results.map((result: IResult, index: number) => (
+                          <Card className="w-full max-w-md mx-auto text-center" key={index}>
+                              <CardHeader>
+                                  <CardTitle>
+                                      {isImage ? (
+                                          <Image
+                                              src={result.option}
+                                              alt={`Response ${index + 1}`}
+                                              width={350}
+                                              height={150}
+                                              className="object-cover rounded-lg mx-auto"
+                                              priority={index === 0}
+                                          />
+                                      ) : (
+                                          result.option
+                                      )}
+                                  </CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                  <div className="grid grid-cols-2">
+                                      {result.users.map((username: string, idx: number) => (
+                                          <div
+                                              key={idx}
+                                              className="m-2 p-2 bg-primary rounded-lg text-center text-primary-foreground font-bold"
+                                          >
+                                              {username}
+                                          </div>
+                                      ))}
+                                  </div>
+                              </CardContent>
+                          </Card>
+                      ))}
             </div>
         </>
     );

@@ -17,7 +17,17 @@ export type { TemplateInput, ValidationResult } from "./validateTemplateQuestion
 
 export async function createTemplatesFromArray(
     packId: string,
-    templates: { category: string; questionType: string; question: string; options?: unknown[] }[],
+    templates: {
+        category: string;
+        questionType: string;
+        question: string;
+        multiSelect?: boolean;
+        options?: unknown[];
+        pairingKeySource?: string;
+        pairingMode?: string;
+        pairingKeys?: string[];
+        pairingValues?: string[];
+    }[],
     packMeta?: { name?: string; description?: string; category?: string }
 ): Promise<{
     loaded: number;
@@ -42,7 +52,12 @@ export async function createTemplatesFromArray(
         category: t.category.trim(),
         questionType: t.questionType as QuestionType,
         question: t.question.trim(),
+        multiSelect: t.multiSelect ?? false,
         options: t.options || [],
+        ...(t.pairingKeySource && { pairingKeySource: t.pairingKeySource }),
+        ...(t.pairingMode && { pairingMode: t.pairingMode }),
+        ...(t.pairingKeys && { pairingKeys: t.pairingKeys }),
+        ...(t.pairingValues && { pairingValues: t.pairingValues }),
     }));
 
     const inserted = await QuestionTemplate.insertMany(docs);
@@ -95,7 +110,14 @@ export async function addTemplatePackToGroup(
             template.question,
             "",
             template.options,
-            template._id
+            template._id,
+            {
+                multiSelect: template.multiSelect,
+                pairingKeySource: template.pairingKeySource,
+                pairingMode: template.pairingMode,
+                pairingKeys: template.pairingKeys,
+                pairingValues: template.pairingValues,
+            }
         );
     }
 
