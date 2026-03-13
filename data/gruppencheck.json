@@ -1,0 +1,120 @@
+[
+  {
+    "category": "Wer in der Gruppe",
+    "questionType": "users-select-one",
+    "question": "Wer wäre am ehesten in 10 Jahren der Erfolgreichste – wenn er/sie es wirklich wollen würde?"
+  },
+  {
+    "category": "Wer in der Gruppe",
+    "questionType": "users-select-one",
+    "question": "Wer wäre der beste Krisenmanager, wenn wirklich alles schief läuft?"
+  },
+  {
+    "category": "Wer in der Gruppe",
+    "questionType": "users-select-one",
+    "question": "Wer hätte am meisten Spaß bei einem 24h-Survival-Trip ohne Handy und ohne Plan?"
+  },
+  {
+    "category": "Wer in der Gruppe",
+    "questionType": "users-select-one",
+    "question": "Wer ist am ehrlichsten – auch wenn die Wahrheit wehtut?"
+  },
+  {
+    "category": "Wer in der Gruppe",
+    "questionType": "users-select-one",
+    "question": "Wer käme mit jedem Menschen auf der Welt irgendwie klar?"
+  },
+  {
+    "category": "Wer in der Gruppe",
+    "questionType": "users-select-one",
+    "question": "Wer würde als Erster ein eigenes Business gründen – und es würde tatsächlich funktionieren?"
+  },
+  {
+    "category": "Wer in der Gruppe",
+    "questionType": "users-select-one",
+    "question": "Wer schreibt die längsten und emotionalsten Geburtstagsnachrichten?"
+  },
+  {
+    "category": "Wer in der Gruppe",
+    "questionType": "users-select-one",
+    "question": "Wer findet in jeder Situation noch einen Witz – auch wenn er völlig unangebracht ist?"
+  },
+  {
+    "category": "Wer in der Gruppe",
+    "questionType": "users-select-one",
+    "question": "Wer ist eigentlich der emotionale Anker der Gruppe?"
+  },
+  {
+    "category": "Wer in der Gruppe",
+    "questionType": "users-select-one",
+    "question": "Wer würde am ehesten alles stehen und liegen lassen und spontan für eine Woche verreisen?"
+  },
+  {
+    "category": "Wer in der Gruppe",
+    "questionType": "users-select-one",
+    "question": "Wer hat den besten Kompass dafür, was im Leben wirklich wichtig ist?"
+  },
+  {
+    "category": "Wer in der Gruppe",
+    "questionType": "users-select-one",
+    "question": "Wer wäre beim gemeinsamen Urlaub die größte Quelle für Chaos und Stress?"
+  },
+  {
+    "category": "Wer in der Gruppe",
+    "questionType": "users-select-one",
+    "question": "Wer tanzt auf der nächsten Party am ausgelassensten – ohne jede Scheu?"
+  },
+  {
+    "category": "Wer in der Gruppe",
+    "questionType": "users-select-one",
+    "question": "Wer wäre am ehesten Dorfältester in einem kleinen Bergdorf?"
+  },
+  {
+    "category": "Wer in der Gruppe",
+    "questionType": "users-select-multiple",
+    "question": "Wer wären die besten Reisepartner für eine 3-wöchige Backpacker-Tour ohne fixes Programm?"
+  },
+  {
+    "category": "Wer in der Gruppe",
+    "questionType": "users-select-multiple",
+    "question": "Wer sind die stillen Helden der Gruppe – die man nie genug wertschätzt?"
+  },
+  {
+    "category": "Wer in der Gruppe",
+    "questionType": "users-select-multiple",
+    "question": "Wer kann jederzeit angerufen werden – egal worum es geht, egal wie spät?"
+  },
+  {
+    "category": "Wer in der Gruppe",
+    "questionType": "users-select-multiple",
+    "question": "Wer hält die Gruppe am meisten zusammen?"
+  },
+  {
+    "category": "Wer in der Gruppe",
+    "questionType": "custom-select-one",
+    "question": "Welches Tier wärst du, wenn du eines wärst?",
+    "options": [
+      "Löwe – führt, auch wenn niemand folgt",
+      "Delfin – zu schlau für seinen eigenen Nutzen",
+      "Hund – loyal bis ins Grab",
+      "Katze – macht was er will, fühlt sich für nichts schuldig",
+      "Eule – sagt wenig, beobachtet alles",
+      "Otter – macht alles zum Spaß",
+      "Bär – gesellig, aber bitte nicht vor 10 Uhr"
+    ]
+  },
+  {
+    "category": "Wer in der Gruppe",
+    "questionType": "custom-select-one",
+    "question": "Welchen Job hättest du in einer mittelalterlichen Stadt?",
+    "options": [
+      "König / Königin",
+      "Hofnarr",
+      "Schmied",
+      "Händler",
+      "Ritter",
+      "Hexe / Zauberer",
+      "Bauer (zufrieden damit)"
+    ]
+  }
+]
