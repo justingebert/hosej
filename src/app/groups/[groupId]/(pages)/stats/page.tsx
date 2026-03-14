@@ -11,7 +11,10 @@ import {
 } from "@/components/ui/table";
 import { useParams } from "next/navigation";
 import Header from "@/components/ui/custom/Header";
-import { QuestionsByType, QuestionsByUser } from "@/components/features/charts/QuestionCharts";
+import {
+    QuestionsByType,
+    QuestionsByUser,
+} from "@/app/groups/[groupId]/(pages)/stats/_components/QuestionCharts";
 import { Separator } from "@/components/ui/separator";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";

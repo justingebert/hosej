@@ -1,6 +1,6 @@
-import RallyResults from "@/components/features/rally/VoteResultsRally.client";
-import RallyVoteCarousel from "@/components/features/rally/VotingOptionsRally.client";
-import SubmitRally from "@/components/features/rally/submitImageRally.client";
+import RallyResults from "@/app/groups/[groupId]/rally/_components/VoteResultsRally.client";
+import RallyVoteCarousel from "@/app/groups/[groupId]/rally/_components/VotingOptionsRally.client";
+import SubmitRally from "@/app/groups/[groupId]/rally/_components/submitImageRally.client";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRouter, useSearchParams } from "next/navigation";

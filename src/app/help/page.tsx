@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import BackLink from "@/components/ui/custom/BackLink";
-import PWAInstallButton from "@/components/features/pwa/PWAInstallButton";
+import PWAInstallButton from "@/components/common/PWAInstallButton";
 
 export default function HelpPage() {
     return (

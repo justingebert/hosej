@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import VoteOptions from "@/components/features/question/VotingOptions.client";
+import VoteOptions from "@/app/groups/[groupId]/question/_components/VotingOptions.client";
 import type { QuestionOptionDTO } from "@/types/models/question";
 import { QuestionType } from "@/types/models/question";
 

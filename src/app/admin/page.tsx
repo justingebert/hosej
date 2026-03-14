@@ -10,9 +10,9 @@ import { ArrowLeft, Shield } from "lucide-react";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
 import type { FeatureStatus } from "@/types/models/appConfig";
-import TemplateUploadCard from "@/components/admin/TemplateUploadCard";
-import GlobalFeatureControl from "@/components/admin/GlobalFeatureControl";
-import GroupPackManager from "@/components/admin/GroupPackManager";
+import TemplateUploadCard from "@/app/admin/_components/TemplateUploadCard";
+import GlobalFeatureControl from "@/app/admin/_components/GlobalFeatureControl";
+import GroupPackManager from "@/app/admin/_components/GroupPackManager";
 import Header from "@/components/ui/custom/Header";
 import BackLink from "@/components/ui/custom/BackLink";
 

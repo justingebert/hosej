@@ -2,13 +2,8 @@
 
 import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from "recharts";
 import { Card, CardContent } from "@/components/ui/card";
-import type {
-    ChartConfig} from "@/components/ui/chart";
-import {
-    ChartContainer,
-    ChartTooltip,
-    ChartTooltipContent,
-} from "@/components/ui/chart";
+import type { ChartConfig } from "@/components/ui/chart";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 
 export function RallyVotesChart({ submissions }: { submissions: any[] }) {
     const chartData = submissions.map((submission, index) => ({

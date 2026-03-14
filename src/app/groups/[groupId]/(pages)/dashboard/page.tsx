@@ -18,9 +18,11 @@ import type { MissedActivitySummary } from "@/types/models/activityEvent";
 // Lazy load CompletionChart (uses recharts ~200KB)
 const CompletionChart = dynamic(
     () =>
-        import("@/components/features/charts/CompletionChart").then((mod) => ({
-            default: mod.CompletionChart,
-        })),
+        import("@/app/groups/[groupId]/(pages)/dashboard/_components/CompletionChart").then(
+            (mod) => ({
+                default: mod.CompletionChart,
+            })
+        ),
     {
         loading: () => <div className="w-24 h-24 bg-muted rounded-lg animate-pulse" />,
         ssr: false,

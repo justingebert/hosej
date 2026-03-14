@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { Accordion } from "@/components/ui/accordion";
-import { FeatureSettingsAccordionSimple } from "@/components/features/settings/FeatureSettingsAccordionSimple";
+import { FeatureSettingsAccordionSimple } from "@/app/groups/[groupId]/(pages)/settings/_components/FeatureSettingsAccordionSimple";
 import { describe, expect, it } from "vitest";
 
 describe("FeatureSettingsAccordionSimple", () => {

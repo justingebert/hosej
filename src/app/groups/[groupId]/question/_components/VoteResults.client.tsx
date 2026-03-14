@@ -12,7 +12,7 @@ import { useAppHaptics } from "@/hooks/useAppHaptics";
 
 import type { IResult, QuestionDTO, QuestionResultsDTO } from "@/types/models/question";
 import { Badge } from "@/components/ui/badge";
-import ChatComponent from "@/components/features/chat/Chat.client";
+import ChatComponent from "@/components/chat/Chat.client";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type VoteResultsProps = {
