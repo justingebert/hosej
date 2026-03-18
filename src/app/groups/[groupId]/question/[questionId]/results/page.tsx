@@ -3,7 +3,7 @@
 import React, { Suspense } from "react";
 import { useParams } from "next/navigation";
 import useSWR from "swr";
-import VoteResults from "@/components/features/question/VoteResults.client";
+import VoteResults from "@/app/groups/[groupId]/question/_components/VoteResults.client";
 import BackLink from "@/components/ui/custom/BackLink";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import Image from "next/image";

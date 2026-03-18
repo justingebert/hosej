@@ -1,0 +1,160 @@
+[
+  {
+    "category": "Feierabend",
+    "questionType": "users-select-one",
+    "question": "Wer schmeißt spontan die beste Party – mit minimalem Budget und null Vorlauf?"
+  },
+  {
+    "category": "Feierabend",
+    "questionType": "users-select-one",
+    "question": "Wer hat nach 3 Cocktails plötzlich die besten Ideen für ein neues Business?"
+  },
+  {
+    "category": "Feierabend",
+    "questionType": "users-select-one",
+    "question": "Wer wäre der Typ, der beim Spieleabend alle Regeln erklärt – und trotzdem als Erster verliert?"
+  },
+  {
+    "category": "Feierabend",
+    "questionType": "users-select-one",
+    "question": "Wer bringt beim Grillen das seltsamste Zeug mit?"
+  },
+  {
+    "category": "Feierabend",
+    "questionType": "users-select-multiple",
+    "question": "Wer würde als DJ den Abend retten – und wer würde ihn zerstören?"
+  },
+  {
+    "category": "Feierabend",
+    "questionType": "users-select-multiple",
+    "question": "Wer ist der klassische 'Ich komm dann nach' – und kommt nie?"
+  },
+  {
+    "category": "Feierabend",
+    "questionType": "users-select-multiple",
+    "question": "Wer wäre die beste Gesellschaft für einen echten Lazy Sunday?"
+  },
+  {
+    "category": "Feierabend",
+    "questionType": "users-select-multiple",
+    "question": "Wer macht aus einem ruhigen Abend zuverlässig ein unvergessliches Erlebnis?"
+  },
+  {
+    "category": "Feierabend",
+    "questionType": "custom-select-one",
+    "question": "Welcher Feierabend-Typ bist du?",
+    "options": [
+      "Sofort auf die Couch, Handy weg",
+      "Kurze Runde draußen, dann chillen",
+      "Sport oder Gym – erst dann kann ich abschalten",
+      "Kochen als Therapie",
+      "Direkt raus mit Leuten, ich kann zuhause nicht abschalten",
+      "Einfach treiben lassen"
+    ]
+  },
+  {
+    "category": "Feierabend",
+    "questionType": "custom-select-one",
+    "question": "Was ist dein Go-to, wenn du einfach mal nichts denken willst?",
+    "options": [
+      "Sinnloser YouTube-Rabbit-Hole",
+      "Serie bingewatchen bis 2 Uhr",
+      "Spaziergang mit Musik",
+      "Zocken",
+      "Kochen oder Backen",
+      "Schlafen, sofort und sofort viel"
+    ]
+  },
+  {
+    "category": "Feierabend",
+    "questionType": "custom-select-one",
+    "question": "Der perfekte Freitagabend-Plan – den du dir aber nie wirklich gönnst?",
+    "options": [
+      "Nix. Absolut nix. Stille.",
+      "Spontan irgendwo hinsitzen und Bier trinken",
+      "Gutes Essen, gute Leute, kein Plan",
+      "Kino oder Konzert, dann Bar",
+      "Zuhause kochen und dabei Wein trinken",
+      "Einfach raus und schauen was passiert"
+    ]
+  },
+  {
+    "category": "Feierabend",
+    "questionType": "custom-select-one",
+    "question": "Was ist dein erster Gedanke, wenn endlich Urlaub anfängt?",
+    "options": [
+      "Endlich schlafen",
+      "Was machen wir heute Abend?",
+      "Ich muss das kurz noch für die Arbeit checken",
+      "Reise planen – jetzt erst recht",
+      "Nichts. Absolut nichts planen.",
+      "Wann treffen wir uns alle?"
+    ]
+  },
+  {
+    "category": "Feierabend",
+    "questionType": "custom-select-one",
+    "question": "Welche Ausrede benutzt du am häufigsten, wenn du keine Lust auf ausgehen hast?",
+    "options": [
+      "Ich muss morgen früh raus (lüge ich seit Jahren)",
+      "Ich schwör, ich komm nächstes Mal wirklich",
+      "Mein Kontostand sagt nein",
+      "Es ist viel zu kalt heute",
+      "Ich hab's einfach vergessen",
+      "Ich wollte schon früh schlafen gehen (war noch nie der Fall)"
+    ]
+  },
+  {
+    "category": "Feierabend",
+    "questionType": "custom-select-one",
+    "question": "Welcher Modus bist du gerade?",
+    "options": [
+      "Im Produktivitäts-Modus",
+      "Im totalen Chaos-Modus",
+      "Im Chillen-Modus",
+      "Im 'Ich hab alles im Griff'-Modus (Lüge)",
+      "Im Urlaubs-Countdown-Modus",
+      "Im 'Ich kündige bald'-Modus"
+    ]
+  },
+  {
+    "category": "Feierabend",
+    "questionType": "custom-select-multiple",
+    "question": "Was darf auf einem guten Gruppenabend auf keinen Fall fehlen?",
+    "options": [
+      "Gutes Essen",
+      "Kein strikter Plan",
+      "Musik, die alle gut finden",
+      "Irgendein Spiel",
+      "Die richtige Location",
+      "Keine Ausreden, alle sind dabei",
+      "Genug zu trinken",
+      "Spontanität"
+    ]
+  },
+  {
+    "category": "Feierabend",
+    "questionType": "custom-select-multiple",
+    "question": "Was stresst dich am meisten an einem Arbeitstag?",
+    "options": [
+      "Unnötige Meetings",
+      "Dinge, die kurz vor Feierabend reinkommen",
+      "Schlechte Kommunikation",
+      "Pendeln",
+      "Zu viele Aufgaben gleichzeitig",
+      "Leute, die nicht liefern",
+      "Open-Space-Lärm",
+      "Das Gefühl, nichts geschafft zu haben"
+    ]
+  },
+  {
+    "category": "Feierabend",
+    "questionType": "rating",
+    "question": "Wie sehr brauchst du gerade Urlaub? (1 = ich bin super erholt, 10 = bitte sofort)"
+  },
+  {
+    "category": "Feierabend",
+    "questionType": "rating",
+    "question": "Wie gut war deine Work-Life-Balance diese Woche?"
+  }
+]

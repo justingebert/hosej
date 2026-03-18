@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { DisplayOptions } from "@/components/features/question/DisplayOptions";
+import { DisplayOptions } from "@/app/groups/[groupId]/question/_components/DisplayOptions";
 
 describe("DisplayOptions", () => {
     it("renders static options as disabled inputs", () => {

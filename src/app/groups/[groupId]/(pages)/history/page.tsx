@@ -6,8 +6,8 @@ import Header from "@/components/ui/custom/Header";
 import { useParams } from "next/navigation";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { usePaginatedData } from "@/hooks/usePaginatedData";
-import { DataTable } from "./data-table";
-import { columns } from "./columns";
+import { DataTable } from "./_components/data-table";
+import { columns } from "./_components/columns";
 
 const QuestionHistoryPage = () => {
     const params = useParams<{ groupId: string }>();

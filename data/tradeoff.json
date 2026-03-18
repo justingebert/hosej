@@ -2,58 +2,6 @@
   {
     "category": "Trade-Off",
     "questionType": "custom-select-one",
-    "question": "Wofür würdest du dein Leben optimieren?",
-    "options": [
-      "Maximalen Komfort",
-      "Möglichst viele Erfahrungen",
-      "Möglichst hohes Einkommen",
-      "Möglichst viel Freizeit",
-      "Enge, stabile Beziehungen",
-      "Persönliches Wachstum"
-    ]
-  },
-  {
-    "category": "Trade-Off",
-    "questionType": "custom-select-one",
-    "question": "Worauf würdest du zuerst verzichten, wenn das Leben stressig wird?",
-    "options": [
-      "Schlaf",
-      "Hobbys",
-      "Sozialleben",
-      "Karrierefortschritt",
-      "Gesundheitsroutinen",
-      "Ersparnisse"
-    ]
-  },
-  {
-    "category": "Trade-Off",
-    "questionType": "custom-select-one",
-    "question": "Wann fühlt sich ein Tag für dich „erfolgreich“ an?",
-    "options": [
-      "Wenn ich viele Aufgaben erledigt habe",
-      "Wenn ich etwas Neues gelernt habe",
-      "Wenn ich Zeit mit Menschen verbracht habe",
-      "Wenn ich mich ruhig und ausgeglichen gefühlt habe",
-      "Wenn ich Fortschritt gemacht / Geld verdient habe",
-      "Wenn ich etwas Sinnvolles getan habe"
-    ]
-  },
-  {
-    "category": "Trade-Off",
-    "questionType": "custom-select-one",
-    "question": "Alter, was ist das Schlimmste?",
-    "options": [
-      "Es juckt dich immer irgendwo leicht",
-      "Dein Handy ist immer bei 15 % Akku",
-      "Dir fehlt immer ein Socke",
-      "Internet ist immer leicht langsam",
-      "Schuhe sind immer minimal unbequem",
-      "Kaffee ist immer nur lauwarm"
-    ]
-  },
-  {
-    "category": "Trade-Off",
-    "questionType": "custom-select-one",
     "question": "Ein verpeilter Fee-Praktikant gibt dir eine B-Sortiment-Superkraft. Was nimmst du?",
     "options": [
       "Ich kann immer auf den Cent genau schätzen, wie viel der Einkauf kosten wird",
@@ -151,6 +99,58 @@
       "Yu-Gi-Oh! Karten",
       "Panini-Sticker (WM 2006)",
       "Beyblades"
+    ]
+  },
+  {
+    "category": "Trade-Off",
+    "questionType": "custom-select-one",
+    "question": "Alter, was ist das Schlimmste?",
+    "options": [
+      "Es juckt dich immer irgendwo leicht",
+      "Dein Handy ist immer bei 15 % Akku",
+      "Dir fehlt immer ein Socke",
+      "Internet ist immer leicht langsam",
+      "Schuhe sind immer minimal unbequem",
+      "Kaffee ist immer nur lauwarm"
+    ]
+  },
+  {
+    "category": "Trade-Off",
+    "questionType": "custom-select-one",
+    "question": "Wofür würdest du dein Leben optimieren?",
+    "options": [
+      "Maximalen Komfort",
+      "Möglichst viele Erfahrungen",
+      "Möglichst hohes Einkommen",
+      "Möglichst viel Freizeit",
+      "Enge, stabile Beziehungen",
+      "Persönliches Wachstum"
+    ]
+  },
+  {
+    "category": "Trade-Off",
+    "questionType": "custom-select-one",
+    "question": "Worauf würdest du zuerst verzichten, wenn das Leben stressig wird?",
+    "options": [
+      "Schlaf",
+      "Hobbys",
+      "Sozialleben",
+      "Karrierefortschritt",
+      "Gesundheitsroutinen",
+      "Ersparnisse"
+    ]
+  },
+  {
+    "category": "Trade-Off",
+    "questionType": "custom-select-one",
+    "question": "Wann fühlt sich ein Tag für dich „erfolgreich“ an?",
+    "options": [
+      "Wenn ich viele Aufgaben erledigt habe",
+      "Wenn ich etwas Neues gelernt habe",
+      "Wenn ich Zeit mit Menschen verbracht habe",
+      "Wenn ich mich ruhig und ausgeglichen gefühlt habe",
+      "Wenn ich Fortschritt gemacht / Geld verdient habe",
+      "Wenn ich etwas Sinnvolles getan habe"
     ]
   }
 ]

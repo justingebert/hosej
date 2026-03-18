@@ -11,10 +11,10 @@ import { useToast } from "@/hooks/use-toast";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
 import type { FeatureStatus } from "@/types/models/appConfig";
-import { GroupInfoCard } from "@/components/features/settings/GroupInfoCard";
-import { GroupFeatureSettingsCard } from "@/components/features/settings/GroupFeatureSettingsCard";
-import { GroupMembersCard } from "@/components/features/settings/GroupMembersCard";
-import { GroupDangerZoneCard } from "@/components/features/settings/GroupDangerZoneCard";
+import { GroupInfoCard } from "@/app/groups/[groupId]/(pages)/settings/_components/GroupInfoCard";
+import { GroupFeatureSettingsCard } from "@/app/groups/[groupId]/(pages)/settings/_components/GroupFeatureSettingsCard";
+import { GroupMembersCard } from "@/app/groups/[groupId]/(pages)/settings/_components/GroupMembersCard";
+import { GroupDangerZoneCard } from "@/app/groups/[groupId]/(pages)/settings/_components/GroupDangerZoneCard";
 
 type GroupProcessedDTO = GroupDTO & { userIsAdmin: boolean };
 

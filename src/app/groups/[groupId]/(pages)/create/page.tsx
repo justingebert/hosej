@@ -7,9 +7,11 @@ import { useState } from "react";
 import type { createQuestionData, createRallyData } from "@/types/create";
 
 const CreateQuestion = dynamic(
-    () => import("@/components/features/question/createQuestion.client")
+    () => import("@/app/groups/[groupId]/question/_components/createQuestion.client")
 );
-const CreateRally = dynamic(() => import("@/components/features/rally/createRally.client"));
+const CreateRally = dynamic(
+    () => import("@/app/groups/[groupId]/rally/_components/createRally.client")
+);
 
 export default function CreatePage() {
     const [questionData, setQuestionData] = useState<createQuestionData>({

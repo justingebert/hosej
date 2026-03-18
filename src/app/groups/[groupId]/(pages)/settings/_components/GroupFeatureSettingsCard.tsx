@@ -2,10 +2,10 @@
 
 import { Accordion } from "@/components/ui/accordion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FeatureSettingsAccordionSimple } from "@/components/features/settings/FeatureSettingsAccordionSimple";
-import { JukeboxSettings } from "@/components/features/settings/JukeboxSettings";
-import { QuestionSettings } from "@/components/features/settings/QuestionSettings";
-import { RallySettings } from "@/components/features/settings/RallySettings";
+import { FeatureSettingsAccordionSimple } from "@/app/groups/[groupId]/(pages)/settings/_components/FeatureSettingsAccordionSimple";
+import { JukeboxSettings } from "@/app/groups/[groupId]/(pages)/settings/_components/JukeboxSettings";
+import { QuestionSettings } from "@/app/groups/[groupId]/(pages)/settings/_components/QuestionSettings";
+import { RallySettings } from "@/app/groups/[groupId]/(pages)/settings/_components/RallySettings";
 import type { FeatureStatus } from "@/types/models/appConfig";
 import type { GroupDTO } from "@/types/models/group";
 

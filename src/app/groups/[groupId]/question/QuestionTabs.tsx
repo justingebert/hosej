@@ -2,8 +2,8 @@
 
 import { useMemo, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
-import VoteOptions from "@/components/features/question/VotingOptions.client";
-import VoteResults from "@/components/features/question/VoteResults.client";
+import VoteOptions from "@/app/groups/[groupId]/question/_components/VotingOptions.client";
+import VoteResults from "@/app/groups/[groupId]/question/_components/VoteResults.client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
@@ -27,7 +27,7 @@ import type {
     QuestionWithUserStateDTO,
     UserRating,
 } from "@/types/models/question";
-import { buildFlatQuestionList } from "@/components/features/question/questionTabsUtils";
+import { buildFlatQuestionList } from "@/app/groups/[groupId]/question/_components/questionTabsUtils";
 import { useAppHaptics } from "@/hooks/useAppHaptics";
 
 type RateValue = Exclude<UserRating, null>;

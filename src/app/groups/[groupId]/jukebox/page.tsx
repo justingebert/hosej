@@ -24,7 +24,7 @@ import { SiApplemusic } from "react-icons/si";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { AnimatePresence, motion } from "framer-motion";
-import ChatComponent from "@/components/features/chat/Chat.client";
+import ChatComponent from "@/components/chat/Chat.client";
 import { Card } from "@/components/ui/card";
 import { useAppHaptics } from "@/hooks/useAppHaptics";
 

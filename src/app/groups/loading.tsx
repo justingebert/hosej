@@ -1,5 +1,5 @@
-import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { GroupListSkeleton } from "@/app/groups/_components/groupListSkeleton";
 
 export default function GroupsLoading() {
     return (
@@ -9,21 +9,7 @@ export default function GroupsLoading() {
                 <Skeleton className="h-10 w-32" />
                 <Skeleton className="h-10 w-10" />
             </div>
-            <div className="flex-grow overflow-y-auto py-6">
-                <div className="grid grid-cols-1 gap-6 pb-24">
-                    {[...Array(4)].map((_, i) => (
-                        <Card key={i}>
-                            <CardContent className="flex justify-between items-center p-4">
-                                <div>
-                                    <Skeleton className="h-6 w-32" />
-                                    <Skeleton className="h-4 w-24 mt-1" />
-                                </div>
-                                <Skeleton className="h-8 w-8" />
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
-            </div>
+            <GroupListSkeleton />
         </div>
     );
 }

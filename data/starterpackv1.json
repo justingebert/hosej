@@ -1,164 +1,6 @@
 [
   {
     "category": "Starter-Pack",
-    "questionType": "users-select-one",
-    "question": "Wer würde am ehesten in einer Reality-Show mitmachen?"
-  },
-  {
-    "category": "Starter-Pack",
-    "questionType": "users-select-one",
-    "question": "Wer flirtet am offensichtlichsten, wenn Alkohol im Spiel ist?"
-  },
-  {
-    "category": "Starter-Pack",
-    "questionType": "users-select-one",
-    "question": "Wer wäre die schlechteste Person, der man ein Geheimnis anvertrauen sollte?"
-  },
-  {
-    "category": "Starter-Pack",
-    "questionType": "users-select-one",
-    "question": "Wer würde am ehesten in einer Sekte landen, ohne es zu merken?"
-  },
-  {
-    "category": "Starter-Pack",
-    "questionType": "users-select-one",
-    "question": "Wer würde beim Zombie-Angriff am längsten überleben?"
-  },
-  {
-    "category": "Starter-Pack",
-    "questionType": "users-select-multiple",
-    "question": "Wer sind die größten Drama-Queens in der Gruppe?"
-  },
-  {
-    "category": "Starter-Pack",
-    "questionType": "users-select-multiple",
-    "question": "Wer wären die schlimmsten Mitbewohner in einer WG?"
-  },
-  {
-    "category": "Starter-Pack",
-    "questionType": "users-select-multiple",
-    "question": "Wer regt sich beim Spieleabend am meisten auf, wenn er verliert?"
-  },
-  {
-    "category": "Starter-Pack",
-    "questionType": "users-select-multiple",
-    "question": "Wer redet beim ersten Date am meisten über sich selbst?"
-  },
-  {
-    "category": "Starter-Pack",
-    "questionType": "users-select-multiple",
-    "question": "Wer könnte eine Woche ohne Handy wirklich aushalten?"
-  },
-  {
-    "category": "Starter-Pack",
-    "questionType": "custom-select-one",
-    "question": "Wenn du jemanden aus der Gruppe auf eine einsame Insel schicken müsstest, wen würdest du wählen und warum?",
-    "options": [
-      "Kann am besten improvisieren",
-      "Nervt am wenigsten",
-      "Findet bestimmt Essen",
-      "Hält die Stimmung oben",
-      "Will eh meistens seine Ruhe"
-    ]
-  },
-  {
-    "category": "Starter-Pack",
-    "questionType": "custom-select-one",
-    "question": "Du bekommst 1 Million Euro, musst aber eine Person aus der Gruppe nie wieder sehen. Wen triffst du?",
-    "options": [
-      "Die Person, die mich am meisten triggert",
-      "Die Person, die nie zurückschreibt",
-      "Die Person, die immer alles besser weiß",
-      "Die Person, die ständig zu spät kommt",
-      "Niemand, Geld ist es nicht wert"
-    ]
-  },
-  {
-    "category": "Starter-Pack",
-    "questionType": "custom-select-one",
-    "question": "Mit welchem Promi wärst du am liebsten zusammen?",
-    "options": [
-      "Zendaya",
-      "Ryan Gosling",
-      "Dua Lipa",
-      "Pedro Pascal",
-      "Margot Robbie",
-      "Timothée Chalamet",
-      "Florence Pugh",
-      "Harry Styles"
-    ]
-  },
-  {
-    "category": "Starter-Pack",
-    "questionType": "custom-select-multiple",
-    "question": "Welche drei Regeln würdest du für die Gruppe aufstellen?",
-    "options": [
-      "Wer zu spät kommt, bringt den nächsten Kasten Bier 🍺",
-      "Wer zuerst müde wird, macht Kaffee für alle ☕",
-      "Niemand darf „Ich trink heut nix“ sagen",
-      "Wer das Treffen absagt, muss beim nächsten Mal was Peinliches anziehen",
-      "Wenn jemand nörgelt, gibt’s eine Strafrunde Wahrheit oder Pflicht",
-      "Der Verlierer jedes Spiels muss den ganzen Abend über eine Sonnenbrille tragen",
-      "Niemand darf nüchterner sein als der Durchschnitt",
-      "Wer einen Insider vergisst, bekommt einen neuen Spitznamen",
-      "Derjenige mit der lautesten Lache darf die Musik aussuchen",
-      "Wer den Abend als Erster „Ich geh jetzt“ sagt, zahlt die letzte Runde"
-    ]
-  },
-  {
-    "category": "Starter-Pack",
-    "questionType": "custom-select-multiple",
-    "question": "Welche Apps würdest du behalten, wenn du alle anderen löschen müsstest?",
-    "options": [
-      "WhatsApp",
-      "Instagram",
-      "Spotify",
-      "Google Maps",
-      "TikTok",
-      "YouTube",
-      "Reddit",
-      "Tinder",
-      "Netflix",
-      "Banking-App"
-    ]
-  },
-  {
-    "category": "Starter-Pack",
-    "questionType": "text",
-    "question": "Was ist die peinlichste Angewohnheit, die du nie wirklich abgelegt hast?"
-  },
-  {
-    "category": "Starter-Pack",
-    "questionType": "text",
-    "question": "Was war das größte Fettnäpfchen, in das du jemals getreten bist?"
-  },
-  {
-    "category": "Starter-Pack",
-    "questionType": "text",
-    "question": "Du wachst plötzlich im Körper einer anderen Person aus der Gruppe auf. Was ist das Erste, was du tust?"
-  },
-  {
-    "category": "Starter-Pack",
-    "questionType": "rating",
-    "question": "Wie ehrlich bist du wirklich, wenn du sagst „Mir ist das egal“?"
-  },
-  {
-    "category": "Starter-Pack",
-    "questionType": "rating",
-    "question": "Wie sehr freust du dich auf den nächsten Gruppenausflug?"
-  },
-  {
-    "category": "Starter-Pack",
-    "questionType": "users-select-one",
-    "question": "Wer würde am ehesten bei einem Vorstellungsgespräch komplett improvisieren – und trotzdem den Job bekommen?"
-  },
-  {
-    "category": "Starter-Pack",
-    "questionType": "users-select-multiple",
-    "question": "Wer wären die besten Mitspieler für ein Trinkspiel, das drei Stunden dauert?"
-  },
-  {
-    "category": "Starter-Pack",
     "questionType": "custom-select-one",
     "question": "Du wachst morgen mit einer neuen Fähigkeit auf – welche hättest du am liebsten?",
     "options": [
@@ -172,41 +14,6 @@
   },
   {
     "category": "Starter-Pack",
-    "questionType": "text",
-    "question": "Was war die dümmste Diskussion, die du je mit Freunden geführt hast?"
-  },
-  {
-    "category": "Starter-Pack",
-    "questionType": "users-select-one",
-    "question": "Wer würde am ehesten aus Spaß bei einem Tattoo-Studio landen – und es wirklich durchziehen?"
-  },
-  {
-    "category": "Starter-Pack",
-    "questionType": "custom-select-multiple",
-    "question": "Welche Ausreden benutzt du am häufigsten, wenn du keine Lust hast rauszugehen?",
-    "options": [
-      "Ich will morgen produktiv sein (lüge jedes Mal)",
-      "Ich schwör, ich komm nächstes Mal wirklich",
-      "Ich hab Angst, dass’s wieder „nur ein Drink“ wird",
-      "Mein Kontostand sagt nein",
-      "Ich wusste nicht, dass es jetzt schon so spät ist",
-      "Ich hab voll vergessen, dass wir überhaupt was ausgemacht hatten",
-      "Es ist viel zu kalt heute",
-      "Ich muss noch kurz aufs Klo, dann geh ich los"
-    ]
-  },
-  {
-    "category": "Starter-Pack",
-    "questionType": "text",
-    "question": "Wenn du eine Sache an der Gruppe ändern könntest – was wäre es?"
-  },
-  {
-    "category": "Starter-Pack",
-    "questionType": "rating",
-    "question": "Wie chaotisch würdest du deinen Freundeskreis einschätzen? (1 = super organisiert, 10 = komplettes Chaos)"
-  },
-  {
-    "category": "Starter-Pack",
     "questionType": "custom-select-one",
     "question": "Du musst den Rest deines Lebens nur noch ein Getränk trinken – was wählst du?",
     "options": [
@@ -216,7 +23,151 @@
       "Eistee",
       "Mate",
       "Cocktails",
-      "Energy Drinks"
+      "Energy Drinks",
+      "Wasser (Respekt)"
     ]
+  },
+  {
+    "category": "Starter-Pack",
+    "questionType": "custom-select-one",
+    "question": "Du bekommst einen Millionen-Euro-Scheck – was passiert als Erstes?",
+    "options": [
+      "Sofort kündigen",
+      "Für die Eltern sorgen",
+      "Reisen bis das Geld alle ist",
+      "Investieren und smart werden",
+      "Party schmeißen mit der ganzen Gruppe",
+      "Immobilien kaufen und Boomer-Energie annehmen"
+    ]
+  },
+  {
+    "category": "Starter-Pack",
+    "questionType": "custom-select-one",
+    "question": "Wenn du für einen Tag in eine andere Epoche reisen könntest – wann fährst du hin?",
+    "options": [
+      "Antikes Rom auf dem Höhepunkt",
+      "Wildes Amerika, 1880er",
+      "Swinging Sixties",
+      "80er – Neon, Kassetten, kein Internet",
+      "Mittelalter (romantisierte Version)",
+      "Zukunft, +100 Jahre"
+    ]
+  },
+  {
+    "category": "Starter-Pack",
+    "questionType": "custom-select-one",
+    "question": "Mit welchem Promi würdest du am liebsten eine Nacht feiern gehen?",
+    "options": [
+      "Zendaya",
+      "Ryan Gosling",
+      "Dua Lipa",
+      "Pedro Pascal",
+      "Margot Robbie",
+      "Timothée Chalamet",
+      "Harry Styles",
+      "Bad Bunny"
+    ]
+  },
+  {
+    "category": "Starter-Pack",
+    "questionType": "custom-select-multiple",
+    "question": "Welche Apps würdest du behalten, wenn du alle anderen löschen müsstest? (max 3)",
+    "options": [
+      "WhatsApp",
+      "Instagram",
+      "Spotify",
+      "Google Maps",
+      "TikTok",
+      "YouTube",
+      "Reddit",
+      "Netflix",
+      "Banking-App",
+      "Wetter-App"
+    ]
+  },
+  {
+    "category": "Starter-Pack",
+    "questionType": "custom-select-multiple",
+    "question": "Was macht einen perfekten Gruppenabend aus?",
+    "options": [
+      "Kein konkreter Plan",
+      "Gutes Essen",
+      "Alle sind dabei",
+      "Lange Nacht",
+      "Spontaner Location-Wechsel",
+      "Kein Stress",
+      "Gute Musik",
+      "Absoluter Chillen-Modus",
+      "Draußen sein"
+    ]
+  },
+  {
+    "category": "Starter-Pack",
+    "questionType": "rating",
+    "question": "Wie chaotisch ist diese Gruppe? (1 = super organisiert, 10 = totales Chaos)"
+  },
+  {
+    "category": "Starter-Pack",
+    "questionType": "rating",
+    "question": "Wie gut war deine Woche?"
+  },
+  {
+    "category": "Starter-Pack",
+    "questionType": "custom-select-one",
+    "question": "Welche Rolle hättest du in einem Fantasy-Abenteuer?",
+    "options": [
+      "Der Held",
+      "Der weise Mentor",
+      "Der lustige Sidekick",
+      "Der Schurke (aus Versehen)",
+      "Der Feigling, der trotzdem überlebt",
+      "Das Genie mit dem Plan",
+      "Der Wildcard, der alles sabotiert"
+    ]
+  },
+  {
+    "category": "Starter-Pack",
+    "questionType": "users-select-one",
+    "question": "Wer würde am ehesten in einer Reality-Show mitmachen – und tatsächlich gewinnen?"
+  },
+  {
+    "category": "Starter-Pack",
+    "questionType": "users-select-one",
+    "question": "Wer würde beim Zombie-Angriff am längsten überleben?"
+  },
+  {
+    "category": "Starter-Pack",
+    "questionType": "users-select-one",
+    "question": "Wer würde am ehesten versehentlich in eine Sekte reinrutschen – und sie dann irgendwie leiten?"
+  },
+  {
+    "category": "Starter-Pack",
+    "questionType": "users-select-one",
+    "question": "Wer wäre der Charakter, der in einem Horrorfilm als Erster stirbt?"
+  },
+  {
+    "category": "Starter-Pack",
+    "questionType": "users-select-one",
+    "question": "Wer würde bei einem Vorstellungsgespräch komplett improvisieren – und trotzdem den Job bekommen?"
+  },
+  {
+    "category": "Starter-Pack",
+    "questionType": "users-select-one",
+    "question": "Wer wäre am ehesten in 10 Jahren komplett überraschend berühmt?"
+  },
+  {
+    "category": "Starter-Pack",
+    "questionType": "users-select-multiple",
+    "question": "Wer wären die schlimmsten Mitbewohner in einer WG?"
+  },
+  {
+    "category": "Starter-Pack",
+    "questionType": "users-select-multiple",
+    "question": "Wer könnte eine Woche ohne Handy wirklich durchhalten?"
+  },
+  {
+    "category": "Starter-Pack",
+    "questionType": "users-select-multiple",
+    "question": "Wer wäre am verlässlichsten, wenn es wirklich drauf ankommt?"
   }
 ]

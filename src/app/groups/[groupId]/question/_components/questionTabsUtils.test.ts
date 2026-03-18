@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { QuestionType } from "@/types/models/question";
 import type { QuestionWithUserStateDTO } from "@/types/models/question";
-import { buildFlatQuestionList } from "@/components/features/question/questionTabsUtils";
+import { buildFlatQuestionList } from "@/app/groups/[groupId]/question/_components/questionTabsUtils";
 
 function makeQuestion(
     overrides: Partial<QuestionWithUserStateDTO> & Pick<QuestionWithUserStateDTO, "_id">

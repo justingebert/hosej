@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from "uuid";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { HoseJLoader } from "@/components/ui/custom/HoseJLoader";
-import PWAInstallButton from "@/components/features/pwa/PWAInstallButton";
+import PWAInstallButton from "@/components/common/PWAInstallButton";
 
 function StartPage() {
     const { data: session, status } = useSession();
