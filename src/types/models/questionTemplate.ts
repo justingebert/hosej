@@ -14,7 +14,6 @@ export interface IQuestionTemplate {
     pairingKeySource?: PairingKeySource;
     pairingMode?: PairingMode;
     pairingKeys?: string[];
-    pairingValues?: string[];
 
     createdAt: Date;
 }

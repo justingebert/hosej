@@ -241,15 +241,33 @@ function RatingDrawer({
                 {question.questionType === "pairing" && (
                     <>
                         <div className="overflow-y-auto">
-                            <div className="space-y-1 text-sm">
-                                {question.pairingKeys?.map((key, i) => (
-                                    <div
-                                        key={i}
-                                        className="p-2 bg-secondary rounded-lg text-center"
-                                    >
-                                        {key}
-                                    </div>
-                                ))}
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="flex flex-col gap-1">
+                                    <span className="text-xs text-muted-foreground font-medium mb-1">
+                                        Keys
+                                    </span>
+                                    {question.pairingKeys?.map((key, i) => (
+                                        <div
+                                            key={i}
+                                            className="p-2 bg-secondary rounded-lg text-center text-sm"
+                                        >
+                                            {key}
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="flex flex-col gap-1">
+                                    <span className="text-xs text-muted-foreground font-medium mb-1">
+                                        Values
+                                    </span>
+                                    {question.options?.map((option, i) => (
+                                        <div
+                                            key={i}
+                                            className="p-2 bg-secondary rounded-lg text-center text-sm"
+                                        >
+                                            {typeof option === "string" ? option : option.key}
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                         <Separator className="my-6" />

@@ -58,18 +58,43 @@ const VoteResults = ({ user, question, available, returnTo }: VoteResultsProps) 
             <div className="flex justify-center">{numOfVotes}</div>
             {isPairing && pairingResults ? (
                 <div className="space-y-2 my-2">
-                    {pairingResults.map((pr: IPairingResult) => (
-                        <Link
-                            key={pr.key}
-                            href={`/groups/${question.groupId}/question/${question._id}/resultsdetailed/?returnTo=${encodeURIComponent(returnTo || "")}`}
-                            onClick={() => play("selection")}
-                        >
-                            <div className="bg-secondary my-2 rounded-md p-3 flex justify-between items-center">
-                                <span className="font-medium">{pr.key}</span>
-                                <Badge>{pr.topValue || "-"}</Badge>
-                            </div>
-                        </Link>
-                    ))}
+                    {pairingResults.map((pr: IPairingResult) => {
+                        const topCount = pr.valueCounts[0]?.count ?? 0;
+                        const topValues = pr.valueCounts.filter((vc) => vc.count === topCount);
+
+                        return (
+                            <Link
+                                key={pr.key}
+                                href={`/groups/${question.groupId}/question/${question._id}/resultsdetailed/?returnTo=${encodeURIComponent(returnTo || "")}`}
+                                onClick={() => play("selection")}
+                            >
+                                <div className="bg-secondary my-2 rounded-md p-3 flex justify-between items-center gap-2 min-w-0">
+                                    <span className="font-medium truncate shrink-0 max-w-[40%]">
+                                        {pr.key}
+                                    </span>
+                                    <div className="flex gap-1 flex-wrap justify-end min-w-0 max-w-[60%]">
+                                        {topValues.length === 0 ? (
+                                            <Badge variant="outline">-</Badge>
+                                        ) : topValues.length === 1 ? (
+                                            <Badge className="truncate max-w-full">
+                                                {topValues[0].value}
+                                            </Badge>
+                                        ) : (
+                                            topValues.map((tv) => (
+                                                <Badge
+                                                    key={tv.value}
+                                                    variant="outline"
+                                                    className="truncate max-w-full"
+                                                >
+                                                    {tv.value}
+                                                </Badge>
+                                            ))
+                                        )}
+                                    </div>
+                                </div>
+                            </Link>
+                        );
+                    })}
                 </div>
             ) : (
                 <div>

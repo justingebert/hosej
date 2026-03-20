@@ -52,20 +52,31 @@ export default function ResultsDetailPage() {
             <div className="grid grid-cols-1 gap-5 pb-20">
                 {isPairing && pairingResults
                     ? pairingResults.map((pr: IPairingResult, index: number) => (
-                          <Card className="w-full max-w-md mx-auto text-center" key={index}>
+                          <Card className="w-full max-w-md mx-auto" key={index}>
                               <CardHeader>
-                                  <CardTitle>{pr.key}</CardTitle>
+                                  <CardTitle className="text-center">{pr.key}</CardTitle>
                               </CardHeader>
-                              <CardContent>
+                              <CardContent className="space-y-2">
                                   {pr.valueCounts.map((vc, idx) => (
-                                      <div
-                                          key={idx}
-                                          className="flex justify-between items-center p-2 m-1 bg-secondary rounded-lg"
-                                      >
-                                          <span className="font-medium">{vc.value}</span>
-                                          <span className="text-sm text-muted-foreground">
-                                              {vc.count} ({vc.percentage}%)
-                                          </span>
+                                      <div key={idx} className="bg-secondary rounded-lg p-3">
+                                          <div className="flex justify-between items-center">
+                                              <span className="font-medium">{vc.value}</span>
+                                              <span className="text-sm text-muted-foreground">
+                                                  {vc.count} ({vc.percentage}%)
+                                              </span>
+                                          </div>
+                                          {vc.users.length > 0 && (
+                                              <div className="flex flex-wrap gap-1 mt-2">
+                                                  {vc.users.map((username, uidx) => (
+                                                      <span
+                                                          key={uidx}
+                                                          className="text-xs px-2 py-0.5 bg-primary text-primary-foreground rounded-full"
+                                                      >
+                                                          {username}
+                                                      </span>
+                                                  ))}
+                                              </div>
+                                          )}
                                       </div>
                                   ))}
                               </CardContent>

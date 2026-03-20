@@ -41,7 +41,6 @@ const questionSchema = new mongoose.Schema<IQuestion>({
         required: false,
     },
     pairingKeys: { type: [String], required: false },
-    pairingValues: { type: [String], required: false },
     used: { type: Boolean, default: false },
     active: { type: Boolean, default: false },
     usedAt: { type: Date },

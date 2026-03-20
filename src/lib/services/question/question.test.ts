@@ -160,7 +160,7 @@ describe("createQuestion", () => {
             pairingKeySource: PairingKeySource.Custom,
             pairingMode: PairingMode.Exclusive,
             pairingKeys: ["Alice", "Bob"],
-            pairingValues: ["Funny", "Smart"],
+            options: ["Funny", "Smart"],
         });
 
         expect(result).toBeDefined();
@@ -175,7 +175,7 @@ describe("createQuestion", () => {
                 submittedBy: mockUserId,
                 pairingKeySource: PairingKeySource.Custom,
                 pairingKeys: ["A", "B"],
-                pairingValues: ["X", "Y"],
+                options: ["X", "Y"],
             })
         ).rejects.toThrow(ValidationError);
     });
@@ -190,7 +190,22 @@ describe("createQuestion", () => {
                 pairingKeySource: PairingKeySource.Custom,
                 pairingMode: PairingMode.Open,
                 pairingKeys: ["A", "B"],
-                pairingValues: ["X"],
+                options: ["X"],
+            })
+        ).rejects.toThrow(ValidationError);
+    });
+
+    it("should throw ValidationError for exclusive pairing with fewer values than keys", async () => {
+        await expect(
+            createQuestion(mockGroupId, mockUserId, {
+                category: "fun",
+                questionType: QuestionType.Pairing,
+                question: "Match?",
+                submittedBy: mockUserId,
+                pairingKeySource: PairingKeySource.Custom,
+                pairingMode: PairingMode.Exclusive,
+                pairingKeys: ["A", "B", "C"],
+                options: ["X", "Y"],
             })
         ).rejects.toThrow(ValidationError);
     });
@@ -376,7 +391,7 @@ describe("voteOnQuestion", () => {
             questionType: QuestionType.Pairing,
             pairingMode: PairingMode.Exclusive,
             pairingKeys: ["Alice", "Bob"],
-            pairingValues: ["Funny", "Smart"],
+            options: ["Funny", "Smart"],
         });
         const mockGroup = createMockGroup();
 
@@ -400,7 +415,7 @@ describe("voteOnQuestion", () => {
             questionType: QuestionType.Pairing,
             pairingMode: PairingMode.Exclusive,
             pairingKeys: ["Alice", "Bob"],
-            pairingValues: ["Funny", "Smart"],
+            options: ["Funny", "Smart"],
         });
 
         (Question.findById as Mock).mockResolvedValue(mockQuestion);
@@ -421,7 +436,7 @@ describe("voteOnQuestion", () => {
             questionType: QuestionType.Pairing,
             pairingMode: PairingMode.Open,
             pairingKeys: ["Alice", "Bob"],
-            pairingValues: ["Funny", "Smart"],
+            options: ["Funny", "Smart"],
         });
         const mockGroup = createMockGroup();
 
@@ -445,7 +460,7 @@ describe("voteOnQuestion", () => {
             questionType: QuestionType.Pairing,
             pairingMode: PairingMode.Open,
             pairingKeys: ["Alice", "Bob"],
-            pairingValues: ["Funny", "Smart"],
+            options: ["Funny", "Smart"],
         });
 
         (Question.findById as Mock).mockResolvedValue(mockQuestion);
@@ -591,7 +606,7 @@ describe("getQuestionResults", () => {
             questionType: QuestionType.Pairing,
             multiSelect: false,
             pairingKeys: ["Alice", "Bob"],
-            pairingValues: ["Funny", "Smart"],
+            options: ["Funny", "Smart"],
             answers: [
                 {
                     user: { username: "User1" },

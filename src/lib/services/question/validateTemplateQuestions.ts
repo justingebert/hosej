@@ -9,7 +9,6 @@ export interface TemplateInput {
     pairingKeySource?: string;
     pairingMode?: string;
     pairingKeys?: string[];
-    pairingValues?: string[];
 }
 
 export interface ValidationError {
@@ -152,11 +151,23 @@ export function validateTemplates(templates: any): ValidationResult {
                     message: "Custom pairing keys require at least 2 entries",
                 });
             }
-            if (!template.pairingValues || template.pairingValues.length < 2) {
+            if (!template.options || template.options.length < 2) {
                 errors.push({
                     index: i,
-                    field: "pairingValues",
-                    message: "Pairing questions require at least 2 values",
+                    field: "options",
+                    message: "Pairing questions require at least 2 values in options",
+                });
+            }
+            if (
+                template.pairingMode === "exclusive" &&
+                template.pairingKeys &&
+                template.options &&
+                template.options.length < template.pairingKeys.length
+            ) {
+                errors.push({
+                    index: i,
+                    field: "options",
+                    message: "Exclusive pairing requires at least as many values as keys",
                 });
             }
         }

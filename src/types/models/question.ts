@@ -40,7 +40,6 @@ export interface IQuestion {
     pairingKeySource?: PairingKeySource;
     pairingMode?: PairingMode;
     pairingKeys?: string[];
-    pairingValues?: string[];
 
     used: boolean;
     active: boolean;

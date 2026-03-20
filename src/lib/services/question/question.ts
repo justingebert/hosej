@@ -93,7 +93,6 @@ export async function createQuestion(
         pairingKeySource?: PairingKeySource;
         pairingMode?: PairingMode;
         pairingKeys?: string[];
-        pairingValues?: string[];
     }
 ): Promise<IQuestion> {
     const {
@@ -107,7 +106,6 @@ export async function createQuestion(
         pairingKeySource,
         pairingMode,
         pairingKeys,
-        pairingValues,
     } = data;
     if (!category || !questionType || !question || !submittedBy) {
         throw new ValidationError("Missing required fields");
@@ -122,13 +120,20 @@ export async function createQuestion(
         if (!pairingMode || !pairingKeySource) {
             throw new ValidationError("Pairing questions require pairingMode and pairingKeySource");
         }
-        if (!pairingValues || pairingValues.length < 2) {
-            throw new ValidationError("Pairing questions require at least 2 values");
+        if (!finalOptions || finalOptions.length < 2) {
+            throw new ValidationError("Pairing questions require at least 2 values (in options)");
         }
         if (pairingKeySource === PairingKeySource.Custom) {
             if (!pairingKeys || pairingKeys.length < 2) {
                 throw new ValidationError("Custom pairing keys require at least 2 entries");
             }
+        }
+        if (
+            pairingMode === PairingMode.Exclusive &&
+            pairingKeys &&
+            finalOptions.length < pairingKeys.length
+        ) {
+            throw new ValidationError("Exclusive pairing requires at least as many values as keys");
         }
     }
 
@@ -143,7 +148,6 @@ export async function createQuestion(
         pairingKeySource,
         pairingMode,
         pairingKeys,
-        pairingValues,
         submittedBy,
     });
     await newQuestion.save();
@@ -174,7 +178,6 @@ export async function createQuestionFromTemplate(
         pairingKeySource?: PairingKeySource;
         pairingMode?: PairingMode;
         pairingKeys?: string[];
-        pairingValues?: string[];
     }
 ): Promise<IQuestion> {
     let finalOptions = options || [];
@@ -195,7 +198,6 @@ export async function createQuestionFromTemplate(
         pairingKeySource: extra?.pairingKeySource,
         pairingMode: extra?.pairingMode,
         pairingKeys: extra?.pairingKeys,
-        pairingValues: extra?.pairingValues,
     });
     await newQuestion.save();
 
@@ -292,7 +294,7 @@ export async function voteOnQuestion(
     if (question.questionType === QuestionType.Pairing) {
         const pairingResponse = response as Record<string, string>;
         const validKeys = question.pairingKeys || [];
-        const validValues = question.pairingValues || [];
+        const validValues = (question.options as string[]) || [];
 
         for (const [key, value] of Object.entries(pairingResponse)) {
             if (!validKeys.includes(key)) {

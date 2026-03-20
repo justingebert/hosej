@@ -24,7 +24,6 @@ const questionTemplateSchema = new mongoose.Schema<IQuestionTemplate>({
         required: false,
     },
     pairingKeys: { type: [String], required: false },
-    pairingValues: { type: [String], required: false },
     createdAt: { type: Date, default: Date.now },
 });
 

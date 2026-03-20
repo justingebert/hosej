@@ -88,16 +88,38 @@ const ResultsPage = () => {
                                     {typeof option === "string" ? option : option.key}
                                 </div>
                             ))}
-                        {question.questionType === "pairing" &&
-                            question.pairingKeys &&
-                            question.pairingKeys.map((key: string, index: number) => (
-                                <div
-                                    key={index}
-                                    className="p-4 m-2 bg-secondary rounded-lg w-full max-w-md text-center"
-                                >
-                                    {key}
+                        {question.questionType === "pairing" && (
+                            <div className="grid grid-cols-2 gap-3 w-full max-w-md">
+                                <div className="flex flex-col gap-1">
+                                    <span className="text-xs text-muted-foreground font-medium mb-1">
+                                        Keys
+                                    </span>
+                                    {question.pairingKeys?.map((key: string, i: number) => (
+                                        <div
+                                            key={i}
+                                            className="p-2 bg-secondary rounded-lg text-center text-sm"
+                                        >
+                                            {key}
+                                        </div>
+                                    ))}
                                 </div>
-                            ))}
+                                <div className="flex flex-col gap-1">
+                                    <span className="text-xs text-muted-foreground font-medium mb-1">
+                                        Values
+                                    </span>
+                                    {question.options?.map(
+                                        (option: QuestionOptionDTO, i: number) => (
+                                            <div
+                                                key={i}
+                                                className="p-2 bg-secondary rounded-lg text-center text-sm"
+                                            >
+                                                {typeof option === "string" ? option : option.key}
+                                            </div>
+                                        )
+                                    )}
+                                </div>
+                            </div>
+                        )}
                     </div>
                     <VoteResults
                         user={user!}

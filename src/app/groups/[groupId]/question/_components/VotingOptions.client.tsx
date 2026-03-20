@@ -23,7 +23,6 @@ const VoteOptions = ({
         | "multiSelect"
         | "options"
         | "pairingKeys"
-        | "pairingValues"
         | "pairingMode"
     >;
     onVote: () => void;

@@ -13,7 +13,6 @@ export const CreateQuestionSchema = z
         pairingKeySource: z.nativeEnum(PairingKeySource).optional(),
         pairingMode: z.nativeEnum(PairingMode).optional(),
         pairingKeys: z.array(z.string()).optional(),
-        pairingValues: z.array(z.string()).optional(),
     })
     .refine(
         (data) => {
@@ -39,11 +38,25 @@ export const CreateQuestionSchema = z
     .refine(
         (data) => {
             if (data.questionType === QuestionType.Pairing) {
-                return data.pairingValues && data.pairingValues.length >= 2;
+                return data.options && data.options.length >= 2;
             }
             return true;
         },
-        { message: "Pairing questions require at least 2 values" }
+        { message: "Pairing questions require at least 2 values (in options)" }
+    )
+    .refine(
+        (data) => {
+            if (
+                data.questionType === QuestionType.Pairing &&
+                data.pairingMode === PairingMode.Exclusive &&
+                data.pairingKeys &&
+                data.options
+            ) {
+                return data.options.length >= data.pairingKeys.length;
+            }
+            return true;
+        },
+        { message: "Exclusive pairing requires at least as many values as keys" }
     );
 
 export const UpdateQuestionAttachmentsSchema = z.object({

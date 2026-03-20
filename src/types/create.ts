@@ -13,5 +13,4 @@ export type createQuestionData = {
     pairingKeySource?: string;
     pairingMode?: string;
     pairingKeys?: string[];
-    pairingValues?: string[];
 };

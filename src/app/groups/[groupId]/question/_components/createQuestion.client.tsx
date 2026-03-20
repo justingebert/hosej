@@ -98,7 +98,6 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                 pairingKeySource: undefined,
                 pairingMode: undefined,
                 pairingKeys: undefined,
-                pairingValues: undefined,
             }));
         } else if (value === "custom") {
             setQuestionData((prev) => ({
@@ -110,7 +109,6 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                 pairingKeySource: undefined,
                 pairingMode: undefined,
                 pairingKeys: undefined,
-                pairingValues: undefined,
             }));
         } else if (value === "image") {
             setQuestionData((prev) => ({
@@ -122,7 +120,6 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                 pairingKeySource: undefined,
                 pairingMode: undefined,
                 pairingKeys: undefined,
-                pairingValues: undefined,
             }));
         } else if (value === "rating") {
             setQuestionData((prev) => ({
@@ -134,19 +131,17 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                 pairingKeySource: undefined,
                 pairingMode: undefined,
                 pairingKeys: undefined,
-                pairingValues: undefined,
             }));
         } else if (value === "pairing") {
             setQuestionData((prev) => ({
                 ...prev,
                 questionType: value,
                 multiSelect: false,
-                options: [],
+                options: [""],
                 optionFiles: [],
                 pairingKeySource: "members",
                 pairingMode: "exclusive",
                 pairingKeys: group?.members.map((member) => member.name) || [],
-                pairingValues: [""],
             }));
         } else {
             // text
@@ -159,7 +154,6 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                 pairingKeySource: undefined,
                 pairingMode: undefined,
                 pairingKeys: undefined,
-                pairingValues: undefined,
             }));
         }
     };
@@ -232,28 +226,6 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
         }));
     };
 
-    const handlePairingValueChange = (value: string, index: number) => {
-        setQuestionData((prev) => {
-            const values = [...(prev.pairingValues || [])];
-            values[index] = value;
-            return { ...prev, pairingValues: values };
-        });
-    };
-
-    const handleAddPairingValue = () => {
-        setQuestionData((prev) => ({
-            ...prev,
-            pairingValues: [...(prev.pairingValues || []), ""],
-        }));
-    };
-
-    const handleRemovePairingValue = (index: number) => {
-        setQuestionData((prev) => ({
-            ...prev,
-            pairingValues: (prev.pairingValues || []).filter((_, idx) => idx !== index),
-        }));
-    };
-
     const resetForm = () => {
         setQuestionData({
             question: "",
@@ -265,7 +237,6 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
             pairingKeySource: undefined,
             pairingMode: undefined,
             pairingKeys: undefined,
-            pairingValues: undefined,
         });
         setClearImageInput(true);
     };
@@ -301,10 +272,8 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
         }
 
         if (isPairing) {
-            const trimmedValues = (questionData.pairingValues || [])
-                .map((v) => v.trim())
-                .filter((v) => v !== "");
-            if (trimmedValues.length < 2) {
+            const trimmedKeys = (questionData.pairingKeys || []).filter((k) => k.trim() !== "");
+            if (trimmedOptions.length < 2) {
                 toast({
                     title: "Please add at least two pairing values.",
                     variant: "destructive",
@@ -312,12 +281,20 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                 setIsSubmitting(false);
                 return;
             }
-            if (
-                questionData.pairingKeySource === "custom" &&
-                (questionData.pairingKeys || []).filter((k) => k.trim() !== "").length < 2
-            ) {
+            if (questionData.pairingKeySource === "custom" && trimmedKeys.length < 2) {
                 toast({
                     title: "Please add at least two pairing keys.",
+                    variant: "destructive",
+                });
+                setIsSubmitting(false);
+                return;
+            }
+            if (
+                questionData.pairingMode === "exclusive" &&
+                trimmedOptions.length < trimmedKeys.length
+            ) {
+                toast({
+                    title: "Unique match requires at least as many values as keys.",
                     variant: "destructive",
                 });
                 setIsSubmitting(false);
@@ -331,7 +308,7 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
             questionType: questionData.questionType,
             question: questionData.question,
             multiSelect: questionData.multiSelect,
-            options: questionData.questionType === "custom" ? trimmedOptions : [],
+            options: questionData.questionType === "custom" || isPairing ? trimmedOptions : [],
             submittedBy: user!._id,
         };
 
@@ -341,9 +318,6 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
             questionPayload.pairingKeys = (questionData.pairingKeys || [])
                 .map((k) => k.trim())
                 .filter((k) => k !== "");
-            questionPayload.pairingValues = (questionData.pairingValues || [])
-                .map((v) => v.trim())
-                .filter((v) => v !== "");
         }
 
         try {
@@ -458,22 +432,7 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                 </Select>
             </div>
 
-            {showMultiSelectToggle && (
-                <div className="mt-3 flex items-center gap-3">
-                    <Switch
-                        id="multi-select"
-                        checked={questionData.multiSelect}
-                        onCheckedChange={(checked) =>
-                            setQuestionData((prev) => ({ ...prev, multiSelect: checked }))
-                        }
-                    />
-                    <Label htmlFor="multi-select" className="text-sm text-muted-foreground">
-                        Allow multiple selections
-                    </Label>
-                </div>
-            )}
-
-            <div className="mt-5 flex flex-row gap-4">
+            <div className="mt-5">
                 <Input
                     type="text"
                     placeholder="Enter question"
@@ -484,13 +443,31 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                     required
                     className="w-full"
                 />
+            </div>
+
+            <div className="mt-3 flex items-center justify-between gap-3">
                 <ImageUploader
                     onFileSelect={handleMainImageAdded}
                     clearInput={clearImageInput}
                     showFilename={false}
-                    className="w-12 flex items-center justify-center"
-                    buttonstyle="flex items-center justify-between w-full p-3"
+                    className="flex items-center"
+                    buttonstyle="flex items-center gap-2 text-sm text-muted-foreground"
+                    label="Add image"
                 />
+                {showMultiSelectToggle && (
+                    <div className="flex items-center gap-2">
+                        <Switch
+                            id="multi-select"
+                            checked={questionData.multiSelect}
+                            onCheckedChange={(checked) =>
+                                setQuestionData((prev) => ({ ...prev, multiSelect: checked }))
+                            }
+                        />
+                        <Label htmlFor="multi-select" className="text-sm text-muted-foreground">
+                            Allow multiple
+                        </Label>
+                    </div>
+                )}
             </div>
 
             {isPairing ? (
@@ -549,16 +526,16 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                         )}
                     </div>
 
-                    {/* Values */}
+                    {/* Values (stored in options) */}
                     <div>
                         <Label className="text-sm text-muted-foreground mb-1 block">Values</Label>
                         <DisplayOptions
                             mode="editable"
-                            options={questionData.pairingValues || []}
+                            options={questionData.options}
                             clearInput={clearImageInput}
-                            onOptionChange={handlePairingValueChange}
-                            onOptionRemove={handleRemovePairingValue}
-                            onOptionAdd={handleAddPairingValue}
+                            onOptionChange={handleOptionChange}
+                            onOptionRemove={handleRemoveOption}
+                            onOptionAdd={handleAddOption}
                             onOptionImageAdded={() => {}}
                         />
                     </div>

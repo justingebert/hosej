@@ -26,7 +26,6 @@ export async function createTemplatesFromArray(
         pairingKeySource?: string;
         pairingMode?: string;
         pairingKeys?: string[];
-        pairingValues?: string[];
     }[],
     packMeta?: { name?: string; description?: string; category?: string }
 ): Promise<{
@@ -57,7 +56,6 @@ export async function createTemplatesFromArray(
         ...(t.pairingKeySource && { pairingKeySource: t.pairingKeySource }),
         ...(t.pairingMode && { pairingMode: t.pairingMode }),
         ...(t.pairingKeys && { pairingKeys: t.pairingKeys }),
-        ...(t.pairingValues && { pairingValues: t.pairingValues }),
     }));
 
     const inserted = await QuestionTemplate.insertMany(docs);
@@ -116,7 +114,6 @@ export async function addTemplatePackToGroup(
                 pairingKeySource: template.pairingKeySource,
                 pairingMode: template.pairingMode,
                 pairingKeys: template.pairingKeys,
-                pairingValues: template.pairingValues,
             }
         );
     }
