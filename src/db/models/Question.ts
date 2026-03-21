@@ -2,6 +2,16 @@ import mongoose from "mongoose";
 import type { IAnswer, IQuestion } from "@/types/models/question";
 import { PairingKeySource, PairingMode, QuestionType } from "@/types/models/question";
 
+const pairingSchema = new mongoose.Schema(
+    {
+        keySource: { type: String, enum: Object.values(PairingKeySource), required: true },
+        mode: { type: String, enum: Object.values(PairingMode), required: true },
+        keys: { type: [String], required: false },
+        values: { type: [String], required: true },
+    },
+    { _id: false }
+);
+
 const answerSchema = new mongoose.Schema<IAnswer>({
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     response: { type: mongoose.Schema.Types.Mixed, required: true }, // Can be a string, object, etc.
@@ -30,17 +40,7 @@ const questionSchema = new mongoose.Schema<IQuestion>({
         ok: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
         bad: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     },
-    pairingKeySource: {
-        type: String,
-        enum: Object.values(PairingKeySource),
-        required: false,
-    },
-    pairingMode: {
-        type: String,
-        enum: Object.values(PairingMode),
-        required: false,
-    },
-    pairingKeys: { type: [String], required: false },
+    pairing: { type: pairingSchema, required: false },
     used: { type: Boolean, default: false },
     active: { type: Boolean, default: false },
     usedAt: { type: Date },

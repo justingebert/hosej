@@ -23,9 +23,12 @@ export async function createTemplatesFromArray(
         question: string;
         multiSelect?: boolean;
         options?: unknown[];
-        pairingKeySource?: string;
-        pairingMode?: string;
-        pairingKeys?: string[];
+        pairing?: {
+            keySource: string;
+            mode: string;
+            keys?: string[];
+            values: string[];
+        };
     }[],
     packMeta?: { name?: string; description?: string; category?: string }
 ): Promise<{
@@ -53,9 +56,7 @@ export async function createTemplatesFromArray(
         question: t.question.trim(),
         multiSelect: t.multiSelect ?? false,
         options: t.options || [],
-        ...(t.pairingKeySource && { pairingKeySource: t.pairingKeySource }),
-        ...(t.pairingMode && { pairingMode: t.pairingMode }),
-        ...(t.pairingKeys && { pairingKeys: t.pairingKeys }),
+        ...(t.pairing && { pairing: t.pairing }),
     }));
 
     const inserted = await QuestionTemplate.insertMany(docs);
@@ -111,9 +112,7 @@ export async function addTemplatePackToGroup(
             template._id,
             {
                 multiSelect: template.multiSelect,
-                pairingKeySource: template.pairingKeySource,
-                pairingMode: template.pairingMode,
-                pairingKeys: template.pairingKeys,
+                pairing: template.pairing,
             }
         );
     }

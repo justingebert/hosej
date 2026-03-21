@@ -246,7 +246,7 @@ function RatingDrawer({
                                     <span className="text-xs text-muted-foreground font-medium mb-1">
                                         Keys
                                     </span>
-                                    {question.pairingKeys?.map((key, i) => (
+                                    {question.pairing?.keys?.map((key, i) => (
                                         <div
                                             key={i}
                                             className="p-2 bg-secondary rounded-lg text-center text-sm"
@@ -259,12 +259,12 @@ function RatingDrawer({
                                     <span className="text-xs text-muted-foreground font-medium mb-1">
                                         Values
                                     </span>
-                                    {question.options?.map((option, i) => (
+                                    {question.pairing?.values?.map((value, i) => (
                                         <div
                                             key={i}
                                             className="p-2 bg-secondary rounded-lg text-center text-sm"
                                         >
-                                            {typeof option === "string" ? option : option.key}
+                                            {value}
                                         </div>
                                     ))}
                                 </div>

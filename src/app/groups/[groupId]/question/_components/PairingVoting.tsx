@@ -23,15 +23,12 @@ const PairingVoting = ({
     question,
     onVote,
 }: {
-    question: Pick<
-        QuestionWithUserStateDTO,
-        "_id" | "groupId" | "pairingKeys" | "options" | "pairingMode"
-    >;
+    question: Pick<QuestionWithUserStateDTO, "_id" | "groupId" | "pairing">;
     onVote: () => void;
 }) => {
-    const keys = question.pairingKeys || [];
-    const values = (question.options as string[]) || [];
-    const isExclusive = question.pairingMode === "exclusive";
+    const keys = question.pairing?.keys || [];
+    const values = question.pairing?.values || [];
+    const isExclusive = question.pairing?.mode === "exclusive";
 
     // selections: key -> value
     const [selections, setSelections] = useState<Record<string, string>>({});

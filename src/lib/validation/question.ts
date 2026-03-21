@@ -1,6 +1,13 @@
 import { z } from "zod";
 import { PairingKeySource, PairingMode, QuestionType } from "@/types/models/question";
 
+const PairingConfigSchema = z.object({
+    keySource: z.nativeEnum(PairingKeySource),
+    mode: z.nativeEnum(PairingMode),
+    keys: z.array(z.string()).optional(),
+    values: z.array(z.string()),
+});
+
 export const CreateQuestionSchema = z
     .object({
         category: z.string().min(1, "category is required").max(100),
@@ -10,26 +17,24 @@ export const CreateQuestionSchema = z
         multiSelect: z.boolean().default(false),
         image: z.string().optional(),
         options: z.array(z.unknown()).optional(),
-        pairingKeySource: z.nativeEnum(PairingKeySource).optional(),
-        pairingMode: z.nativeEnum(PairingMode).optional(),
-        pairingKeys: z.array(z.string()).optional(),
+        pairing: PairingConfigSchema.optional(),
     })
     .refine(
         (data) => {
             if (data.questionType === QuestionType.Pairing) {
-                return !!data.pairingMode && !!data.pairingKeySource;
+                return !!data.pairing;
             }
             return true;
         },
-        { message: "Pairing questions require pairingMode and pairingKeySource" }
+        { message: "Pairing questions require a pairing config" }
     )
     .refine(
         (data) => {
             if (
                 data.questionType === QuestionType.Pairing &&
-                data.pairingKeySource === PairingKeySource.Custom
+                data.pairing?.keySource === PairingKeySource.Custom
             ) {
-                return data.pairingKeys && data.pairingKeys.length >= 2;
+                return data.pairing.keys && data.pairing.keys.length >= 2;
             }
             return true;
         },
@@ -38,21 +43,20 @@ export const CreateQuestionSchema = z
     .refine(
         (data) => {
             if (data.questionType === QuestionType.Pairing) {
-                return data.options && data.options.length >= 2;
+                return data.pairing && data.pairing.values.length >= 2;
             }
             return true;
         },
-        { message: "Pairing questions require at least 2 values (in options)" }
+        { message: "Pairing questions require at least 2 values" }
     )
     .refine(
         (data) => {
             if (
                 data.questionType === QuestionType.Pairing &&
-                data.pairingMode === PairingMode.Exclusive &&
-                data.pairingKeys &&
-                data.options
+                data.pairing?.mode === PairingMode.Exclusive &&
+                data.pairing.keys
             ) {
-                return data.options.length >= data.pairingKeys.length;
+                return data.pairing.values.length >= data.pairing.keys.length;
             }
             return true;
         },

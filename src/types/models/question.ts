@@ -20,6 +20,13 @@ export enum PairingMode {
     Open = "open", // many:1 — values can repeat
 }
 
+export interface IPairingConfig {
+    keySource: PairingKeySource;
+    mode: PairingMode;
+    keys?: string[];
+    values: string[];
+}
+
 export interface IQuestion {
     _id: Types.ObjectId;
     groupId: Types.ObjectId;
@@ -37,9 +44,7 @@ export interface IQuestion {
         bad: Types.ObjectId[];
     };
 
-    pairingKeySource?: PairingKeySource;
-    pairingMode?: PairingMode;
-    pairingKeys?: string[];
+    pairing?: IPairingConfig;
 
     used: boolean;
     active: boolean;

@@ -157,25 +157,24 @@ describe("createQuestion", () => {
             questionType: QuestionType.Pairing,
             question: "Match members to traits",
             submittedBy: mockUserId,
-            pairingKeySource: PairingKeySource.Custom,
-            pairingMode: PairingMode.Exclusive,
-            pairingKeys: ["Alice", "Bob"],
-            options: ["Funny", "Smart"],
+            pairing: {
+                keySource: PairingKeySource.Custom,
+                mode: PairingMode.Exclusive,
+                keys: ["Alice", "Bob"],
+                values: ["Funny", "Smart"],
+            },
         });
 
         expect(result).toBeDefined();
     });
 
-    it("should throw ValidationError for pairing without pairingMode", async () => {
+    it("should throw ValidationError for pairing without pairing config", async () => {
         await expect(
             createQuestion(mockGroupId, mockUserId, {
                 category: "fun",
                 questionType: QuestionType.Pairing,
                 question: "Match?",
                 submittedBy: mockUserId,
-                pairingKeySource: PairingKeySource.Custom,
-                pairingKeys: ["A", "B"],
-                options: ["X", "Y"],
             })
         ).rejects.toThrow(ValidationError);
     });
@@ -187,10 +186,12 @@ describe("createQuestion", () => {
                 questionType: QuestionType.Pairing,
                 question: "Match?",
                 submittedBy: mockUserId,
-                pairingKeySource: PairingKeySource.Custom,
-                pairingMode: PairingMode.Open,
-                pairingKeys: ["A", "B"],
-                options: ["X"],
+                pairing: {
+                    keySource: PairingKeySource.Custom,
+                    mode: PairingMode.Open,
+                    keys: ["A", "B"],
+                    values: ["X"],
+                },
             })
         ).rejects.toThrow(ValidationError);
     });
@@ -202,10 +203,12 @@ describe("createQuestion", () => {
                 questionType: QuestionType.Pairing,
                 question: "Match?",
                 submittedBy: mockUserId,
-                pairingKeySource: PairingKeySource.Custom,
-                pairingMode: PairingMode.Exclusive,
-                pairingKeys: ["A", "B", "C"],
-                options: ["X", "Y"],
+                pairing: {
+                    keySource: PairingKeySource.Custom,
+                    mode: PairingMode.Exclusive,
+                    keys: ["A", "B", "C"],
+                    values: ["X", "Y"],
+                },
             })
         ).rejects.toThrow(ValidationError);
     });
@@ -389,9 +392,12 @@ describe("voteOnQuestion", () => {
         const mockQuestion = createMockQuestion({
             answers: [],
             questionType: QuestionType.Pairing,
-            pairingMode: PairingMode.Exclusive,
-            pairingKeys: ["Alice", "Bob"],
-            options: ["Funny", "Smart"],
+            pairing: {
+                keySource: PairingKeySource.Custom,
+                mode: PairingMode.Exclusive,
+                keys: ["Alice", "Bob"],
+                values: ["Funny", "Smart"],
+            },
         });
         const mockGroup = createMockGroup();
 
@@ -413,9 +419,12 @@ describe("voteOnQuestion", () => {
         const mockQuestion = createMockQuestion({
             answers: [],
             questionType: QuestionType.Pairing,
-            pairingMode: PairingMode.Exclusive,
-            pairingKeys: ["Alice", "Bob"],
-            options: ["Funny", "Smart"],
+            pairing: {
+                keySource: PairingKeySource.Custom,
+                mode: PairingMode.Exclusive,
+                keys: ["Alice", "Bob"],
+                values: ["Funny", "Smart"],
+            },
         });
 
         (Question.findById as Mock).mockResolvedValue(mockQuestion);
@@ -434,9 +443,12 @@ describe("voteOnQuestion", () => {
         const mockQuestion = createMockQuestion({
             answers: [],
             questionType: QuestionType.Pairing,
-            pairingMode: PairingMode.Open,
-            pairingKeys: ["Alice", "Bob"],
-            options: ["Funny", "Smart"],
+            pairing: {
+                keySource: PairingKeySource.Custom,
+                mode: PairingMode.Open,
+                keys: ["Alice", "Bob"],
+                values: ["Funny", "Smart"],
+            },
         });
         const mockGroup = createMockGroup();
 
@@ -458,9 +470,12 @@ describe("voteOnQuestion", () => {
         const mockQuestion = createMockQuestion({
             answers: [],
             questionType: QuestionType.Pairing,
-            pairingMode: PairingMode.Open,
-            pairingKeys: ["Alice", "Bob"],
-            options: ["Funny", "Smart"],
+            pairing: {
+                keySource: PairingKeySource.Custom,
+                mode: PairingMode.Open,
+                keys: ["Alice", "Bob"],
+                values: ["Funny", "Smart"],
+            },
         });
 
         (Question.findById as Mock).mockResolvedValue(mockQuestion);
@@ -605,8 +620,12 @@ describe("getQuestionResults", () => {
             groupId: new Types.ObjectId(mockGroupId),
             questionType: QuestionType.Pairing,
             multiSelect: false,
-            pairingKeys: ["Alice", "Bob"],
-            options: ["Funny", "Smart"],
+            pairing: {
+                keySource: PairingKeySource.Custom,
+                mode: PairingMode.Exclusive,
+                keys: ["Alice", "Bob"],
+                values: ["Funny", "Smart"],
+            },
             answers: [
                 {
                     user: { username: "User1" },

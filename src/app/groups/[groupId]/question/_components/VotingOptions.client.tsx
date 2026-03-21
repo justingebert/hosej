@@ -17,13 +17,7 @@ const VoteOptions = ({
 }: {
     question: Pick<
         QuestionWithUserStateDTO,
-        | "_id"
-        | "groupId"
-        | "questionType"
-        | "multiSelect"
-        | "options"
-        | "pairingKeys"
-        | "pairingMode"
+        "_id" | "groupId" | "questionType" | "multiSelect" | "options" | "pairing"
     >;
     onVote: () => void;
 }) => {

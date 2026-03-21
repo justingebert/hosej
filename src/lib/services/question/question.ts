@@ -11,6 +11,7 @@ import { ActivityFeature, ActivityType } from "@/types/models/activityEvent";
 import { EntityModel } from "@/types/models/chat";
 import type {
     IAnswer,
+    IPairingConfig,
     IPairingResult,
     IQuestion,
     QuestionDocument,
@@ -25,7 +26,7 @@ async function populateFromMembers(question: QuestionDocument): Promise<Question
     const isUsers = question.questionType === QuestionType.Users;
     const isPairingMembers =
         question.questionType === QuestionType.Pairing &&
-        question.pairingKeySource === PairingKeySource.Members;
+        question.pairing?.keySource === PairingKeySource.Members;
 
     if (!isUsers && !isPairingMembers) {
         return question;
@@ -37,8 +38,8 @@ async function populateFromMembers(question: QuestionDocument): Promise<Question
     if (isUsers) {
         question.options = memberNames;
     }
-    if (isPairingMembers) {
-        question.pairingKeys = memberNames;
+    if (isPairingMembers && question.pairing) {
+        question.pairing.keys = memberNames;
     }
     await question.save();
 
@@ -90,23 +91,11 @@ export async function createQuestion(
         multiSelect?: boolean;
         image?: string;
         options?: unknown[];
-        pairingKeySource?: PairingKeySource;
-        pairingMode?: PairingMode;
-        pairingKeys?: string[];
+        pairing?: IPairingConfig;
     }
 ): Promise<IQuestion> {
-    const {
-        category,
-        questionType,
-        question,
-        submittedBy,
-        multiSelect,
-        image,
-        options,
-        pairingKeySource,
-        pairingMode,
-        pairingKeys,
-    } = data;
+    const { category, questionType, question, submittedBy, multiSelect, image, options, pairing } =
+        data;
     if (!category || !questionType || !question || !submittedBy) {
         throw new ValidationError("Missing required fields");
     }
@@ -117,21 +106,21 @@ export async function createQuestion(
     }
 
     if (questionType === QuestionType.Pairing) {
-        if (!pairingMode || !pairingKeySource) {
-            throw new ValidationError("Pairing questions require pairingMode and pairingKeySource");
+        if (!pairing) {
+            throw new ValidationError("Pairing questions require a pairing config");
         }
-        if (!finalOptions || finalOptions.length < 2) {
-            throw new ValidationError("Pairing questions require at least 2 values (in options)");
+        if (pairing.values.length < 2) {
+            throw new ValidationError("Pairing questions require at least 2 values");
         }
-        if (pairingKeySource === PairingKeySource.Custom) {
-            if (!pairingKeys || pairingKeys.length < 2) {
+        if (pairing.keySource === PairingKeySource.Custom) {
+            if (!pairing.keys || pairing.keys.length < 2) {
                 throw new ValidationError("Custom pairing keys require at least 2 entries");
             }
         }
         if (
-            pairingMode === PairingMode.Exclusive &&
-            pairingKeys &&
-            finalOptions.length < pairingKeys.length
+            pairing.mode === PairingMode.Exclusive &&
+            pairing.keys &&
+            pairing.values.length < pairing.keys.length
         ) {
             throw new ValidationError("Exclusive pairing requires at least as many values as keys");
         }
@@ -145,9 +134,7 @@ export async function createQuestion(
         multiSelect: multiSelect ?? false,
         image: image || "",
         options: finalOptions,
-        pairingKeySource,
-        pairingMode,
-        pairingKeys,
+        pairing,
         submittedBy,
     });
     await newQuestion.save();
@@ -175,9 +162,7 @@ export async function createQuestionFromTemplate(
     templateId?: Types.ObjectId,
     extra?: {
         multiSelect?: boolean;
-        pairingKeySource?: PairingKeySource;
-        pairingMode?: PairingMode;
-        pairingKeys?: string[];
+        pairing?: IPairingConfig;
     }
 ): Promise<IQuestion> {
     let finalOptions = options || [];
@@ -195,9 +180,7 @@ export async function createQuestionFromTemplate(
         options: finalOptions,
         submittedBy: null,
         templateId,
-        pairingKeySource: extra?.pairingKeySource,
-        pairingMode: extra?.pairingMode,
-        pairingKeys: extra?.pairingKeys,
+        pairing: extra?.pairing,
     });
     await newQuestion.save();
 
@@ -293,8 +276,8 @@ export async function voteOnQuestion(
 
     if (question.questionType === QuestionType.Pairing) {
         const pairingResponse = response as Record<string, string>;
-        const validKeys = question.pairingKeys || [];
-        const validValues = (question.options as string[]) || [];
+        const validKeys = question.pairing?.keys || [];
+        const validValues = question.pairing?.values || [];
 
         for (const [key, value] of Object.entries(pairingResponse)) {
             if (!validKeys.includes(key)) {
@@ -305,7 +288,7 @@ export async function voteOnQuestion(
             }
         }
 
-        if (question.pairingMode === PairingMode.Exclusive) {
+        if (question.pairing?.mode === PairingMode.Exclusive) {
             const usedValues = Object.values(pairingResponse);
             if (new Set(usedValues).size !== usedValues.length) {
                 throw new ValidationError("In exclusive mode, each value can only be used once");
@@ -394,7 +377,7 @@ export async function getQuestionResults(questionId: string): Promise<{
 
     // Pairing results
     if (question.questionType === QuestionType.Pairing) {
-        const pairingKeys = question.pairingKeys || [];
+        const pairingKeys = question.pairing?.keys || [];
         const keyAggregation: Record<
             string,
             Record<string, { count: number; users: string[] }>

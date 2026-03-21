@@ -6,9 +6,12 @@ export interface TemplateInput {
     question: string;
     multiSelect?: boolean;
     options?: any[];
-    pairingKeySource?: string;
-    pairingMode?: string;
-    pairingKeys?: string[];
+    pairing?: {
+        keySource: string;
+        mode: string;
+        keys?: string[];
+        values: string[];
+    };
 }
 
 export interface ValidationError {
@@ -127,48 +130,56 @@ export function validateTemplates(templates: any): ValidationResult {
 
         // Validate pairing fields
         if (template.questionType === QuestionType.Pairing) {
-            if (!template.pairingMode) {
+            if (!template.pairing) {
                 errors.push({
                     index: i,
-                    field: "pairingMode",
-                    message: "pairingMode is required for pairing questions",
+                    field: "pairing",
+                    message: "pairing config is required for pairing questions",
                 });
-            }
-            if (!template.pairingKeySource) {
-                errors.push({
-                    index: i,
-                    field: "pairingKeySource",
-                    message: "pairingKeySource is required for pairing questions",
-                });
-            }
-            if (
-                template.pairingKeySource === PairingKeySource.Custom &&
-                (!template.pairingKeys || template.pairingKeys.length < 2)
-            ) {
-                errors.push({
-                    index: i,
-                    field: "pairingKeys",
-                    message: "Custom pairing keys require at least 2 entries",
-                });
-            }
-            if (!template.options || template.options.length < 2) {
-                errors.push({
-                    index: i,
-                    field: "options",
-                    message: "Pairing questions require at least 2 values in options",
-                });
-            }
-            if (
-                template.pairingMode === "exclusive" &&
-                template.pairingKeys &&
-                template.options &&
-                template.options.length < template.pairingKeys.length
-            ) {
-                errors.push({
-                    index: i,
-                    field: "options",
-                    message: "Exclusive pairing requires at least as many values as keys",
-                });
+            } else {
+                if (!template.pairing.mode) {
+                    errors.push({
+                        index: i,
+                        field: "pairing.mode",
+                        message: "pairing.mode is required for pairing questions",
+                    });
+                }
+                if (!template.pairing.keySource) {
+                    errors.push({
+                        index: i,
+                        field: "pairing.keySource",
+                        message: "pairing.keySource is required for pairing questions",
+                    });
+                }
+                if (
+                    template.pairing.keySource === PairingKeySource.Custom &&
+                    (!template.pairing.keys || template.pairing.keys.length < 2)
+                ) {
+                    errors.push({
+                        index: i,
+                        field: "pairing.keys",
+                        message: "Custom pairing keys require at least 2 entries",
+                    });
+                }
+                if (!template.pairing.values || template.pairing.values.length < 2) {
+                    errors.push({
+                        index: i,
+                        field: "pairing.values",
+                        message: "Pairing questions require at least 2 values",
+                    });
+                }
+                if (
+                    template.pairing.mode === "exclusive" &&
+                    template.pairing.keys &&
+                    template.pairing.values &&
+                    template.pairing.values.length < template.pairing.keys.length
+                ) {
+                    errors.push({
+                        index: i,
+                        field: "pairing.values",
+                        message: "Exclusive pairing requires at least as many values as keys",
+                    });
+                }
             }
         }
     }

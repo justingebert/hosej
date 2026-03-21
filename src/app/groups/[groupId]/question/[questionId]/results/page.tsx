@@ -94,7 +94,7 @@ const ResultsPage = () => {
                                     <span className="text-xs text-muted-foreground font-medium mb-1">
                                         Keys
                                     </span>
-                                    {question.pairingKeys?.map((key: string, i: number) => (
+                                    {question.pairing?.keys?.map((key: string, i: number) => (
                                         <div
                                             key={i}
                                             className="p-2 bg-secondary rounded-lg text-center text-sm"
@@ -107,16 +107,14 @@ const ResultsPage = () => {
                                     <span className="text-xs text-muted-foreground font-medium mb-1">
                                         Values
                                     </span>
-                                    {question.options?.map(
-                                        (option: QuestionOptionDTO, i: number) => (
-                                            <div
-                                                key={i}
-                                                className="p-2 bg-secondary rounded-lg text-center text-sm"
-                                            >
-                                                {typeof option === "string" ? option : option.key}
-                                            </div>
-                                        )
-                                    )}
+                                    {question.pairing?.values?.map((value: string, i: number) => (
+                                        <div
+                                            key={i}
+                                            className="p-2 bg-secondary rounded-lg text-center text-sm"
+                                        >
+                                            {value}
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         )}

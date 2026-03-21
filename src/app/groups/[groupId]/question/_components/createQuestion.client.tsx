@@ -95,9 +95,7 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                 multiSelect: false,
                 options: group?.members.map((member) => member.name) || [],
                 optionFiles: [],
-                pairingKeySource: undefined,
-                pairingMode: undefined,
-                pairingKeys: undefined,
+                pairing: undefined,
             }));
         } else if (value === "custom") {
             setQuestionData((prev) => ({
@@ -106,9 +104,7 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                 multiSelect: false,
                 options: [""],
                 optionFiles: [],
-                pairingKeySource: undefined,
-                pairingMode: undefined,
-                pairingKeys: undefined,
+                pairing: undefined,
             }));
         } else if (value === "image") {
             setQuestionData((prev) => ({
@@ -117,9 +113,7 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                 multiSelect: false,
                 options: ["", ""],
                 optionFiles: [null, null],
-                pairingKeySource: undefined,
-                pairingMode: undefined,
-                pairingKeys: undefined,
+                pairing: undefined,
             }));
         } else if (value === "rating") {
             setQuestionData((prev) => ({
@@ -128,20 +122,21 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                 multiSelect: false,
                 options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
                 optionFiles: [],
-                pairingKeySource: undefined,
-                pairingMode: undefined,
-                pairingKeys: undefined,
+                pairing: undefined,
             }));
         } else if (value === "pairing") {
             setQuestionData((prev) => ({
                 ...prev,
                 questionType: value,
                 multiSelect: false,
-                options: [""],
+                options: [],
                 optionFiles: [],
-                pairingKeySource: "members",
-                pairingMode: "exclusive",
-                pairingKeys: group?.members.map((member) => member.name) || [],
+                pairing: {
+                    keySource: "members",
+                    mode: "exclusive",
+                    keys: group?.members.map((member) => member.name) || [],
+                    values: [""],
+                },
             }));
         } else {
             // text
@@ -151,9 +146,7 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                 multiSelect: false,
                 options: [],
                 optionFiles: [],
-                pairingKeySource: undefined,
-                pairingMode: undefined,
-                pairingKeys: undefined,
+                pairing: undefined,
             }));
         }
     };
@@ -198,31 +191,62 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
     const handlePairingKeySourceChange = (source: string) => {
         setQuestionData((prev) => ({
             ...prev,
-            pairingKeySource: source,
-            pairingKeys:
-                source === "members" ? group?.members.map((member) => member.name) || [] : [""],
+            pairing: {
+                ...prev.pairing!,
+                keySource: source,
+                keys:
+                    source === "members" ? group?.members.map((member) => member.name) || [] : [""],
+            },
+        }));
+    };
+
+    const handlePairingValueChange = (value: string, index: number) => {
+        setQuestionData((prev) => {
+            const values = [...(prev.pairing?.values || [])];
+            values[index] = value;
+            return { ...prev, pairing: { ...prev.pairing!, values } };
+        });
+    };
+
+    const handleAddPairingValue = () => {
+        setQuestionData((prev) => ({
+            ...prev,
+            pairing: { ...prev.pairing!, values: [...(prev.pairing?.values || []), ""] },
+        }));
+    };
+
+    const handleRemovePairingValue = (index: number) => {
+        setQuestionData((prev) => ({
+            ...prev,
+            pairing: {
+                ...prev.pairing!,
+                values: (prev.pairing?.values || []).filter((_, idx) => idx !== index),
+            },
         }));
     };
 
     const handlePairingKeyChange = (value: string, index: number) => {
         setQuestionData((prev) => {
-            const keys = [...(prev.pairingKeys || [])];
+            const keys = [...(prev.pairing?.keys || [])];
             keys[index] = value;
-            return { ...prev, pairingKeys: keys };
+            return { ...prev, pairing: { ...prev.pairing!, keys } };
         });
     };
 
     const handleAddPairingKey = () => {
         setQuestionData((prev) => ({
             ...prev,
-            pairingKeys: [...(prev.pairingKeys || []), ""],
+            pairing: { ...prev.pairing!, keys: [...(prev.pairing?.keys || []), ""] },
         }));
     };
 
     const handleRemovePairingKey = (index: number) => {
         setQuestionData((prev) => ({
             ...prev,
-            pairingKeys: (prev.pairingKeys || []).filter((_, idx) => idx !== index),
+            pairing: {
+                ...prev.pairing!,
+                keys: (prev.pairing?.keys || []).filter((_, idx) => idx !== index),
+            },
         }));
     };
 
@@ -234,9 +258,7 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
             options: [],
             mainImageFile: null,
             optionFiles: [],
-            pairingKeySource: undefined,
-            pairingMode: undefined,
-            pairingKeys: undefined,
+            pairing: undefined,
         });
         setClearImageInput(true);
     };
@@ -272,8 +294,11 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
         }
 
         if (isPairing) {
-            const trimmedKeys = (questionData.pairingKeys || []).filter((k) => k.trim() !== "");
-            if (trimmedOptions.length < 2) {
+            const trimmedValues = (questionData.pairing?.values || []).filter(
+                (v) => v.trim() !== ""
+            );
+            const trimmedKeys = (questionData.pairing?.keys || []).filter((k) => k.trim() !== "");
+            if (trimmedValues.length < 2) {
                 toast({
                     title: "Please add at least two pairing values.",
                     variant: "destructive",
@@ -281,7 +306,7 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                 setIsSubmitting(false);
                 return;
             }
-            if (questionData.pairingKeySource === "custom" && trimmedKeys.length < 2) {
+            if (questionData.pairing?.keySource === "custom" && trimmedKeys.length < 2) {
                 toast({
                     title: "Please add at least two pairing keys.",
                     variant: "destructive",
@@ -290,8 +315,8 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                 return;
             }
             if (
-                questionData.pairingMode === "exclusive" &&
-                trimmedOptions.length < trimmedKeys.length
+                questionData.pairing?.mode === "exclusive" &&
+                trimmedValues.length < trimmedKeys.length
             ) {
                 toast({
                     title: "Unique match requires at least as many values as keys.",
@@ -308,16 +333,21 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
             questionType: questionData.questionType,
             question: questionData.question,
             multiSelect: questionData.multiSelect,
-            options: questionData.questionType === "custom" || isPairing ? trimmedOptions : [],
+            options: questionData.questionType === "custom" ? trimmedOptions : [],
             submittedBy: user!._id,
         };
 
-        if (isPairing) {
-            questionPayload.pairingKeySource = questionData.pairingKeySource;
-            questionPayload.pairingMode = questionData.pairingMode;
-            questionPayload.pairingKeys = (questionData.pairingKeys || [])
-                .map((k) => k.trim())
-                .filter((k) => k !== "");
+        if (isPairing && questionData.pairing) {
+            questionPayload.pairing = {
+                keySource: questionData.pairing.keySource,
+                mode: questionData.pairing.mode,
+                keys: (questionData.pairing.keys || [])
+                    .map((k) => k.trim())
+                    .filter((k) => k !== ""),
+                values: (questionData.pairing.values || [])
+                    .map((v) => v.trim())
+                    .filter((v) => v !== ""),
+            };
         }
 
         try {
@@ -480,7 +510,7 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                     <div className="flex gap-2">
                         <Button
                             variant={
-                                questionData.pairingKeySource === "members"
+                                questionData.pairing?.keySource === "members"
                                     ? "default"
                                     : "secondary"
                             }
@@ -491,7 +521,9 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                         </Button>
                         <Button
                             variant={
-                                questionData.pairingKeySource === "custom" ? "default" : "secondary"
+                                questionData.pairing?.keySource === "custom"
+                                    ? "default"
+                                    : "secondary"
                             }
                             size="sm"
                             onClick={() => handlePairingKeySourceChange("custom")}
@@ -503,10 +535,10 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                     {/* Keys */}
                     <div>
                         <Label className="text-sm text-muted-foreground mb-1 block">Keys</Label>
-                        {questionData.pairingKeySource === "members" ? (
+                        {questionData.pairing?.keySource === "members" ? (
                             <DisplayOptions
                                 mode="static"
-                                options={questionData.pairingKeys || []}
+                                options={questionData.pairing?.keys || []}
                                 clearInput={clearImageInput}
                                 onOptionChange={() => {}}
                                 onOptionRemove={() => {}}
@@ -516,7 +548,7 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                         ) : (
                             <DisplayOptions
                                 mode="editable"
-                                options={questionData.pairingKeys || []}
+                                options={questionData.pairing?.keys || []}
                                 clearInput={clearImageInput}
                                 onOptionChange={handlePairingKeyChange}
                                 onOptionRemove={handleRemovePairingKey}
@@ -526,16 +558,16 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                         )}
                     </div>
 
-                    {/* Values (stored in options) */}
+                    {/* Values */}
                     <div>
                         <Label className="text-sm text-muted-foreground mb-1 block">Values</Label>
                         <DisplayOptions
                             mode="editable"
-                            options={questionData.options}
+                            options={questionData.pairing?.values || []}
                             clearInput={clearImageInput}
-                            onOptionChange={handleOptionChange}
-                            onOptionRemove={handleRemoveOption}
-                            onOptionAdd={handleAddOption}
+                            onOptionChange={handlePairingValueChange}
+                            onOptionRemove={handleRemovePairingValue}
+                            onOptionAdd={handleAddPairingValue}
                             onOptionImageAdded={() => {}}
                         />
                     </div>
@@ -544,25 +576,27 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                     <div className="flex gap-2">
                         <Button
                             variant={
-                                questionData.pairingMode === "exclusive" ? "default" : "secondary"
+                                questionData.pairing?.mode === "exclusive" ? "default" : "secondary"
                             }
                             size="sm"
                             onClick={() =>
                                 setQuestionData((prev) => ({
                                     ...prev,
-                                    pairingMode: "exclusive",
+                                    pairing: { ...prev.pairing!, mode: "exclusive" },
                                 }))
                             }
                         >
                             Unique Match
                         </Button>
                         <Button
-                            variant={questionData.pairingMode === "open" ? "default" : "secondary"}
+                            variant={
+                                questionData.pairing?.mode === "open" ? "default" : "secondary"
+                            }
                             size="sm"
                             onClick={() =>
                                 setQuestionData((prev) => ({
                                     ...prev,
-                                    pairingMode: "open",
+                                    pairing: { ...prev.pairing!, mode: "open" },
                                 }))
                             }
                         >
@@ -570,7 +604,7 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                         </Button>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                        {questionData.pairingMode === "exclusive"
+                        {questionData.pairing?.mode === "exclusive"
                             ? "Each value can only be matched once."
                             : "Values can be reused across multiple keys."}
                     </p>

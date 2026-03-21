@@ -10,7 +10,10 @@ export type createQuestionData = {
     options: string[];
     mainImageFile: File | null;
     optionFiles: (File | null)[];
-    pairingKeySource?: string;
-    pairingMode?: string;
-    pairingKeys?: string[];
+    pairing?: {
+        keySource: string;
+        mode: string;
+        keys?: string[];
+        values: string[];
+    };
 };
