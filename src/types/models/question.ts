@@ -1,6 +1,32 @@
 import type { HydratedDocument, Types } from "mongoose";
 import type { ToDTO } from "@/types/common";
 
+export enum QuestionType {
+    Users = "users",
+    Custom = "custom",
+    Image = "image",
+    Text = "text",
+    Rating = "rating",
+    Pairing = "pairing",
+}
+
+export enum PairingKeySource {
+    Members = "members",
+    Custom = "custom",
+}
+
+export enum PairingMode {
+    Exclusive = "exclusive", // 1:1 — each value used at most once
+    Open = "open", // many:1 — values can repeat
+}
+
+export interface IPairingConfig {
+    keySource: PairingKeySource;
+    mode: PairingMode;
+    keys?: string[];
+    values: string[];
+}
+
 export interface IQuestion {
     _id: Types.ObjectId;
     groupId: Types.ObjectId;
@@ -8,6 +34,7 @@ export interface IQuestion {
     questionType: QuestionType;
     question: string;
     image?: string;
+    multiSelect: boolean;
 
     options?: unknown[];
     answers: IAnswer[];
@@ -16,6 +43,8 @@ export interface IQuestion {
         ok: Types.ObjectId[];
         bad: Types.ObjectId[];
     };
+
+    pairing?: IPairingConfig;
 
     used: boolean;
     active: boolean;
@@ -29,20 +58,9 @@ export interface IQuestion {
     imageUrl?: string;
 }
 
-export enum QuestionType {
-    UsersSelectOne = "users-select-one",
-    UsersSelectMultiple = "users-select-multiple",
-    CustomSelectOne = "custom-select-one",
-    CustomSelectMultiple = "custom-select-multiple",
-    Text = "text",
-    Rating = "rating",
-    ImageSelectOne = "image-select-one",
-    ImageSelectMultiple = "image-select-multiple",
-}
-
 export interface IAnswer {
     user: Types.ObjectId;
-    response: string | string[] | Record<string, unknown>;
+    response: string | string[] | Record<string, string>;
     time: Date;
 }
 
@@ -51,6 +69,12 @@ export interface IResult {
     count: number;
     percentage: number;
     users: string[];
+}
+
+export interface IPairingResult {
+    key: string;
+    valueCounts: { value: string; count: number; percentage: number; users: string[] }[];
+    topValue: string;
 }
 
 export type QuestionDTO = ToDTO<IQuestion>;
@@ -71,7 +95,9 @@ export type QuestionWithUserStateDTO = Omit<QuestionDTO, "options"> & {
 
 export type QuestionResultsDTO = {
     results: IResult[];
+    pairingResults?: IPairingResult[];
     totalVotes: number;
     totalUsers: number;
     questionType: QuestionType;
+    multiSelect: boolean;
 };

@@ -187,7 +187,7 @@ function RatingDrawer({
             <DrawerTrigger className="w-full" onClick={() => play("selection")}>
                 <Card className="relative text-center">
                     <h2 className="font-bold p-6 text-foreground">{question.question}</h2>
-                    {question.questionType.includes("multiple") && (
+                    {question.multiSelect && (
                         <CheckCheck className="absolute bottom-2 right-2 text-muted-foreground w-4 h-4" />
                     )}
                 </Card>
@@ -197,11 +197,11 @@ function RatingDrawer({
                     <DrawerTitle>Rate the Question</DrawerTitle>
                     <DrawerDescription></DrawerDescription>
                 </DrawerHeader>
-                {!question.questionType.startsWith("text") && (
+                {question.questionType !== "text" && question.questionType !== "pairing" && (
                     <>
                         <div className="overflow-y-auto">
                             <div className="grid grid-cols-2 gap-4">
-                                {question.questionType.startsWith("image") &&
+                                {question.questionType === "image" &&
                                     question.options &&
                                     question.options.map((option: QuestionOptionDTO, index) => {
                                         if (typeof option === "string") return null;
@@ -221,7 +221,7 @@ function RatingDrawer({
                                             </div>
                                         );
                                     })}
-                                {!question.questionType.startsWith("image") &&
+                                {question.questionType !== "image" &&
                                     question.options &&
                                     question.options.map((option: QuestionOptionDTO, index) => (
                                         <div
@@ -233,6 +233,41 @@ function RatingDrawer({
                                             </span>
                                         </div>
                                     ))}
+                            </div>
+                        </div>
+                        <Separator className="my-6" />
+                    </>
+                )}
+                {question.questionType === "pairing" && (
+                    <>
+                        <div className="overflow-y-auto">
+                            <div className="grid grid-cols-2 gap-3">
+                                <div className="flex flex-col gap-1">
+                                    <span className="text-xs text-muted-foreground font-medium mb-1">
+                                        Keys
+                                    </span>
+                                    {question.pairing?.keys?.map((key, i) => (
+                                        <div
+                                            key={i}
+                                            className="p-2 bg-secondary rounded-lg text-center text-sm"
+                                        >
+                                            {key}
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="flex flex-col gap-1">
+                                    <span className="text-xs text-muted-foreground font-medium mb-1">
+                                        Values
+                                    </span>
+                                    {question.pairing?.values?.map((value, i) => (
+                                        <div
+                                            key={i}
+                                            className="p-2 bg-secondary rounded-lg text-center text-sm"
+                                        >
+                                            {value}
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                         <Separator className="my-6" />

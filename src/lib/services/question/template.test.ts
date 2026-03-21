@@ -34,7 +34,7 @@ describe("createTemplatesFromArray", () => {
         const result = await createTemplatesFromArray("test-pack", [
             {
                 category: "fun",
-                questionType: QuestionType.CustomSelectOne,
+                questionType: QuestionType.Custom,
                 question: "What is fun?",
                 options: ["A", "B"],
             },
@@ -112,7 +112,7 @@ describe("createTemplatesFromArray", () => {
             createTemplatesFromArray("test-pack", [
                 {
                     category: "fun",
-                    questionType: QuestionType.CustomSelectOne,
+                    questionType: QuestionType.Custom,
                     question: "What is fun?",
                 },
             ])
@@ -167,8 +167,9 @@ describe("addTemplatePackToGroup", () => {
             {
                 _id: new Types.ObjectId(),
                 category: "fun",
-                questionType: QuestionType.CustomSelectOne,
+                questionType: QuestionType.Custom,
                 question: "Q1?",
+                multiSelect: false,
                 options: ["A", "B"],
             },
         ];

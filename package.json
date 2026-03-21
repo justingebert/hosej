@@ -16,7 +16,8 @@
     "prepare": "husky",
     "db:backup": "bash scripts/backup-db.sh",
     "db:restore": "bash scripts/restore-db.sh",
-    "cron:local": "bash scripts/cron-local.sh"
+    "cron:local": "bash scripts/cron-local.sh",
+    "db:migrate-question-types": "npx tsx scripts/migrate-question-types.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.529.0",
@@ -68,6 +69,7 @@
     "@types/uuid": "^9.0.8",
     "@vitejs/plugin-react": "^5.1.3",
     "autoprefixer": "^10.0.1",
+    "dotenv": "^17.3.1",
     "eslint": "^9.39.3",
     "eslint-config-next": "^16.1.6",
     "eslint-config-prettier": "^10.1.8",

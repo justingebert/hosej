@@ -10,6 +10,7 @@ interface ImageUploaderProps {
     placeholder?: string;
     showFilename?: boolean;
     buttonstyle?: string;
+    label?: string;
 }
 
 const ImageUploader: React.FC<ImageUploaderProps> = ({
@@ -18,6 +19,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     showFilename,
     className,
     buttonstyle,
+    label,
 }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [selectedFileName, setSelectedFileName] = useState<string | null>(null); // State to hold the selected file name
@@ -71,6 +73,11 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
                             <X color="red" />
                         </div>
                     )
+                ) : label ? (
+                    <>
+                        <ImagePlus className="h-4 w-4" />
+                        <span>{label}</span>
+                    </>
                 ) : (
                     <ImagePlus />
                 )}

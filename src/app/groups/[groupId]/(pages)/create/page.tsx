@@ -17,6 +17,7 @@ export default function CreatePage() {
     const [questionData, setQuestionData] = useState<createQuestionData>({
         question: "",
         questionType: "",
+        multiSelect: false,
         options: [],
         mainImageFile: null,
         optionFiles: [],
