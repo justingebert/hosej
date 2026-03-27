@@ -239,7 +239,7 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
             const trimmedKeys = (questionData.pairing?.keys || []).filter((k) => k.trim() !== "");
             if (trimmedValues.length < 2) {
                 toast({
-                    title: "Please add at least two pairing values.",
+                    title: 'Please add at least two choices under "With these".',
                     variant: "destructive",
                 });
                 setIsSubmitting(false);
@@ -250,7 +250,7 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                 trimmedKeys.length < 2
             ) {
                 toast({
-                    title: "Please add at least two pairing keys.",
+                    title: 'Please add at least two items under "Match these".',
                     variant: "destructive",
                 });
                 setIsSubmitting(false);
@@ -261,7 +261,7 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                 trimmedValues.length < trimmedKeys.length
             ) {
                 toast({
-                    title: "Unique match requires at least as many values as keys.",
+                    title: "Without reuse, you need at least as many choices as items to match.",
                     variant: "destructive",
                 });
                 setIsSubmitting(false);
