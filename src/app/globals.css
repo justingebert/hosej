@@ -6,39 +6,41 @@
     :root {
         --radius: 1rem;
 
-        --background: 0 0% 100%;
-        --foreground: 222.2 84% 4.9%;
+        --background: 40 25% 97%;
+        /* #faf9f5 warm parchment — Anthropic light */
+        --foreground: 40 6% 8%;
+        /* #141413 warm near-black */
 
         --card: 0 0% 100%;
-        --card-foreground: 222.2 84% 4.9%;
+        --card-foreground: 40 6% 8%;
 
         --popover: 0 0% 100%;
-        --popover-foreground: 222.2 84% 4.9%;
+        --popover-foreground: 40 6% 8%;
 
-        --primary: 222.2 47.4% 11.2%;
-        --primary-foreground: 210 40% 98%;
+        --primary: 40 6% 8%;
+        --primary-foreground: 40 25% 97%;
 
-        --secondary: 210 40% 96.1%;
-        --secondary-foreground: 222.2 47.4% 11.2%;
-        --secondary-transparent: rgba(210, 40%, 96.1%, 0.3);
+        --secondary: 36 28% 92%;
+        --secondary-foreground: 40 6% 20%;
+        --secondary-transparent: rgba(237, 230, 220, 0.3);
 
-        --secondary-darker: 210 40% 90.1%;
-        --secondary-darker-foreground: 210 40% 10.1%;
+        --secondary-darker: 36 20% 85%;
+        --secondary-darker-foreground: 40 6% 20%;
+        --secondary-dark-transparent: rgba(222, 213, 200, 0.3);
 
-        --secondary-dark-transparent: rgba(210, 40%, 90.1%, 0.3);
+        --muted: 40 12% 88%;
+        --muted-foreground: 40 5% 44%;
 
-        --muted: 210 40% 96.1%;
-        --muted-foreground: 215.4 16.3% 46.9%;
-
-        --accent: 210 40% 96.1%;
-        --accent-foreground: 222.2 47.4% 11.2%;
+        --accent: 211 34% 37%;
+        /* #3d5a80 slate blue */
+        --accent-foreground: 40 25% 97%;
 
         --destructive: 0 84.2% 60.2%;
-        --destructive-foreground: 210 40% 98%;
+        --destructive-foreground: 40 25% 97%;
 
-        --border: 214.3 31.8% 91.4%;
-        --input: 214.3 31.8% 91.4%;
-        --ring: 222.2 84% 4.9%;
+        --border: 40 18% 86%;
+        --input: 40 18% 86%;
+        --ring: 211 34% 37%;
 
         --radius: 0.5rem;
 
@@ -64,45 +66,51 @@
         /* Coral red */
 
         --shine-color: rgba(0, 0, 0, 0);
-        /* Default shine color for light mode */
         --shine-highlight: rgba(40, 40, 40, 0.4);
-        /* Shine highlight for light mode */
     }
 
     .dark {
         --radius: 1rem;
-        --background: 222.2 10% 4.9%;
-        --foreground: 210 40% 98%;
 
-        --card: 222.2 15% 6.5%;
-        --card-foreground: 210 40% 98%;
+        --background: 80 4% 11%;
+        /* #1a1a18 — Anthropic dark, warm near-black with subtle green-gray */
+        --foreground: 40 25% 97%;
+        /* #faf9f5 warm off-white */
 
-        --popover: 222.2 15% 6.5%;
-        --popover-foreground: 210 40% 98%;
+        --card: 80 3% 14%;
+        /* #212120 — slightly lifted surface */
+        --card-foreground: 40 25% 97%;
 
-        --primary: 210 40% 98%;
-        --primary-foreground: 222.2 47.4% 11.2%;
+        --popover: 80 3% 14%;
+        --popover-foreground: 40 25% 97%;
 
-        --secondary: 222.2 15% 15%;
-        --secondary-foreground: 210 40% 98%;
-        --secondary-transparent: rgba(222.2, 15%, 15%, 0.3);
+        --primary: 40 25% 97%;
+        --primary-foreground: 80 4% 11%;
 
-        --secondary-darker: 222.2 15% 22%;
-        --secondary-darker-foreground: 210 40% 98%;
-        --secondary-dark-transparent: rgba(222.2, 15%, 22%, 0.3);
+        --secondary: 80 3% 18%;
+        /* #2a2a28 */
+        --secondary-foreground: 40 25% 82%;
+        --secondary-transparent: rgba(42, 42, 40, 0.3);
 
-        --muted: 222.2 15% 15%;
-        --muted-foreground: 215 20.2% 65.1%;
+        --secondary-darker: 80 3% 22%;
+        /* #333331 */
+        --secondary-darker-foreground: 40 25% 82%;
+        --secondary-dark-transparent: rgba(51, 51, 49, 0.3);
 
-        --accent: 217.2 32.6% 17.5%;
-        --accent-foreground: 210 40% 98%;
+        --muted: 80 3% 18%;
+        --muted-foreground: 40 5% 46%;
+
+        --accent: 211 40% 59%;
+        /* #6b96c2 slate blue, lifted for dark */
+        --accent-foreground: 80 4% 11%;
 
         --destructive: 0 62.8% 30.6%;
-        --destructive-foreground: 210 40% 98%;
+        --destructive-foreground: 40 25% 97%;
 
-        --border: 217.2 32.6% 17.5%;
-        --input: 217.2 32.6% 17.5%;
-        --ring: 212.7 26.8% 83.9%;
+        --border: 80 3% 20%;
+        /* #302f2e subtle warm-gray border */
+        --input: 80 3% 20%;
+        --ring: 211 40% 59%;
 
         --chart-1: 220 70% 50%;
         --chart-2: 160 60% 45%;
