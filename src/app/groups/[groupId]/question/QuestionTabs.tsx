@@ -244,7 +244,7 @@ function RatingDrawer({
                             <div className="grid grid-cols-2 gap-3">
                                 <div className="flex flex-col gap-1">
                                     <span className="text-xs text-muted-foreground font-medium mb-1">
-                                        Keys
+                                        Match these
                                     </span>
                                     {question.pairing?.keys?.map((key, i) => (
                                         <div
@@ -257,7 +257,7 @@ function RatingDrawer({
                                 </div>
                                 <div className="flex flex-col gap-1">
                                     <span className="text-xs text-muted-foreground font-medium mb-1">
-                                        Values
+                                        With these
                                     </span>
                                     {question.pairing?.values?.map((value, i) => (
                                         <div

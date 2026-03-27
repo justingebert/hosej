@@ -3,6 +3,8 @@ export type createRallyData = {
     lengthInDays: number;
 };
 
+import type { PairingKeySource, PairingMode } from "@/types/models/question";
+
 export type createQuestionData = {
     question: string;
     questionType: string;
@@ -11,8 +13,8 @@ export type createQuestionData = {
     mainImageFile: File | null;
     optionFiles: (File | null)[];
     pairing?: {
-        keySource: string;
-        mode: string;
+        keySource: PairingKeySource;
+        mode: PairingMode;
         keys?: string[];
         values: string[];
     };

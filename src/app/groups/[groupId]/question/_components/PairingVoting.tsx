@@ -19,6 +19,44 @@ const PAIR_COLORS = [
     "bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border-indigo-500/40",
 ];
 
+function PairButton({
+    label,
+    colorIdx,
+    isActive,
+    isDisabled,
+    isSelectable,
+    onClick,
+    onUnpair,
+}: {
+    label: string;
+    colorIdx: number;
+    isActive?: boolean;
+    isDisabled?: boolean;
+    isSelectable?: boolean;
+    onClick: () => void;
+    onUnpair?: () => void;
+}) {
+    return (
+        <button
+            onClick={onClick}
+            onDoubleClick={onUnpair}
+            disabled={isDisabled}
+            className={cn(
+                "rounded-lg px-3 py-3 text-sm font-medium text-center transition-all border-2",
+                isActive
+                    ? "border-foreground bg-foreground/10 scale-[1.02]"
+                    : colorIdx >= 0
+                      ? PAIR_COLORS[colorIdx]
+                      : "border-transparent bg-secondary",
+                isDisabled && "opacity-30",
+                isSelectable && colorIdx < 0 && "ring-1 ring-foreground/20 cursor-pointer"
+            )}
+        >
+            {label}
+        </button>
+    );
+}
+
 const PairingVoting = ({
     question,
     onVote,
@@ -94,14 +132,12 @@ const PairingVoting = ({
         setSelections((prev) => {
             const next = { ...prev };
             if (next[key] === activeValue) {
-                // Unpair
                 delete next[key];
             } else {
                 next[key] = activeValue;
             }
             return next;
         });
-        // Keep value active so user can assign it to more keys
     };
 
     const handleUnpair = (key: string) => {
@@ -124,83 +160,63 @@ const PairingVoting = ({
         onVote();
     };
 
+    const submitFooter = (
+        <div className="fixed bottom-0 left-0 w-full backdrop-blur-md pb-10 pt-4 px-6">
+            <Button
+                onClick={() => allSelected && submitVote()}
+                disabled={!allSelected}
+                className="w-full h-12 text-lg font-bold"
+            >
+                Submit
+            </Button>
+        </div>
+    );
+
     // ── Exclusive mode: keys left, values right ──
     if (isExclusive) {
         return (
             <div className="flex flex-col">
                 <div className="grid grid-cols-2 gap-3 pb-32">
-                    {/* Keys column */}
                     <div className="flex flex-col gap-2">
                         <span className="text-xs text-muted-foreground font-medium mb-1">
                             Match
                         </span>
                         {keys.map((key) => {
                             const colorIdx = keyColorIndex(key);
-                            const isPaired = colorIdx >= 0;
-                            const isActive = activeKey === key;
-
                             return (
-                                <button
+                                <PairButton
                                     key={key}
+                                    label={key}
+                                    colorIdx={colorIdx}
+                                    isActive={activeKey === key}
                                     onClick={() => handleKeyTapExclusive(key)}
-                                    onDoubleClick={() => isPaired && handleUnpair(key)}
-                                    className={cn(
-                                        "rounded-lg px-3 py-3 text-sm font-medium text-center transition-all border-2",
-                                        isActive
-                                            ? "border-foreground bg-foreground/10 scale-[1.02]"
-                                            : isPaired
-                                              ? PAIR_COLORS[colorIdx]
-                                              : "border-transparent bg-secondary"
-                                    )}
-                                >
-                                    {key}
-                                </button>
+                                    onUnpair={() => colorIdx >= 0 && handleUnpair(key)}
+                                />
                             );
                         })}
                     </div>
 
-                    {/* Values column */}
                     <div className="flex flex-col gap-2">
                         <span className="text-xs text-muted-foreground font-medium mb-1">With</span>
                         {values.map((value) => {
                             const colorIdx = valueColorIndexExclusive(value);
-                            const isPaired = colorIdx >= 0;
                             const isDisabled =
                                 usedValues.has(value) && selections[activeKey ?? ""] !== value;
-                            const isSelectable = activeKey !== null && !isDisabled;
-
                             return (
-                                <button
+                                <PairButton
                                     key={value}
+                                    label={value}
+                                    colorIdx={colorIdx}
+                                    isDisabled={!activeKey || isDisabled}
+                                    isSelectable={activeKey !== null && !isDisabled}
                                     onClick={() => handleValueTapExclusive(value)}
-                                    disabled={!activeKey || isDisabled}
-                                    className={cn(
-                                        "rounded-lg px-3 py-3 text-sm font-medium text-center transition-all border-2",
-                                        isPaired
-                                            ? PAIR_COLORS[colorIdx]
-                                            : "border-transparent bg-secondary",
-                                        isDisabled && "opacity-30",
-                                        isSelectable &&
-                                            !isPaired &&
-                                            "ring-1 ring-foreground/20 cursor-pointer"
-                                    )}
-                                >
-                                    {value}
-                                </button>
+                                />
                             );
                         })}
                     </div>
                 </div>
 
-                <div className="fixed bottom-0 left-0 w-full backdrop-blur-md pb-10 pt-4 px-6">
-                    <Button
-                        onClick={() => allSelected && submitVote()}
-                        disabled={!allSelected}
-                        className="w-full h-12 text-lg font-bold"
-                    >
-                        Submit
-                    </Button>
-                </div>
+                {submitFooter}
             </div>
         );
     }
@@ -209,80 +225,48 @@ const PairingVoting = ({
     return (
         <div className="flex flex-col">
             <div className="grid grid-cols-2 gap-3 pb-32">
-                {/* Values column (tap first) */}
                 <div className="flex flex-col gap-2">
                     <span className="text-xs text-muted-foreground font-medium mb-1">
                         Pick value
                     </span>
                     {values.map((value) => {
                         const colorIdx = valueColorIndexOpen(value);
-                        const isPaired = colorIdx >= 0;
-                        const isActive = activeValue === value;
-
                         return (
-                            <button
+                            <PairButton
                                 key={value}
+                                label={value}
+                                colorIdx={colorIdx}
+                                isActive={activeValue === value}
                                 onClick={() => handleValueTapOpen(value)}
-                                className={cn(
-                                    "rounded-lg px-3 py-3 text-sm font-medium text-center transition-all border-2",
-                                    isActive
-                                        ? "border-foreground bg-foreground/10 scale-[1.02]"
-                                        : isPaired
-                                          ? PAIR_COLORS[colorIdx]
-                                          : "border-transparent bg-secondary"
-                                )}
-                            >
-                                {value}
-                            </button>
+                            />
                         );
                     })}
                 </div>
 
-                {/* Keys column (assign to) */}
                 <div className="flex flex-col gap-2">
                     <span className="text-xs text-muted-foreground font-medium mb-1">
                         Then assign
                     </span>
                     {keys.map((key) => {
                         const colorIdx = keyColorIndex(key);
-                        const isPaired = colorIdx >= 0;
-                        const isSelectable = activeValue !== null;
-
-                        // In open mode, key color matches its assigned value's color
-                        const keyValueColor = isPaired ? valueColorIndexOpen(selections[key]) : -1;
-
+                        const keyValueColor =
+                            colorIdx >= 0 ? valueColorIndexOpen(selections[key]) : -1;
                         return (
-                            <button
+                            <PairButton
                                 key={key}
+                                label={key}
+                                colorIdx={keyValueColor}
+                                isDisabled={!activeValue}
+                                isSelectable={activeValue !== null}
                                 onClick={() => handleKeyTapOpen(key)}
-                                onDoubleClick={() => isPaired && handleUnpair(key)}
-                                disabled={!activeValue}
-                                className={cn(
-                                    "rounded-lg px-3 py-3 text-sm font-medium text-center transition-all border-2",
-                                    isPaired && keyValueColor >= 0
-                                        ? PAIR_COLORS[keyValueColor]
-                                        : "border-transparent bg-secondary",
-                                    isSelectable &&
-                                        !isPaired &&
-                                        "ring-1 ring-foreground/20 cursor-pointer"
-                                )}
-                            >
-                                {key}
-                            </button>
+                                onUnpair={() => colorIdx >= 0 && handleUnpair(key)}
+                            />
                         );
                     })}
                 </div>
             </div>
 
-            <div className="fixed bottom-0 left-0 w-full backdrop-blur-md pb-10 pt-4 px-6">
-                <Button
-                    onClick={() => allSelected && submitVote()}
-                    disabled={!allSelected}
-                    className="w-full h-12 text-lg font-bold"
-                >
-                    Submit
-                </Button>
-            </div>
+            {submitFooter}
         </div>
     );
 };
