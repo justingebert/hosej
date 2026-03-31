@@ -11,8 +11,8 @@ const PairingConfigSchema = z.object({
 export const CreateQuestionSchema = z
     .object({
         category: z.string().min(1, "category is required").max(100),
-        questionType: z.nativeEnum(QuestionType),
-        question: z.string().min(1, "question is required").max(500),
+        questionType: z.enum(QuestionType),
+        question: z.string().min(1, "question is required").max(5000),
         submittedBy: z.string().min(1),
         multiSelect: z.boolean().default(false),
         image: z.string().optional(),
