@@ -16,8 +16,17 @@ interface DataTableToolbarProps<TData> {
     table: Table<TData>;
 }
 
+const questionTypeLabels: Record<string, string> = {
+    users: "Members",
+    custom: "Custom",
+    image: "Image",
+    text: "Text",
+    rating: "Rating",
+    pairing: "Pairing",
+};
+
 const questionTypesOptions = Object.values(QuestionType).map((type) => ({
-    label: type,
+    label: questionTypeLabels[type] || type,
     value: type,
 }));
 

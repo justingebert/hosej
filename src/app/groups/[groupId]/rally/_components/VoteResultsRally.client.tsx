@@ -10,7 +10,7 @@ import fetcher from "@/lib/fetcher";
 import { RallyVotesChart } from "@/app/groups/[groupId]/rally/_components/RallyResultsChart";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import ChatComponent from "@/components/chat/Chat.client";
+import ChatComponent from "@/components/common/Chat";
 
 const RallyResults = ({ user, rally }: any) => {
     const [loadedImages, setLoadedImages] = useState<{ [key: number]: boolean }>({});

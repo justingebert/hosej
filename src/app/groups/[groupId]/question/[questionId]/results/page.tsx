@@ -57,7 +57,7 @@ const ResultsPage = () => {
                         <Badge>🐐{question.rating.good?.length || 0}</Badge>
                     </div>
                     <div className="flex flex-col items-center mb-10">
-                        {question.questionType.startsWith("image") &&
+                        {question.questionType === "image" &&
                             question.options &&
                             question.options.map((option: QuestionOptionDTO, index: number) => {
                                 if (typeof option === "string") return null;
@@ -77,7 +77,8 @@ const ResultsPage = () => {
                                     </div>
                                 );
                             })}
-                        {!question.questionType.startsWith("image") &&
+                        {question.questionType !== "image" &&
+                            question.questionType !== "pairing" &&
                             question.options &&
                             question.options.map((option: QuestionOptionDTO, index: number) => (
                                 <div
@@ -87,6 +88,36 @@ const ResultsPage = () => {
                                     {typeof option === "string" ? option : option.key}
                                 </div>
                             ))}
+                        {question.questionType === "pairing" && (
+                            <div className="grid grid-cols-2 gap-3 w-full max-w-md">
+                                <div className="flex flex-col gap-1">
+                                    <span className="text-xs text-muted-foreground font-medium mb-1">
+                                        Keys
+                                    </span>
+                                    {question.pairing?.keys?.map((key: string, i: number) => (
+                                        <div
+                                            key={i}
+                                            className="p-2 bg-secondary rounded-lg text-center text-sm"
+                                        >
+                                            {key}
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="flex flex-col gap-1">
+                                    <span className="text-xs text-muted-foreground font-medium mb-1">
+                                        Values
+                                    </span>
+                                    {question.pairing?.values?.map((value: string, i: number) => (
+                                        <div
+                                            key={i}
+                                            className="p-2 bg-secondary rounded-lg text-center text-sm"
+                                        >
+                                            {value}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
                     <VoteResults
                         user={user!}

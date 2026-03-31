@@ -10,17 +10,21 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import ImageUploader from "@/components/common/ImageUploader";
 import { useImageUploader } from "@/hooks/useImageUploader";
 import { useParams } from "next/navigation";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { useToast } from "@/hooks/use-toast";
 import type { createQuestionData } from "@/types/create";
+import { PairingKeySource, PairingMode } from "@/types/models/question";
 import useSWR from "swr";
 import type { GroupDTO } from "@/types/models/group";
 import fetcher from "@/lib/fetcher";
 import { DisplayOptions } from "./DisplayOptions";
 import type { OptionsMode } from "./DisplayOptions";
+import PairingConfig from "./PairingConfig";
 
 interface CreateQuestionProps {
     questionData: createQuestionData;
@@ -39,9 +43,9 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
     const { uploading, compressImages, handleImageUpload } = useImageUploader();
 
     let optionsMode: OptionsMode;
-    if (questionData.questionType.startsWith("custom")) {
+    if (questionData.questionType === "custom") {
         optionsMode = "editable";
-    } else if (questionData.questionType.startsWith("image-select")) {
+    } else if (questionData.questionType === "image") {
         optionsMode = "image-editable";
     } else {
         optionsMode = "static";
@@ -82,41 +86,69 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
     const optionsContainerRef = useRef<HTMLDivElement>(null);
     const buttonRef = useRef<HTMLDivElement>(null);
 
+    const showMultiSelectToggle = ["users", "custom", "image"].includes(questionData.questionType);
+    const isPairing = questionData.questionType === "pairing";
+
     const handleTypeSelect = (value: string) => {
-        if (value.startsWith("users")) {
+        if (value === "users") {
             setQuestionData((prev) => ({
                 ...prev,
                 questionType: value,
+                multiSelect: false,
                 options: group?.members.map((member) => member.name) || [],
                 optionFiles: [],
+                pairing: undefined,
             }));
-        } else if (value.startsWith("custom")) {
+        } else if (value === "custom") {
             setQuestionData((prev) => ({
                 ...prev,
                 questionType: value,
+                multiSelect: false,
                 options: [""],
                 optionFiles: [],
+                pairing: undefined,
             }));
-        } else if (value.startsWith("image-select")) {
+        } else if (value === "image") {
             setQuestionData((prev) => ({
                 ...prev,
                 questionType: value,
+                multiSelect: false,
                 options: ["", ""],
                 optionFiles: [null, null],
+                pairing: undefined,
             }));
-        } else if (value.startsWith("rating")) {
+        } else if (value === "rating") {
             setQuestionData((prev) => ({
                 ...prev,
                 questionType: value,
+                multiSelect: false,
                 options: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
                 optionFiles: [],
+                pairing: undefined,
             }));
-        } else {
+        } else if (value === "pairing") {
             setQuestionData((prev) => ({
                 ...prev,
                 questionType: value,
+                multiSelect: false,
                 options: [],
                 optionFiles: [],
+                pairing: {
+                    keySource: PairingKeySource.Members,
+                    mode: PairingMode.Exclusive,
+                    keys: group?.members.map((member) => member.name) || [],
+                    values: [""],
+                },
+            }));
+        } else {
+            // text
+            setQuestionData((prev) => ({
+                ...prev,
+                questionType: value,
+                multiSelect: false,
+                options: [],
+                optionFiles: [],
+                pairing: undefined,
             }));
         }
     };
@@ -161,9 +193,11 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
         setQuestionData({
             question: "",
             questionType: "",
+            multiSelect: false,
             options: [],
             mainImageFile: null,
             optionFiles: [],
+            pairing: undefined,
         });
         setClearImageInput(true);
     };
@@ -180,7 +214,7 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
             (file): file is File => file !== null
         );
 
-        if (questionData.questionType.startsWith("custom") && trimmedOptions.length < 2) {
+        if (questionData.questionType === "custom" && trimmedOptions.length < 2) {
             toast({
                 title: "Please add at least two options for custom selections.",
                 variant: "destructive",
@@ -189,10 +223,7 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
             return;
         }
 
-        if (
-            questionData.questionType.startsWith("image-select") &&
-            trimmedOptionsFiles.length < 2
-        ) {
+        if (questionData.questionType === "image" && trimmedOptionsFiles.length < 2) {
             toast({
                 title: "Please add at least two options for image selections.",
                 variant: "destructive",
@@ -201,14 +232,65 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
             return;
         }
 
-        const questionPayload = {
+        if (isPairing) {
+            const trimmedValues = (questionData.pairing?.values || []).filter(
+                (v) => v.trim() !== ""
+            );
+            const trimmedKeys = (questionData.pairing?.keys || []).filter((k) => k.trim() !== "");
+            if (trimmedValues.length < 2) {
+                toast({
+                    title: 'Please add at least two choices under "With these".',
+                    variant: "destructive",
+                });
+                setIsSubmitting(false);
+                return;
+            }
+            if (
+                questionData.pairing?.keySource === PairingKeySource.Custom &&
+                trimmedKeys.length < 2
+            ) {
+                toast({
+                    title: 'Please add at least two items under "Match these".',
+                    variant: "destructive",
+                });
+                setIsSubmitting(false);
+                return;
+            }
+            if (
+                questionData.pairing?.mode === PairingMode.Exclusive &&
+                trimmedValues.length < trimmedKeys.length
+            ) {
+                toast({
+                    title: "Without reuse, you need at least as many choices as items to match.",
+                    variant: "destructive",
+                });
+                setIsSubmitting(false);
+                return;
+            }
+        }
+
+        const questionPayload: Record<string, unknown> = {
             groupId: groupId,
             category: "Daily",
             questionType: questionData.questionType,
             question: questionData.question,
-            options: questionData.questionType.startsWith("custom") ? trimmedOptions : [],
+            multiSelect: questionData.multiSelect,
+            options: questionData.questionType === "custom" ? trimmedOptions : [],
             submittedBy: user!._id,
         };
+
+        if (isPairing && questionData.pairing) {
+            questionPayload.pairing = {
+                keySource: questionData.pairing.keySource,
+                mode: questionData.pairing.mode,
+                keys: (questionData.pairing.keys || [])
+                    .map((k) => k.trim())
+                    .filter((k) => k !== ""),
+                values: (questionData.pairing.values || [])
+                    .map((v) => v.trim())
+                    .filter((v) => v !== ""),
+            };
+        }
 
         try {
             // Create the question without options first
@@ -259,10 +341,7 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                 }
             }
 
-            if (
-                questionData.questionType === "image-select-one" ||
-                questionData.questionType === "image-select-multiple"
-            ) {
+            if (questionData.questionType === "image") {
                 // Upload option images and update the options array
                 const compressedFiles = await compressImages(trimmedOptionsFiles);
                 const optionImageUrls = (await handleImageUpload(
@@ -315,22 +394,17 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                         <SelectValue placeholder="Select Question Type" />
                     </SelectTrigger>
                     <SelectContent className="absolute z-50">
-                        <SelectItem value="users-select-one">Vote One User</SelectItem>
-                        <SelectItem value="users-select-multiple">Vote Multiple Users</SelectItem>
-                        <SelectItem value="custom-select-one">Vote One Custom Option</SelectItem>
-                        <SelectItem value="custom-select-multiple">
-                            Vote Multiple Custom Options
-                        </SelectItem>
+                        <SelectItem value="users">Vote Users</SelectItem>
+                        <SelectItem value="custom">Vote Custom Options</SelectItem>
                         <SelectItem value="text">Text Reply</SelectItem>
                         <SelectItem value="rating">Rating (1-10)</SelectItem>
-                        <SelectItem value="image-select-one">Vote One Custom Image</SelectItem>
-                        <SelectItem value="image-select-multiple">
-                            Vote Multiple Custom Images
-                        </SelectItem>
+                        <SelectItem value="image">Vote Custom Images</SelectItem>
+                        <SelectItem value="pairing">Pairing</SelectItem>
                     </SelectContent>
                 </Select>
             </div>
-            <div className="mt-5 flex flex-row gap-4">
+
+            <div className="mt-5">
                 <Input
                     type="text"
                     placeholder="Enter question"
@@ -341,29 +415,62 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                     required
                     className="w-full"
                 />
+            </div>
+
+            <div className="mt-3 flex items-center justify-between gap-3">
                 <ImageUploader
                     onFileSelect={handleMainImageAdded}
                     clearInput={clearImageInput}
                     showFilename={false}
-                    className="w-12 flex items-center justify-center"
-                    buttonstyle="flex items-center justify-between w-full p-3"
+                    className="flex items-center"
+                    buttonstyle="flex items-center gap-2 text-sm text-muted-foreground"
+                    label="Add image"
                 />
+                {showMultiSelectToggle && (
+                    <div className="flex items-center gap-2">
+                        <Switch
+                            id="multi-select"
+                            checked={questionData.multiSelect}
+                            onCheckedChange={(checked) =>
+                                setQuestionData((prev) => ({ ...prev, multiSelect: checked }))
+                            }
+                        />
+                        <Label htmlFor="multi-select" className="text-sm text-muted-foreground">
+                            Allow multiple
+                        </Label>
+                    </div>
+                )}
             </div>
-            <div
-                ref={optionsContainerRef}
-                className="mt-4 px-4 overflow-y-auto"
-                style={{ maxHeight: availableHeight ? `${availableHeight}px` : "auto" }}
-            >
-                <DisplayOptions
-                    mode={optionsMode}
-                    options={questionData.options}
-                    clearInput={clearImageInput}
-                    onOptionChange={handleOptionChange}
-                    onOptionRemove={handleRemoveOption}
-                    onOptionAdd={handleAddOption}
-                    onOptionImageAdded={handleOptionImageAdded}
-                />
-            </div>
+
+            {isPairing ? (
+                <div
+                    ref={optionsContainerRef}
+                    className="mt-4 px-4 overflow-y-auto"
+                    style={{ maxHeight: availableHeight ? `${availableHeight}px` : "auto" }}
+                >
+                    <PairingConfig
+                        pairing={questionData.pairing!}
+                        memberNames={group?.members.map((m) => m.name) || []}
+                        onChange={(pairing) => setQuestionData((prev) => ({ ...prev, pairing }))}
+                    />
+                </div>
+            ) : (
+                <div
+                    ref={optionsContainerRef}
+                    className="mt-4 px-4 overflow-y-auto"
+                    style={{ maxHeight: availableHeight ? `${availableHeight}px` : "auto" }}
+                >
+                    <DisplayOptions
+                        mode={optionsMode}
+                        options={questionData.options}
+                        clearInput={clearImageInput}
+                        onOptionChange={handleOptionChange}
+                        onOptionRemove={handleRemoveOption}
+                        onOptionAdd={handleAddOption}
+                        onOptionImageAdded={handleOptionImageAdded}
+                    />
+                </div>
+            )}
 
             <div
                 ref={buttonRef}

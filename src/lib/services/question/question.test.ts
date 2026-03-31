@@ -27,7 +27,7 @@ import User from "@/db/models/User";
 import { createChatForEntity } from "@/lib/services/chat";
 import { generateSignedUrl } from "@/lib/s3";
 import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
-import { QuestionType } from "@/types/models/question";
+import { PairingKeySource, PairingMode, QuestionType } from "@/types/models/question";
 
 const mockUserId = new Types.ObjectId().toString();
 const mockGroupId = new Types.ObjectId().toString();
@@ -39,9 +39,10 @@ function createMockQuestion(overrides: Record<string, any> = {}) {
         _id: new Types.ObjectId(mockQuestionId),
         groupId: new Types.ObjectId(mockGroupId),
         category: "general",
-        questionType: QuestionType.CustomSelectOne,
+        questionType: QuestionType.Custom,
         question: "Test question?",
         image: "",
+        multiSelect: false,
         options: ["A", "B", "C"],
         answers: [] as any[],
         rating: { good: [] as any[], ok: [] as any[], bad: [] as any[] },
@@ -100,7 +101,7 @@ describe("createQuestion", () => {
 
         const result = await createQuestion(mockGroupId, mockUserId, {
             category: "general",
-            questionType: QuestionType.CustomSelectOne,
+            questionType: QuestionType.Custom,
             question: "Test?",
             submittedBy: mockUserId,
             options: ["A", "B"],
@@ -116,7 +117,7 @@ describe("createQuestion", () => {
         await expect(
             createQuestion(mockGroupId, mockUserId, {
                 category: "",
-                questionType: QuestionType.CustomSelectOne,
+                questionType: QuestionType.Custom,
                 question: "Test?",
                 submittedBy: mockUserId,
             })
@@ -145,6 +146,72 @@ describe("createQuestion", () => {
 
         expect(savedData.options).toEqual(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]);
     });
+
+    it("should create a pairing question with required fields", async () => {
+        mockConstructors();
+        const mockGroup = createMockGroup();
+        (Group.findById as Mock).mockReturnValue({ orFail: () => mockGroup });
+
+        const result = await createQuestion(mockGroupId, mockUserId, {
+            category: "fun",
+            questionType: QuestionType.Pairing,
+            question: "Match members to traits",
+            submittedBy: mockUserId,
+            pairing: {
+                keySource: PairingKeySource.Custom,
+                mode: PairingMode.Exclusive,
+                keys: ["Alice", "Bob"],
+                values: ["Funny", "Smart"],
+            },
+        });
+
+        expect(result).toBeDefined();
+    });
+
+    it("should throw ValidationError for pairing without pairing config", async () => {
+        await expect(
+            createQuestion(mockGroupId, mockUserId, {
+                category: "fun",
+                questionType: QuestionType.Pairing,
+                question: "Match?",
+                submittedBy: mockUserId,
+            })
+        ).rejects.toThrow(ValidationError);
+    });
+
+    it("should throw ValidationError for pairing with fewer than 2 values", async () => {
+        await expect(
+            createQuestion(mockGroupId, mockUserId, {
+                category: "fun",
+                questionType: QuestionType.Pairing,
+                question: "Match?",
+                submittedBy: mockUserId,
+                pairing: {
+                    keySource: PairingKeySource.Custom,
+                    mode: PairingMode.Open,
+                    keys: ["A", "B"],
+                    values: ["X"],
+                },
+            })
+        ).rejects.toThrow(ValidationError);
+    });
+
+    it("should throw ValidationError for exclusive pairing with fewer values than keys", async () => {
+        await expect(
+            createQuestion(mockGroupId, mockUserId, {
+                category: "fun",
+                questionType: QuestionType.Pairing,
+                question: "Match?",
+                submittedBy: mockUserId,
+                pairing: {
+                    keySource: PairingKeySource.Custom,
+                    mode: PairingMode.Exclusive,
+                    keys: ["A", "B", "C"],
+                    values: ["X", "Y"],
+                },
+            })
+        ).rejects.toThrow(ValidationError);
+    });
 });
 
 // ─── createQuestionFromTemplate ─────────────────────────────────────────────
@@ -156,7 +223,7 @@ describe("createQuestionFromTemplate", () => {
         const result = await createQuestionFromTemplate(
             mockGroupId,
             "general",
-            QuestionType.CustomSelectOne,
+            QuestionType.Custom,
             "Template Q?",
             "",
             ["A", "B"],
@@ -251,7 +318,7 @@ describe("getQuestionById", () => {
         mockQuestion.toObject = vi.fn().mockReturnValue({
             ...mockQuestion,
             image: "https://s3.example.com/image.jpg",
-            questionType: QuestionType.CustomSelectOne,
+            questionType: QuestionType.Custom,
         });
         (Question.findOne as Mock).mockResolvedValue(mockQuestion);
 
@@ -312,9 +379,113 @@ describe("voteOnQuestion", () => {
     });
 
     it("should throw ValidationError for invalid response", async () => {
+        const mockQuestion = createMockQuestion({ answers: [] });
+        (Question.findById as Mock).mockResolvedValue(mockQuestion);
+
         await expect(voteOnQuestion(mockGroupId, mockQuestionId, mockUserId, 123)).rejects.toThrow(
             ValidationError
         );
+    });
+
+    it("should accept pairing vote with valid keys and values", async () => {
+        const mockUser = { _id: new Types.ObjectId(mockUserId), username: "testuser" };
+        const mockQuestion = createMockQuestion({
+            answers: [],
+            questionType: QuestionType.Pairing,
+            pairing: {
+                keySource: PairingKeySource.Custom,
+                mode: PairingMode.Exclusive,
+                keys: ["Alice", "Bob"],
+                values: ["Funny", "Smart"],
+            },
+        });
+        const mockGroup = createMockGroup();
+
+        (Question.findById as Mock).mockResolvedValue(mockQuestion);
+        (User.findById as Mock).mockResolvedValue(mockUser);
+        (Question.findByIdAndUpdate as Mock).mockResolvedValue(mockQuestion);
+        (Group.findById as Mock).mockResolvedValue(mockGroup);
+
+        const result = await voteOnQuestion(mockGroupId, mockQuestionId, mockUserId, {
+            Alice: "Funny",
+            Bob: "Smart",
+        });
+
+        expect(result.alreadyVoted).toBe(false);
+    });
+
+    it("should reject exclusive pairing vote with duplicate values", async () => {
+        const mockUser = { _id: new Types.ObjectId(mockUserId), username: "testuser" };
+        const mockQuestion = createMockQuestion({
+            answers: [],
+            questionType: QuestionType.Pairing,
+            pairing: {
+                keySource: PairingKeySource.Custom,
+                mode: PairingMode.Exclusive,
+                keys: ["Alice", "Bob"],
+                values: ["Funny", "Smart"],
+            },
+        });
+
+        (Question.findById as Mock).mockResolvedValue(mockQuestion);
+        (User.findById as Mock).mockResolvedValue(mockUser);
+
+        await expect(
+            voteOnQuestion(mockGroupId, mockQuestionId, mockUserId, {
+                Alice: "Funny",
+                Bob: "Funny",
+            })
+        ).rejects.toThrow(ValidationError);
+    });
+
+    it("should allow open pairing vote with duplicate values", async () => {
+        const mockUser = { _id: new Types.ObjectId(mockUserId), username: "testuser" };
+        const mockQuestion = createMockQuestion({
+            answers: [],
+            questionType: QuestionType.Pairing,
+            pairing: {
+                keySource: PairingKeySource.Custom,
+                mode: PairingMode.Open,
+                keys: ["Alice", "Bob"],
+                values: ["Funny", "Smart"],
+            },
+        });
+        const mockGroup = createMockGroup();
+
+        (Question.findById as Mock).mockResolvedValue(mockQuestion);
+        (User.findById as Mock).mockResolvedValue(mockUser);
+        (Question.findByIdAndUpdate as Mock).mockResolvedValue(mockQuestion);
+        (Group.findById as Mock).mockResolvedValue(mockGroup);
+
+        const result = await voteOnQuestion(mockGroupId, mockQuestionId, mockUserId, {
+            Alice: "Funny",
+            Bob: "Funny",
+        });
+
+        expect(result.alreadyVoted).toBe(false);
+    });
+
+    it("should reject pairing vote with invalid key", async () => {
+        const mockUser = { _id: new Types.ObjectId(mockUserId), username: "testuser" };
+        const mockQuestion = createMockQuestion({
+            answers: [],
+            questionType: QuestionType.Pairing,
+            pairing: {
+                keySource: PairingKeySource.Custom,
+                mode: PairingMode.Open,
+                keys: ["Alice", "Bob"],
+                values: ["Funny", "Smart"],
+            },
+        });
+
+        (Question.findById as Mock).mockResolvedValue(mockQuestion);
+        (User.findById as Mock).mockResolvedValue(mockUser);
+
+        await expect(
+            voteOnQuestion(mockGroupId, mockQuestionId, mockUserId, {
+                Charlie: "Funny",
+            })
+        ).rejects.toThrow(ValidationError);
     });
 });
 
@@ -390,7 +561,8 @@ describe("getQuestionResults", () => {
         const mockQuestion = {
             _id: new Types.ObjectId(mockQuestionId),
             groupId: new Types.ObjectId(mockGroupId),
-            questionType: QuestionType.CustomSelectOne,
+            questionType: QuestionType.Custom,
+            multiSelect: false,
             answers: [
                 { user: { username: "Alice" }, response: "A", time: new Date() },
                 { user: { username: "Bob" }, response: "A", time: new Date() },
@@ -426,7 +598,8 @@ describe("getQuestionResults", () => {
         const mockQuestion = {
             _id: new Types.ObjectId(mockQuestionId),
             groupId: new Types.ObjectId(mockGroupId),
-            questionType: QuestionType.CustomSelectMultiple,
+            questionType: QuestionType.Custom,
+            multiSelect: true,
             answers: [{ user: { username: "Alice" }, response: ["A", "B"], time: new Date() }],
         };
 
@@ -439,6 +612,48 @@ describe("getQuestionResults", () => {
 
         expect(result.totalVotes).toBe(1);
         expect(result.results).toHaveLength(2);
+    });
+
+    it("should return pairing results for pairing questions", async () => {
+        const mockQuestion = {
+            _id: new Types.ObjectId(mockQuestionId),
+            groupId: new Types.ObjectId(mockGroupId),
+            questionType: QuestionType.Pairing,
+            multiSelect: false,
+            pairing: {
+                keySource: PairingKeySource.Custom,
+                mode: PairingMode.Exclusive,
+                keys: ["Alice", "Bob"],
+                values: ["Funny", "Smart"],
+            },
+            answers: [
+                {
+                    user: { username: "User1" },
+                    response: { Alice: "Funny", Bob: "Smart" },
+                    time: new Date(),
+                },
+                {
+                    user: { username: "User2" },
+                    response: { Alice: "Smart", Bob: "Funny" },
+                    time: new Date(),
+                },
+            ],
+        };
+
+        (Question.findById as Mock).mockReturnValue({
+            populate: vi.fn().mockResolvedValue(mockQuestion),
+        });
+        (Group.findById as Mock).mockReturnValue({ orFail: () => createMockGroup() });
+
+        const result = await getQuestionResults(mockQuestionId);
+
+        expect(result.pairingResults).toBeDefined();
+        expect(result.pairingResults).toHaveLength(2);
+        expect(result.results).toEqual([]);
+
+        const aliceResult = result.pairingResults!.find((r) => r.key === "Alice")!;
+        expect(aliceResult.valueCounts).toHaveLength(2);
+        expect(aliceResult.valueCounts[0].count).toBe(1);
     });
 });
 
@@ -603,5 +818,18 @@ describe("parseVoteResponse", () => {
     it("throws ValidationError when response is empty", () => {
         expect(() => parseVoteResponse([])).toThrow(ValidationError);
         expect(() => parseVoteResponse(["  "])).toThrow(ValidationError);
+    });
+
+    it("accepts pairing Record for pairing question type", () => {
+        const result = parseVoteResponse({ Alice: "Funny", Bob: "Smart" }, QuestionType.Pairing);
+        expect(result).toEqual({ Alice: "Funny", Bob: "Smart" });
+    });
+
+    it("throws ValidationError for pairing with non-object response", () => {
+        expect(() => parseVoteResponse("hello", QuestionType.Pairing)).toThrow(ValidationError);
+    });
+
+    it("throws ValidationError for pairing with empty object", () => {
+        expect(() => parseVoteResponse({}, QuestionType.Pairing)).toThrow(ValidationError);
     });
 });

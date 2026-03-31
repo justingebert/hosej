@@ -1,10 +1,17 @@
-import { QuestionType } from "@/types/models/question";
+import { PairingKeySource, QuestionType } from "@/types/models/question";
 
 export interface TemplateInput {
     category: string;
     questionType: string;
     question: string;
+    multiSelect?: boolean;
     options?: any[];
+    pairing?: {
+        keySource: string;
+        mode: string;
+        keys?: string[];
+        values: string[];
+    };
 }
 
 export interface ValidationError {
@@ -106,6 +113,74 @@ export function validateTemplates(templates: any): ValidationResult {
                 field: "options",
                 message: "Options must be an array if provided",
             });
+        }
+
+        // Validate multiSelect if present
+        if (
+            template.multiSelect !== undefined &&
+            template.multiSelect !== null &&
+            typeof template.multiSelect !== "boolean"
+        ) {
+            errors.push({
+                index: i,
+                field: "multiSelect",
+                message: "multiSelect must be a boolean if provided",
+            });
+        }
+
+        // Validate pairing fields
+        if (template.questionType === QuestionType.Pairing) {
+            if (!template.pairing) {
+                errors.push({
+                    index: i,
+                    field: "pairing",
+                    message: "pairing config is required for pairing questions",
+                });
+            } else {
+                if (!template.pairing.mode) {
+                    errors.push({
+                        index: i,
+                        field: "pairing.mode",
+                        message: "pairing.mode is required for pairing questions",
+                    });
+                }
+                if (!template.pairing.keySource) {
+                    errors.push({
+                        index: i,
+                        field: "pairing.keySource",
+                        message: "pairing.keySource is required for pairing questions",
+                    });
+                }
+                if (
+                    template.pairing.keySource === PairingKeySource.Custom &&
+                    (!template.pairing.keys || template.pairing.keys.length < 2)
+                ) {
+                    errors.push({
+                        index: i,
+                        field: "pairing.keys",
+                        message: "Custom pairing keys require at least 2 entries",
+                    });
+                }
+                if (!template.pairing.values || template.pairing.values.length < 2) {
+                    errors.push({
+                        index: i,
+                        field: "pairing.values",
+                        message: "Pairing questions require at least 2 values",
+                    });
+                }
+                if (
+                    template.pairing.mode === "exclusive" &&
+                    template.pairing.keys &&
+                    template.pairing.values &&
+                    template.pairing.values.length < template.pairing.keys.length
+                ) {
+                    errors.push({
+                        index: i,
+                        field: "pairing.values",
+                        message: "Exclusive pairing requires at least as many values as keys",
+                    });
+                }
+            }
         }
     }
 
