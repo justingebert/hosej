@@ -12,7 +12,7 @@ import { FaSpotify, FaYoutube } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { FoldVertical, UnfoldVertical } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import ChatComponent from "@/components/chat/Chat.client";
+import ChatComponent from "@/components/common/Chat";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Slider } from "@/components/ui/slider";
 

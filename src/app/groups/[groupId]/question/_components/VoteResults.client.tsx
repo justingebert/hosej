@@ -17,7 +17,7 @@ import type {
     QuestionResultsDTO,
 } from "@/types/models/question";
 import { Badge } from "@/components/ui/badge";
-import ChatComponent from "@/components/chat/Chat.client";
+import ChatComponent from "@/components/common/Chat";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type VoteResultsProps = {
