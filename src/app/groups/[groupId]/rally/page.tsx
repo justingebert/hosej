@@ -6,7 +6,7 @@ import Header from "@/components/ui/custom/Header";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { Card } from "@/components/ui/card";
 import BackLink from "@/components/ui/custom/BackLink";
-import { RallyTabs } from "./RallyTabs";
+import { RallyTabs } from "./_components/RallyTabs";
 import fetcher from "@/lib/fetcher";
 import type { IRallyJson } from "@/types/models/rally";
 import { useEffect, useMemo, useState } from "react";
