@@ -81,6 +81,11 @@ function StartPage() {
     };
 
     useEffect(() => {
+        if (!navigator.onLine) {
+            router.replace("/offline");
+            return;
+        }
+
         if (status === "loading") return;
 
         if (session) {
