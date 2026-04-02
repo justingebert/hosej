@@ -45,6 +45,7 @@ export async function proxy(req: NextRequest) {
         "/terms",
         "/privacy",
         "/setup-name",
+        "/offline",
         "/",
     ]);
     if (publicRoutes.has(pathname) || (pathname == "/api/users" && req.method === "POST")) {
