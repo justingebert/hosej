@@ -88,6 +88,7 @@ function readPalette() {
 }
 
 function loadStars(): number {
+    if (typeof window === "undefined") return 0;
     return parseInt(localStorage.getItem(STARS_KEY) || "0");
 }
 
@@ -98,14 +99,15 @@ export default function OfflinePage() {
     const [showShop, setShowShop] = useState(false);
     const [stars, setStars] = useState(() => loadStars());
     const [ownedBalls, setOwnedBalls] = useState<string[]>(() => {
+        if (typeof window === "undefined") return ["standard"];
         try {
             return JSON.parse(localStorage.getItem(OWNED_KEY) || '["standard"]');
         } catch {
             return ["standard"];
         }
     });
-    const [activeBall, setActiveBall] = useState(
-        () => localStorage.getItem(ACTIVE_KEY) || "standard"
+    const [activeBall, setActiveBall] = useState(() =>
+        typeof window === "undefined" ? "standard" : localStorage.getItem(ACTIVE_KEY) || "standard"
     );
 
     // Refs for game loop to read
