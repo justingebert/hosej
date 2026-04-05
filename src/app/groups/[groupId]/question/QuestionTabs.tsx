@@ -21,6 +21,7 @@ import Image from "next/image";
 import { mutate } from "swr";
 import { CheckCheck } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { AnimatePresence, motion } from "framer-motion";
 import type { Session } from "next-auth";
 import type {
     QuestionOptionDTO,
@@ -148,22 +149,37 @@ function QuestionContent({
                 />
             )}
             <div className="mt-10">
-                {question.userHasVoted ? (
-                    <VoteResults
-                        user={user}
-                        question={question}
-                        available={true}
-                        returnTo={`question?returnTo=${question._id}`}
-                    />
-                ) : (
-                    <VoteOptions
-                        question={question}
-                        onVote={() => {
-                            mutate(`/api/groups/${groupId}/question`);
-                            handleDrawer();
-                        }}
-                    />
-                )}
+                <AnimatePresence mode="wait">
+                    {question.userHasVoted ? (
+                        <motion.div
+                            key="results"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <VoteResults
+                                user={user}
+                                question={question}
+                                available={true}
+                                returnTo={`question?returnTo=${question._id}`}
+                            />
+                        </motion.div>
+                    ) : (
+                        <motion.div
+                            key="voting"
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.2 }}
+                        >
+                            <VoteOptions
+                                question={question}
+                                onVote={() => {
+                                    mutate(`/api/groups/${groupId}/question`);
+                                    handleDrawer();
+                                }}
+                            />
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
         </>
     );

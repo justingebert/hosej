@@ -93,6 +93,8 @@ export default function Dashboard() {
                     variant="ghost"
                     size="icon"
                     className="rounded-full bg-muted/50 hover:bg-muted"
+                    haptic="navigation"
+                    onClick={() => router.push(`/groups/${groupId}/info`)}
                 >
                     <Info className="h-5 w-5" />
                 </Button>

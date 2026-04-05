@@ -53,16 +53,30 @@ export function GroupsList({
         }
     };
 
-    function copyToClipboard(text: string) {
-        navigator.clipboard
-            .writeText(text)
-            .then(() => {
-                toast({ title: "GroupId copied to clipboard!" });
-            })
-            .catch((err) => {
-                console.error("Failed to copy to clipboard: ", err);
-                toast({ title: "Ooops someting went wrong while coping!", variant: "destructive" });
-            });
+    async function shareGroup(groupId: string, groupName: string) {
+        const joinLink = `${window.location.origin}/join/${groupId}`;
+
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: `Join ${groupName} on HoseJ`,
+                    text: `Join my group "${groupName}" on HoseJ!`,
+                    url: joinLink,
+                });
+                return;
+            } catch (err) {
+                // User cancelled share or share API failed — fall through to clipboard
+                if (err instanceof Error && err.name === "AbortError") return;
+            }
+        }
+
+        try {
+            await navigator.clipboard.writeText(joinLink);
+            toast({ title: "Invite link copied!" });
+        } catch (err) {
+            console.error("Failed to copy to clipboard: ", err);
+            toast({ title: "Failed to copy to clipboard", variant: "destructive" });
+        }
     }
 
     const { data, isLoading } = useSWR<{ groups: GroupDTO[] }>(
@@ -83,7 +97,7 @@ export function GroupsList({
             ) : groups.length === 0 ? (
                 <EmptyGroupsGuide />
             ) : (
-                <div className="flex-grow py-6 max-w-5xl mx-auto w-full">
+                <div className="flex-grow py-6 pb-32 max-w-5xl mx-auto w-full">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                         {groups.map((group) => (
                             <div key={group._id} className="relative group">
@@ -134,7 +148,7 @@ export function GroupsList({
                                                 className="rounded-full hover:bg-primary/10 transition-colors"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    copyToClipboard(`${group._id}`);
+                                                    shareGroup(group._id, group.name);
                                                 }}
                                             >
                                                 <Share className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />

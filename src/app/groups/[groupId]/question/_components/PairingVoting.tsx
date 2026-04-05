@@ -70,6 +70,7 @@ const PairingVoting = ({
 
     // selections: key index -> value index (index-based to handle duplicate strings)
     const [selections, setSelections] = useState<Record<number, number>>({});
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // ── Exclusive mode state: tap key first, then value ──
     const [activeKey, setActiveKey] = useState<number | null>(null);
@@ -155,27 +156,33 @@ const PairingVoting = ({
     const allSelected = keys.every((_, i) => selections[i] !== undefined);
 
     const submitVote = async () => {
+        if (isSubmitting) return;
+        setIsSubmitting(true);
         // Convert index-based selections back to string-based for the API
         const response: Record<string, string> = {};
         for (const [ki, vi] of Object.entries(selections)) {
             response[keys[Number(ki)]] = values[vi];
         }
-        await fetch(`/api/groups/${question.groupId}/question/${question._id}/vote`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ response }),
-        });
-        onVote();
+        try {
+            await fetch(`/api/groups/${question.groupId}/question/${question._id}/vote`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ response }),
+            });
+            onVote();
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const submitFooter = (
         <div className="fixed bottom-0 left-0 w-full backdrop-blur-md pb-10 pt-4 px-6">
             <Button
                 onClick={() => allSelected && submitVote()}
-                disabled={!allSelected}
+                disabled={!allSelected || isSubmitting}
                 className="w-full h-12 text-lg font-bold"
             >
-                Submit
+                {isSubmitting ? "Submitting..." : "Submit"}
             </Button>
         </div>
     );

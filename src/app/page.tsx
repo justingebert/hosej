@@ -115,6 +115,9 @@ function StartPage() {
                     placeholder="What do your friends call you?"
                     value={userName}
                     onChange={(e) => setUserName(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter" && userName) handleStartWithoutAccount();
+                    }}
                     className="w-full max-w-sm text-center"
                 />
 

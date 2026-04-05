@@ -29,6 +29,7 @@ const VoteOptions = ({
 
     const [textResponse, setTextResponse] = useState<string>("");
     const [selectedResponses, setSelectedResponses] = useState<string[]>([]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const toggleOption = (option: QuestionOptionDTO) => {
         const value = optionResponseValue(option);
@@ -41,19 +42,25 @@ const VoteOptions = ({
     };
 
     const submitVote = async () => {
+        if (isSubmitting) return;
+        setIsSubmitting(true);
         const response = isText ? [textResponse] : selectedResponses;
 
-        await fetch(`/api/groups/${question.groupId}/question/${question._id}/vote`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                response,
-            }),
-        });
+        try {
+            await fetch(`/api/groups/${question.groupId}/question/${question._id}/vote`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    response,
+                }),
+            });
 
-        onVote();
+            onVote();
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     if (isPairing) {
@@ -114,9 +121,10 @@ const VoteOptions = ({
 
                         if (hasResponse) submitVote();
                     }}
+                    disabled={isSubmitting}
                     className="w-full h-12 text-lg font-bold"
                 >
-                    Submit
+                    {isSubmitting ? "Submitting..." : "Submit"}
                 </Button>
             </div>
         </div>
