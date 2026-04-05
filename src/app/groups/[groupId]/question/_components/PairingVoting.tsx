@@ -68,53 +68,56 @@ const PairingVoting = ({
     const values = question.pairing?.values || [];
     const isExclusive = question.pairing?.mode === "exclusive";
 
-    // selections: key -> value
-    const [selections, setSelections] = useState<Record<string, string>>({});
+    // selections: key index -> value index (index-based to handle duplicate strings)
+    const [selections, setSelections] = useState<Record<number, number>>({});
 
     // ── Exclusive mode state: tap key first, then value ──
-    const [activeKey, setActiveKey] = useState<string | null>(null);
+    const [activeKey, setActiveKey] = useState<number | null>(null);
 
     // ── Open mode state: tap value first, then keys ──
-    const [activeValue, setActiveValue] = useState<string | null>(null);
+    const [activeValue, setActiveValue] = useState<number | null>(null);
 
     // Assign a stable color index per paired key (order they appear)
-    const pairedKeys = keys.filter((k) => selections[k]);
-    const keyColorIndex = (key: string): number => {
-        const idx = pairedKeys.indexOf(key);
+    const pairedKeyIndices = keys.map((_, i) => i).filter((i) => selections[i] !== undefined);
+    const keyColorIndex = (keyIdx: number): number => {
+        const idx = pairedKeyIndices.indexOf(keyIdx);
         return idx >= 0 ? idx % PAIR_COLORS.length : -1;
     };
 
     // ── Exclusive mode: value gets the color of its paired key ──
-    const valueColorIndexExclusive = (value: string): number => {
-        const pairedKey = pairedKeys.find((k) => selections[k] === value);
-        if (!pairedKey) return -1;
-        return keyColorIndex(pairedKey);
+    const valueColorIndexExclusive = (valueIdx: number): number => {
+        const pairedKeyIdx = pairedKeyIndices.find((ki) => selections[ki] === valueIdx);
+        if (pairedKeyIdx === undefined) return -1;
+        return keyColorIndex(pairedKeyIdx);
     };
 
-    // ── Open mode: value gets its own color (by order of distinct values used) ──
-    const usedValuesOrdered = [...new Set(pairedKeys.map((k) => selections[k]))];
-    const valueColorIndexOpen = (value: string): number => {
-        const idx = usedValuesOrdered.indexOf(value);
+    // ── Open mode: value gets its own color (by order of distinct value indices used) ──
+    const usedValueIndicesOrdered = [...new Set(pairedKeyIndices.map((ki) => selections[ki]))];
+    const valueColorIndexOpen = (valueIdx: number): number => {
+        const idx = usedValueIndicesOrdered.indexOf(valueIdx);
         return idx >= 0 ? idx % PAIR_COLORS.length : -1;
     };
 
-    const usedValues = isExclusive ? new Set(Object.values(selections)) : new Set<string>();
+    const usedValueIndices = isExclusive
+        ? new Set(pairedKeyIndices.map((ki) => selections[ki]))
+        : new Set<number>();
 
     // ── Exclusive mode handlers ──
-    const handleKeyTapExclusive = (key: string) => {
-        setActiveKey((prev) => (prev === key ? null : key));
+    const handleKeyTapExclusive = (keyIdx: number) => {
+        setActiveKey((prev) => (prev === keyIdx ? null : keyIdx));
     };
 
-    const handleValueTapExclusive = (value: string) => {
-        if (!activeKey) return;
-        if (isExclusive && usedValues.has(value) && selections[activeKey] !== value) return;
+    const handleValueTapExclusive = (valueIdx: number) => {
+        if (activeKey === null) return;
+        if (isExclusive && usedValueIndices.has(valueIdx) && selections[activeKey] !== valueIdx)
+            return;
 
         setSelections((prev) => {
             const next = { ...prev };
-            if (next[activeKey!] === value) {
-                delete next[activeKey!];
+            if (next[activeKey] === valueIdx) {
+                delete next[activeKey];
             } else {
-                next[activeKey!] = value;
+                next[activeKey] = valueIdx;
             }
             return next;
         });
@@ -122,40 +125,45 @@ const PairingVoting = ({
     };
 
     // ── Open mode handlers: tap value first, then assign to keys ──
-    const handleValueTapOpen = (value: string) => {
-        setActiveValue((prev) => (prev === value ? null : value));
+    const handleValueTapOpen = (valueIdx: number) => {
+        setActiveValue((prev) => (prev === valueIdx ? null : valueIdx));
     };
 
-    const handleKeyTapOpen = (key: string) => {
-        if (!activeValue) return;
+    const handleKeyTapOpen = (keyIdx: number) => {
+        if (activeValue === null) return;
 
         setSelections((prev) => {
             const next = { ...prev };
-            if (next[key] === activeValue) {
-                delete next[key];
+            if (next[keyIdx] === activeValue) {
+                delete next[keyIdx];
             } else {
-                next[key] = activeValue;
+                next[keyIdx] = activeValue;
             }
             return next;
         });
     };
 
-    const handleUnpair = (key: string) => {
+    const handleUnpair = (keyIdx: number) => {
         setSelections((prev) => {
             const next = { ...prev };
-            delete next[key];
+            delete next[keyIdx];
             return next;
         });
-        if (activeKey === key) setActiveKey(null);
+        if (activeKey === keyIdx) setActiveKey(null);
     };
 
-    const allSelected = keys.every((key) => selections[key]);
+    const allSelected = keys.every((_, i) => selections[i] !== undefined);
 
     const submitVote = async () => {
+        // Convert index-based selections back to string-based for the API
+        const response: Record<string, string> = {};
+        for (const [ki, vi] of Object.entries(selections)) {
+            response[keys[Number(ki)]] = values[vi];
+        }
         await fetch(`/api/groups/${question.groupId}/question/${question._id}/vote`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ response: selections }),
+            body: JSON.stringify({ response }),
         });
         onVote();
     };
@@ -181,16 +189,16 @@ const PairingVoting = ({
                         <span className="text-xs text-muted-foreground font-medium mb-1">
                             Match
                         </span>
-                        {keys.map((key) => {
-                            const colorIdx = keyColorIndex(key);
+                        {keys.map((key, ki) => {
+                            const colorIdx = keyColorIndex(ki);
                             return (
                                 <PairButton
-                                    key={key}
+                                    key={ki}
                                     label={key}
                                     colorIdx={colorIdx}
-                                    isActive={activeKey === key}
-                                    onClick={() => handleKeyTapExclusive(key)}
-                                    onUnpair={() => colorIdx >= 0 && handleUnpair(key)}
+                                    isActive={activeKey === ki}
+                                    onClick={() => handleKeyTapExclusive(ki)}
+                                    onUnpair={() => colorIdx >= 0 && handleUnpair(ki)}
                                 />
                             );
                         })}
@@ -198,18 +206,19 @@ const PairingVoting = ({
 
                     <div className="flex flex-col gap-2">
                         <span className="text-xs text-muted-foreground font-medium mb-1">With</span>
-                        {values.map((value) => {
-                            const colorIdx = valueColorIndexExclusive(value);
+                        {values.map((value, vi) => {
+                            const colorIdx = valueColorIndexExclusive(vi);
                             const isDisabled =
-                                usedValues.has(value) && selections[activeKey ?? ""] !== value;
+                                usedValueIndices.has(vi) &&
+                                (activeKey === null || selections[activeKey] !== vi);
                             return (
                                 <PairButton
-                                    key={value}
+                                    key={vi}
                                     label={value}
                                     colorIdx={colorIdx}
-                                    isDisabled={!activeKey || isDisabled}
+                                    isDisabled={activeKey === null || isDisabled}
                                     isSelectable={activeKey !== null && !isDisabled}
-                                    onClick={() => handleValueTapExclusive(value)}
+                                    onClick={() => handleValueTapExclusive(vi)}
                                 />
                             );
                         })}
@@ -229,15 +238,15 @@ const PairingVoting = ({
                     <span className="text-xs text-muted-foreground font-medium mb-1">
                         Pick value
                     </span>
-                    {values.map((value) => {
-                        const colorIdx = valueColorIndexOpen(value);
+                    {values.map((value, vi) => {
+                        const colorIdx = valueColorIndexOpen(vi);
                         return (
                             <PairButton
-                                key={value}
+                                key={vi}
                                 label={value}
                                 colorIdx={colorIdx}
-                                isActive={activeValue === value}
-                                onClick={() => handleValueTapOpen(value)}
+                                isActive={activeValue === vi}
+                                onClick={() => handleValueTapOpen(vi)}
                             />
                         );
                     })}
@@ -247,19 +256,19 @@ const PairingVoting = ({
                     <span className="text-xs text-muted-foreground font-medium mb-1">
                         Then assign
                     </span>
-                    {keys.map((key) => {
-                        const colorIdx = keyColorIndex(key);
+                    {keys.map((key, ki) => {
+                        const colorIdx = keyColorIndex(ki);
                         const keyValueColor =
-                            colorIdx >= 0 ? valueColorIndexOpen(selections[key]) : -1;
+                            colorIdx >= 0 ? valueColorIndexOpen(selections[ki]) : -1;
                         return (
                             <PairButton
-                                key={key}
+                                key={ki}
                                 label={key}
                                 colorIdx={keyValueColor}
-                                isDisabled={!activeValue}
+                                isDisabled={activeValue === null}
                                 isSelectable={activeValue !== null}
-                                onClick={() => handleKeyTapOpen(key)}
-                                onUnpair={() => colorIdx >= 0 && handleUnpair(key)}
+                                onClick={() => handleKeyTapOpen(ki)}
+                                onUnpair={() => colorIdx >= 0 && handleUnpair(ki)}
                             />
                         );
                     })}
