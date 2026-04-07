@@ -50,6 +50,7 @@ export const UpdateGroupSchema = z.object({
 export const GroupHistoryQuerySchema = z.object({
     limit: z.coerce.number().int().min(1).max(1000).default(1000),
     offset: z.coerce.number().int().min(0).default(0),
+    search: z.string().max(200).optional(),
 });
 
 export const UpdateAdminConfigSchema = z.object({

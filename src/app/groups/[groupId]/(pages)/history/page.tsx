@@ -8,11 +8,19 @@ import { ArrowDown, ArrowUp } from "lucide-react";
 import { usePaginatedData } from "@/hooks/usePaginatedData";
 import { DataTable } from "./_components/data-table";
 import { columns } from "./_components/columns";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 
 const QuestionHistoryPage = () => {
     const params = useParams<{ groupId: string }>();
     const groupId = params ? params.groupId : "";
-    const { data, loading, hasMore, loadMore } = usePaginatedData({ groupId });
+
+    const [search, setSearch] = useState("");
+    const debouncedSearch = useDebouncedValue(search, 300);
+
+    const { data, loading, hasMore, loadMore } = usePaginatedData({
+        groupId,
+        search: debouncedSearch || undefined,
+    });
     const [showGoTop, setShowGoTop] = useState(false);
     const [showGoBottom, setShowGoBottom] = useState(true);
 
@@ -21,8 +29,8 @@ const QuestionHistoryPage = () => {
         const windowHeight = window.innerHeight;
         const documentHeight = document.documentElement.scrollHeight;
 
-        const scrolledToBottom = windowHeight + scrollTop >= documentHeight - 50; // Near bottom threshold
-        const scrolledToTop = scrollTop <= 50; // Near top threshold
+        const scrolledToBottom = windowHeight + scrollTop >= documentHeight - 50;
+        const scrolledToTop = scrollTop <= 50;
 
         setShowGoBottom(!scrolledToBottom);
         setShowGoTop(!scrolledToTop);
@@ -50,6 +58,8 @@ const QuestionHistoryPage = () => {
                 hasMore={hasMore}
                 loading={loading}
                 onLoadMore={loadMore}
+                search={search}
+                onSearchChange={setSearch}
             />
 
             <div className="fixed bottom-24 left-6 space-y-4 flex flex-col">

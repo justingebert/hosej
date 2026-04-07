@@ -224,16 +224,20 @@ export async function getGroupHistory(
     userId: string,
     groupId: string,
     limit: number,
-    offset: number
+    offset: number,
+    search?: string
 ) {
     await isUserInGroup(userId, groupId);
 
-    return Question.find({
+    const filter: Record<string, unknown> = {
         groupId,
         used: true,
         active: false,
-    })
-        .skip(offset)
-        .limit(limit)
-        .sort({ createdAt: -1 });
+    };
+
+    if (search) {
+        filter.question = { $regex: search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), $options: "i" };
+    }
+
+    return Question.find(filter).skip(offset).limit(limit).sort({ createdAt: -1 });
 }

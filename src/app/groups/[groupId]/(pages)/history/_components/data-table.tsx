@@ -17,46 +17,50 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { DataTableToolbar } from "./data-table-toolbar";
-import { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useRouter } from "next/navigation";
+import type { IQuestion } from "@/types/models/question";
 
-interface DataTableProps<TData, TValue> {
-    columns: ColumnDef<TData, TValue>[];
-    data: TData[];
+interface DataTableProps {
+    columns: ColumnDef<IQuestion, unknown>[];
+    data: IQuestion[];
     hasMore: boolean;
     loading: boolean;
     onLoadMore: () => void;
+    search: string;
+    onSearchChange: (value: string) => void;
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable({
     columns,
     data,
     hasMore,
     loading,
     onLoadMore,
-}: DataTableProps<TData, TValue>) {
-    const [columnVisibility, setColumnVisibility] = useState({
-        question: true,
-        answers: true,
-        questionType: false,
-        submittedBy: false,
-    });
+    search,
+    onSearchChange,
+}: DataTableProps) {
+    const router = useRouter();
 
     const table = useReactTable({
         data,
         columns,
-        state: {
-            columnVisibility,
+        initialState: {
+            columnVisibility: {
+                question: true,
+                questionType: false,
+                submittedBy: false,
+            },
         },
         getCoreRowModel: getCoreRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
     });
 
     return (
-        <div className="rounded-md">
-            <DataTableToolbar table={table} />
+        <>
+            <DataTableToolbar table={table} search={search} onSearchChange={onSearchChange} />
             <Table>
-                <TableHeader>
+                <TableHeader className="sr-only">
                     {table.getHeaderGroups().map((headerGroup) => (
                         <TableRow key={headerGroup.id}>
                             {headerGroup.headers.map((header) => (
@@ -75,9 +79,16 @@ export function DataTable<TData, TValue>({
                 <TableBody>
                     {table.getRowModel().rows.length
                         ? table.getRowModel().rows.map((row) => (
-                              <TableRow key={row.id}>
+                              <TableRow
+                                  key={row.id}
+                                  className="cursor-pointer active:bg-muted/80"
+                                  onClick={() => {
+                                      const q = row.original;
+                                      router.push(`/groups/${q.groupId}/question/${q._id}/results`);
+                                  }}
+                              >
                                   {row.getVisibleCells().map((cell) => (
-                                      <TableCell key={cell.id}>
+                                      <TableCell key={cell.id} className="py-3">
                                           {flexRender(
                                               cell.column.columnDef.cell,
                                               cell.getContext()
@@ -96,7 +107,7 @@ export function DataTable<TData, TValue>({
                     {loading &&
                         [...Array(10)].map((_, i) => (
                             <TableRow key={i}>
-                                <TableCell colSpan={3} className="p-2">
+                                <TableCell className="p-2">
                                     <Skeleton className="h-10" />
                                 </TableCell>
                             </TableRow>
@@ -108,6 +119,6 @@ export function DataTable<TData, TValue>({
                     <Button onClick={onLoadMore}>Load More</Button>
                 </div>
             )}
-        </div>
+        </>
     );
 }

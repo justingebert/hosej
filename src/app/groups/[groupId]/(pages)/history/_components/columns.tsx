@@ -1,8 +1,7 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { ArrowRight } from "lucide-react";
-import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 
 import type { IQuestion } from "@/types/models/question";
 
@@ -10,23 +9,12 @@ export const columns: ColumnDef<IQuestion>[] = [
     {
         accessorKey: "question",
         header: "Question",
-    },
-    {
-        accessorKey: "answers",
-        header: "Results",
-        cell: ({ row }) => {
-            const groupId = row.original.groupId;
-            const questionId = row.original._id;
-
-            return (
-                <Link
-                    href={`/groups/${groupId}/question/${questionId}/results`}
-                    className="flex justify-center"
-                >
-                    <ArrowRight />
-                </Link>
-            );
-        },
+        cell: ({ row }) => (
+            <div className="flex items-center justify-between gap-2">
+                <span className="line-clamp-2">{row.getValue("question")}</span>
+                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+            </div>
+        ),
     },
     {
         accessorKey: "submittedBy",

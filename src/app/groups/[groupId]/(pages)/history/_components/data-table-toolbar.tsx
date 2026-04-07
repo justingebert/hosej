@@ -9,11 +9,12 @@ import { useParams } from "next/navigation";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
 import type { GroupDTO } from "@/types/models/group";
-
 import { QuestionType } from "@/types/models/question";
 
 interface DataTableToolbarProps<TData> {
     table: Table<TData>;
+    search: string;
+    onSearchChange: (value: string) => void;
 }
 
 const questionTypeLabels: Record<string, string> = {
@@ -30,31 +31,34 @@ const questionTypesOptions = Object.values(QuestionType).map((type) => ({
     value: type,
 }));
 
-export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>) {
+export function DataTableToolbar<TData>({
+    table,
+    search,
+    onSearchChange,
+}: DataTableToolbarProps<TData>) {
     const params = useParams<{ groupId: string }>();
     const groupId = params ? params.groupId : "";
     const { data: users } = useSWR<GroupDTO["members"]>(`/api/groups/${groupId}/members`, fetcher);
 
     const groupMembers = users
-        ? users.map((user: any) => ({
+        ? users.map((user) => ({
               label: user.name,
-              value: user.user,
+              value: String(user.user),
           }))
         : [];
 
-    const isFiltered = table.getState().columnFilters.length > 0;
+    const isFiltered = table.getState().columnFilters.length > 0 || search.length > 0;
 
     return (
         <div className="space-y-2 mb-4">
             <div className="relative w-full">
                 <Input
-                    value={(table.getColumn("question")?.getFilterValue() as string) ?? ""}
-                    onChange={(event) =>
-                        table.getColumn("question")?.setFilterValue(event.target.value)
-                    }
+                    placeholder="Search questions..."
+                    value={search}
+                    onChange={(e) => onSearchChange(e.target.value)}
                     className="w-full pr-10"
                 />
-                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2" />
+                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             </div>
 
             <div className="flex flex-wrap justify-between md:space-x-2">
@@ -80,16 +84,21 @@ export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>)
             </div>
 
             <div className="flex justify-between items-center">
-                <Button size="sm" className="h-8">
-                    <div className="text-sm">{table.getFilteredRowModel().rows.length} Results</div>
-                </Button>
+                <div className="text-sm text-muted-foreground">
+                    {table.getFilteredRowModel().rows.length} Results
+                </div>
                 <Button
+                    variant="ghost"
+                    size="sm"
                     disabled={!isFiltered}
-                    onClick={() => table.resetColumnFilters()}
+                    onClick={() => {
+                        table.resetColumnFilters();
+                        onSearchChange("");
+                    }}
                     className="h-8 px-2 lg:px-3"
                 >
                     Reset
-                    <X className="-mr-1" />
+                    <X className="ml-1 h-4 w-4" />
                 </Button>
             </div>
         </div>
