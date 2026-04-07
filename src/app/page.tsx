@@ -32,9 +32,16 @@ function StartPage() {
                 }
             } catch (error) {
                 console.error(`Error during ${provider} sign-in:`, error);
-                toast({ title: "Failed to sign in!", variant: "destructive" });
+                // Don't show error toast for network failures with a stored deviceId —
+                // the user didn't initiate this, it was auto-sign-in on app open.
+                if (navigator.onLine) {
+                    toast({ title: "Failed to sign in!", variant: "destructive" });
+                }
             } finally {
-                setLoading(false);
+                // Only reveal the login form if we're online.
+                // If offline/flaky, keep the loader — the user still has credentials,
+                // they just can't reach the server right now.
+                if (navigator.onLine) setLoading(false);
             }
         },
         [callbackUrl, router]
@@ -96,8 +103,11 @@ function StartPage() {
             router.push(callbackUrl);
         } else {
             const deviceId = localStorage.getItem("deviceId");
-            if (deviceId) handleSignIn("credentials", { deviceId });
-            else setLoading(false);
+            if (deviceId) {
+                handleSignIn("credentials", { deviceId });
+            } else {
+                setLoading(false);
+            }
         }
     }, [session, status, handleSignIn, router, callbackUrl]);
 
