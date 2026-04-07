@@ -219,7 +219,7 @@ export async function getActiveQuestions(
     const questionsWithImages = await Promise.all(
         questionsWithState.map(async (question) => {
             if (question.image) {
-                const { url } = await generateSignedUrl(new URL(question.image).pathname);
+                const { url } = await generateSignedUrl(question.image);
                 question.imageUrl = url;
             }
             if (question.questionType === QuestionType.Image && Array.isArray(question.options)) {
@@ -244,7 +244,7 @@ export async function getQuestionById(groupId: string, questionId: string): Prom
     const questionJson = question.toObject();
 
     if (questionJson.image) {
-        const { url } = await generateSignedUrl(new URL(questionJson.image).pathname);
+        const { url } = await generateSignedUrl(questionJson.image);
         questionJson.imageUrl = url;
     }
 
@@ -478,10 +478,10 @@ export async function getQuestionResults(questionId: string): Promise<{
 export async function updateQuestionAttachments(
     groupId: string,
     questionId: string,
-    data: { imageUrl?: string; options?: unknown[] }
+    data: { imageKey?: string; options?: unknown[] }
 ): Promise<void> {
-    if (!data.imageUrl && !data.options) {
-        throw new ValidationError("At least one of imageUrl or options is required");
+    if (!data.imageKey && !data.options) {
+        throw new ValidationError("At least one of imageKey or options is required");
     }
     if (data.options && (!Array.isArray(data.options) || data.options.length === 0)) {
         throw new ValidationError("Options must be a non-empty array");
@@ -490,8 +490,8 @@ export async function updateQuestionAttachments(
     const question = await Question.findOne({ groupId, _id: questionId });
     if (!question) throw new NotFoundError("Question not found");
 
-    if (data.imageUrl) {
-        question.image = data.imageUrl;
+    if (data.imageKey) {
+        question.image = data.imageKey;
     }
     if (data.options) {
         question.options = data.options;

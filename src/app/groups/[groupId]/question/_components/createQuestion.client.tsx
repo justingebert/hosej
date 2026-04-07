@@ -329,7 +329,7 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                             headers: {
                                 "Content-Type": "application/json",
                             },
-                            body: JSON.stringify({ imageUrl: imageUrl[0].url }),
+                            body: JSON.stringify({ imageKey: imageUrl[0].key }),
                         }
                     );
                     if (!response.ok) {

@@ -64,7 +64,7 @@ export const CreateQuestionSchema = z
     );
 
 export const UpdateQuestionAttachmentsSchema = z.object({
-    imageUrl: z.string().optional(),
+    imageKey: z.string().optional(),
 });
 
 export const VoteOnQuestionSchema = z.object({
