@@ -1,10 +1,11 @@
 import mongoose from "mongoose";
 import type { IRally, IPictureSubmission } from "@/types/models/rally";
+import { RallyStatus } from "@/types/models/rally";
 
 const pictureSubmissionSchema = new mongoose.Schema<IPictureSubmission>({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     username: { type: String },
-    imageUrl: { type: String, required: true },
+    imageKey: { type: String, required: true },
     votes: [
         {
             user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
@@ -13,27 +14,33 @@ const pictureSubmissionSchema = new mongoose.Schema<IPictureSubmission>({
     ],
 });
 
-const rallySchema = new mongoose.Schema<IRally>({
-    groupId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Group",
-        required: true,
+const rallySchema = new mongoose.Schema<IRally>(
+    {
+        groupId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Group",
+            required: true,
+        },
+        task: { type: String, required: true },
+        status: {
+            type: String,
+            enum: Object.values(RallyStatus),
+            default: RallyStatus.Created,
+            required: true,
+        },
+        submissions: [pictureSubmissionSchema],
+        startTime: { type: Date, default: null },
+        submissionEnd: { type: Date, default: null },
+        votingEnd: { type: Date, default: null },
+        resultsEnd: { type: Date, default: null },
+        lengthInDays: { type: Number, required: true },
+        createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        chat: { type: mongoose.Schema.Types.ObjectId, ref: "Chat" },
     },
-    task: { type: String, required: true },
-    submissions: [pictureSubmissionSchema],
-    startTime: { type: Date, required: false },
-    endTime: { type: Date, required: false },
-    votingOpen: { type: Boolean, default: false },
-    resultsShowing: { type: Boolean, default: false },
-    used: { type: Boolean, default: false },
-    active: { type: Boolean, default: false },
-    lengthInDays: { type: Number, required: true },
-    submittedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    chat: { type: mongoose.Schema.Types.ObjectId, ref: "Chat" },
-    createdAt: { type: Date, default: Date.now },
-});
+    { timestamps: true }
+);
 
-rallySchema.index({ groupId: 1, active: 1 });
+rallySchema.index({ groupId: 1, status: 1 });
 
 const Rally =
     (mongoose.models.Rally as mongoose.Model<IRally>) ||

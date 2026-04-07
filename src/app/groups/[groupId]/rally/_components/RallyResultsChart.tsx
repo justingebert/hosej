@@ -5,7 +5,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import type { ChartConfig } from "@/components/ui/chart";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 
-export function RallyVotesChart({ submissions }: { submissions: any[] }) {
+export function RallyVotesChart({
+    submissions,
+}: {
+    submissions: { username: string; votes: { user: string; time: string }[] }[];
+}) {
     const chartData = submissions.map((submission, index) => ({
         username: submission.username, // Username for the label
         votes: submission.votes.length, // Number of votes for each submission
@@ -17,7 +21,7 @@ export function RallyVotesChart({ submissions }: { submissions: any[] }) {
         votes: {
             label: "Votes",
         },
-        ...chartData.reduce((config: any, item) => {
+        ...chartData.reduce((config: ChartConfig, item) => {
             config[item.username] = {
                 label: item.username, // Set label as the username
                 color: item.fill, // Use the fill color for the legend
@@ -70,7 +74,7 @@ export function RallyVotesChart({ submissions }: { submissions: any[] }) {
                                 offset={8}
                                 className="fill-foreground"
                                 fontSize={12}
-                                formatter={(value: any) => (value === 0 ? "" : value)}
+                                formatter={(value: number) => (value === 0 ? "" : value)}
                             />
                         </Bar>
                     </BarChart>

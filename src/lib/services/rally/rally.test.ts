@@ -33,6 +33,7 @@ import { isUserInGroup, isUserAdmin, addPointsToMember } from "@/lib/services/gr
 import { createChatForEntity } from "@/lib/services/chat";
 import { sendNotification } from "@/lib/sendNotification";
 import { ConflictError, NotFoundError, ValidationError } from "@/lib/api/errorHandling";
+import { RallyStatus } from "@/types/models/rally";
 
 // ─── Test IDs ──────────────────────────────────────────────────────────────
 
@@ -52,16 +53,16 @@ function createMockRally(overrides: Record<string, any> = {}) {
         groupId: new Types.ObjectId(mockGroupId),
         task: "Take a sunset photo",
         lengthInDays: 3,
+        status: RallyStatus.Submission,
         submissions: [] as any[],
         startTime: new Date(Date.now() - 86400000),
-        endTime: new Date(Date.now() + 86400000),
-        votingOpen: false,
-        resultsShowing: false,
-        used: true,
-        active: true,
-        submittedBy: new Types.ObjectId(mockUserId),
+        submissionEnd: new Date(Date.now() + 86400000),
+        votingEnd: null,
+        resultsEnd: null,
+        createdBy: new Types.ObjectId(mockUserId),
         chat: mockChatId,
         createdAt: new Date(),
+        updatedAt: new Date(),
         save: vi.fn().mockResolvedValue(undefined),
         ...overrides,
     };
@@ -120,7 +121,7 @@ describe("getActiveRallies", () => {
         expect(result.message).toBe("No active rallies");
     });
 
-    it("returns currently running rallies (past start time)", async () => {
+    it("returns rallies in submission/voting/results status", async () => {
         const rally = createMockRally();
         (Rally.find as Mock).mockResolvedValue([rally]);
         (Group.findById as Mock).mockResolvedValue(createMockGroup());
@@ -129,27 +130,14 @@ describe("getActiveRallies", () => {
 
         expect(result.rallies).toHaveLength(1);
         expect(result.rallies[0]).toBe(rally);
-    });
-
-    it("filters out rallies that haven't started yet", async () => {
-        const futureRally = createMockRally({
-            startTime: new Date(Date.now() + 86400000), // starts tomorrow
+        expect(Rally.find).toHaveBeenCalledWith({
+            groupId: mockGroupId,
+            status: { $in: [RallyStatus.Submission, RallyStatus.Voting, RallyStatus.Results] },
         });
-        (Rally.find as Mock).mockResolvedValue([futureRally]);
-        (Group.findById as Mock).mockResolvedValue(createMockGroup());
-
-        const result = await getActiveRallies(mockUserId, mockGroupId);
-
-        expect(result.rallies).toEqual([]);
-        expect(result.message).toBe("No rallies left");
     });
 
     it("does not mutate rally state", async () => {
-        const rally = createMockRally({
-            used: false,
-            startTime: new Date(Date.now() - 1000),
-            endTime: new Date(Date.now() + 86400000),
-        });
+        const rally = createMockRally();
         (Rally.find as Mock).mockResolvedValue([rally]);
         (Group.findById as Mock).mockResolvedValue(createMockGroup());
 
@@ -176,7 +164,7 @@ describe("processRallyStateTransitions", () => {
         expect(Rally.find).not.toHaveBeenCalled();
     });
 
-    it("silently returns when no active rallies", async () => {
+    it("silently returns when no processable rallies", async () => {
         (Group.findById as Mock).mockResolvedValue(createMockGroup());
         (Rally.find as Mock).mockResolvedValue([]);
 
@@ -184,18 +172,18 @@ describe("processRallyStateTransitions", () => {
         expect(sendNotification).not.toHaveBeenCalled();
     });
 
-    it("marks rally as used when start time arrives", async () => {
+    it("transitions scheduled → submission when start time arrives", async () => {
         const rally = createMockRally({
-            used: false,
+            status: RallyStatus.Scheduled,
             startTime: new Date(Date.now() - 1000),
-            endTime: new Date(Date.now() + 86400000),
+            submissionEnd: new Date(Date.now() + 86400000),
         });
         (Rally.find as Mock).mockResolvedValue([rally]);
         (Group.findById as Mock).mockResolvedValue(createMockGroup());
 
         await processRallyStateTransitions(mockGroupId);
 
-        expect(rally.used).toBe(true);
+        expect(rally.status).toBe(RallyStatus.Submission);
         expect(rally.save).toHaveBeenCalled();
         expect(sendNotification).toHaveBeenCalledWith(
             expect.stringContaining("Rally Started"),
@@ -204,19 +192,33 @@ describe("processRallyStateTransitions", () => {
         );
     });
 
-    it("transitions from submission to voting phase when endTime passes", async () => {
+    it("does not transition scheduled rally before start time", async () => {
         const rally = createMockRally({
-            used: true,
-            endTime: new Date(Date.now() - 1000), // expired
-            votingOpen: false,
-            resultsShowing: false,
+            status: RallyStatus.Scheduled,
+            startTime: new Date(Date.now() + 86400000), // tomorrow
+            submissionEnd: new Date(Date.now() + 2 * 86400000),
         });
         (Rally.find as Mock).mockResolvedValue([rally]);
         (Group.findById as Mock).mockResolvedValue(createMockGroup());
 
         await processRallyStateTransitions(mockGroupId);
 
-        expect(rally.votingOpen).toBe(true);
+        expect(rally.status).toBe(RallyStatus.Scheduled);
+        expect(rally.save).not.toHaveBeenCalled();
+    });
+
+    it("transitions submission → voting when submissionEnd passes", async () => {
+        const rally = createMockRally({
+            status: RallyStatus.Submission,
+            submissionEnd: new Date(Date.now() - 1000),
+        });
+        (Rally.find as Mock).mockResolvedValue([rally]);
+        (Group.findById as Mock).mockResolvedValue(createMockGroup());
+
+        await processRallyStateTransitions(mockGroupId);
+
+        expect(rally.status).toBe(RallyStatus.Voting);
+        expect(rally.votingEnd).toBeInstanceOf(Date);
         expect(rally.save).toHaveBeenCalled();
         expect(sendNotification).toHaveBeenCalledWith(
             expect.stringContaining("Voting"),
@@ -225,20 +227,18 @@ describe("processRallyStateTransitions", () => {
         );
     });
 
-    it("transitions from voting to results phase", async () => {
+    it("transitions voting → results when votingEnd passes", async () => {
         const rally = createMockRally({
-            used: true,
-            endTime: new Date(Date.now() - 1000),
-            votingOpen: true,
-            resultsShowing: false,
+            status: RallyStatus.Voting,
+            votingEnd: new Date(Date.now() - 1000),
         });
         (Rally.find as Mock).mockResolvedValue([rally]);
         (Group.findById as Mock).mockResolvedValue(createMockGroup());
 
         await processRallyStateTransitions(mockGroupId);
 
-        expect(rally.votingOpen).toBe(false);
-        expect(rally.resultsShowing).toBe(true);
+        expect(rally.status).toBe(RallyStatus.Results);
+        expect(rally.resultsEnd).toBeInstanceOf(Date);
         expect(rally.save).toHaveBeenCalled();
         expect(sendNotification).toHaveBeenCalledWith(
             expect.stringContaining("Results"),
@@ -247,19 +247,16 @@ describe("processRallyStateTransitions", () => {
         );
     });
 
-    it("deactivates rally and activates next one after results phase", async () => {
+    it("transitions results → completed and activates next rally", async () => {
         const rally = createMockRally({
-            used: true,
-            endTime: new Date(Date.now() - 1000),
-            votingOpen: false,
-            resultsShowing: true,
+            status: RallyStatus.Results,
+            resultsEnd: new Date(Date.now() - 1000),
         });
         const nextRally = createMockRally({
             _id: new Types.ObjectId(),
-            active: false,
-            used: false,
+            status: RallyStatus.Created,
             startTime: null,
-            endTime: null,
+            submissionEnd: null,
         });
         (Rally.find as Mock).mockResolvedValue([rally]);
         (Rally.findOne as Mock).mockResolvedValue(nextRally);
@@ -267,11 +264,10 @@ describe("processRallyStateTransitions", () => {
 
         await processRallyStateTransitions(mockGroupId);
 
-        expect(rally.active).toBe(false);
-        expect(rally.resultsShowing).toBe(false);
-        expect(nextRally.active).toBe(true);
-        expect(nextRally.startTime).toBeTruthy();
-        expect(nextRally.endTime).toBeTruthy();
+        expect(rally.status).toBe(RallyStatus.Completed);
+        expect(nextRally.status).toBe(RallyStatus.Scheduled);
+        expect(nextRally.startTime).toBeInstanceOf(Date);
+        expect(nextRally.submissionEnd).toBeInstanceOf(Date);
         expect(nextRally.save).toHaveBeenCalled();
     });
 });
@@ -339,7 +335,7 @@ describe("createRally", () => {
 describe("activateRallies", () => {
     it("activates pending rallies up to the configured count", async () => {
         const mockGroup = createMockGroup();
-        const pendingRally = createMockRally({ active: false, used: false });
+        const pendingRally = createMockRally({ status: RallyStatus.Created });
 
         (Group.findById as Mock).mockResolvedValue(mockGroup);
         (Rally.find as Mock)
@@ -351,9 +347,9 @@ describe("activateRallies", () => {
         const result = await activateRallies(mockUserId, mockGroupId);
 
         expect(result.message).toBe("Activated rallies");
-        expect(pendingRally.active).toBe(true);
-        expect(pendingRally.startTime).toBeTruthy();
-        expect(pendingRally.endTime).toBeTruthy();
+        expect(pendingRally.status).toBe(RallyStatus.Submission);
+        expect(pendingRally.startTime).toBeInstanceOf(Date);
+        expect(pendingRally.submissionEnd).toBeInstanceOf(Date);
         expect(pendingRally.save).toHaveBeenCalled();
     });
 
@@ -391,22 +387,22 @@ describe("getSubmissions", () => {
             {
                 _id: new Types.ObjectId(),
                 userId: new Types.ObjectId(),
-                imageUrl: "https://s3.example.com//images/photo1.jpg",
+                imageKey: "group1/rally/r1/photo1.jpg",
                 votes: [{ user: new Types.ObjectId() }],
                 toObject: vi.fn().mockReturnValue({
                     _id: "sub1",
-                    imageUrl: "https://s3.example.com//images/photo1.jpg",
+                    imageKey: "group1/rally/r1/photo1.jpg",
                     votes: [{ user: "u1" }],
                 }),
             },
             {
                 _id: new Types.ObjectId(),
                 userId: new Types.ObjectId(),
-                imageUrl: "https://s3.example.com//images/photo2.jpg",
+                imageKey: "group1/rally/r1/photo2.jpg",
                 votes: [{ user: new Types.ObjectId() }, { user: new Types.ObjectId() }],
                 toObject: vi.fn().mockReturnValue({
                     _id: "sub2",
-                    imageUrl: "https://s3.example.com//images/photo2.jpg",
+                    imageKey: "group1/rally/r1/photo2.jpg",
                     votes: [{ user: "u1" }, { user: "u2" }],
                 }),
             },
@@ -451,7 +447,7 @@ describe("addSubmission", () => {
             mockUserId,
             mockGroupId,
             mockRallyId,
-            "https://s3.example.com/photo.jpg"
+            "group1/rally/r1/photo.jpg"
         );
 
         expect(Rally.findByIdAndUpdate).toHaveBeenCalledWith(
@@ -459,7 +455,7 @@ describe("addSubmission", () => {
             {
                 $push: {
                     submissions: expect.objectContaining({
-                        imageUrl: "https://s3.example.com/photo.jpg",
+                        imageKey: "group1/rally/r1/photo.jpg",
                     }),
                 },
             },
@@ -469,10 +465,22 @@ describe("addSubmission", () => {
         expect(result).toBe(updatedRally);
     });
 
-    it("throws ValidationError when imageUrl is missing", async () => {
+    it("throws ValidationError when imageKey is missing", async () => {
         await expect(addSubmission(mockUserId, mockGroupId, mockRallyId, "")).rejects.toThrow(
             ValidationError
         );
+    });
+
+    it("throws ValidationError when rally is not in submission phase", async () => {
+        const rally = createMockRally({ status: RallyStatus.Voting, submissions: [] });
+
+        (Group.findById as Mock).mockResolvedValue(createMockGroup());
+        (User.findById as Mock).mockResolvedValue(createMockUser());
+        (Rally.findById as Mock).mockResolvedValue(rally);
+
+        await expect(
+            addSubmission(mockUserId, mockGroupId, mockRallyId, "group1/rally/r1/photo.jpg")
+        ).rejects.toThrow(ValidationError);
     });
 
     it("throws ConflictError when user already submitted", async () => {
@@ -481,7 +489,7 @@ describe("addSubmission", () => {
                 {
                     _id: new Types.ObjectId(),
                     userId: new Types.ObjectId(mockUserId),
-                    imageUrl: "https://existing.jpg",
+                    imageKey: "group1/rally/r1/existing.jpg",
                     votes: [],
                 },
             ],
@@ -492,7 +500,7 @@ describe("addSubmission", () => {
         (Rally.findById as Mock).mockResolvedValue(rally);
 
         await expect(
-            addSubmission(mockUserId, mockGroupId, mockRallyId, "https://new.jpg")
+            addSubmission(mockUserId, mockGroupId, mockRallyId, "group1/rally/r1/new.jpg")
         ).rejects.toThrow(ConflictError);
     });
 });
@@ -505,12 +513,12 @@ describe("voteOnSubmission", () => {
         votes: { user: Types.ObjectId }[] = []
     ) {
         return createMockRally({
-            votingOpen: true,
+            status: RallyStatus.Voting,
             submissions: [
                 {
                     _id: new Types.ObjectId(mockSubmissionId),
                     userId: new Types.ObjectId(submissionUserId),
-                    imageUrl: "https://photo.jpg",
+                    imageKey: "group1/rally/r1/photo.jpg",
                     votes,
                     username: "otheruser",
                 },
@@ -518,22 +526,40 @@ describe("voteOnSubmission", () => {
         });
     }
 
-    it("adds a vote and awards points", async () => {
+    it("adds a vote atomically and awards points", async () => {
         const rally = createRallyWithSubmission();
         const mockGroup = createMockGroup();
 
         (Group.findById as Mock).mockResolvedValue(mockGroup);
         (Rally.findOne as Mock).mockResolvedValue(rally);
+        (Rally.updateOne as Mock).mockResolvedValue({ modifiedCount: 1 });
 
         await voteOnSubmission(mockUserId, mockGroupId, mockRallyId, mockSubmissionId);
 
-        expect(rally.submissions[0].votes).toHaveLength(1);
-        expect(rally.save).toHaveBeenCalled();
+        expect(Rally.updateOne).toHaveBeenCalledWith(
+            {
+                _id: mockRallyId,
+                submissions: {
+                    $elemMatch: {
+                        _id: new Types.ObjectId(mockSubmissionId),
+                        "votes.user": { $ne: new Types.ObjectId(mockUserId) },
+                    },
+                },
+            },
+            {
+                $push: {
+                    "submissions.$.votes": {
+                        user: new Types.ObjectId(mockUserId),
+                        time: expect.any(Date),
+                    },
+                },
+            }
+        );
         expect(addPointsToMember).toHaveBeenCalledWith(mockGroup, mockUserId, 1);
     });
 
     it("throws ConflictError when user votes on own submission (self-vote prevention)", async () => {
-        const rally = createRallyWithSubmission(mockUserId); // own submission
+        const rally = createRallyWithSubmission(mockUserId);
         (Group.findById as Mock).mockResolvedValue(createMockGroup());
         (Rally.findOne as Mock).mockResolvedValue(rally);
 
@@ -545,12 +571,11 @@ describe("voteOnSubmission", () => {
         ).rejects.toThrow("You cannot vote on your own submission");
     });
 
-    it("throws ConflictError when user already voted (duplicate vote prevention)", async () => {
-        const rally = createRallyWithSubmission(mockOtherUserId, [
-            { user: new Types.ObjectId(mockUserId) },
-        ]);
+    it("throws ConflictError when atomic update matches no document (duplicate vote)", async () => {
+        const rally = createRallyWithSubmission();
         (Group.findById as Mock).mockResolvedValue(createMockGroup());
         (Rally.findOne as Mock).mockResolvedValue(rally);
+        (Rally.updateOne as Mock).mockResolvedValue({ modifiedCount: 0 });
 
         await expect(
             voteOnSubmission(mockUserId, mockGroupId, mockRallyId, mockSubmissionId)
@@ -562,7 +587,7 @@ describe("voteOnSubmission", () => {
 
     it("throws ValidationError when voting is not open", async () => {
         const rally = createRallyWithSubmission();
-        rally.votingOpen = false;
+        rally.status = RallyStatus.Submission;
 
         (Group.findById as Mock).mockResolvedValue(createMockGroup());
         (Rally.findOne as Mock).mockResolvedValue(rally);
@@ -585,7 +610,7 @@ describe("voteOnSubmission", () => {
     });
 
     it("throws NotFoundError when submission doesn't exist", async () => {
-        const rally = createMockRally({ votingOpen: true, submissions: [] });
+        const rally = createMockRally({ status: RallyStatus.Voting, submissions: [] });
         (Group.findById as Mock).mockResolvedValue(createMockGroup());
         (Rally.findOne as Mock).mockResolvedValue(rally);
 

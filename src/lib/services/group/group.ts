@@ -3,6 +3,7 @@ import Group from "@/db/models/Group";
 import User from "@/db/models/User";
 import Question from "@/db/models/Question";
 import Rally from "@/db/models/Rally";
+import { RallyStatus } from "@/types/models/rally";
 import Chat from "@/db/models/Chat";
 import type {
     GroupDocument,
@@ -196,8 +197,8 @@ export async function getGroupStats(userId: string, groupId: string): Promise<Gr
             { $project: { _id: 0, username: "$user.username", count: 1 } },
             { $sort: { count: -1 } },
         ]),
-        Rally.countDocuments({ groupId, used: true }),
-        Rally.countDocuments({ groupId, used: false }),
+        Rally.countDocuments({ groupId, status: RallyStatus.Completed }),
+        Rally.countDocuments({ groupId, status: RallyStatus.Created }),
         Chat.aggregate([
             { $match: { group: objectId } },
             { $unwind: "$messages" },

@@ -1,91 +1,108 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Image from "next/image";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import useSWR from "swr";
-import type { IPictureSubmissionJson } from "@/types/models/rally";
 import fetcher from "@/lib/fetcher";
 import { RallyVotesChart } from "@/app/groups/[groupId]/rally/_components/RallyResultsChart";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import ChatComponent from "@/components/common/Chat";
+import { Heart } from "lucide-react";
+import type { Session } from "next-auth";
+import type { RallyDTO, PictureSubmissionWithUrlDTO } from "@/types/models/rally";
 
-const RallyResults = ({ user, rally }: any) => {
-    const [loadedImages, setLoadedImages] = useState<{ [key: number]: boolean }>({});
+interface RallyResultsProps {
+    user: Session["user"] | undefined;
+    rally: RallyDTO;
+}
 
-    const { data, isLoading } = useSWR<{ submissions: IPictureSubmissionJson[] }>(
+const MEDALS = ["🥇", "🥈", "🥉"];
+
+const RallyResults = ({ user, rally }: RallyResultsProps) => {
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+    const { data } = useSWR<{ submissions: PictureSubmissionWithUrlDTO[] }>(
         `/api/groups/${rally.groupId}/rally/${rally._id}/submissions`,
         fetcher
     );
 
     const submissions = useMemo(() => data?.submissions || [], [data?.submissions]);
 
-    const handleImageLoad = (id: number) => {
-        setLoadedImages((prev) => ({ ...prev, [id]: true }));
-    };
+    if (submissions.length === 0) return null;
 
     return (
-        <div>
-            <div className="mb-6">
-                <RallyVotesChart submissions={submissions} />
-            </div>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-5">
+        <div className="mt-2">
+            {/* Chart */}
+            {submissions.length > 1 && (
+                <div className="mb-6">
+                    <RallyVotesChart submissions={submissions} />
+                </div>
+            )}
+
+            {/* Submission cards */}
+            <div className="flex flex-col gap-4 mb-5">
                 {submissions.map((submission, index) => (
-                    <Card key={submission._id.toString()} className="overflow-hidden">
-                        <CardHeader className="flex flex-row items-center justify-between p-5">
-                            <div className="flex items-center gap-4">
-                                <Avatar>
-                                    {/* <AvatarImage src={`x`} alt={submission.username} /> */}
-                                    <AvatarFallback>{submission.username[0]}</AvatarFallback>
+                    <Card
+                        key={submission._id}
+                        className={`overflow-hidden ${index === 0 && submissions.length > 1 ? "ring-2 ring-primary/20" : ""}`}
+                    >
+                        <div className="flex items-center justify-between px-4 pt-3 pb-2">
+                            <div className="flex items-center gap-2.5">
+                                <Avatar className="h-8 w-8">
+                                    <AvatarFallback className="text-sm">
+                                        {submission.username[0]}
+                                    </AvatarFallback>
                                 </Avatar>
-                                <div>
-                                    <h3 className="text-lg font-semibold">{submission.username}</h3>
-                                </div>
+                                <span className="font-medium text-sm">{submission.username}</span>
                             </div>
-                            {index < 3 && (
-                                <Badge
-                                    variant={
-                                        index === 0
-                                            ? "default"
-                                            : index === 1
-                                              ? "secondary"
-                                              : "outline"
-                                    }
-                                >
-                                    {index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉"}
-                                </Badge>
-                            )}
-                        </CardHeader>
-                        <CardContent className="p-0 relative">
+                            <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-1 text-muted-foreground">
+                                    <Heart className="h-3.5 w-3.5" />
+                                    <span className="text-sm font-medium">
+                                        {submission.votes.length}
+                                    </span>
+                                </div>
+                                {index < 3 && submissions.length > 1 && (
+                                    <span className="text-lg">{MEDALS[index]}</span>
+                                )}
+                            </div>
+                        </div>
+                        <CardContent className="p-0">
                             <Image
                                 src={submission.imageUrl}
                                 alt={`Submission by ${submission.username}`}
-                                className={`object-cover w-full h-auto cursor-pointer ${
-                                    loadedImages[index] ? "opacity-100" : "opacity-0"
-                                }`}
-                                width={300}
-                                height={300}
+                                className="object-cover w-full h-auto cursor-pointer"
+                                width={600}
+                                height={600}
                                 priority={index === 0}
-                                style={{ transition: "opacity 0.3s ease-in-out" }}
-                                onLoad={() => handleImageLoad(index)}
+                                onClick={() => setSelectedImage(submission.imageUrl)}
                             />
                         </CardContent>
-                        <CardFooter className="flex justify-between items-center p-5">
-                            <div className="flex items-center gap-2">
-                                <span className="text-2xl font-bold">
-                                    {submission.votes.length}
-                                </span>
-                                <span className="text-m ">votes</span>
-                            </div>
-                            <Badge variant="outline">Rank #{index + 1}</Badge>
-                        </CardFooter>
                     </Card>
                 ))}
             </div>
-            <Separator className="my-6" />
-            <ChatComponent user={user} entity={rally} available={true} />
+
+            <Separator className="my-4" />
+            {user && <ChatComponent user={user} entity={rally} available={true} />}
+
+            {/* Fullscreen image dialog */}
+            <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
+                <DialogContent className="max-w-[90vw] max-h-[90vh] p-2 bg-transparent border-none shadow-none">
+                    {selectedImage && (
+                        <Image
+                            src={selectedImage}
+                            alt="Full size"
+                            width={600}
+                            height={600}
+                            className="rounded-xl w-full h-auto"
+                        />
+                    )}
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };

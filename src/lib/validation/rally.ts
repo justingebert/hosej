@@ -6,5 +6,5 @@ export const CreateRallySchema = z.object({
 });
 
 export const AddRallySubmissionSchema = z.object({
-    imageUrl: z.string().min(1, "imageUrl is required"),
+    imageKey: z.string().min(1, "imageKey is required"),
 });
