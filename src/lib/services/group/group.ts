@@ -5,6 +5,7 @@ import Question from "@/db/models/Question";
 import Rally from "@/db/models/Rally";
 import { RallyStatus } from "@/types/models/rally";
 import Chat from "@/db/models/Chat";
+import Jukebox from "@/db/models/Jukebox";
 import type {
     GroupDocument,
     IGroup,
@@ -166,8 +167,10 @@ export async function getGroupStats(userId: string, groupId: string): Promise<Gr
         questionsLeftCount,
         questionsByType,
         questionsByUser,
-        RalliesUsedCount,
-        RalliesLeftCount,
+        ralliesCompletedCount,
+        ralliesCreatedCount,
+        rallyWins,
+        jukeboxStats,
         messages,
     ] = await Promise.all([
         Question.countDocuments({ groupId, used: true }),
@@ -199,6 +202,40 @@ export async function getGroupStats(userId: string, groupId: string): Promise<Gr
         ]),
         Rally.countDocuments({ groupId, status: RallyStatus.Completed }),
         Rally.countDocuments({ groupId, status: RallyStatus.Created }),
+        // Rally wins: for each completed rally, find the submission with most votes
+        Rally.aggregate([
+            { $match: { groupId: objectId, status: RallyStatus.Completed } },
+            { $unwind: "$submissions" },
+            { $addFields: { voteCount: { $size: "$submissions.votes" } } },
+            { $sort: { _id: 1, voteCount: -1 } },
+            { $group: { _id: "$_id", winner: { $first: "$submissions" } } },
+            { $group: { _id: "$winner.userId", wins: { $sum: 1 } } },
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "_id",
+                    foreignField: "_id",
+                    as: "user",
+                },
+            },
+            { $unwind: "$user" },
+            { $project: { _id: 0, username: "$user.username", wins: 1 } },
+            { $sort: { wins: -1 } },
+        ]),
+        // Jukebox: total songs and average rating
+        Jukebox.aggregate([
+            { $match: { groupId: objectId } },
+            { $unwind: "$songs" },
+            { $unwind: { path: "$songs.ratings", preserveNullAndEmptyArrays: true } },
+            {
+                $group: {
+                    _id: null,
+                    songIds: { $addToSet: "$songs._id" },
+                    avgRating: { $avg: "$songs.ratings.rating" },
+                },
+            },
+            { $project: { _id: 0, songsCount: { $size: "$songIds" }, avgRating: 1 } },
+        ]),
         Chat.aggregate([
             { $match: { group: objectId } },
             { $unwind: "$messages" },
@@ -212,8 +249,11 @@ export async function getGroupStats(userId: string, groupId: string): Promise<Gr
         questionsLeftCount,
         questionsByType,
         questionsByUser,
-        RalliesUsedCount,
-        RalliesLeftCount,
+        ralliesCompletedCount,
+        ralliesCreatedCount,
+        rallyWins,
+        jukeboxSongsCount: jukeboxStats[0]?.songsCount || 0,
+        jukeboxAvgRating: Math.round((jukeboxStats[0]?.avgRating || 0) * 10) / 10,
         messagesCount: messages[0]?.messagesCount || 0,
     };
 }

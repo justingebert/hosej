@@ -98,7 +98,10 @@ export interface GroupStatsDTO {
     questionsLeftCount: number;
     questionsByType: { _id: string; count: number }[];
     questionsByUser: { username: string; count: number }[];
-    RalliesUsedCount: number;
-    RalliesLeftCount: number;
+    ralliesCompletedCount: number;
+    ralliesCreatedCount: number;
+    rallyWins: { username: string; wins: number }[];
+    jukeboxSongsCount: number;
+    jukeboxAvgRating: number;
     messagesCount: number;
 }

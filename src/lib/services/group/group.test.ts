@@ -6,6 +6,7 @@ vi.mock("@/db/models/User");
 vi.mock("@/db/models/Question");
 vi.mock("@/db/models/Rally");
 vi.mock("@/db/models/Chat");
+vi.mock("@/db/models/Jukebox");
 vi.mock("@/lib/services/question");
 
 import {
@@ -24,6 +25,7 @@ import User from "@/db/models/User";
 import Question from "@/db/models/Question";
 import Rally from "@/db/models/Rally";
 import Chat from "@/db/models/Chat";
+import Jukebox from "@/db/models/Jukebox";
 import { addTemplatePackToGroup, activateSmartQuestions } from "@/lib/services/question";
 import { ForbiddenError, NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 
@@ -323,16 +325,21 @@ describe("getGroupStats", () => {
             .mockResolvedValueOnce([{ _id: "custom", count: 5 }])
             .mockResolvedValueOnce([{ username: "testuser", count: 3 }]);
         (Rally.countDocuments as Mock)
-            .mockResolvedValueOnce(3) // used
-            .mockResolvedValueOnce(2); // unused
+            .mockResolvedValueOnce(3) // completed
+            .mockResolvedValueOnce(2); // created
+        (Rally.aggregate as Mock).mockResolvedValue([{ username: "testuser", wins: 2 }]);
+        (Jukebox.aggregate as Mock).mockResolvedValue([{ songsCount: 15, avgRating: 3.7 }]);
         (Chat.aggregate as Mock).mockResolvedValue([{ messagesCount: 42 }]);
 
         const result = await getGroupStats(mockUserId, mockGroupId);
 
         expect(result.questionsUsedCount).toBe(10);
         expect(result.questionsLeftCount).toBe(5);
-        expect(result.RalliesUsedCount).toBe(3);
-        expect(result.RalliesLeftCount).toBe(2);
+        expect(result.ralliesCompletedCount).toBe(3);
+        expect(result.ralliesCreatedCount).toBe(2);
+        expect(result.rallyWins).toHaveLength(1);
+        expect(result.jukeboxSongsCount).toBe(15);
+        expect(result.jukeboxAvgRating).toBe(3.7);
         expect(result.messagesCount).toBe(42);
         expect(result.questionsByType).toHaveLength(1);
         expect(result.questionsByUser).toHaveLength(1);

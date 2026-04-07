@@ -11,7 +11,6 @@ import {
     ChartTooltipContent,
 } from "@/components/ui/chart";
 
-// Sample colors for pie chart
 const COLORS = [
     "hsl(var(--chart-1))",
     "hsl(var(--chart-2))",
@@ -25,48 +24,43 @@ const COLORS = [
     "hsl(var(--chart-10))",
 ];
 
-// Chart for Questions by Type
-export function QuestionsByType({ data }: { data: any[] }) {
+const questionTypeLabels: Record<string, string> = {
+    users: "Members",
+    custom: "Custom",
+    image: "Image",
+    text: "Text",
+    rating: "Rating",
+    pairing: "Pairing",
+};
+
+function buildChartConfig(items: { name: string; fill: string }[]): ChartConfig {
+    const config: ChartConfig = { value: { label: "Count" } };
+    for (const item of items) {
+        config[item.name] = { label: item.name, color: item.fill };
+    }
+    return config;
+}
+
+export function QuestionsByType({ data }: { data: { _id: string; count: number }[] }) {
     const chartData = data.map((item, index) => ({
-        name: item._id,
+        name: questionTypeLabels[item._id] || item._id,
         value: item.count,
         fill: COLORS[index % COLORS.length],
     }));
 
-    const questionsByTypeConfig: ChartConfig = {
-        value: {
-            label: "Questions Count",
-        },
-        ...chartData.reduce((config: any, item) => {
-            config[item.name] = {
-                label: item.name,
-                color: item.fill,
-            };
-            return config;
-        }, {}),
-    };
-
     return (
-        <Card className="flex flex-col">
+        <Card>
             <CardHeader className="items-center pb-0">
-                <CardTitle className="text-xl">By Type</CardTitle>
+                <CardTitle className="text-base">By Type</CardTitle>
             </CardHeader>
-            <CardContent className="flex-1 pb-0">
+            <CardContent className="pb-2">
                 <ChartContainer
-                    config={questionsByTypeConfig}
-                    className="mx-auto aspect-square max-h-[300px]"
+                    config={buildChartConfig(chartData)}
+                    className="mx-auto aspect-square max-h-[250px]"
                 >
                     <PieChart>
                         <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
-
-                        <Pie
-                            data={chartData}
-                            dataKey="value"
-                            nameKey="name"
-                            innerRadius={35}
-                            width={400}
-                            height={400}
-                        />
+                        <Pie data={chartData} dataKey="value" nameKey="name" innerRadius={35} />
                         <ChartLegend
                             content={<ChartLegendContent nameKey="name" />}
                             className="flex-wrap justify-center gap-2"
@@ -78,51 +72,29 @@ export function QuestionsByType({ data }: { data: any[] }) {
     );
 }
 
-export function QuestionsByUser({ data }: { data: any[] }) {
-    // Step 1: Generate chart data for the Pie chart
+export function QuestionsByUser({ data }: { data: { username: string; count: number }[] }) {
     const chartData = data.map((item, index) => ({
-        name: item.username, // Use the actual name (user) from the data
-        value: item.count, // The count value for each user
-        fill: COLORS[index % COLORS.length], // Assign color based on index
+        name: item.username,
+        value: item.count,
+        fill: COLORS[index % COLORS.length],
     }));
 
-    // Step 2: Create chart config dynamically
-    const questionsByUserConfig: ChartConfig = {
-        value: {
-            label: "Questions Count",
-        },
-        ...chartData.reduce((config: any, item) => {
-            config[item.name] = {
-                label: item.name, // Set label as the actual name (user) from the data
-                color: item.fill, // Use the fill color for the legend
-            };
-            return config;
-        }, {}),
-    };
-
     return (
-        <Card className="flex flex-col">
+        <Card>
             <CardHeader className="items-center pb-0">
-                <CardTitle className="text-xl">By User</CardTitle>
+                <CardTitle className="text-base">By User</CardTitle>
             </CardHeader>
-            <CardContent className="flex-1 pb-0">
+            <CardContent className="pb-2">
                 <ChartContainer
-                    config={questionsByUserConfig}
-                    className="mx-auto aspect-square max-h-[300px]"
+                    config={buildChartConfig(chartData)}
+                    className="mx-auto aspect-square max-h-[250px]"
                 >
                     <PieChart>
                         <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
-                        <Pie
-                            data={chartData}
-                            dataKey="value"
-                            nameKey="name"
-                            innerRadius={35}
-                            width={400}
-                            height={400}
-                        />
+                        <Pie data={chartData} dataKey="value" nameKey="name" innerRadius={35} />
                         <ChartLegend
                             content={<ChartLegendContent nameKey="name" />}
-                            className="flex-wrap justify-center gap-2 "
+                            className="flex-wrap justify-center gap-2"
                         />
                     </PieChart>
                 </ChartContainer>
