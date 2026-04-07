@@ -2,7 +2,6 @@
 
 import dynamic from "next/dynamic";
 import { useParams, useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Camera, Info, Users, MessageSquareText, Radio, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -34,7 +33,6 @@ export default function Dashboard() {
     const { play } = useAppHaptics();
     const params = useParams<{ groupId: string }>();
     const groupId = params?.groupId;
-    const seenMarkedRef = useRef(false);
 
     const { data: group } = useSWR<GroupDTO>(groupId ? `/api/groups/${groupId}` : null, fetcher);
 
@@ -47,21 +45,6 @@ export default function Dashboard() {
         groupId ? `/api/groups/${groupId}/activity/missed` : null,
         fetcher
     );
-
-    // Mark dashboard as seen after 2 seconds
-    const markSeen = useCallback(() => {
-        if (!groupId || seenMarkedRef.current) return;
-        seenMarkedRef.current = true;
-        fetch(`/api/groups/${groupId}/activity/seen`, { method: "POST" }).catch(() => {
-            seenMarkedRef.current = false;
-        });
-    }, [groupId]);
-
-    useEffect(() => {
-        if (!missedActivity) return;
-        const timer = setTimeout(markSeen, 2000);
-        return () => clearTimeout(timer);
-    }, [missedActivity, markSeen]);
 
     const DailyCompletion = questionsData ? questionsData.completionPercentage : 0;
 

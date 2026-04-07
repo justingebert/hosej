@@ -13,11 +13,13 @@ import fetcher from "@/lib/fetcher";
 import QuestionsTabs from "./QuestionTabs";
 
 import type { QuestionWithUserStateDTO } from "@/types/models/question";
+import { useMarkFeatureSeen } from "@/hooks/useMarkFeatureSeen";
 
 const DailyQuestionPage = () => {
     const { user } = useAuthRedirect();
     const params = useParams<{ groupId: string }>();
     const groupId = params ? params.groupId : "";
+    useMarkFeatureSeen(groupId, "question");
     const router = useRouter();
 
     const { data, isLoading } = useSWR<{ questions: QuestionWithUserStateDTO[] }>(

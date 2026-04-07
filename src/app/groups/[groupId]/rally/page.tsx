@@ -13,11 +13,13 @@ import { useMemo } from "react";
 import type { GroupDTO } from "@/types/models/group";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useMarkFeatureSeen } from "@/hooks/useMarkFeatureSeen";
 
 const RallyPage = () => {
     const { user } = useAuthRedirect();
     const params = useParams<{ groupId: string }>();
     const groupId = params?.groupId;
+    useMarkFeatureSeen(groupId, "rally");
 
     const { data: group } = useSWR<GroupDTO>(groupId ? `/api/groups/${groupId}` : null, fetcher);
     const {

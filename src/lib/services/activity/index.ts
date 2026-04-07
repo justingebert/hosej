@@ -1,6 +1,6 @@
 export {
     recordActivity,
     getMissedActivity,
-    markDashboardSeen,
+    markFeatureSeen,
     getGroupsWithActivity,
 } from "./activityEvent";

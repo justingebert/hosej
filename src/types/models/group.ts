@@ -1,6 +1,12 @@
 import type { HydratedDocument, Types } from "mongoose";
 import type { ToDTO } from "../common";
 
+export interface IFeatureSeenAt {
+    question: Date | null;
+    rally: Date | null;
+    jukebox: Date | null;
+}
+
 export interface IGroupMember {
     user: Types.ObjectId;
     name: string;
@@ -8,7 +14,7 @@ export interface IGroupMember {
     streak: number;
     lastPointDate: Date | null;
     joinedAt: Date;
-    lastDashboardVisitAt: Date | null;
+    lastSeenAt: IFeatureSeenAt;
 }
 
 export interface IGroupJukeboxSettings {

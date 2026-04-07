@@ -14,11 +14,13 @@ import { Card } from "@/components/ui/card";
 import { JukeboxSearch } from "@/app/groups/[groupId]/jukebox/_components/jukeboxSearch";
 import { JukeboxSubmissions } from "@/app/groups/[groupId]/jukebox/_components/jukeboxSubmissions";
 import JukeboxLoading from "@/app/groups/[groupId]/jukebox/loading";
+import { useMarkFeatureSeen } from "@/hooks/useMarkFeatureSeen";
 
 const JukeboxPage = () => {
     const { user } = useAuthRedirect();
     const params = useParams<{ groupId: string }>();
     const groupId = params ? params.groupId : "";
+    useMarkFeatureSeen(groupId, "jukebox");
     const { toast } = useToast();
 
     // Track active tab (jukebox) and per-jukebox submission status

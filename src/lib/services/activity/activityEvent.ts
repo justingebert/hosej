@@ -3,9 +3,16 @@ import ActivityEvent from "@/db/models/ActivityEvent";
 import Group from "@/db/models/Group";
 import User from "@/db/models/User";
 import { Types } from "mongoose";
-import { NotFoundError } from "@/lib/api/errorHandling";
+import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 import { ActivityFeature } from "@/types/models/activityEvent";
 import type { ActivityType, MissedActivitySummary } from "@/types/models/activityEvent";
+
+/** Map ActivityFeature enum to the lastSeenAt sub-field key */
+const FEATURE_TO_SEEN_KEY: Record<string, "question" | "rally" | "jukebox"> = {
+    [ActivityFeature.Question]: "question",
+    [ActivityFeature.Rally]: "rally",
+    [ActivityFeature.Jukebox]: "jukebox",
+};
 
 /**
  * Record an activity event. Intended to be called fire-and-forget
@@ -32,6 +39,7 @@ export async function recordActivity(params: {
 
 /**
  * Get missed activity counts per feature for a user in a group.
+ * Each feature is compared against its own lastSeenAt timestamp.
  * Excludes events created by the requesting user.
  */
 export async function getMissedActivity(
@@ -45,50 +53,59 @@ export async function getMissedActivity(
     const member = group.members.find((m) => m.user.toString() === userId);
     if (!member) throw new NotFoundError("User is not a member of this group");
 
-    // Default to 24h ago if user has never visited the dashboard
-    const since = member.lastDashboardVisitAt ?? new Date(Date.now() - 24 * 60 * 60 * 1000);
-
-    const pipeline = await ActivityEvent.aggregate<{ _id: ActivityFeature; count: number }>([
-        {
-            $match: {
-                groupId: group._id,
-                createdAt: { $gt: since },
-                actorUser: { $ne: new Types.ObjectId(userId) },
-            },
-        },
-        {
-            $group: {
-                _id: "$feature",
-                count: { $sum: 1 },
-            },
-        },
-    ]);
+    const defaultSince = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const lastSeenAt = member.lastSeenAt ?? { question: null, rally: null, jukebox: null };
 
     const summary: MissedActivitySummary = {
         [ActivityFeature.Question]: 0,
         [ActivityFeature.Rally]: 0,
         [ActivityFeature.Jukebox]: 0,
     };
-    for (const row of pipeline) {
-        if (row._id in summary) {
-            summary[row._id as keyof MissedActivitySummary] = row.count;
-        }
-    }
+
+    // Query each feature separately using its own "since" timestamp
+    const features = [
+        ActivityFeature.Question,
+        ActivityFeature.Rally,
+        ActivityFeature.Jukebox,
+    ] as const;
+
+    await Promise.all(
+        features.map(async (feature) => {
+            const key = FEATURE_TO_SEEN_KEY[feature];
+            const since = lastSeenAt[key] ?? defaultSince;
+
+            const count = await ActivityEvent.countDocuments({
+                groupId: group._id,
+                feature,
+                createdAt: { $gt: since },
+                actorUser: { $ne: new Types.ObjectId(userId) },
+            });
+
+            summary[feature] = count;
+        })
+    );
 
     return summary;
 }
 
 /**
- * Mark the user's dashboard as seen for a group.
- * Sets lastDashboardVisitAt to now.
+ * Mark a specific feature as seen for the user in a group.
+ * Only updates the timestamp for the given feature.
  */
-export async function markDashboardSeen(groupId: string, userId: string): Promise<Date> {
+export async function markFeatureSeen(
+    groupId: string,
+    userId: string,
+    feature: string
+): Promise<Date> {
     await dbConnect();
+
+    const key = FEATURE_TO_SEEN_KEY[feature];
+    if (!key) throw new ValidationError(`Invalid feature: ${feature}`);
 
     const now = new Date();
     const result = await Group.findOneAndUpdate(
         { _id: groupId, "members.user": userId },
-        { $set: { "members.$.lastDashboardVisitAt": now } },
+        { $set: { [`members.$.lastSeenAt.${key}`]: now } },
         { new: true }
     );
 
@@ -114,10 +131,20 @@ export async function getGroupsWithActivity(userId: string): Promise<Record<stri
 
     const result: Record<string, boolean> = {};
     const userObjectId = new Types.ObjectId(userId);
+    const defaultSince = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
     for (const group of groups) {
         const member = group.members.find((m) => m.user.equals(userObjectId));
-        const since = member?.lastDashboardVisitAt ?? new Date(Date.now() - 24 * 60 * 60 * 1000);
+        const lastSeenAt = member?.lastSeenAt ?? { question: null, rally: null, jukebox: null };
+
+        // Use the oldest lastSeenAt across features as the baseline
+        const timestamps = [lastSeenAt.question, lastSeenAt.rally, lastSeenAt.jukebox].filter(
+            Boolean
+        ) as Date[];
+        const since =
+            timestamps.length > 0
+                ? new Date(Math.min(...timestamps.map((d) => d.getTime())))
+                : defaultSince;
 
         const count = await ActivityEvent.countDocuments({
             groupId: group._id,
