@@ -3,10 +3,8 @@
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Shield } from "lucide-react";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
 import type { FeatureStatus } from "@/types/models/appConfig";
@@ -138,17 +136,17 @@ export default function AdminPage() {
             <Header title="Admin Panel" leftComponent={<BackLink href={`/settings`} />} />
 
             <div className="space-y-4">
-                {/*<GlobalFeatureControl*/}
-                {/*    config={config}*/}
-                {/*    localConfig={localConfig}*/}
-                {/*    onUpdateFeature={updateFeature}*/}
-                {/*    onSave={saveSettings}*/}
-                {/*    saving={saving}*/}
-                {/*/>*/}
-
                 <GroupPackManager />
 
                 <TemplateUploadCard />
+
+                <GlobalFeatureControl
+                    config={config}
+                    localConfig={localConfig}
+                    onUpdateFeature={updateFeature}
+                    onSave={saveSettings}
+                    saving={saving}
+                />
             </div>
         </>
     );

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -8,177 +8,167 @@ import {
     type CarouselApi,
     CarouselContent,
     CarouselItem,
-    CarouselNext,
-    CarouselPrevious,
 } from "@/components/ui/carousel";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
-import Modal from "react-modal";
-import { X } from "lucide-react";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
-import type { IPictureSubmissionJson } from "@/types/models/rally";
+import type { PictureSubmissionWithUrlDTO, RallyDTO } from "@/types/models/rally";
 import { useAppHaptics } from "@/hooks/useAppHaptics";
+import type { Session } from "next-auth";
 
-const RallyVoteCarousel = ({ user, rally, onVote }: any) => {
+interface RallyVoteCarouselProps {
+    user: Session["user"] | undefined;
+    rally: RallyDTO;
+    onVote: () => void;
+}
+
+const RallyVoteCarousel = ({ user, rally, onVote }: RallyVoteCarouselProps) => {
     const { play } = useAppHaptics();
     const [selectedSubmission, setSelectedSubmission] = useState<string>("");
     const [api, setApi] = useState<CarouselApi | null>(null);
-    const [hasVoted, setHasVoted] = useState(false);
-    const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [currentIndex, setCurrentIndex] = useState(0);
 
-    const { data, isLoading } = useSWR<{ submissions: IPictureSubmissionJson[] }>(
+    const { data, isLoading } = useSWR<{ submissions: PictureSubmissionWithUrlDTO[] }>(
         `/api/groups/${rally.groupId}/rally/${rally._id}/submissions`,
         fetcher
     );
 
     const submissions = useMemo(() => data?.submissions || [], [data?.submissions]);
 
+    const isOwnSubmission = useMemo(() => {
+        if (!user || currentIndex < 0 || currentIndex >= submissions.length) return false;
+        return submissions[currentIndex].userId === user._id;
+    }, [user, currentIndex, submissions]);
+
     useEffect(() => {
         if (submissions.length > 0) {
-            setSelectedSubmission(submissions[0]._id.toString());
+            setSelectedSubmission(submissions[0]._id);
         }
-
-        const userHasVoted = submissions.some((submission: any) =>
-            submission.votes.some((vote: any) => vote.user === user._id)
-        );
-        setHasVoted(userHasVoted);
-    }, [submissions, user]);
+    }, [submissions]);
 
     useEffect(() => {
         if (!api || submissions.length === 0) return;
 
         const onSelect = () => {
-            const selectedIndex = api.selectedScrollSnap();
-            if (selectedIndex >= 0 && selectedIndex < submissions.length) {
-                setSelectedSubmission(submissions[selectedIndex]._id.toString());
+            const idx = api.selectedScrollSnap();
+            setCurrentIndex(idx);
+            if (idx >= 0 && idx < submissions.length) {
+                setSelectedSubmission(submissions[idx]._id);
             }
         };
 
         api.on("select", onSelect);
-        onSelect(); // Initial call to set the first selected item
-
+        onSelect();
         return () => {
-            api.off("select", onSelect); // Clean up the event listener on unmount
+            api.off("select", onSelect);
         };
     }, [api, submissions]);
 
-    const openModal = (imageUrl: string) => {
-        setSelectedImage(imageUrl);
-        setModalIsOpen(true);
-    };
-
-    const closeModal = () => {
-        setSelectedImage(null);
-        setModalIsOpen(false);
-    };
-
     const submitVote = async () => {
-        if (!selectedSubmission) {
-            alert("Please select a submission to vote for.");
-            return;
+        if (!selectedSubmission || isSubmitting || isOwnSubmission) return;
+        setIsSubmitting(true);
+
+        try {
+            await fetch(
+                `/api/groups/${rally.groupId}/rally/${rally._id}/submissions/${selectedSubmission}/vote`,
+                { method: "POST", headers: { "Content-Type": "application/json" } }
+            );
+            onVote();
+        } finally {
+            setIsSubmitting(false);
         }
-
-        await fetch(
-            `/api/groups/${rally.groupId}/rally/${rally._id}/submissions/${selectedSubmission}/vote`,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            }
-        );
-
-        setHasVoted(true);
-
-        onVote();
     };
 
-    const modalStyles = {
-        content: {
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            border: "none",
-            background: "none",
-            overflow: "auto",
-        },
-        overlay: {
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: "rgba(0, 0, 0, 0.75)",
-            zIndex: 1000,
-        },
-    };
+    if (isLoading || submissions.length === 0) return null;
 
     return (
-        <div className="flex flex-col grow justify-between">
-            <Carousel setApi={setApi} orientation="vertical" className="mt-20">
-                <CarouselContent className="w-full h-[50dvh]">
+        <div className="flex flex-col grow mt-2 pb-20">
+            {/* Counter */}
+            <div className="flex items-center justify-center gap-2 py-2 text-muted-foreground">
+                <span className="text-sm font-medium">
+                    {currentIndex + 1} / {submissions.length}
+                </span>
+            </div>
+
+            {/* Dot indicators */}
+            <div className="flex justify-center gap-1.5 pb-3">
+                {submissions.map((_, idx) => (
+                    <div
+                        key={idx}
+                        className={`h-1.5 rounded-full transition-all duration-200 ${
+                            idx === currentIndex ? "w-6 bg-primary" : "w-1.5 bg-muted-foreground/30"
+                        }`}
+                    />
+                ))}
+            </div>
+
+            {/* Carousel — swipe to navigate, no arrow buttons */}
+            <Carousel setApi={setApi} orientation="vertical" className="w-full">
+                <CarouselContent className="h-[60dvh]">
                     {submissions.map((submission, index) => (
-                        <CarouselItem key={submission._id.toString()} className="h-[50dvh]">
-                            <Card className="overflow-hidden rounded-md h-full">
-                                <CardContent className="h-full p-0">
-                                    <div className="relative h-full w-full overflow-hidden rounded-md">
-                                        <Image
-                                            src={submission.imageUrl}
-                                            alt={`Submission by ${submission.username}`}
-                                            className="object-cover w-full h-full cursor-pointer"
-                                            width={300}
-                                            height={300}
-                                            priority={index === 0} // Add priority to the first image
-                                            onClick={() => {
-                                                play("selection");
-                                                openModal(submission.imageUrl);
-                                            }}
-                                        />
-                                    </div>
+                        <CarouselItem key={submission._id} className="h-[60dvh]">
+                            <Card className="overflow-hidden rounded-xl h-full border-0 shadow-md">
+                                <CardContent className="h-full p-0 relative">
+                                    <Image
+                                        src={submission.imageUrl}
+                                        alt={`Submission ${index + 1}`}
+                                        className="object-cover w-full h-full cursor-pointer"
+                                        width={600}
+                                        height={600}
+                                        priority={index === 0}
+                                        onClick={() => {
+                                            play("selection");
+                                            setSelectedImage(submission.imageUrl);
+                                        }}
+                                    />
+                                    {submission.userId === user?._id && (
+                                        <Badge
+                                            variant="secondary"
+                                            className="absolute top-3 left-3 shadow-sm"
+                                        >
+                                            Your photo
+                                        </Badge>
+                                    )}
                                 </CardContent>
                             </Card>
                         </CarouselItem>
                     ))}
                 </CarouselContent>
-                <CarouselPrevious className="h-[40dvh] rounded-md -translate-y-[18dvh] " />
-                <CarouselNext className="h-[40dvh] rounded-md translate-y-[18dvh]" />
             </Carousel>
-            <div className="flex justify-center mb-6">
+
+            {/* Fixed vote button at bottom */}
+            <div className="fixed bottom-0 left-0 w-full p-6 bg-background pb-8">
                 <Button
                     onClick={submitVote}
-                    className="mt-24 w-full h-12 text-lg font-bold"
-                    disabled={hasVoted || modalIsOpen}
+                    className="w-full h-12 text-base font-semibold"
+                    disabled={isSubmitting || !!selectedImage || isOwnSubmission}
                 >
-                    Vote for this
+                    {isOwnSubmission
+                        ? "Can't vote on your own photo"
+                        : isSubmitting
+                          ? "Voting..."
+                          : "Vote for this photo"}
                 </Button>
             </div>
-            <Modal
-                isOpen={modalIsOpen}
-                ariaHideApp={false}
-                onRequestClose={closeModal}
-                contentLabel="Image Modal"
-                className="flex justify-center items-center"
-                overlayClassName="fixed inset-0 bg-black bg-opacity-50 bg-blur"
-                style={modalStyles}
-            >
-                {selectedImage && (
-                    <div className=" relative p-4">
+
+            {/* Fullscreen dialog */}
+            <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
+                <DialogContent className="max-w-[90vw] max-h-[90vh] p-2 bg-transparent border-none shadow-none">
+                    {selectedImage && (
                         <Image
                             src={selectedImage}
                             alt="Selected Submission"
                             width={600}
                             height={600}
-                            className="rounded-md "
+                            className="rounded-xl w-full h-auto"
                         />
-                        <Button
-                            onClick={closeModal}
-                            className="absolute top-4 right-2"
-                            variant={"ghost"}
-                        >
-                            <X />
-                        </Button>
-                    </div>
-                )}
-            </Modal>
+                    )}
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };

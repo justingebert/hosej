@@ -1,4 +1,3 @@
-import dbConnect from "@/db/dbConnect";
 import Rally from "@/db/models/Rally";
 import Group from "@/db/models/Group";
 import User from "@/db/models/User";
@@ -14,9 +13,13 @@ import {
     SUBMITTED_RALLY_POINTS,
     VOTED_RALLY_POINTS,
 } from "@/lib/utils/POINT_CONFIG";
+import { RallyStatus } from "@/types/models/rally";
 import type { RallyDocument } from "@/types/models/rally";
 import { recordActivity } from "@/lib/services/activity";
 import { ActivityFeature, ActivityType } from "@/types/models/activityEvent";
+
+const VOTING_DURATION_MS = 24 * 60 * 60 * 1000;
+const RESULTS_DURATION_MS = 24 * 60 * 60 * 1000;
 
 // ─── State Machine ──────────────────────────────────────────────────────────
 
@@ -24,103 +27,123 @@ import { ActivityFeature, ActivityType } from "@/types/models/activityEvent";
  * Advance rally state machine and send notifications.
  * Mutates rallies in-place and saves to DB.
  *
- * State flow:
- *   created → used (submission period) → votingOpen → resultsShowing → deactivated
+ * Status flow:
+ *   created → scheduled → submission → voting → results → completed
  */
 async function advanceRallyStates(
     rallies: RallyDocument[],
     groupId: string,
     groupName: string,
     rallyGapDays: number
-): Promise<RallyDocument[]> {
-    const currentTime = new Date();
+): Promise<void> {
+    const now = new Date();
 
     for (const rally of rallies) {
-        if (!rally.endTime || !rally.startTime) continue;
-        const endTime = new Date(rally.endTime);
-        const startTime = new Date(rally.startTime);
+        switch (rally.status) {
+            case RallyStatus.Scheduled: {
+                if (!rally.startTime || now < rally.startTime) break;
 
-        // Start rally: mark as used when its start time arrives
-        if (!rally.used && currentTime >= startTime && !rally.votingOpen && !rally.resultsShowing) {
-            rally.used = true;
-            await rally.save();
+                rally.status = RallyStatus.Submission;
+                await rally.save();
 
-            recordActivity({
-                groupId,
-                type: ActivityType.RallyActivated,
-                feature: ActivityFeature.Rally,
-                entityId: rally._id.toString(),
-                meta: { task: rally.task },
-            }).catch((err) => console.error("Activity log failed", err));
-
-            await sendNotification(
-                `📷 New ${groupName} Rally Started! 📷`,
-                "📷 PARTICIPATE NOW! 📷",
-                groupId
-            );
-            continue;
-        }
-
-        if (currentTime < endTime) continue;
-
-        // Submission period ended → open voting for 24h
-        if (!rally.votingOpen && !rally.resultsShowing) {
-            rally.votingOpen = true;
-            rally.endTime = new Date(currentTime.getTime() + 24 * 60 * 60 * 1000);
-            await rally.save();
-
-            await sendNotification(`📷${groupName} Rally Voting! 📷`, "📷 VOTE NOW 📷", groupId);
-        }
-        // Voting ended → show results for 24h
-        else if (rally.votingOpen && !rally.resultsShowing) {
-            rally.votingOpen = false;
-            rally.resultsShowing = true;
-            rally.endTime = new Date(currentTime.getTime() + 24 * 60 * 60 * 1000);
-            await rally.save();
-
-            await sendNotification(`📷 ${groupName} Rally Results! 📷`, "📷 VIEW NOW 📷", groupId);
-        }
-        // Results ended → deactivate and activate next rally
-        else if (rally.resultsShowing && !rally.votingOpen) {
-            rally.resultsShowing = false;
-            rally.active = false;
-            rally.endTime = currentTime;
-            await rally.save();
-
-            const gapEndTime = new Date(currentTime.getTime() + rallyGapDays * 24 * 60 * 60 * 1000);
-
-            const newRally = await Rally.findOne({
-                groupId: groupId,
-                active: false,
-                used: false,
-            });
-
-            if (newRally) {
-                newRally.active = true;
-                newRally.startTime = gapEndTime;
-                newRally.endTime = new Date(
-                    gapEndTime.getTime() + newRally.lengthInDays * 24 * 60 * 60 * 1000
-                );
-                await newRally.save();
+                recordActivity({
+                    groupId,
+                    type: ActivityType.RallyActivated,
+                    feature: ActivityFeature.Rally,
+                    entityId: rally._id.toString(),
+                    meta: { task: rally.task },
+                }).catch((err) => console.error("Activity log failed", err));
 
                 await sendNotification(
-                    `📷 ${groupName} Rally finished! 📷`,
-                    `📷 Next Rally starting: ${newRally.startTime.toLocaleString()}📷`,
+                    `📷 New ${groupName} Rally Started! 📷`,
+                    "📷 PARTICIPATE NOW! 📷",
                     groupId
                 );
+                break;
+            }
+
+            case RallyStatus.Submission: {
+                if (!rally.submissionEnd || now < rally.submissionEnd) break;
+
+                rally.status = RallyStatus.Voting;
+                rally.votingEnd = new Date(now.getTime() + VOTING_DURATION_MS);
+                await rally.save();
+
+                await sendNotification(
+                    `📷${groupName} Rally Voting! 📷`,
+                    "📷 VOTE NOW 📷",
+                    groupId
+                );
+                break;
+            }
+
+            case RallyStatus.Voting: {
+                if (!rally.votingEnd || now < rally.votingEnd) break;
+
+                rally.status = RallyStatus.Results;
+                rally.resultsEnd = new Date(now.getTime() + RESULTS_DURATION_MS);
+                await rally.save();
+
+                await sendNotification(
+                    `📷 ${groupName} Rally Results! 📷`,
+                    "📷 VIEW NOW 📷",
+                    groupId
+                );
+                break;
+            }
+
+            case RallyStatus.Results: {
+                if (!rally.resultsEnd || now < rally.resultsEnd) break;
+
+                rally.status = RallyStatus.Completed;
+                await rally.save();
+
+                // Activate next rally from the pool
+                const gapEnd = new Date(now.getTime() + rallyGapDays * 24 * 60 * 60 * 1000);
+
+                const nextRally = await Rally.findOne({
+                    groupId,
+                    status: RallyStatus.Created,
+                });
+
+                if (nextRally) {
+                    nextRally.status = RallyStatus.Scheduled;
+                    nextRally.startTime = gapEnd;
+                    nextRally.submissionEnd = new Date(
+                        gapEnd.getTime() + nextRally.lengthInDays * 24 * 60 * 60 * 1000
+                    );
+                    await nextRally.save();
+
+                    await sendNotification(
+                        `📷 ${groupName} Rally finished! 📷`,
+                        `📷 Next Rally starting: ${nextRally.startTime.toLocaleString()}📷`,
+                        groupId
+                    );
+                }
+                break;
             }
         }
     }
-
-    // Return rallies that are currently running (past their start time)
-    return rallies.filter((rally) => rally.startTime && currentTime >= new Date(rally.startTime));
 }
+
+// ─── Queryable status sets ──────────────────────────────────────────────────
+
+/** Statuses where a rally is "in progress" (visible to users on the rally page) */
+const ACTIVE_STATUSES = [RallyStatus.Submission, RallyStatus.Voting, RallyStatus.Results] as const;
+
+/** Statuses that the cron job needs to process for state transitions */
+const PROCESSABLE_STATUSES = [
+    RallyStatus.Scheduled,
+    RallyStatus.Submission,
+    RallyStatus.Voting,
+    RallyStatus.Results,
+] as const;
 
 // ─── Service Functions ──────────────────────────────────────────────────────
 
 /**
  * Get active rallies for a group (pure read — no state mutation).
- * Returns only rallies that are past their start time.
+ * Returns rallies in submission, voting, or results phase.
  */
 export async function getActiveRallies(
     userId: string,
@@ -131,32 +154,30 @@ export async function getActiveRallies(
     const group = await Group.findById(groupId);
     if (!group) throw new NotFoundError("Group not found");
 
-    const rallies = await Rally.find({ groupId, active: true });
+    const rallies = await Rally.find({
+        groupId,
+        status: { $in: ACTIVE_STATUSES },
+    });
+
     if (rallies.length === 0) {
         return { message: "No active rallies", rallies: [] };
     }
 
-    const currentTime = new Date();
-    const currentRallies = rallies.filter(
-        (rally) => rally.startTime && currentTime >= new Date(rally.startTime)
-    );
-
-    if (currentRallies.length === 0) {
-        return { message: "No rallies left", rallies: [] };
-    }
-
-    return { rallies: currentRallies };
+    return { rallies };
 }
 
 /**
  * Cron entry point: advance rally state machine for a group.
- * Loads group + active rallies, runs state transitions, sends notifications.
+ * Loads group + processable rallies, runs state transitions, sends notifications.
  */
 export async function processRallyStateTransitions(groupId: string): Promise<void> {
     const group = await Group.findById(groupId);
     if (!group) return;
 
-    const rallies = await Rally.find({ groupId, active: true });
+    const rallies = await Rally.find({
+        groupId,
+        status: { $in: PROCESSABLE_STATUSES },
+    });
     if (rallies.length === 0) return;
 
     await advanceRallyStates(
@@ -190,7 +211,7 @@ export async function createRally(
         groupId,
         task,
         lengthInDays,
-        submittedBy: submittingUser._id,
+        createdBy: submittingUser._id,
     });
     await newRally.save();
 
@@ -214,21 +235,25 @@ export async function activateRallies(
     const group = await Group.findById(groupId);
     if (!group) throw new NotFoundError("Group not found");
 
-    const activeRallies = await Rally.find({ groupId, active: true });
+    const activeRallies = await Rally.find({
+        groupId,
+        status: { $in: ACTIVE_STATUSES },
+    });
     if (activeRallies.length >= group.features.rallies.settings.rallyCount) {
         return { message: "rallies already active", rallies: activeRallies };
     }
 
     const countToActivate = group.features.rallies.settings.rallyCount - activeRallies.length;
-    const rallies = await Rally.find({ groupId, active: false, used: false }).limit(
-        countToActivate
-    );
+    const rallies = await Rally.find({
+        groupId,
+        status: RallyStatus.Created,
+    }).limit(countToActivate);
 
-    const currentTime = new Date();
+    const now = new Date();
     for (const rally of rallies) {
-        rally.active = true;
-        rally.startTime = new Date(currentTime.getTime());
-        rally.endTime = new Date(currentTime.getTime() + rally.lengthInDays * 24 * 60 * 60 * 1000);
+        rally.status = RallyStatus.Submission;
+        rally.startTime = now;
+        rally.submissionEnd = new Date(now.getTime() + rally.lengthInDays * 24 * 60 * 60 * 1000);
         await rally.save();
     }
 
@@ -251,12 +276,10 @@ export async function getSubmissions(
     const submissions = await Promise.all(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         rally.submissions.map(async (submission: any) => {
-            const urlObject = new URL(submission.imageUrl);
-            const s3Key = urlObject.pathname;
-            const { url } = await generateSignedUrl(s3Key, 300);
+            const { url } = await generateSignedUrl(submission.imageKey, 300);
 
             return {
-                ...submission.toObject(),
+                ...(submission.toObject ? submission.toObject() : submission),
                 imageUrl: url,
             };
         })
@@ -270,17 +293,18 @@ export async function getSubmissions(
 /**
  * Add a submission to a rally.
  * Prevents duplicate submissions from the same user.
+ * Only allowed during the submission phase.
  */
 export async function addSubmission(
     userId: string,
     groupId: string,
     rallyId: string,
-    imageUrl: string
+    imageKey: string
 ): Promise<RallyDocument> {
     await isUserInGroup(userId, groupId);
 
-    if (!imageUrl) {
-        throw new ValidationError("imageUrl is required");
+    if (!imageKey) {
+        throw new ValidationError("imageKey is required");
     }
 
     const group = await Group.findById(groupId);
@@ -290,7 +314,10 @@ export async function addSubmission(
     const rally = await Rally.findById(rallyId);
     if (!rally) throw new NotFoundError("Rally not found");
 
-    // Prevent duplicate submissions
+    if (rally.status !== RallyStatus.Submission) {
+        throw new ValidationError("Submissions are not accepted in this phase");
+    }
+
     const existingSubmission = rally.submissions.find((s) => s.userId.toString() === userId);
     if (existingSubmission) {
         throw new ConflictError("You have already submitted to this rally");
@@ -299,7 +326,7 @@ export async function addSubmission(
     const newSubmission = {
         userId: sendUser._id,
         username: sendUser.username,
-        imageUrl,
+        imageKey,
         time: Date.now(),
     };
 
@@ -326,7 +353,8 @@ export async function addSubmission(
 
 /**
  * Vote on a rally submission.
- * Prevents: self-voting, duplicate votes, voting when voting is not open.
+ * Prevents: self-voting, duplicate votes, voting when not in voting phase.
+ * Uses atomic $push to prevent race conditions on duplicate votes.
  */
 export async function voteOnSubmission(
     userId: string,
@@ -342,30 +370,41 @@ export async function voteOnSubmission(
     const rally = await Rally.findOne({ groupId, _id: rallyId });
     if (!rally) throw new NotFoundError("Rally not found");
 
-    // Guard: voting must be open
-    if (!rally.votingOpen) {
+    if (rally.status !== RallyStatus.Voting) {
         throw new ValidationError("Voting is not open for this rally");
     }
 
     const submission = rally.submissions.find((s) => s._id.toString() === submissionId);
     if (!submission) throw new NotFoundError("Submission not found");
 
-    // Prevent self-voting
     if (submission.userId.toString() === userId) {
         throw new ConflictError("You cannot vote on your own submission");
     }
 
-    // Prevent duplicate votes (fixed: use .toString() for ObjectId comparison)
-    const userVoted = submission.votes.find((vote) => vote.user.toString() === userId);
-    if (userVoted) {
+    // Atomic $push with duplicate guard — prevents race conditions
+    const result = await Rally.updateOne(
+        {
+            _id: rallyId,
+            submissions: {
+                $elemMatch: {
+                    _id: new Types.ObjectId(submissionId),
+                    "votes.user": { $ne: new Types.ObjectId(userId) },
+                },
+            },
+        },
+        {
+            $push: {
+                "submissions.$.votes": {
+                    user: new Types.ObjectId(userId),
+                    time: new Date(),
+                },
+            },
+        }
+    );
+
+    if (result.modifiedCount === 0) {
         throw new ConflictError("User already voted");
     }
-
-    submission.votes.push({
-        user: new Types.ObjectId(userId),
-        time: new Date(),
-    });
-    await rally.save();
 
     await addPointsToMember(group, userId, VOTED_RALLY_POINTS);
 

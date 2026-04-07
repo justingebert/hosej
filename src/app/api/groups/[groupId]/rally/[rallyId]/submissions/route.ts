@@ -31,8 +31,8 @@ export const POST = withAuthAndErrors(
             params: { groupId: string; rallyId: string };
         }>
     ) => {
-        const { imageUrl } = await parseBody(req, AddRallySubmissionSchema);
-        const updatedRally = await addSubmission(userId, params.groupId, params.rallyId, imageUrl);
+        const { imageKey } = await parseBody(req, AddRallySubmissionSchema);
+        const updatedRally = await addSubmission(userId, params.groupId, params.rallyId, imageKey);
         return NextResponse.json({
             message: "Picture submission added successfully",
             updatedRally,

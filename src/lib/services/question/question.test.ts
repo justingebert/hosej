@@ -314,10 +314,10 @@ describe("getQuestionById", () => {
     });
 
     it("should generate signed URL for image questions", async () => {
-        const mockQuestion = createMockQuestion({ image: "https://s3.example.com/image.jpg" });
+        const mockQuestion = createMockQuestion({ image: "group1/question/q1/image.jpg" });
         mockQuestion.toObject = vi.fn().mockReturnValue({
             ...mockQuestion,
-            image: "https://s3.example.com/image.jpg",
+            image: "group1/question/q1/image.jpg",
             questionType: QuestionType.Custom,
         });
         (Question.findOne as Mock).mockResolvedValue(mockQuestion);
@@ -665,10 +665,10 @@ describe("updateQuestionAttachments", () => {
         (Question.findOne as Mock).mockResolvedValue(mockQuestion);
 
         await updateQuestionAttachments(mockGroupId, mockQuestionId, {
-            imageUrl: "https://s3.example.com/img.jpg",
+            imageKey: "group1/question/q1/img.jpg",
         });
 
-        expect(mockQuestion.image).toBe("https://s3.example.com/img.jpg");
+        expect(mockQuestion.image).toBe("group1/question/q1/img.jpg");
         expect(mockQuestion.save).toHaveBeenCalled();
     });
 
@@ -689,16 +689,16 @@ describe("updateQuestionAttachments", () => {
         (Question.findOne as Mock).mockResolvedValue(mockQuestion);
 
         await updateQuestionAttachments(mockGroupId, mockQuestionId, {
-            imageUrl: "https://s3.example.com/img.jpg",
+            imageKey: "group1/question/q1/img.jpg",
             options: ["A", "B"],
         });
 
-        expect(mockQuestion.image).toBe("https://s3.example.com/img.jpg");
+        expect(mockQuestion.image).toBe("group1/question/q1/img.jpg");
         expect(mockQuestion.options).toEqual(["A", "B"]);
         expect(mockQuestion.save).toHaveBeenCalledTimes(1);
     });
 
-    it("should throw ValidationError when neither imageUrl nor options provided", async () => {
+    it("should throw ValidationError when neither imageKey nor options provided", async () => {
         await expect(updateQuestionAttachments(mockGroupId, mockQuestionId, {})).rejects.toThrow(
             ValidationError
         );
@@ -715,7 +715,7 @@ describe("updateQuestionAttachments", () => {
 
         await expect(
             updateQuestionAttachments(mockGroupId, mockQuestionId, {
-                imageUrl: "https://s3.example.com/img.jpg",
+                imageKey: "group1/question/q1/img.jpg",
             })
         ).rejects.toThrow(NotFoundError);
     });
