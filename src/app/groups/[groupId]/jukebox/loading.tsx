@@ -1,6 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-export function JukeboxLoading() {
+export default function JukeboxLoading() {
     return (
         <div className="space-y-3 mt-12">
             {[...Array(8)].map((_, index) => (

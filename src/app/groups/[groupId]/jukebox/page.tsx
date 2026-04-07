@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { JukeboxSearch } from "@/app/groups/[groupId]/jukebox/_components/jukeboxSearch";
 import { JukeboxSubmissions } from "@/app/groups/[groupId]/jukebox/_components/jukeboxSubmissions";
-import { JukeboxLoading } from "@/app/groups/[groupId]/jukebox/loading";
+import JukeboxLoading from "@/app/groups/[groupId]/jukebox/loading";
 
 const JukeboxPage = () => {
     const { user } = useAuthRedirect();
@@ -49,7 +49,7 @@ const JukeboxPage = () => {
                 title={`Jukebox`}
             />
             {isLoading || !jukeboxes ? (
-                JukeboxLoading()
+                <JukeboxLoading />
             ) : jukeboxes.length === 0 ? (
                 <div className="flex items-center justify-center">
                     <Card className="text-center p-6 ">
