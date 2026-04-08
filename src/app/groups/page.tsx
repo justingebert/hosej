@@ -14,7 +14,7 @@ export default function GroupsPage() {
         <div className="relative min-h-screen flex flex-col">
             <GroupPageHeader router={router} />
 
-            <GroupsList router={router} user={user} />
+            <GroupsList user={user} />
 
             <div className="fixed bottom-0 left-0 w-full backdrop-blur-sm p-8 flex space-x-4">
                 <div className="w-1/2">

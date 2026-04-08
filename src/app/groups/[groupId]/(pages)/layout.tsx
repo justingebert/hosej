@@ -4,15 +4,27 @@ import { useParams, usePathname } from "next/navigation";
 import Link from "next/link";
 import { History, Home, PieChart, Plus, Settings } from "lucide-react";
 import { motion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, ViewTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { useAppHaptics } from "@/hooks/useAppHaptics";
+
+const TAB_ORDER = ["dashboard", "history", "create", "stats", "settings"] as const;
+
+function getTabIndex(path: string, groupId: string): number {
+    for (let i = 0; i < TAB_ORDER.length; i++) {
+        if (path === `/groups/${groupId}/${TAB_ORDER[i]}`) return i;
+    }
+    return 0;
+}
 
 export default function TabsLayout({ children }: { children: React.ReactNode }) {
     const params = useParams<{ groupId: string }>();
     const groupId = params ? params.groupId : "";
     const currentPath = usePathname();
     const { play } = useAppHaptics();
+
+    const currentTabIndex = getTabIndex(currentPath, groupId);
+    const prevTabIndexRef = useRef(currentTabIndex);
 
     // To store refs for each link
     const dashboardRef = useRef<HTMLAnchorElement>(null);
@@ -51,9 +63,24 @@ export default function TabsLayout({ children }: { children: React.ReactNode }) 
         }
     }, [currentPath]);
 
+    // Determine slide direction based on tab index
+    const getTransitionTypes = (targetTab: string): string[] => {
+        const targetIndex = TAB_ORDER.indexOf(targetTab as (typeof TAB_ORDER)[number]);
+        if (targetIndex > currentTabIndex) return ["slide-forward"];
+        if (targetIndex < currentTabIndex) return ["slide-back"];
+        return [];
+    };
+
+    // Update prev tab ref after render
+    useEffect(() => {
+        prevTabIndexRef.current = currentTabIndex;
+    }, [currentTabIndex]);
+
     return (
         <div className="flex flex-col h-[100dvh]">
-            <div className="flex-grow pb-20">{children}</div>
+            <div className="flex-grow pb-20 overflow-x-hidden">
+                <ViewTransition name="tab-content">{children}</ViewTransition>
+            </div>
             <footer className="fixed bottom-0 left-0 right-0 flex justify-between items-center bg-secondarydark-transparent backdrop-blur-lg rounded-lg px-6 drop-shadow-md pb-6 pt-2 ">
                 <motion.div
                     className="absolute w-14 h-14 rounded-lg bg-secondary z-0"
@@ -68,6 +95,7 @@ export default function TabsLayout({ children }: { children: React.ReactNode }) 
                     href={`/groups/${groupId}/dashboard`}
                     className="p-4 z-10"
                     onClick={() => play("navigation")}
+                    transitionTypes={getTransitionTypes("dashboard")}
                 >
                     <Home />
                 </Link>
@@ -76,6 +104,7 @@ export default function TabsLayout({ children }: { children: React.ReactNode }) 
                     href={`/groups/${groupId}/history`}
                     className="p-4 z-10"
                     onClick={() => play("navigation")}
+                    transitionTypes={getTransitionTypes("history")}
                 >
                     <History />
                 </Link>
@@ -84,6 +113,7 @@ export default function TabsLayout({ children }: { children: React.ReactNode }) 
                     href={`/groups/${groupId}/create`}
                     className="z-10"
                     onClick={() => play("navigation")}
+                    transitionTypes={getTransitionTypes("create")}
                 >
                     <Button
                         className="flex items-center justify-center p-2 rounded-full bg-primary"
@@ -97,6 +127,7 @@ export default function TabsLayout({ children }: { children: React.ReactNode }) 
                     href={`/groups/${groupId}/stats`}
                     className="p-4 z-10"
                     onClick={() => play("navigation")}
+                    transitionTypes={getTransitionTypes("stats")}
                 >
                     <PieChart />
                 </Link>
@@ -105,6 +136,7 @@ export default function TabsLayout({ children }: { children: React.ReactNode }) 
                     href={`/groups/${groupId}/settings`}
                     className="p-4 z-10"
                     onClick={() => play("navigation")}
+                    transitionTypes={getTransitionTypes("settings")}
                 >
                     <Settings />
                 </Link>

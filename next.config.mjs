@@ -22,6 +22,9 @@ const securityHeaders = [
 ];
 
 export default withSerwist({
+    experimental: {
+        viewTransition: true,
+    },
     // Empty turbopack config silences the "webpack config found" error
     // for `next dev` (Turbopack). Serwist is disabled in dev anyway.
     // Production builds use --webpack where Serwist needs webpack.

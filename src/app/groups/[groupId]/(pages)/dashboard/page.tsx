@@ -1,8 +1,8 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useParams, useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { useParams } from "next/navigation";
+import Link from "next/link";
 import { Camera, Info, Users, MessageSquareText, Radio, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import useSWR from "swr";
@@ -29,7 +29,6 @@ const CompletionChart = dynamic(
 );
 
 export default function Dashboard() {
-    const router = useRouter();
     const { play } = useAppHaptics();
     const params = useParams<{ groupId: string }>();
     const groupId = params?.groupId;
@@ -50,45 +49,40 @@ export default function Dashboard() {
 
     const titleClass = group?.name && group.name.length > 15 ? "text-2xl" : "text-4xl";
 
-    const navigateWithHaptics = (path: string) => {
-        play("navigation");
-        router.push(path);
-    };
-
     return (
         <div className="flex flex-col w-full min-h-[calc(100vh-140px)]">
             <div className="flex justify-between items-center mb-8 shrink-0">
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="rounded-full bg-muted/50 hover:bg-muted"
-                    haptic="navigation"
-                    onClick={() => router.push(`/groups`)}
+                <Link
+                    href="/groups"
+                    className="inline-flex items-center justify-center rounded-full bg-muted/50 hover:bg-muted h-10 w-10"
+                    onClick={() => play("navigation")}
+                    transitionTypes={["drill-back"]}
                 >
                     <Users className="h-5 w-5" />
-                </Button>
+                </Link>
                 <h1
                     className={`flex-grow ${titleClass} font-bold text-center tracking-tight break-words px-4`}
                 >
                     {group?.name}
                 </h1>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="rounded-full bg-muted/50 hover:bg-muted"
-                    haptic="navigation"
-                    onClick={() => router.push(`/groups/${groupId}/info`)}
+                <Link
+                    href={`/groups/${groupId}/info`}
+                    className="inline-flex items-center justify-center rounded-full bg-muted/50 hover:bg-muted h-10 w-10"
+                    onClick={() => play("navigation")}
+                    transitionTypes={["drill-forward"]}
                 >
                     <Info className="h-5 w-5" />
-                </Button>
+                </Link>
             </div>
 
             <div className="flex flex-col gap-4 max-w-2xl mx-auto w-full flex-1 justify-center">
                 {/* Questions Section */}
                 {!questionLoading && questionsData ? (
-                    <div
+                    <Link
+                        href={`/groups/${groupId}/question`}
                         className="relative group bg-gradient-to-br from-background to-muted/50 border shadow-sm px-6 py-5 min-h-[140px] flex items-center justify-between rounded-2xl cursor-pointer hover:shadow-md active:scale-[0.98] transition-all"
-                        onClick={() => navigateWithHaptics(`/groups/${groupId}/question`)}
+                        onClick={() => play("navigation")}
+                        transitionTypes={["drill-forward"]}
                     >
                         {missedActivity && missedActivity[ActivityFeature.Question] > 0 && (
                             <div className="absolute -top-3 -right-3 z-10">
@@ -117,15 +111,17 @@ export default function Dashboard() {
                         <div className="w-24 h-24 -mr-1 relative flex items-center justify-center shrink-0">
                             <CompletionChart completion={DailyCompletion} />
                         </div>
-                    </div>
+                    </Link>
                 ) : (
                     <Skeleton className="h-[140px] rounded-2xl w-full" />
                 )}
 
                 {/* Rallies Section */}
-                <div
+                <Link
+                    href={`/groups/${groupId}/rally`}
                     className="relative group bg-gradient-to-br from-background to-muted/50 border shadow-sm px-6 py-5 min-h-[140px] flex items-center justify-between rounded-2xl cursor-pointer hover:shadow-md active:scale-[0.98] transition-all"
-                    onClick={() => navigateWithHaptics(`/groups/${groupId}/rally`)}
+                    onClick={() => play("navigation")}
+                    transitionTypes={["drill-forward"]}
                 >
                     {missedActivity && missedActivity[ActivityFeature.Rally] > 0 && (
                         <div className="absolute -top-3 -right-3 z-10">
@@ -154,12 +150,14 @@ export default function Dashboard() {
                             <Camera className="h-10 w-10" />
                         </div>
                     </div>
-                </div>
+                </Link>
 
                 {/* Jukebox Section */}
-                <div
+                <Link
+                    href={`/groups/${groupId}/jukebox`}
                     className="relative group bg-gradient-to-br from-background to-muted/50 border shadow-sm px-6 py-5 min-h-[140px] flex items-center justify-between rounded-2xl cursor-pointer hover:shadow-md active:scale-[0.98] transition-all"
-                    onClick={() => navigateWithHaptics(`/groups/${groupId}/jukebox`)}
+                    onClick={() => play("navigation")}
+                    transitionTypes={["drill-forward"]}
                 >
                     {missedActivity && missedActivity[ActivityFeature.Jukebox] > 0 && (
                         <div className="absolute -top-3 -right-3 z-10">
@@ -188,7 +186,7 @@ export default function Dashboard() {
                             <Radio className="h-10 w-10" />
                         </div>
                     </div>
-                </div>
+                </Link>
             </div>
         </div>
     );

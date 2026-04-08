@@ -9,7 +9,12 @@ const BackLink = ({ href = "/" }: { href?: string }) => {
     const { play } = useAppHaptics();
 
     return (
-        <Link className="flex items-center text-lg" href={href} onClick={() => play("navigation")}>
+        <Link
+            className="flex items-center text-lg"
+            href={href}
+            onClick={() => play("navigation")}
+            transitionTypes={["drill-back"]}
+        >
             <ArrowLeft />
         </Link>
     );

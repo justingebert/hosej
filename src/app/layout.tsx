@@ -2,6 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { ViewTransition } from "react";
 import "./globals.css";
 import { ThemeColorMeta } from "@/components/wrappers/ThemeColorViewport";
 import SWRErrorHandlingProvider from "@/components/wrappers/SWRErrorHandelingProvider";
@@ -32,7 +33,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <body>
                 <SWRErrorHandlingProvider>
                     <div className="p-6 h-[100dvh]">
-                        <AppWrapper>{children}</AppWrapper>
+                        <AppWrapper>
+                            <ViewTransition name="page">{children}</ViewTransition>
+                        </AppWrapper>
                     </div>
                     <Toaster />
                     <Analytics />

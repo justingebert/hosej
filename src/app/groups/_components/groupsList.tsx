@@ -1,5 +1,5 @@
-import type { useRouter } from "next/navigation";
 import type { Session } from "next-auth";
+import Link from "next/link";
 import { useAppHaptics } from "@/hooks/useAppHaptics";
 import { useEffect, useState } from "react";
 import useSWR from "swr";
@@ -13,13 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { EmptyGroupsGuide } from "@/app/groups/_components/emptyGroupsGuide";
 import { GroupListSkeleton } from "@/app/groups/_components/groupListSkeleton";
 
-export function GroupsList({
-    router,
-    user,
-}: {
-    router: ReturnType<typeof useRouter>;
-    user?: Session["user"];
-}) {
+export function GroupsList({ user }: { user?: Session["user"] }) {
     const { toast } = useToast();
     const { play } = useAppHaptics();
 
@@ -104,58 +98,59 @@ export function GroupsList({
                                 {groupsActivity?.[group._id] && (
                                     <Badge className="absolute -top-1.5 -right-1.5 z-10 h-4 w-4 rounded-full bg-destructive animate-pulse shadow-sm shadow-destructive/20 border-border" />
                                 )}
-                                <Card
-                                    className="cursor-pointer bg-gradient-to-br from-background to-muted/50 border shadow-sm hover:shadow-md active:scale-[0.98] transition-all overflow-hidden rounded-2xl"
-                                    onClick={() => {
-                                        play("navigation");
-                                        router.push(`/groups/${group._id}/dashboard`);
-                                    }}
+                                <Link
+                                    href={`/groups/${group._id}/dashboard`}
+                                    onClick={() => play("navigation")}
+                                    transitionTypes={["drill-forward"]}
+                                    className="block"
                                 >
-                                    <CardContent className="flex justify-between items-center p-5">
-                                        <div className="flex flex-col gap-1">
-                                            <CardTitle className="tracking-tight text-xl">
-                                                {group.name}
-                                            </CardTitle>
-                                            <CardDescription className="text-sm">
-                                                Go Vote Now!
-                                            </CardDescription>
-                                        </div>
-                                        <div className="flex items-center space-x-1">
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="rounded-full hover:bg-primary/10 transition-colors"
-                                                onClick={(e) => handleStar(group._id, e)}
-                                            >
-                                                <Star
-                                                    className="w-5 h-5 transition-all"
-                                                    fill={
-                                                        starredGroupId === group._id
-                                                            ? "currentColor"
-                                                            : "none"
-                                                    }
-                                                    color={
-                                                        starredGroupId === group._id
-                                                            ? "gold"
-                                                            : "currentColor"
-                                                    }
-                                                />
-                                            </Button>
+                                    <Card className="cursor-pointer bg-gradient-to-br from-background to-muted/50 border shadow-sm hover:shadow-md active:scale-[0.98] transition-all overflow-hidden rounded-2xl">
+                                        <CardContent className="flex justify-between items-center p-5">
+                                            <div className="flex flex-col gap-1">
+                                                <CardTitle className="tracking-tight text-xl">
+                                                    {group.name}
+                                                </CardTitle>
+                                                <CardDescription className="text-sm">
+                                                    Go Vote Now!
+                                                </CardDescription>
+                                            </div>
+                                            <div className="flex items-center space-x-1">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="rounded-full hover:bg-primary/10 transition-colors"
+                                                    onClick={(e) => handleStar(group._id, e)}
+                                                >
+                                                    <Star
+                                                        className="w-5 h-5 transition-all"
+                                                        fill={
+                                                            starredGroupId === group._id
+                                                                ? "currentColor"
+                                                                : "none"
+                                                        }
+                                                        color={
+                                                            starredGroupId === group._id
+                                                                ? "gold"
+                                                                : "currentColor"
+                                                        }
+                                                    />
+                                                </Button>
 
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="rounded-full hover:bg-primary/10 transition-colors"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    shareGroup(group._id, group.name);
-                                                }}
-                                            >
-                                                <Share className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-                                            </Button>
-                                        </div>
-                                    </CardContent>
-                                </Card>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="rounded-full hover:bg-primary/10 transition-colors"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        shareGroup(group._id, group.name);
+                                                    }}
+                                                >
+                                                    <Share className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                                                </Button>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                </Link>
                             </div>
                         ))}
                     </div>
