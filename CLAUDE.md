@@ -38,10 +38,11 @@ Models (src/db/models/)    → Mongoose schemas, MongoDB
 
 ### Key Directories
 
-- `src/components/features/` — Feature-specific components (question, rally, jukebox)
+- `src/components/common/` — Shared components used across features
 - `src/components/ui/` — shadcn/ui components (do not edit manually, use `npx shadcn-ui@latest add`)
 - `src/components/wrappers/` — Context providers (session, theme, SWR error handling, FCM tokens)
 - `src/lib/api/` — API utilities: `withErrorHandling()` wrapper, `withAuthAndErrors()`, custom error classes (`ValidationError`, `AuthError`, `ForbiddenError`, `NotFoundError`, `ConflictError`)
+- `src/lib/auth/` — NextAuth configuration (`nextAuthOptions.ts`, `callbacks.ts`)
 - `src/hooks/` — Custom React hooks
 - `src/types/models/` — TypeScript interfaces for Mongoose models and DTOs
 
@@ -49,15 +50,15 @@ Models (src/db/models/)    → Mongoose schemas, MongoDB
 
 **API route error handling:** All API routes should use `withErrorHandling()` or `withAuthAndErrors()` wrappers. Throw typed errors (`ValidationError`, `NotFoundError`, etc.) and they auto-map to HTTP status codes.
 
-**Service layer:** Business logic lives in `src/lib/services/` (e.g. `user.ts`, `group/group.ts`). Services call `dbConnect()` internally, throw typed errors, and are the only layer that touches Mongoose models. Route handlers should be thin — parse request, call service, return `NextResponse.json()`. When adding new features, follow this pattern: create service functions first, then wire them into routes.
+**Service layer:** Business logic lives in `src/lib/services/` (e.g. `user/`, `group/`, `question/`, `rally/`, `jukebox/`, `chat/`, `activity/`). Services call `dbConnect()` internally, throw typed errors, and are the only layer that touches Mongoose models. Route handlers should be thin — parse request, call service, return `NextResponse.json()`. When adding new features, follow this pattern: create service functions first, then wire them into routes.
 
 **Database connection:** `src/db/dbConnect.ts` caches the Mongoose connection across serverless invocations. Services call `dbConnect()` internally — routes don't need to.
 
 **Auth proxy:** `src/proxy.ts` protects all routes except auth endpoints, `/`, terms, privacy, and cron. API routes get 401; pages redirect to `/`.
 
-**Group authorization:** `isUserInGroup()` and `isUserAdmin()` live in `src/lib/services/group/group.ts` and are re-exported from `src/lib/admin.ts` for backwards compatibility. They accept an optional pre-loaded group document to avoid redundant DB calls.
+**Group authorization:** `isUserInGroup()` and `isUserAdmin()` live in `src/lib/services/group/group.ts` and are re-exported from `src/lib/services/group/index.ts`. They accept an optional pre-loaded group document to avoid redundant DB calls.
 
-**Image uploads:** Client gets a presigned POST URL from `/api/uploadimage`, uploads directly to S3, then associates the URL with the entity via API.
+**Image uploads:** Client gets a presigned POST URL from `/api/uploadimage`, uploads directly to S3, then associates the URL with the entity via API. Image optimization is disabled (`images.unoptimized: true`) due to Vercel free tier limits.
 
 **Push notifications:** Firebase Admin SDK sends multicast messages. FCM tokens stored per-user. Service worker source is `src/sw.ts`, built by Serwist to `public/firebase-messaging-sw.js`.
 
@@ -69,18 +70,21 @@ Models (src/db/models/)    → Mongoose schemas, MongoDB
 
 - **Framework:** Next.js 16 (App Router), TypeScript, React 19
 - **Styling:** Tailwind CSS + shadcn/ui (Radix primitives)
+- **Animations:** View Transitions API (experimental), framer-motion (tab indicator)
 - **Data fetching:** SWR
 - **Auth:** NextAuth (Google OAuth + device credentials)
 - **Database:** MongoDB + Mongoose
 - **Notifications:** Firebase Cloud Messaging
 - **Storage:** AWS S3 (presigned uploads)
 - **PWA:** Serwist service worker
-- **Deployment:** Vercel
+- **Deployment:** Vercel (free tier)
 
 ## Styling & Layout Patterns
 
 ### Global layout (`src/app/layout.tsx`)
 The root layout wraps all content in `<div className="p-6 h-[100dvh]">`. This means **global `p-6` padding is already applied** — page components must NOT add their own outer padding/margin. Start page content directly without a wrapping padded container.
+
+Scrollbars are hidden globally via CSS (`scrollbar-width: none` + `::-webkit-scrollbar { display: none }`) for a native mobile feel.
 
 ### Full-height layout
 - Root layout: `h-[100dvh]` on the wrapper div
@@ -94,6 +98,19 @@ The root layout wraps all content in `<div className="p-6 h-[100dvh]">`. This me
 
 ### Bottom navigation
 - Fixed footer in the group tabs layout; pages inside that layout must use `pb-20` (already applied by the layout's flex child wrapper)
+
+### View Transitions (experimental)
+Enabled via `experimental.viewTransition: true` in `next.config.mjs`. Uses React's `<ViewTransition>` component.
+
+- **Root layout** wraps children in `<ViewTransition name="page">` — provides default cross-fade and drill-in/out animations for page-level navigations
+- **Tabs layout** wraps children in `<ViewTransition name="tab-content">` — provides directional horizontal slides based on tab order
+- **Navigation direction** is controlled via `transitionTypes` prop on `<Link>`:
+  - `["slide-forward"]` / `["slide-back"]` — horizontal tab slides
+  - `["drill-forward"]` — forward navigation (e.g. groups → dashboard, dashboard → question)
+  - `["drill-back"]` — back navigation (used by `BackLink` component automatically)
+- Animation CSS is in `src/app/globals.css` under the "View Transition animations" section
+- Prefer `<Link>` with `transitionTypes` over `router.push()` for navigations that should animate
+- `loading.tsx` skeletons participate in transitions automatically via Suspense
 
 ## Code Style
 
