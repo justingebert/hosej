@@ -78,7 +78,7 @@ export default function TabsLayout({ children }: { children: React.ReactNode }) 
 
     return (
         <div className="flex flex-col h-[100dvh]">
-            <div className="flex-grow pb-20 overflow-x-hidden">
+            <div className="flex-grow pb-20 overflow-x-hidden px-4 -mx-4">
                 <ViewTransition name="tab-content">{children}</ViewTransition>
             </div>
             <footer className="fixed bottom-0 left-0 right-0 flex justify-between items-center bg-secondarydark-transparent backdrop-blur-lg rounded-lg px-6 drop-shadow-md pb-6 pt-2 ">
