@@ -581,7 +581,7 @@ describe("getQuestionResults", () => {
         expect(result.totalUsers).toBe(2);
         expect(result.results[0].option).toBe("A");
         expect(result.results[0].count).toBe(2);
-        expect(result.results[0].users).toEqual(["Alice", "Bob"]);
+        expect(result.results[0].users.map((u) => u.username)).toEqual(["Alice", "Bob"]);
         expect(result.results[1].option).toBe("B");
         expect(result.results[1].count).toBe(1);
     });

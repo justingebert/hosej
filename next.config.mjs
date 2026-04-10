@@ -41,6 +41,10 @@ export default withSerwist({
               protocol: "https",
               hostname: "hosej-rally-bucket.s3.eu-central-1.amazonaws.com",
             },
+            {
+              protocol: "https",
+              hostname: "i.scdn.co",
+            },
           ],
           unoptimized: false,
     },

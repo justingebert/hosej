@@ -15,6 +15,35 @@ import type {
 } from "@/types/models/group";
 import { ForbiddenError, NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 import { addTemplatePackToGroup, activateSmartQuestions } from "@/lib/services/question";
+import { resolveAvatarUrl } from "@/lib/services/user/user";
+
+/**
+ * Enrich a list of group members with avatar/lastOnline pulled from the
+ * User collection. Returns a new array — does not mutate the input.
+ */
+export async function enrichMembersWithUserData(
+    members: IGroupMember[]
+): Promise<Array<IGroupMember & { avatarUrl?: string; lastOnline?: Date }>> {
+    if (members.length === 0) return [];
+    const memberIds = members.map((m) => m.user);
+    const users = await User.find({ _id: { $in: memberIds } }, { avatar: 1, lastOnline: 1 }).lean();
+
+    const userById = new Map(users.map((u) => [u._id.toString(), u]));
+
+    return Promise.all(
+        members.map(async (m) => {
+            const userInfo = userById.get(m.user.toString());
+            const avatarUrl = userInfo?.avatar
+                ? ((await resolveAvatarUrl(userInfo.avatar)) ?? undefined)
+                : undefined;
+            return {
+                ...m,
+                avatarUrl,
+                lastOnline: userInfo?.lastOnline ?? undefined,
+            };
+        })
+    );
+}
 
 // ─── Authorization helpers ───────────────────────────────────
 
@@ -102,6 +131,7 @@ export async function getAllGroups(): Promise<
 /**
  * Get a single group with a computed userIsAdmin flag.
  * Returns a plain object with the extra field, properly typed.
+ * Members are enriched with avatar/lastOnline from the User collection.
  */
 export async function getGroupWithAdminFlag(
     userId: string,
@@ -113,7 +143,12 @@ export async function getGroupWithAdminFlag(
     await isUserInGroup(userId, groupId, groupDoc);
 
     const group = groupDoc.toObject();
-    return { ...group, userIsAdmin: groupDoc.admin.equals(userId) };
+    const enrichedMembers = await enrichMembersWithUserData(group.members);
+    return {
+        ...group,
+        members: enrichedMembers as IGroupMember[],
+        userIsAdmin: groupDoc.admin.equals(userId),
+    };
 }
 
 export async function updateGroup(

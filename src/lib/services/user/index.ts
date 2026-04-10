@@ -1,7 +1,10 @@
 export {
     getUserById,
+    getUserDTOById,
+    resolveAvatarUrl,
     createDeviceUser,
     updateUser,
+    touchLastOnline,
     registerPushToken,
     unregisterPushToken,
     generateConnectToken,

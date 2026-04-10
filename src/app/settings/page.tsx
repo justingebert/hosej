@@ -16,6 +16,7 @@ import BackLink from "@/components/ui/custom/BackLink";
 import { UserDataTable } from "@/app/settings/_components/userDataTable";
 import { GoogleConnectButton } from "@/app/settings/_components/googleConnectButton";
 import { SettingsSkeleton } from "@/app/settings/_components/settingsSkeleton";
+import { ProfileEditor } from "@/app/settings/_components/ProfileEditor";
 
 export default function SettingsPage() {
     const { status, user } = useAuthRedirect();
@@ -95,6 +96,7 @@ export default function SettingsPage() {
                     />
                 </div>
 
+                <ProfileEditor user={user} />
                 <UserDataTable user={user} />
                 <GoogleConnectButton user={user} className="mt-4" />
 

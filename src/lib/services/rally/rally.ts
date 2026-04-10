@@ -4,6 +4,7 @@ import User from "@/db/models/User";
 import { Types } from "mongoose";
 import { ConflictError, NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 import { generateSignedUrl } from "@/lib/s3";
+import { resolveAvatarUrl } from "@/lib/services/user/user";
 import { isUserAdmin, isUserInGroup, addPointsToMember } from "@/lib/services/group";
 import { createChatForEntity } from "@/lib/services/chat";
 import { EntityModel } from "@/types/models/chat";
@@ -273,14 +274,22 @@ export async function getSubmissions(
     const rally = await Rally.findById(rallyId);
     if (!rally) throw new NotFoundError("Rally not found");
 
+    // Look up avatars for everyone who submitted, in one query.
+    const submitterIds = rally.submissions.map((s) => s.userId);
+    const submitters = await User.find({ _id: { $in: submitterIds } }, { avatar: 1 }).lean();
+    const avatarKeyById = new Map(submitters.map((u) => [u._id.toString(), u.avatar]));
+
     const submissions = await Promise.all(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         rally.submissions.map(async (submission: any) => {
             const { url } = await generateSignedUrl(submission.imageKey, 300);
+            const avatarKey = avatarKeyById.get(submission.userId.toString());
+            const avatarUrl = (await resolveAvatarUrl(avatarKey)) ?? undefined;
 
             return {
                 ...(submission.toObject ? submission.toObject() : submission),
                 imageUrl: url,
+                avatarUrl,
             };
         })
     );

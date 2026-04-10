@@ -13,13 +13,19 @@ export interface IUser {
     connectToken?: string;
     connectTokenExpiresAt?: Date;
 
+    avatar?: string;
+    lastOnline?: Date;
+
     createdAt: Date;
 }
 export type UserDocument = HydratedDocument<IUser>;
 
-export type UserDTO = ToDTO<IUser>;
+export type UserDTO = ToDTO<IUser> & {
+    avatarUrl?: string;
+};
 
 /** Fields that can be updated via PUT /users */
 export interface UpdateUserData {
     username?: string;
+    avatar?: string | null;
 }

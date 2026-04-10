@@ -64,16 +64,21 @@ export interface IAnswer {
     time: Date;
 }
 
+export interface IResultUser {
+    username: string;
+    avatarUrl?: string;
+}
+
 export interface IResult {
     option: string;
     count: number;
     percentage: number;
-    users: string[];
+    users: IResultUser[];
 }
 
 export interface IPairingResult {
     key: string;
-    valueCounts: { value: string; count: number; percentage: number; users: string[] }[];
+    valueCounts: { value: string; count: number; percentage: number; users: IResultUser[] }[];
     topValue: string;
 }
 

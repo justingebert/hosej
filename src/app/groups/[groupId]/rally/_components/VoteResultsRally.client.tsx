@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
 import { RallyVotesChart } from "@/app/groups/[groupId]/rally/_components/RallyResultsChart";
@@ -53,6 +53,12 @@ const RallyResults = ({ user, rally }: RallyResultsProps) => {
                         <div className="flex items-center justify-between px-4 pt-3 pb-2">
                             <div className="flex items-center gap-2.5">
                                 <Avatar className="h-8 w-8">
+                                    {submission.avatarUrl && (
+                                        <AvatarImage
+                                            src={submission.avatarUrl}
+                                            alt={submission.username}
+                                        />
+                                    )}
                                     <AvatarFallback className="text-sm">
                                         {submission.username[0]}
                                     </AvatarFallback>

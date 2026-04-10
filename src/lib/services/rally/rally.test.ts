@@ -409,6 +409,7 @@ describe("getSubmissions", () => {
         ];
 
         (Rally.findById as Mock).mockResolvedValue(createMockRally({ submissions }));
+        (User.find as Mock).mockReturnValue({ lean: vi.fn().mockResolvedValue([]) });
 
         const result = await getSubmissions(mockUserId, mockGroupId, mockRallyId);
 

@@ -52,4 +52,5 @@ export type PictureSubmissionDTO = ToDTO<IPictureSubmission>;
 /** Submission as returned by GET /submissions (imageKey replaced with signed imageUrl) */
 export type PictureSubmissionWithUrlDTO = Omit<PictureSubmissionDTO, "imageKey"> & {
     imageUrl: string;
+    avatarUrl?: string;
 };

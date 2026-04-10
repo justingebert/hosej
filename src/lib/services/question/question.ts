@@ -4,6 +4,7 @@ import User from "@/db/models/User";
 import { Types } from "mongoose";
 import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 import { generateSignedUrl } from "@/lib/s3";
+import { resolveAvatarUrl } from "@/lib/services/user/user";
 import { CREATED_QUESTION_POINTS, VOTED_QUESTION_POINTS } from "@/lib/utils/POINT_CONFIG";
 import { createChatForEntity } from "@/lib/services/chat";
 import { recordActivity } from "@/lib/services/activity";
@@ -14,6 +15,7 @@ import type {
     IPairingConfig,
     IPairingResult,
     IQuestion,
+    IResult,
     QuestionDocument,
     UserRating,
 } from "@/types/models/question";
@@ -352,21 +354,23 @@ export async function rateQuestion(
 }
 
 export async function getQuestionResults(questionId: string): Promise<{
-    results: { option: string; count: number; percentage: number; users: string[] }[];
+    results: IResult[];
     pairingResults?: IPairingResult[];
     totalVotes: number;
     totalUsers: number;
     questionType: QuestionType;
     multiSelect: boolean;
 }> {
-    type PopulatedAnswer = Omit<IAnswer, "user"> & { user: Pick<IUser, "username"> | null };
+    type PopulatedAnswer = Omit<IAnswer, "user"> & {
+        user: Pick<IUser, "username" | "avatar"> | null;
+    };
 
     const question = await Question.findById(questionId).populate<{
         answers: PopulatedAnswer[];
     }>({
         path: "answers.user",
         model: User,
-        select: "username",
+        select: "username avatar",
     });
 
     if (!question) throw new NotFoundError("Question not found");
@@ -374,6 +378,22 @@ export async function getQuestionResults(questionId: string): Promise<{
     const group = await Group.findById(question.groupId).orFail();
     const totalUsers = group.members.length;
     const totalVotes = question.answers.length || 0;
+
+    // Resolve every voting user's avatar once and reuse.
+    const avatarUrlByUsername = new Map<string, string | undefined>();
+    await Promise.all(
+        question.answers.map(async (answer) => {
+            const username = answer.user?.username ?? "Unknown";
+            if (avatarUrlByUsername.has(username)) return;
+            const avatarUrl = (await resolveAvatarUrl(answer.user?.avatar)) ?? undefined;
+            avatarUrlByUsername.set(username, avatarUrl);
+        })
+    );
+
+    const makeResultUser = (username: string) => ({
+        username,
+        avatarUrl: avatarUrlByUsername.get(username),
+    });
 
     // Pairing results
     if (question.questionType === QuestionType.Pairing) {
@@ -408,7 +428,7 @@ export async function getQuestionResults(questionId: string): Promise<{
                     count: detail.count,
                     percentage:
                         totalVotes === 0 ? 0 : Math.round((detail.count / totalVotes) * 100),
-                    users: detail.users,
+                    users: detail.users.map(makeResultUser),
                 }))
                 .sort((a, b) => b.count - a.count);
 
@@ -459,7 +479,7 @@ export async function getQuestionResults(questionId: string): Promise<{
                 option: signedOption,
                 count: detail.count,
                 percentage,
-                users: detail.users,
+                users: detail.users.map(makeResultUser),
             };
         })
     );

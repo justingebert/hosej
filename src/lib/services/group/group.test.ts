@@ -229,6 +229,7 @@ describe("getGroupWithAdminFlag", () => {
             save: vi.fn(),
         };
         (Group.findById as Mock).mockResolvedValue(mockGroup);
+        (User.find as Mock).mockReturnValue({ lean: vi.fn().mockResolvedValue([]) });
 
         const result = await getGroupWithAdminFlag(mockUserId, mockGroupId);
 
@@ -251,6 +252,7 @@ describe("getGroupWithAdminFlag", () => {
             save: vi.fn(),
         };
         (Group.findById as Mock).mockResolvedValue(mockGroup);
+        (User.find as Mock).mockReturnValue({ lean: vi.fn().mockResolvedValue([]) });
 
         const result = await getGroupWithAdminFlag(mockUserId, mockGroupId);
 

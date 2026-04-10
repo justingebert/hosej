@@ -11,6 +11,7 @@ import { createChatForEntity } from "@/lib/services/chat";
 import { EntityModel } from "@/types/models/chat";
 import { recordActivity } from "@/lib/services/activity";
 import { ActivityFeature, ActivityType } from "@/types/models/activityEvent";
+import { resolveAvatarUrl } from "@/lib/services/user/user";
 
 // ─── Query helpers ───────────────────────────────────────────
 
@@ -71,15 +72,45 @@ export async function getJukeboxes(
             {
                 path: "songs.submittedBy",
                 model: User,
-                select: "_id username",
+                select: "_id username avatar",
             },
             {
                 path: "songs.ratings.userId",
                 model: User,
-                select: "_id username",
+                select: "_id username avatar",
             },
         ])
         .lean();
+
+    // Collect every unique avatar key across submitters + raters and resolve once.
+    const avatarKeys = new Set<string>();
+    for (const jukebox of jukeboxes) {
+        for (const song of jukebox.songs) {
+            if (song.submittedBy?.avatar) avatarKeys.add(song.submittedBy.avatar);
+            for (const r of song.ratings) {
+                if (r.userId?.avatar) avatarKeys.add(r.userId.avatar);
+            }
+        }
+    }
+    const avatarUrlByKey = new Map<string, string>();
+    await Promise.all(
+        Array.from(avatarKeys).map(async (key) => {
+            const url = await resolveAvatarUrl(key);
+            if (url) avatarUrlByKey.set(key, url);
+        })
+    );
+    const attachAvatar = <T extends { avatar?: string; avatarUrl?: string }>(u: T): T => {
+        if (u?.avatar) u.avatarUrl = avatarUrlByKey.get(u.avatar);
+        return u;
+    };
+    for (const jukebox of jukeboxes) {
+        for (const song of jukebox.songs) {
+            if (song.submittedBy) attachAvatar(song.submittedBy);
+            for (const r of song.ratings) {
+                if (r.userId) attachAvatar(r.userId);
+            }
+        }
+    }
 
     return jukeboxes.map((jukebox) => {
         const userHasSubmitted = jukebox.songs.some(

@@ -4,12 +4,17 @@ import { RateLimitError, withErrorHandling } from "@/lib/api/errorHandling";
 import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { authLimiter } from "@/lib/rateLimit";
-import { getUserById, createDeviceUser, updateUser } from "@/lib/services/user/user";
+import {
+    getUserDTOById,
+    createDeviceUser,
+    updateUser,
+    resolveAvatarUrl,
+} from "@/lib/services/user/user";
 import { parseBody } from "@/lib/validation/parseBody";
 import { CreateDeviceUserSchema, UpdateUserSchema } from "@/lib/validation/users";
 
 export const GET = withAuthAndErrors(async (req: NextRequest, { userId }: AuthedContext) => {
-    const user = await getUserById(userId);
+    const user = await getUserDTOById(userId);
     return NextResponse.json(user, { status: 200 });
 });
 
@@ -31,5 +36,7 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
 export const PUT = withAuthAndErrors(async (req: NextRequest, { userId }: AuthedContext) => {
     const body = await parseBody(req, UpdateUserSchema);
     const user = await updateUser(userId, body);
-    return NextResponse.json(user, { status: 200 });
+    const obj = user.toObject();
+    const avatarUrl = await resolveAvatarUrl(obj.avatar);
+    return NextResponse.json({ ...obj, avatarUrl: avatarUrl ?? undefined }, { status: 200 });
 });

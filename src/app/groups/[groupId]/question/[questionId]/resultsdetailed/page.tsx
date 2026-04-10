@@ -8,8 +8,28 @@ import BackLink from "@/components/ui/custom/BackLink";
 import fetcher from "@/lib/fetcher";
 import { SkeletonList } from "@/components/ui/custom/SkeletonList";
 import { useParams, useSearchParams } from "next/navigation";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-import type { IPairingResult, IResult, QuestionResultsDTO } from "@/types/models/question";
+import type {
+    IPairingResult,
+    IResult,
+    IResultUser,
+    QuestionResultsDTO,
+} from "@/types/models/question";
+
+function UserChip({ user }: { user: IResultUser }) {
+    return (
+        <div className="flex items-center gap-2 px-2 py-1.5 bg-primary text-primary-foreground rounded-2xl">
+            <Avatar className="h-6 w-6 shrink-0">
+                {user.avatarUrl && <AvatarImage src={user.avatarUrl} alt={user.username} />}
+                <AvatarFallback className="text-[10px] bg-primary-foreground text-primary">
+                    {user.username.slice(0, 1).toUpperCase()}
+                </AvatarFallback>
+            </Avatar>
+            <span className="text-sm font-semibold truncate">{user.username}</span>
+        </div>
+    );
+}
 
 export default function ResultsDetailPage() {
     const params = useParams<{ groupId: string; questionId: string }>();
@@ -67,13 +87,8 @@ export default function ResultsDetailPage() {
                                           </div>
                                           {vc.users.length > 0 && (
                                               <div className="flex flex-wrap gap-1 mt-2">
-                                                  {vc.users.map((username, uidx) => (
-                                                      <span
-                                                          key={uidx}
-                                                          className="text-xs px-2 py-0.5 bg-primary text-primary-foreground rounded-full"
-                                                      >
-                                                          {username}
-                                                      </span>
+                                                  {vc.users.map((u, uidx) => (
+                                                      <UserChip key={uidx} user={u} />
                                                   ))}
                                               </div>
                                           )}
@@ -101,14 +116,9 @@ export default function ResultsDetailPage() {
                                   </CardTitle>
                               </CardHeader>
                               <CardContent>
-                                  <div className="grid grid-cols-2">
-                                      {result.users.map((username: string, idx: number) => (
-                                          <div
-                                              key={idx}
-                                              className="m-2 p-2 bg-primary rounded-lg text-center text-primary-foreground font-bold"
-                                          >
-                                              {username}
-                                          </div>
+                                  <div className="flex flex-wrap gap-2 justify-center">
+                                      {result.users.map((u, idx: number) => (
+                                          <UserChip key={idx} user={u} />
                                       ))}
                                   </div>
                               </CardContent>

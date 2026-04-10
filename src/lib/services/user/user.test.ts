@@ -95,7 +95,7 @@ describe("updateUser", () => {
         expect(result.username).toBe("newname");
         expect(User.findByIdAndUpdate).toHaveBeenCalledWith(
             mockUserId,
-            { username: "newname" },
+            { $set: { username: "newname" } },
             { new: true }
         );
     });
@@ -117,7 +117,7 @@ describe("updateUser", () => {
 
         expect(User.findByIdAndUpdate).toHaveBeenCalledWith(
             mockUserId,
-            { username: "newname" },
+            { $set: { username: "newname" } },
             { new: true }
         );
     });

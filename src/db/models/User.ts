@@ -41,6 +41,12 @@ const UserSchema = new Schema<IUser>({
     connectTokenExpiresAt: {
         type: Date,
     },
+    avatar: {
+        type: String,
+    },
+    lastOnline: {
+        type: Date,
+    },
     createdAt: {
         type: Date,
         default: Date.now,

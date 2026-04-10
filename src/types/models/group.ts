@@ -86,8 +86,11 @@ export interface UpdateGroupData {
     features?: UpdateGroupFeatures;
 }
 
-export type GroupMemberDTO = ToDTO<IGroupMember>;
-export type GroupDTO = ToDTO<IGroup>;
+export type GroupMemberDTO = ToDTO<IGroupMember> & {
+    avatarUrl?: string;
+    lastOnline?: string;
+};
+export type GroupDTO = Omit<ToDTO<IGroup>, "members"> & { members: GroupMemberDTO[] };
 
 /** API response type for GET /groups/[groupId] — includes computed field */
 export type GroupWithAdminDTO = GroupDTO & { userIsAdmin: boolean };

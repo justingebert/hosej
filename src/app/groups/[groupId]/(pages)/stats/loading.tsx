@@ -14,7 +14,7 @@ export default function StatsLoading() {
             </div>
 
             {/* Leaderboard section */}
-            <Skeleton className="h-10 w-40 mb-2" />
+            <Skeleton className="h-10 w-full mb-2" />
             {[...Array(5)].map((_, i) => (
                 <Skeleton key={i} className="h-12 mb-1 rounded-md" />
             ))}

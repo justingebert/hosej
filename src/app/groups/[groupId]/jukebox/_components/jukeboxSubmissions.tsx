@@ -15,6 +15,7 @@ import { Separator } from "@/components/ui/separator";
 import ChatComponent from "@/components/common/Chat";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Slider } from "@/components/ui/slider";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export function JukeboxSubmissions({
     jukebox,
@@ -164,8 +165,18 @@ export function JukeboxSubmissions({
                                     <div className="px-2">
                                         <AnimatePresence>
                                             <div className="flex justify-between items-center rounded-md bg-secondarydark px-4 py-2 shadow-md mb-2">
-                                                <div className="">
-                                                    {/* <span>submitted by: </span> */}
+                                                <div className="flex items-center gap-2">
+                                                    <Avatar className="h-6 w-6">
+                                                        {song.submittedBy.avatarUrl && (
+                                                            <AvatarImage
+                                                                src={song.submittedBy.avatarUrl}
+                                                                alt={song.submittedBy.username}
+                                                            />
+                                                        )}
+                                                        <AvatarFallback className="text-[10px]">
+                                                            {song.submittedBy.username[0]}
+                                                        </AvatarFallback>
+                                                    </Avatar>
                                                     <span>{song.submittedBy.username}</span>
                                                 </div>
                                                 <div className="flex flex-row space-x-2">
@@ -219,8 +230,29 @@ export function JukeboxSubmissions({
                                                         transition={{ duration: 0.3 }}
                                                         className="mb-2 rounded-md bg-secondarydark px-4 py-2 shadow-md"
                                                     >
-                                                        <div className="flex justify-between text-sm">
-                                                            <span>{rating.userId.username}</span>
+                                                        <div className="flex justify-between items-center text-sm">
+                                                            <div className="flex items-center gap-2">
+                                                                <Avatar className="h-6 w-6">
+                                                                    {rating.userId.avatarUrl && (
+                                                                        <AvatarImage
+                                                                            src={
+                                                                                rating.userId
+                                                                                    .avatarUrl
+                                                                            }
+                                                                            alt={
+                                                                                rating.userId
+                                                                                    .username
+                                                                            }
+                                                                        />
+                                                                    )}
+                                                                    <AvatarFallback className="text-[10px]">
+                                                                        {rating.userId.username[0]}
+                                                                    </AvatarFallback>
+                                                                </Avatar>
+                                                                <span>
+                                                                    {rating.userId.username}
+                                                                </span>
+                                                            </div>
                                                             <span
                                                                 className={`font-bold ${ratingColorText}`}
                                                             >

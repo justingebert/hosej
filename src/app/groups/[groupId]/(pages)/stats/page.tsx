@@ -16,6 +16,7 @@ import {
     QuestionsByUser,
 } from "@/app/groups/[groupId]/(pages)/stats/_components/QuestionCharts";
 import { Card, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
 import type { GroupDTO, GroupStatsDTO, GroupMemberDTO } from "@/types/models/group";
@@ -134,7 +135,19 @@ const StatsPage = () => {
                             <TableCell className="font-medium text-muted-foreground">
                                 {index + 1}
                             </TableCell>
-                            <TableCell className="font-medium">{member.name}</TableCell>
+                            <TableCell className="font-medium">
+                                <div className="flex items-center gap-2">
+                                    <Avatar className="h-7 w-7 shrink-0">
+                                        {member.avatarUrl && (
+                                            <AvatarImage src={member.avatarUrl} alt={member.name} />
+                                        )}
+                                        <AvatarFallback className="text-xs">
+                                            {(member.name || "?").slice(0, 1).toUpperCase()}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                    <span className="truncate">{member.name}</span>
+                                </div>
+                            </TableCell>
                             <TableCell className="text-right">{member.points}</TableCell>
                             <TableCell className="text-right">
                                 {member.streak > 0 ? `${member.streak} 👖` : "—"}

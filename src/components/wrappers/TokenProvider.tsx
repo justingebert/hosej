@@ -24,6 +24,22 @@ const sendTokenToServer = async (token: string) => {
     }
 };
 
+const HEARTBEAT_THROTTLE_MS = 5 * 60 * 1000;
+const HEARTBEAT_STORAGE_KEY = "lastHeartbeatAt";
+
+const sendHeartbeat = () => {
+    try {
+        const last = Number(localStorage.getItem(HEARTBEAT_STORAGE_KEY) || 0);
+        if (Date.now() - last < HEARTBEAT_THROTTLE_MS) return;
+        localStorage.setItem(HEARTBEAT_STORAGE_KEY, Date.now().toString());
+    } catch {
+        /* localStorage unavailable — fall through and send */
+    }
+    fetch(`/api/users/heartbeat`, { method: "POST" }).catch(() => {
+        /* fire-and-forget */
+    });
+};
+
 export function TokenProvider({ children }: { children: React.ReactNode }) {
     const { data: session, status } = useSession();
     const isAuthenticated = status === "authenticated";
@@ -38,6 +54,19 @@ export function TokenProvider({ children }: { children: React.ReactNode }) {
             }
         }
     }, [fcmToken, session, isAuthenticated, isRegistered]);
+
+    // Send a heartbeat on mount and whenever the tab regains focus, so the
+    // user's lastOnline timestamp stays up to date. The server throttles writes.
+    useEffect(() => {
+        if (!isAuthenticated || !isRegistered) return;
+        sendHeartbeat();
+
+        const onVisibility = () => {
+            if (document.visibilityState === "visible") sendHeartbeat();
+        };
+        document.addEventListener("visibilitychange", onVisibility);
+        return () => document.removeEventListener("visibilitychange", onVisibility);
+    }, [isAuthenticated, isRegistered]);
 
     return <>{children}</>;
 }
