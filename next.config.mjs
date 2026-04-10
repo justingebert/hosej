@@ -41,7 +41,7 @@ export default withSerwist({
               hostname: "hosej-rally-bucket.s3.eu-central-1.amazonaws.com",
             },
           ],
-          unoptimized: true,
+          unoptimized: false,
     },
     async headers() {
         return [
