@@ -1,16 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { HoseJLoader } from "@/components/ui/custom/HoseJLoader";
 
-export default function SetupNamePage() {
+function SetupNameContent() {
     const { data: session, status, update } = useSession();
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const callbackUrl = searchParams?.get("callbackUrl") || "/groups";
     const { toast } = useToast();
     const [name, setName] = useState("");
     const [submitting, setSubmitting] = useState(false);
@@ -28,7 +30,7 @@ export default function SetupNamePage() {
 
     // If user doesn't need name setup, redirect away
     if (session && !session.user.needsNameSetup) {
-        router.replace("/groups");
+        router.replace(callbackUrl);
         return <HoseJLoader />;
     }
 
@@ -55,7 +57,7 @@ export default function SetupNamePage() {
 
             // Refresh session — clears needsNameSetup flag since DB doesn't have it
             await update();
-            router.push("/groups");
+            router.push(callbackUrl);
         } catch {
             toast({ title: "Something went wrong", variant: "destructive" });
         } finally {
@@ -85,5 +87,13 @@ export default function SetupNamePage() {
                 </Button>
             </div>
         </div>
+    );
+}
+
+export default function SetupNamePage() {
+    return (
+        <Suspense fallback={<HoseJLoader />}>
+            <SetupNameContent />
+        </Suspense>
     );
 }

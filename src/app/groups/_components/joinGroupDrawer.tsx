@@ -19,10 +19,18 @@ export function JoinGroupDrawer() {
     const { toast } = useToast();
     const { user } = useAuthRedirect();
 
+    const extractGroupId = (input: string): string => {
+        const trimmed = input.trim();
+        const match = trimmed.match(/\/join\/([^\s/?#]+)/);
+        if (match) return match[1];
+        return trimmed;
+    };
+
     const handleJoin = async () => {
         if (groupId.trim() === "") return;
+        const parsedId = extractGroupId(groupId);
         try {
-            const res = await fetch(`/api/groups/${groupId}/members`, {
+            const res = await fetch(`/api/groups/${parsedId}/members`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -58,7 +66,7 @@ export function JoinGroupDrawer() {
                         <Input
                             autoFocus
                             id="groupId"
-                            placeholder="Group ID"
+                            placeholder="Group ID or invite link"
                             value={groupId}
                             onChange={(e) => setGroupId(e.target.value)}
                         />

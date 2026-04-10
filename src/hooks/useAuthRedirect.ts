@@ -8,7 +8,9 @@ export function useAuthRedirect() {
         if (status === "loading") return;
         // Don't bounce to sign-in when offline or on a flaky connection —
         // the session fetch may have failed, not the auth itself.
-        if (!session && navigator.onLine) signIn();
+        if (!session && navigator.onLine) {
+            signIn(undefined, { callbackUrl: window.location.pathname });
+        }
     }, [status, session]);
 
     const user = session?.user;

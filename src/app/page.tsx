@@ -96,9 +96,12 @@ function StartPage() {
         if (status === "loading") return;
 
         if (session) {
-            const starredGroupId = localStorage.getItem("starredGroupId");
-            if (starredGroupId) {
-                callbackUrl = `/groups/${starredGroupId}/dashboard`;
+            const isExplicitCallback = searchParams?.get("callbackUrl");
+            if (!isExplicitCallback) {
+                const starredGroupId = localStorage.getItem("starredGroupId");
+                if (starredGroupId) {
+                    callbackUrl = `/groups/${starredGroupId}/dashboard`;
+                }
             }
             router.push(callbackUrl);
         } else {

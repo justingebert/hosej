@@ -45,6 +45,7 @@ export async function proxy(req: NextRequest) {
         "/terms",
         "/privacy",
         "/setup-name",
+        "/auth/error",
         "/offline",
         "/",
     ]);
@@ -59,6 +60,7 @@ export async function proxy(req: NextRequest) {
         }
 
         const loginUrl = new URL("/", req.url);
+        loginUrl.searchParams.set("callbackUrl", pathname);
         return NextResponse.redirect(loginUrl);
     }
 
@@ -70,6 +72,9 @@ export async function proxy(req: NextRequest) {
         !pathname.startsWith("/api/users")
     ) {
         const setupUrl = new URL("/setup-name", req.url);
+        if (pathname !== "/setup-name") {
+            setupUrl.searchParams.set("callbackUrl", pathname);
+        }
         return NextResponse.redirect(setupUrl);
     }
 
