@@ -1,7 +1,9 @@
 import type { Account, Session, User as NextAuthUser } from "next-auth";
 import type { JWT } from "next-auth/jwt";
+import { cookies } from "next/headers";
 import dbConnect from "@/db/dbConnect";
 import User from "@/db/models/User";
+import { CONNECT_TOKEN_COOKIE } from "@/lib/auth/connectToken";
 
 /**
  * CredentialsProvider authorize function for device-based auth.
@@ -43,11 +45,26 @@ export async function jwtCallback({
         const existingUser = await User.findOne({ googleId: account.providerAccountId });
         if (!existingUser) {
             // Check if a device user is linking their Google account (connect flow).
-            // A valid connect token means an existing user initiated the link.
-            const deviceUser = await User.findOne({
-                connectToken: { $exists: true, $ne: null },
-                connectTokenExpiresAt: { $gt: new Date() },
-            });
+            // The connect token is issued to a specific browser via an httpOnly
+            // cookie by POST /api/users/google/connect-token. We require an exact
+            // match between the cookie token and the user's stored connectToken —
+            // without this binding, any concurrent Google sign-in could be merged
+            // into a victim who happens to have a pending link in progress.
+            let cookieToken: string | undefined;
+            try {
+                const cookieStore = await cookies();
+                cookieToken = cookieStore.get(CONNECT_TOKEN_COOKIE)?.value;
+            } catch {
+                // cookies() may be unavailable outside a request scope — treat
+                // as no cookie present and fall through to fresh-signup handling.
+            }
+
+            const deviceUser = cookieToken
+                ? await User.findOne({
+                      connectToken: cookieToken,
+                      connectTokenExpiresAt: { $gt: new Date() },
+                  })
+                : null;
 
             if (deviceUser) {
                 // Connect flow: merge Google ID into the existing device user
@@ -57,6 +74,16 @@ export async function jwtCallback({
                 deviceUser.connectToken = undefined;
                 deviceUser.connectTokenExpiresAt = undefined;
                 await deviceUser.save();
+
+                // Best-effort cookie clear. The connect token is already
+                // single-use (cleared above), so even if the cookie lingers
+                // until its 5-minute maxAge expiry it can no longer be matched.
+                try {
+                    const cookieStore = await cookies();
+                    cookieStore.delete(CONNECT_TOKEN_COOKIE);
+                } catch {
+                    /* no-op — see comment above */
+                }
 
                 token.userId = deviceUser._id.toString();
                 token.username = deviceUser.username;
