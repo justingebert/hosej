@@ -1,18 +1,16 @@
 "use client";
 
-import useSWR from "swr";
 import type { Session } from "next-auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useImageUploader } from "@/hooks/useImageUploader";
-import fetcher from "@/lib/fetcher";
-import type { UserDTO } from "@/types/models/user";
+import { useUser } from "@/hooks/data/useUser";
 import { Trash } from "lucide-react";
 
 export function ProfileEditor({ user }: { user: Session["user"] }) {
     const { toast } = useToast();
-    const { data, mutate } = useSWR<UserDTO>("/api/users", fetcher);
+    const { user: data, updateUser } = useUser();
     const { uploading, compressImages, handleImageUpload } = useImageUploader();
 
     const handleAvatarFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -24,13 +22,7 @@ export function ProfileEditor({ user }: { user: Session["user"] }) {
                 compressed,
             ]);
             if (!result || result.length === 0) throw new Error("Upload failed");
-            const res = await fetch("/api/users", {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ avatar: result[0].key }),
-            });
-            if (!res.ok) throw new Error("Failed to save avatar");
-            await mutate();
+            await updateUser({ avatar: result[0].key });
             toast({ title: "Avatar updated" });
         } catch (err) {
             const message = err instanceof Error ? err.message : "Something went wrong";
@@ -42,13 +34,7 @@ export function ProfileEditor({ user }: { user: Session["user"] }) {
 
     const handleRemoveAvatar = async () => {
         try {
-            const res = await fetch("/api/users", {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ avatar: null }),
-            });
-            if (!res.ok) throw new Error("Failed to remove avatar");
-            await mutate();
+            await updateUser({ avatar: null });
             toast({ title: "Avatar removed" });
         } catch (err) {
             const message = err instanceof Error ? err.message : "Something went wrong";
