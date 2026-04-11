@@ -2,12 +2,14 @@ import type { IJukeboxProcessed } from "@/types/models/jukebox";
 import { useAppHaptics } from "@/hooks/useAppHaptics";
 import { useParams } from "next/navigation";
 import { useState } from "react";
-import { mutate } from "swr";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader, Search } from "lucide-react";
 import Image from "next/image";
+import { useJukeboxSearch } from "@/hooks/data/useJukeboxSearch";
+import { useJukeboxes } from "@/hooks/data/useJukeboxes";
+import type { SpotifyTrack } from "@/hooks/data/useJukeboxSearch";
 
 export function JukeboxSearch({
     jukebox,
@@ -22,24 +24,15 @@ export function JukeboxSearch({
     const params = useParams<{ groupId: string }>();
     const groupId = params ? params.groupId : "";
     const [searchQuery, setSearchQuery] = useState("");
-    const [searchResults, setSearchResults] = useState<any[] | null>(null); // Null for no search yet
-    const [isLoading, setIsLoading] = useState(false);
-    const [selectedTrack, setSelectedTrack] = useState<any | null>(null);
+    const [selectedTrack, setSelectedTrack] = useState<SpotifyTrack | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const { results: searchResults, isLoading, search, reset } = useJukeboxSearch(groupId);
+    const { addSong } = useJukeboxes(groupId);
 
     const searchSpotify = async () => {
         if (!searchQuery.trim()) return;
-
-        setIsLoading(true);
         try {
-            const response = await fetch(
-                `/api/groups/${groupId}/jukebox/search?q=${encodeURIComponent(searchQuery)}`
-            );
-            if (!response.ok) {
-                throw new Error("Failed to fetch search results");
-            }
-            const result = await response.json();
-            setSearchResults(result.tracks.items || []);
+            await search(searchQuery);
         } catch (err) {
             toast({
                 title: "Something went wrong",
@@ -47,8 +40,6 @@ export function JukeboxSearch({
                 variant: "destructive",
             });
             console.error("Error searching Spotify:", err);
-        } finally {
-            setIsLoading(false);
         }
     };
 
@@ -63,29 +54,17 @@ export function JukeboxSearch({
 
         setIsSubmitting(true);
         try {
-            const response = await fetch(`/api/groups/${groupId}/jukebox/${jukebox._id}/song`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    spotifyTrackId: selectedTrack.id,
-                    title: selectedTrack.name,
-                    artist: selectedTrack.artists.map((a: any) => a.name).join(", "),
-                    album: selectedTrack.album.name,
-                    coverImageUrl: selectedTrack.album.images[0]?.url || "",
-                }),
+            await addSong(jukebox._id, {
+                spotifyTrackId: selectedTrack.id,
+                title: selectedTrack.name,
+                artist: selectedTrack.artists.map((a) => a.name).join(", "),
+                album: selectedTrack.album.name,
+                coverImageUrl: selectedTrack.album.images[0]?.url || "",
             });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || "Failed to submit song");
-            }
-            mutate(`/api/groups/${groupId}/jukebox?isActive=true`);
             play("success");
 
             setSelectedTrack(null);
-            setSearchResults(null);
+            reset();
             setUserHasSubmitted(true);
         } catch (error) {
             console.error("Error submitting song:", error);

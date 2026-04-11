@@ -6,152 +6,225 @@ import { SkeletonList } from "@/components/ui/custom/SkeletonList";
 import type { GroupDTO } from "@/types/models/group";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import useSWR from "swr";
-import fetcher from "@/lib/fetcher";
-import type { FeatureStatus } from "@/types/models/appConfig";
 import { GroupInfoCard } from "@/app/groups/[groupId]/(pages)/settings/_components/GroupInfoCard";
 import { GroupFeatureSettingsCard } from "@/app/groups/[groupId]/(pages)/settings/_components/GroupFeatureSettingsCard";
 import { GroupMembersCard } from "@/app/groups/[groupId]/(pages)/settings/_components/GroupMembersCard";
 import { GroupDangerZoneCard } from "@/app/groups/[groupId]/(pages)/settings/_components/GroupDangerZoneCard";
+import { useGroup } from "@/hooks/data/useGroup";
+import { useFeatureStatus } from "@/hooks/data/useFeatureStatus";
 
-type GroupProcessedDTO = GroupDTO & { userIsAdmin: boolean };
+// ─── Header (renders group name) ─────────────────────────────
 
-export default function GroupSettingsPage() {
-    const params = useParams<{ groupId: string }>();
-    const groupId = params ? params.groupId : "";
+function GroupTitleHeader({ groupId }: { groupId: string }) {
+    const { group } = useGroup(groupId);
+    return <Header title={group?.name ?? null} />;
+}
+
+// ─── Form section: GroupInfo + FeatureSettings + Save ────────
+
+function FormSection({ groupId }: { groupId: string }) {
     const { user } = useAuthRedirect();
     const { toast } = useToast();
+    const { group, isLoading, updateGroup } = useGroup(groupId);
+    const { features: globalFeatures } = useFeatureStatus();
+
     const [features, setFeatures] = useState<GroupDTO["features"] | null>(null);
-    const router = useRouter();
+    const [syncedFeaturesKey, setSyncedFeaturesKey] = useState<string | null>(null);
+    const nextFeaturesKey = group ? `${group._id}:${JSON.stringify(group.features)}` : null;
 
-    const {
-        data: group,
-        isLoading,
-        error,
-        mutate,
-    } = useSWR<GroupProcessedDTO>(`/api/groups/${groupId}`, fetcher, {});
+    if (nextFeaturesKey !== syncedFeaturesKey) {
+        setFeatures(group?.features ?? null);
+        setSyncedFeaturesKey(nextFeaturesKey);
+    }
 
-    const { data: globalFeatures } = useSWR<{
-        questions: { status: FeatureStatus };
-        rallies: { status: FeatureStatus };
-        jukebox: { status: FeatureStatus };
-    }>("/api/features/status", fetcher);
+    if (isLoading || !group || !features) {
+        return <SkeletonList count={6} className="h-12 mb-4" />;
+    }
 
-    useEffect(() => {
-        if (group) {
-            setFeatures(group.features);
-        }
-    }, [group]);
+    const userIsAdmin = !!group.userIsAdmin;
 
-    if (error) return <p className="text-red-500">Failed to load group data</p>;
-
-    const userIsAdmin = !!group?.userIsAdmin;
-
-    const adminName = group?.admin
+    const adminName = group.admin
         ? group.members.find((member) => member.user === group.admin)?.name || "N/A"
         : "N/A";
 
-    const currentMember = group?.members.find((member) => member.user === user?._id);
+    const currentMember = group.members.find((member) => member.user === user?._id);
     const currentMemberName = currentMember?.name || "Member not found";
 
     const updateQuestionSettings = (
         partial: Partial<GroupDTO["features"]["questions"]["settings"]>
     ) => {
-        setFeatures((prev) => {
-            if (!prev) return prev;
-            return {
-                ...prev,
-                questions: {
-                    ...prev.questions,
-                    settings: { ...prev.questions.settings, ...partial },
-                },
-            };
-        });
+        setFeatures((prev) =>
+            prev
+                ? {
+                      ...prev,
+                      questions: {
+                          ...prev.questions,
+                          settings: { ...prev.questions.settings, ...partial },
+                      },
+                  }
+                : prev
+        );
     };
 
     const updateRallySettings = (partial: Partial<GroupDTO["features"]["rallies"]["settings"]>) => {
-        setFeatures((prev) => {
-            if (!prev) return prev;
-            return {
-                ...prev,
-                rallies: {
-                    ...prev.rallies,
-                    settings: { ...prev.rallies.settings, ...partial },
-                },
-            };
-        });
+        setFeatures((prev) =>
+            prev
+                ? {
+                      ...prev,
+                      rallies: {
+                          ...prev.rallies,
+                          settings: { ...prev.rallies.settings, ...partial },
+                      },
+                  }
+                : prev
+        );
     };
 
     const updateJukeboxSettings = (
         partial: Partial<GroupDTO["features"]["jukebox"]["settings"]>
     ) => {
-        setFeatures((prev) => {
-            if (!prev) return prev;
-            return {
-                ...prev,
-                jukebox: {
-                    ...prev.jukebox,
-                    settings: { ...prev.jukebox.settings, ...partial },
-                },
-            };
-        });
+        setFeatures((prev) =>
+            prev
+                ? {
+                      ...prev,
+                      jukebox: {
+                          ...prev.jukebox,
+                          settings: { ...prev.jukebox.settings, ...partial },
+                      },
+                  }
+                : prev
+        );
     };
 
     const saveSettings = async () => {
         try {
-            if (!features) return;
-            await fetch(`/api/groups/${groupId}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ features }),
+            await updateGroup({
+                features: {
+                    questions: {
+                        enabled: features.questions.enabled,
+                        settings: {
+                            questionCount: features.questions.settings.questionCount,
+                            packs: features.questions.settings.packs,
+                        },
+                    },
+                    rallies: {
+                        enabled: features.rallies.enabled,
+                        settings: features.rallies.settings,
+                    },
+                    jukebox: {
+                        enabled: features.jukebox.enabled,
+                        settings: features.jukebox.settings,
+                    },
+                },
             });
             toast({ title: "Group Settings saved" });
-            mutate();
         } catch (error) {
             console.error("Failed to save settings:", error);
             toast({ title: "Failed to save Settings", variant: "destructive" });
         }
     };
 
-    const kickMember = async (memberId: string) => {
+    return (
+        <div className="space-y-6">
+            <GroupInfoCard
+                currentMemberName={currentMemberName}
+                groupId={groupId}
+                createdAt={new Date(group.createdAt)}
+                adminName={adminName}
+            />
+
+            {userIsAdmin && (
+                <GroupFeatureSettingsCard
+                    groupId={groupId}
+                    features={features}
+                    globalFeatures={globalFeatures}
+                    onQuestionCountChange={(value) =>
+                        updateQuestionSettings({ questionCount: value })
+                    }
+                    onRallyCountChange={(value) => updateRallySettings({ rallyCount: value })}
+                    onRallyGapDaysChange={(value) => updateRallySettings({ rallyGapDays: value })}
+                    onJukeboxConcurrentChange={(value) =>
+                        updateJukeboxSettings({ concurrent: value })
+                    }
+                    onJukeboxActivationDaysChange={(value) =>
+                        updateJukeboxSettings({ activationDays: value })
+                    }
+                />
+            )}
+
+            {userIsAdmin && (
+                <div className="sticky bottom-0 left-0 right-0 ">
+                    <Button className="w-full" size="lg" onClick={saveSettings}>
+                        Save Changes
+                    </Button>
+                </div>
+            )}
+        </div>
+    );
+}
+
+// ─── Members section ─────────────────────────────────────────
+
+function MembersSection({ groupId }: { groupId: string }) {
+    const { user } = useAuthRedirect();
+    const { toast } = useToast();
+    const { group, isLoading, kickMember } = useGroup(groupId);
+
+    if (isLoading || !group) return <SkeletonList count={3} className="h-12 mb-4" />;
+    if (!user) return null;
+
+    const userIsAdmin = !!group.userIsAdmin;
+
+    const handleKick = async (memberId: string) => {
         try {
-            const response = await fetch(`/api/groups/${groupId}/members/${memberId}`, {
-                method: "DELETE",
-            });
-            if (!response.ok) {
-                throw new Error("Failed to kick member");
-            }
+            await kickMember(memberId);
             toast({ title: "Member kicked" });
-            mutate();
         } catch (error) {
             console.error("Failed to kick member:", error);
             toast({ title: "Failed to kick member", variant: "destructive" });
         }
     };
 
-    const leaveGroup = async () => {
+    return (
+        <GroupMembersCard
+            members={group.members}
+            currentUserId={user._id}
+            userIsAdmin={userIsAdmin}
+            onKickMember={handleKick}
+        />
+    );
+}
+
+// ─── Danger Zone section ─────────────────────────────────────
+
+function DangerZoneSection({ groupId }: { groupId: string }) {
+    const { user } = useAuthRedirect();
+    const { toast } = useToast();
+    const router = useRouter();
+    const { group, isLoading, deleteGroup, leaveGroup } = useGroup(groupId);
+
+    if (isLoading || !group) return <SkeletonList count={2} className="h-12 mb-4" />;
+
+    const userIsAdmin = !!group.userIsAdmin;
+
+    const handleLeaveGroup = async () => {
+        if (!user) return;
         try {
-            const res = await fetch(`/api/groups/${groupId}/members/${user?._id}`, {
-                method: "DELETE",
-            });
-            if (!res.ok) {
-                toast({ title: "Failed to leave group", variant: "destructive" });
-            }
-            mutate();
+            await leaveGroup(user._id);
             toast({ title: "You have left the group" });
             router.push("/groups");
         } catch (error) {
             console.error("Failed to leave group:", error);
-            toast({ title: "Something went wrong", variant: "destructive" });
+            toast({ title: "Failed to leave group", variant: "destructive" });
         }
     };
 
-    const deleteGroup = async () => {
-        if (!userIsAdmin || !group) return;
+    const handleDeleteGroup = async () => {
+        if (!userIsAdmin) return;
         try {
-            await fetch(`/api/groups/${groupId}`, { method: "DELETE" });
+            await deleteGroup();
             toast({ title: "Group deleted successfully" });
             router.push("/groups");
         } catch (error) {
@@ -161,70 +234,30 @@ export default function GroupSettingsPage() {
     };
 
     return (
+        <GroupDangerZoneCard
+            groupName={group.name}
+            userIsAdmin={userIsAdmin}
+            onLeaveGroup={handleLeaveGroup}
+            onDeleteGroup={handleDeleteGroup}
+        />
+    );
+}
+
+// ─── Page shell ──────────────────────────────────────────────
+
+export default function GroupSettingsPage() {
+    const params = useParams<{ groupId: string }>();
+    const groupId = params ? params.groupId : "";
+
+    return (
         <>
-            <Header title={group?.name || null} />
+            <GroupTitleHeader groupId={groupId} />
 
-            {isLoading ? (
-                <SkeletonList count={10} className="h-12 mb-4" />
-            ) : !group ? (
-                <p>Group not found.</p>
-            ) : !user || !features ? (
-                <SkeletonList count={10} className="h-12 mb-4" />
-            ) : (
-                <div className="space-y-6 pb-12">
-                    <GroupInfoCard
-                        currentMemberName={currentMemberName}
-                        groupId={groupId}
-                        createdAt={new Date(group.createdAt)}
-                        adminName={adminName}
-                    />
-
-                    {userIsAdmin && (
-                        <GroupFeatureSettingsCard
-                            groupId={groupId}
-                            features={features}
-                            globalFeatures={globalFeatures}
-                            onQuestionCountChange={(value) =>
-                                updateQuestionSettings({ questionCount: value })
-                            }
-                            onRallyCountChange={(value) =>
-                                updateRallySettings({ rallyCount: value })
-                            }
-                            onRallyGapDaysChange={(value) =>
-                                updateRallySettings({ rallyGapDays: value })
-                            }
-                            onJukeboxConcurrentChange={(value) =>
-                                updateJukeboxSettings({ concurrent: value })
-                            }
-                            onJukeboxActivationDaysChange={(value) =>
-                                updateJukeboxSettings({ activationDays: value })
-                            }
-                        />
-                    )}
-
-                    {userIsAdmin && (
-                        <div className="sticky bottom-0 left-0 right-0 ">
-                            <Button className="w-full" size="lg" onClick={saveSettings}>
-                                Save Changes
-                            </Button>
-                        </div>
-                    )}
-
-                    <GroupMembersCard
-                        members={group.members}
-                        currentUserId={user._id}
-                        userIsAdmin={userIsAdmin}
-                        onKickMember={kickMember}
-                    />
-
-                    <GroupDangerZoneCard
-                        groupName={group.name}
-                        userIsAdmin={userIsAdmin}
-                        onLeaveGroup={leaveGroup}
-                        onDeleteGroup={deleteGroup}
-                    />
-                </div>
-            )}
+            <div className="space-y-6 pb-12">
+                <FormSection groupId={groupId} />
+                <MembersSection groupId={groupId} />
+                <DangerZoneSection groupId={groupId} />
+            </div>
         </>
     );
 }

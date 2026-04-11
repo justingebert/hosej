@@ -17,11 +17,11 @@ import {
 } from "@/app/groups/[groupId]/(pages)/stats/_components/QuestionCharts";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import useSWR from "swr";
-import fetcher from "@/lib/fetcher";
-import type { GroupDTO, GroupStatsDTO, GroupMemberDTO } from "@/types/models/group";
+import type { GroupMemberDTO } from "@/types/models/group";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MessageSquare, Calendar, Trophy, Music, Star } from "lucide-react";
+import { useGroup } from "@/hooks/data/useGroup";
+import { useGroupStats } from "@/hooks/data/useGroupStats";
 
 function StatCard({
     label,
@@ -47,118 +47,151 @@ function SectionHeader({ children }: { children: React.ReactNode }) {
     return <h2 className="text-lg font-semibold mt-6 mb-3">{children}</h2>;
 }
 
-const StatsPage = () => {
-    const params = useParams<{ groupId: string }>();
-    const groupId = params ? params.groupId : "";
+// ─── Skeletons ───────────────────────────────────────────────
 
-    const { data: stats, isLoading: statsLoading } = useSWR<GroupStatsDTO>(
-        `/api/groups/${groupId}/stats`,
-        fetcher
+function ThreeCardsSkeleton() {
+    return (
+        <div className="grid grid-cols-3 gap-3">
+            {[...Array(3)].map((_, i) => (
+                <Skeleton key={i} className="h-24" />
+            ))}
+        </div>
     );
-    const { data: group, isLoading: groupLoading } = useSWR<GroupDTO>(
-        `/api/groups/${groupId}/`,
-        fetcher
+}
+
+function TwoCardsSkeleton() {
+    return (
+        <div className="grid grid-cols-2 gap-3 mb-8">
+            {[...Array(2)].map((_, i) => (
+                <Skeleton key={i} className="h-24" />
+            ))}
+        </div>
     );
+}
+
+function LeaderboardSkeleton() {
+    return (
+        <>
+            <Skeleton className="h-10 mb-2" />
+            {[...Array(5)].map((_, i) => (
+                <Skeleton key={i} className="h-12 mb-1" />
+            ))}
+        </>
+    );
+}
+
+function ChartsSkeleton() {
+    return (
+        <div className="space-y-3">
+            <Skeleton className="h-64" />
+            <Skeleton className="h-64" />
+        </div>
+    );
+}
+
+// ─── Data sections ───────────────────────────────────────────
+
+function OverviewCards({ groupId }: { groupId: string }) {
+    const { group, isLoading: groupLoading } = useGroup(groupId);
+    const { stats, isLoading: statsLoading } = useGroupStats(groupId);
+
+    if (groupLoading || statsLoading || !group || !stats) return <ThreeCardsSkeleton />;
+
+    const groupAgeDays = group.createdAt
+        ? Math.floor(
+              (new Date().getTime() - new Date(group.createdAt).getTime()) / (1000 * 60 * 60 * 24)
+          )
+        : 0;
+
+    return (
+        <div className="grid grid-cols-3 gap-3">
+            <StatCard
+                label="days active"
+                value={groupAgeDays}
+                icon={<Calendar className="h-4 w-4" />}
+            />
+            <StatCard
+                label="messages"
+                value={stats.messagesCount}
+                icon={<MessageSquare className="h-4 w-4" />}
+            />
+            <StatCard
+                label="members"
+                value={group.members.length}
+                icon={<Trophy className="h-4 w-4" />}
+            />
+        </div>
+    );
+}
+
+function Leaderboard({ groupId }: { groupId: string }) {
+    const { group, isLoading } = useGroup(groupId);
 
     const sortedUsers = useMemo(
         () => (group ? [...group.members].sort((a, b) => b.points - a.points) : []),
         [group]
     );
 
-    const groupAgeDays = group?.createdAt
-        ? Math.floor(
-              (new Date().getTime() - new Date(group.createdAt).getTime()) / (1000 * 60 * 60 * 24)
-          )
-        : 0;
+    if (isLoading || !group) return <LeaderboardSkeleton />;
 
-    const isLoading = statsLoading || groupLoading;
+    return (
+        <Table>
+            <TableHeader>
+                <TableRow>
+                    <TableHead className="w-8">#</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead className="text-right">Points</TableHead>
+                    <TableHead className="text-right w-16">Streak</TableHead>
+                </TableRow>
+            </TableHeader>
+            <TableBody>
+                {sortedUsers.map((member: GroupMemberDTO, index: number) => (
+                    <TableRow key={String(member.user)}>
+                        <TableCell className="font-medium text-muted-foreground">
+                            {index + 1}
+                        </TableCell>
+                        <TableCell className="font-medium">
+                            <div className="flex items-center gap-2">
+                                <Avatar className="h-7 w-7 shrink-0">
+                                    {member.avatarUrl && (
+                                        <AvatarImage src={member.avatarUrl} alt={member.name} />
+                                    )}
+                                    <AvatarFallback className="text-xs">
+                                        {(member.name || "?").slice(0, 1).toUpperCase()}
+                                    </AvatarFallback>
+                                </Avatar>
+                                <span className="truncate">{member.name}</span>
+                            </div>
+                        </TableCell>
+                        <TableCell className="text-right">{member.points}</TableCell>
+                        <TableCell className="text-right">
+                            {member.streak > 0 ? `${member.streak} 👖` : "—"}
+                        </TableCell>
+                    </TableRow>
+                ))}
+            </TableBody>
+        </Table>
+    );
+}
 
-    if (isLoading || !stats || !group) {
+function QuestionsSection({ groupId }: { groupId: string }) {
+    const { stats, isLoading } = useGroupStats(groupId);
+
+    if (isLoading || !stats) {
         return (
             <>
-                <Header title="Statistics" />
-                <div className="grid grid-cols-3 gap-3 mb-4">
-                    {[...Array(3)].map((_, i) => (
-                        <Skeleton key={i} className="h-24" />
-                    ))}
+                <ThreeCardsSkeleton />
+                <div className="mt-3">
+                    <ChartsSkeleton />
                 </div>
-                <Skeleton className="h-10 mb-2" />
-                {[...Array(5)].map((_, i) => (
-                    <Skeleton key={i} className="h-12 mb-1" />
-                ))}
-                <Skeleton className="h-64 mt-6" />
-                <Skeleton className="h-64 mt-4" />
             </>
         );
     }
 
     const totalQuestions = stats.questionsUsedCount + stats.questionsLeftCount;
-    const totalRallies = stats.ralliesCompletedCount + stats.ralliesCreatedCount;
 
     return (
         <>
-            <Header title="Statistics" />
-
-            {/* Overview cards */}
-            <div className="grid grid-cols-3 gap-3">
-                <StatCard
-                    label="days active"
-                    value={groupAgeDays}
-                    icon={<Calendar className="h-4 w-4" />}
-                />
-                <StatCard
-                    label="messages"
-                    value={stats.messagesCount}
-                    icon={<MessageSquare className="h-4 w-4" />}
-                />
-                <StatCard
-                    label="members"
-                    value={group.members.length}
-                    icon={<Trophy className="h-4 w-4" />}
-                />
-            </div>
-
-            {/* Leaderboard */}
-            <SectionHeader>Leaderboard</SectionHeader>
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead className="w-8">#</TableHead>
-                        <TableHead>Name</TableHead>
-                        <TableHead className="text-right">Points</TableHead>
-                        <TableHead className="text-right w-16">Streak</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {sortedUsers.map((member: GroupMemberDTO, index: number) => (
-                        <TableRow key={String(member.user)}>
-                            <TableCell className="font-medium text-muted-foreground">
-                                {index + 1}
-                            </TableCell>
-                            <TableCell className="font-medium">
-                                <div className="flex items-center gap-2">
-                                    <Avatar className="h-7 w-7 shrink-0">
-                                        {member.avatarUrl && (
-                                            <AvatarImage src={member.avatarUrl} alt={member.name} />
-                                        )}
-                                        <AvatarFallback className="text-xs">
-                                            {(member.name || "?").slice(0, 1).toUpperCase()}
-                                        </AvatarFallback>
-                                    </Avatar>
-                                    <span className="truncate">{member.name}</span>
-                                </div>
-                            </TableCell>
-                            <TableCell className="text-right">{member.points}</TableCell>
-                            <TableCell className="text-right">
-                                {member.streak > 0 ? `${member.streak} 👖` : "—"}
-                            </TableCell>
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
-
-            {/* Questions */}
-            <SectionHeader>Questions</SectionHeader>
             <div className="grid grid-cols-3 gap-3 mb-4">
                 <StatCard label="used" value={stats.questionsUsedCount} />
                 <StatCard label="remaining" value={stats.questionsLeftCount} />
@@ -168,9 +201,19 @@ const StatsPage = () => {
                 <QuestionsByType data={stats.questionsByType} />
                 <QuestionsByUser data={stats.questionsByUser} />
             </div>
+        </>
+    );
+}
 
-            {/* Rallies */}
-            <SectionHeader>Rallies</SectionHeader>
+function RalliesSection({ groupId }: { groupId: string }) {
+    const { stats, isLoading } = useGroupStats(groupId);
+
+    if (isLoading || !stats) return <ThreeCardsSkeleton />;
+
+    const totalRallies = stats.ralliesCompletedCount + stats.ralliesCreatedCount;
+
+    return (
+        <>
             <div className="grid grid-cols-3 gap-3 mb-4">
                 <StatCard label="completed" value={stats.ralliesCompletedCount} />
                 <StatCard label="created" value={stats.ralliesCreatedCount} />
@@ -197,21 +240,54 @@ const StatsPage = () => {
                     </CardContent>
                 </Card>
             )}
+        </>
+    );
+}
 
-            {/* Jukebox */}
+function JukeboxSection({ groupId }: { groupId: string }) {
+    const { stats, isLoading } = useGroupStats(groupId);
+
+    if (isLoading || !stats) return <TwoCardsSkeleton />;
+
+    return (
+        <div className="grid grid-cols-2 gap-3 mb-8">
+            <StatCard
+                label="songs shared"
+                value={stats.jukeboxSongsCount}
+                icon={<Music className="h-4 w-4" />}
+            />
+            <StatCard
+                label="avg rating"
+                value={stats.jukeboxAvgRating > 0 ? `${stats.jukeboxAvgRating}` : "—"}
+                icon={<Star className="h-4 w-4" />}
+            />
+        </div>
+    );
+}
+
+// ─── Page shell ──────────────────────────────────────────────
+
+const StatsPage = () => {
+    const params = useParams<{ groupId: string }>();
+    const groupId = params ? params.groupId : "";
+
+    return (
+        <>
+            <Header title="Statistics" />
+
+            <OverviewCards groupId={groupId} />
+
+            <SectionHeader>Leaderboard</SectionHeader>
+            <Leaderboard groupId={groupId} />
+
+            <SectionHeader>Questions</SectionHeader>
+            <QuestionsSection groupId={groupId} />
+
+            <SectionHeader>Rallies</SectionHeader>
+            <RalliesSection groupId={groupId} />
+
             <SectionHeader>Jukebox</SectionHeader>
-            <div className="grid grid-cols-2 gap-3 mb-8">
-                <StatCard
-                    label="songs shared"
-                    value={stats.jukeboxSongsCount}
-                    icon={<Music className="h-4 w-4" />}
-                />
-                <StatCard
-                    label="avg rating"
-                    value={stats.jukeboxAvgRating > 0 ? `${stats.jukeboxAvgRating}` : "—"}
-                    icon={<Star className="h-4 w-4" />}
-                />
-            </div>
+            <JukeboxSection groupId={groupId} />
         </>
     );
 };

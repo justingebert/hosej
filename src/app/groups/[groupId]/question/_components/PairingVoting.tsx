@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/utils";
 import type { QuestionWithUserStateDTO } from "@/types/models/question";
+import { useQuestionActions } from "@/hooks/data/useActiveQuestions";
 
 // Palette of distinct pair colors — bg + text combos that work on light & dark
 const PAIR_COLORS = [
@@ -71,6 +72,7 @@ const PairingVoting = ({
     // selections: key index -> value index (index-based to handle duplicate strings)
     const [selections, setSelections] = useState<Record<number, number>>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const { voteQuestion } = useQuestionActions(question.groupId);
 
     // ── Exclusive mode state: tap key first, then value ──
     const [activeKey, setActiveKey] = useState<number | null>(null);
@@ -164,11 +166,7 @@ const PairingVoting = ({
             response[keys[Number(ki)]] = values[vi];
         }
         try {
-            await fetch(`/api/groups/${question.groupId}/question/${question._id}/vote`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ response }),
-            });
+            await voteQuestion(question._id, response);
             onVote();
         } finally {
             setIsSubmitting(false);

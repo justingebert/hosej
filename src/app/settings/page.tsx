@@ -24,6 +24,7 @@ export default function SettingsPage() {
 
     const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
+    //TODO remove this and get from session
     const { data: adminConfig } = useSWR(user ? "/api/admin/config" : null, fetcher, {
         onError: () => {},
         shouldRetryOnError: false,

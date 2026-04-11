@@ -5,14 +5,12 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Camera, Info, Users, MessageSquareText, Radio, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import useSWR from "swr";
-import fetcher from "@/lib/fetcher";
-import type { GroupDTO } from "@/types/models/group";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAppHaptics } from "@/hooks/useAppHaptics";
-import type { QuestionWithUserStateDTO } from "@/types/models/question";
 import { ActivityFeature } from "@/types/models/activityEvent";
-import type { MissedActivitySummary } from "@/types/models/activityEvent";
+import { useGroup } from "@/hooks/data/useGroup";
+import { useActiveQuestions } from "@/hooks/data/useActiveQuestions";
+import { useMissedActivity } from "@/hooks/data/useMissedActivity";
 
 // Lazy load CompletionChart (uses recharts ~200KB)
 const CompletionChart = dynamic(
@@ -28,26 +26,81 @@ const CompletionChart = dynamic(
     }
 );
 
+function GroupTitle({ groupId }: { groupId: string }) {
+    const { group } = useGroup(groupId);
+    if (!group) {
+        return (
+            <div className="flex-grow flex justify-center px-4">
+                <Skeleton className="h-10 w-48" />
+            </div>
+        );
+    }
+    const titleClass = group.name && group.name.length > 15 ? "text-2xl" : "text-4xl";
+    return (
+        <h1
+            className={`flex-grow ${titleClass} font-bold text-center tracking-tight break-words px-4`}
+        >
+            {group.name}
+        </h1>
+    );
+}
+
+function QuestionCard({
+    groupId,
+    missedCount,
+}: {
+    groupId: string;
+    missedCount: number | undefined;
+}) {
+    const { play } = useAppHaptics();
+    const { completionPercentage, isLoading } = useActiveQuestions(groupId);
+
+    if (isLoading) {
+        return <Skeleton className="h-[140px] rounded-2xl w-full" />;
+    }
+
+    return (
+        <Link
+            href={`/groups/${groupId}/question`}
+            className="relative group bg-gradient-to-br from-background to-muted/50 border shadow-sm px-6 py-5 min-h-[140px] flex items-center justify-between rounded-2xl cursor-pointer hover:shadow-md active:scale-[0.98] transition-all"
+            onClick={() => play("navigation")}
+            transitionTypes={["drill-forward"]}
+        >
+            {missedCount !== undefined && missedCount > 0 && (
+                <div className="absolute -top-3 -right-3 z-10">
+                    <Badge
+                        variant="destructive"
+                        className="shadow-sm animate-pulse shadow-destructive/20 border-border"
+                    >
+                        {missedCount} new
+                    </Badge>
+                </div>
+            )}
+            <div className="flex flex-col justify-center gap-1 z-10 relative">
+                <div className="flex items-center gap-2 text-muted-foreground mb-1">
+                    <MessageSquareText className="h-4 w-4" />
+                    <span className="text-xs font-semibold uppercase tracking-wider">
+                        Daily Question
+                    </span>
+                </div>
+                <div className="font-bold text-2xl tracking-tight">Answer Today&apos;s</div>
+                <div className="text-sm text-muted-foreground mt-1 flex items-center gap-1 group-hover:text-foreground transition-colors">
+                    Join the conversation <ChevronRight className="h-4 w-4" />
+                </div>
+            </div>
+            <div className="w-24 h-24 -mr-1 relative flex items-center justify-center shrink-0">
+                <CompletionChart completion={completionPercentage ?? 0} />
+            </div>
+        </Link>
+    );
+}
+
 export default function Dashboard() {
     const { play } = useAppHaptics();
     const params = useParams<{ groupId: string }>();
-    const groupId = params?.groupId;
+    const groupId = params?.groupId ?? "";
 
-    const { data: group } = useSWR<GroupDTO>(groupId ? `/api/groups/${groupId}` : null, fetcher);
-
-    const { data: questionsData, isLoading: questionLoading } = useSWR<{
-        questions: QuestionWithUserStateDTO[];
-        completionPercentage: number;
-    }>(groupId ? `/api/groups/${groupId}/question` : null, fetcher);
-
-    const { data: missedActivity } = useSWR<MissedActivitySummary>(
-        groupId ? `/api/groups/${groupId}/activity/missed` : null,
-        fetcher
-    );
-
-    const DailyCompletion = questionsData ? questionsData.completionPercentage : 0;
-
-    const titleClass = group?.name && group.name.length > 15 ? "text-2xl" : "text-4xl";
+    const { missed: missedActivity } = useMissedActivity(groupId || null);
 
     return (
         <div className="flex flex-col w-full min-h-[calc(100vh-140px)]">
@@ -60,11 +113,7 @@ export default function Dashboard() {
                 >
                     <Users className="h-5 w-5" />
                 </Link>
-                <h1
-                    className={`flex-grow ${titleClass} font-bold text-center tracking-tight break-words px-4`}
-                >
-                    {group?.name}
-                </h1>
+                <GroupTitle groupId={groupId} />
                 <Link
                     href={`/groups/${groupId}/info`}
                     className="inline-flex items-center justify-center rounded-full bg-muted/50 hover:bg-muted h-10 w-10"
@@ -77,44 +126,10 @@ export default function Dashboard() {
 
             <div className="flex flex-col gap-4 max-w-2xl mx-auto w-full flex-1 justify-center">
                 {/* Questions Section */}
-                {!questionLoading && questionsData ? (
-                    <Link
-                        href={`/groups/${groupId}/question`}
-                        className="relative group bg-gradient-to-br from-background to-muted/50 border shadow-sm px-6 py-5 min-h-[140px] flex items-center justify-between rounded-2xl cursor-pointer hover:shadow-md active:scale-[0.98] transition-all"
-                        onClick={() => play("navigation")}
-                        transitionTypes={["drill-forward"]}
-                    >
-                        {missedActivity && missedActivity[ActivityFeature.Question] > 0 && (
-                            <div className="absolute -top-3 -right-3 z-10">
-                                <Badge
-                                    variant="destructive"
-                                    className="shadow-sm animate-pulse shadow-destructive/20 border-border"
-                                >
-                                    {missedActivity[ActivityFeature.Question]} new
-                                </Badge>
-                            </div>
-                        )}
-                        <div className="flex flex-col justify-center gap-1 z-10 relative">
-                            <div className="flex items-center gap-2 text-muted-foreground mb-1">
-                                <MessageSquareText className="h-4 w-4" />
-                                <span className="text-xs font-semibold uppercase tracking-wider">
-                                    Daily Question
-                                </span>
-                            </div>
-                            <div className="font-bold text-2xl tracking-tight">
-                                Answer Today&apos;s
-                            </div>
-                            <div className="text-sm text-muted-foreground mt-1 flex items-center gap-1 group-hover:text-foreground transition-colors">
-                                Join the conversation <ChevronRight className="h-4 w-4" />
-                            </div>
-                        </div>
-                        <div className="w-24 h-24 -mr-1 relative flex items-center justify-center shrink-0">
-                            <CompletionChart completion={DailyCompletion} />
-                        </div>
-                    </Link>
-                ) : (
-                    <Skeleton className="h-[140px] rounded-2xl w-full" />
-                )}
+                <QuestionCard
+                    groupId={groupId}
+                    missedCount={missedActivity?.[ActivityFeature.Question]}
+                />
 
                 {/* Rallies Section */}
                 <Link

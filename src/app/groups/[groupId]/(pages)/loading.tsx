@@ -2,14 +2,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function GroupPagesLoading() {
     return (
-        <>
-            <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col w-full ">
+            <div className="flex justify-between items-center mb-8 ">
                 <Skeleton className="h-10 w-10 rounded-full" />
                 <Skeleton className="h-10 w-48" />
                 <Skeleton className="h-10 w-10 rounded-full" />
             </div>
 
-            <div className="flex flex-col gap-4 max-w-2xl mx-auto w-full">
+            <div className="flex flex-col gap-4 max-w-2xl mx-auto w-full flex-1">
                 {[...Array(3)].map((_, i) => (
                     <Skeleton
                         key={i}
@@ -24,6 +24,6 @@ export default function GroupPagesLoading() {
                     </Skeleton>
                 ))}
             </div>
-        </>
+        </div>
     );
 }

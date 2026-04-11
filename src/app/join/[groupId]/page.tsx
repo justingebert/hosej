@@ -4,6 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { useToast } from "@/hooks/use-toast";
+import { useGroups } from "@/hooks/data/useGroups";
 import { HoseJLoader } from "@/components/ui/custom/HoseJLoader";
 
 export default function JoinGroupPage() {
@@ -12,38 +13,29 @@ export default function JoinGroupPage() {
     const router = useRouter();
     const { user } = useAuthRedirect();
     const { toast } = useToast();
+    const { joinGroup } = useGroups(false);
 
     useEffect(() => {
         if (!user || !groupId) return;
 
-        const joinGroup = async () => {
+        const run = async () => {
             try {
-                const res = await fetch(`/api/groups/${groupId}/members`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                });
-
-                if (!res.ok) {
-                    const data = await res.json();
-                    toast({
-                        title: "Could not join group",
-                        description: data.message,
-                        variant: "destructive",
-                    });
-                    router.replace("/groups");
-                    return;
-                }
-
+                await joinGroup(groupId);
                 toast({ title: "Joined group!" });
                 router.replace(`/groups/${groupId}/dashboard`);
-            } catch {
-                toast({ title: "Something went wrong", variant: "destructive" });
+            } catch (err) {
+                const message = err instanceof Error ? err.message : "Something went wrong";
+                toast({
+                    title: "Could not join group",
+                    description: message,
+                    variant: "destructive",
+                });
                 router.replace("/groups");
             }
         };
 
-        joinGroup();
-    }, [user, groupId, router, toast]);
+        void run();
+    }, [user, groupId, router, toast, joinGroup]);
 
     return <HoseJLoader />;
 }

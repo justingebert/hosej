@@ -19,9 +19,8 @@ import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { useToast } from "@/hooks/use-toast";
 import type { createQuestionData } from "@/types/create";
 import { PairingKeySource, PairingMode } from "@/types/models/question";
-import useSWR from "swr";
-import type { GroupDTO } from "@/types/models/group";
-import fetcher from "@/lib/fetcher";
+import { useGroup } from "@/hooks/data/useGroup";
+import { useQuestionActions } from "@/hooks/data/useActiveQuestions";
 import { DisplayOptions } from "./DisplayOptions";
 import type { OptionsMode } from "./DisplayOptions";
 import PairingConfig from "./PairingConfig";
@@ -51,10 +50,9 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
         optionsMode = "static";
     }
 
-    const { data: group, isLoading } = useSWR<GroupDTO>(
-        user ? `/api/groups/${groupId}` : null,
-        fetcher
-    );
+    const { group } = useGroup(user ? groupId : null);
+    const { createQuestion, attachQuestionImage, attachQuestionOptions } =
+        useQuestionActions(groupId);
 
     useEffect(() => {
         if (clearImageInput) {
@@ -294,20 +292,7 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
 
         try {
             // Create the question without options first
-            const response = await fetch(`/api/groups/${groupId}/question/`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(questionPayload),
-            });
-
-            if (!response.ok) {
-                toast({ title: "Failed to create question", variant: "destructive" });
-                setIsSubmitting(false);
-                return;
-            }
-            const { newQuestion } = await response.json();
+            const newQuestion = await createQuestion(questionPayload);
 
             // Upload the main image if there is one
             if (questionData.mainImageFile) {
@@ -321,23 +306,7 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                 );
 
                 if (imageUrl && imageUrl.length > 0) {
-                    // Attach the main image to the question
-                    const response = await fetch(
-                        `/api/groups/${groupId}/question/${newQuestion._id}`,
-                        {
-                            method: "PATCH",
-                            headers: {
-                                "Content-Type": "application/json",
-                            },
-                            body: JSON.stringify({ imageKey: imageUrl[0].key }),
-                        }
-                    );
-                    if (!response.ok) {
-                        toast({ title: "Failed to create question", variant: "destructive" });
-                        //TODO delte question
-                        setIsSubmitting(false);
-                        return;
-                    }
+                    await attachQuestionImage(newQuestion._id, imageUrl[0].key);
                 }
             }
 
@@ -358,19 +327,7 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                     return;
                 }
 
-                // Update the question with options
-                const res = await fetch(`/api/groups/${groupId}/question/${newQuestion._id}`, {
-                    method: "PATCH",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ options: optionImageUrls }),
-                });
-                if (!res.ok) {
-                    toast({ title: "Failed to create question", variant: "destructive" });
-                    setIsSubmitting(false);
-                    return;
-                }
+                await attachQuestionOptions(newQuestion._id, optionImageUrls);
             }
 
             resetForm();

@@ -5,10 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import useSWR from "swr";
-import fetcher from "@/lib/fetcher";
 import { useState } from "react";
-import type { QuestionPackDTO } from "@/types/models/questionPack";
+import { useQuestionPacks } from "@/hooks/data/useQuestionPacks";
 
 interface QuestionSettingsProps {
     groupId: string;
@@ -16,8 +14,6 @@ interface QuestionSettingsProps {
     lastQuestionDate: string | null;
     onQuestionCountChange: (value: number) => void;
 }
-
-type PackWithStatus = QuestionPackDTO & { added: boolean };
 
 export function QuestionSettings({
     groupId,
@@ -27,11 +23,7 @@ export function QuestionSettings({
 }: QuestionSettingsProps) {
     const { toast } = useToast();
     const [addingPackId, setAddingPackId] = useState<string | null>(null);
-
-    const { data: packs, mutate } = useSWR<PackWithStatus[]>(
-        groupId ? `/api/groups/${groupId}/question-packs` : null,
-        fetcher
-    );
+    const { packs } = useQuestionPacks(groupId);
 
     const addPack = async (packId: string) => {
         toast({

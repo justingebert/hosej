@@ -9,30 +9,18 @@ import {
 } from "@/components/ui/drawer";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { mutate } from "swr";
+import { useGroups } from "@/hooks/data/useGroups";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 export function CreateGroupDrawer() {
     const [groupName, setGroupName] = useState("");
     const { toast } = useToast();
+    const { createGroup } = useGroups(false);
 
-    const createGroup = async () => {
+    const handleCreate = async () => {
         try {
-            const res = await fetch("/api/groups", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name: groupName }),
-            });
-
-            if (!res.ok) {
-                console.error("Failed to create group: ", res);
-                toast({ title: "Failed to create group!", variant: "destructive" });
-                return;
-            }
-
-            mutate(`/api/groups`);
-
+            await createGroup(groupName);
             toast({ title: "GroupId Copied to Clipboard!" });
         } catch (error) {
             console.error("Failed to create group: ", error);
@@ -62,7 +50,7 @@ export function CreateGroupDrawer() {
                     <DrawerFooter>
                         <DrawerClose asChild>
                             <Button
-                                onClick={createGroup}
+                                onClick={handleCreate}
                                 disabled={!groupName}
                                 className="mb-6 w-full h-12 text-lg font-bold"
                             >

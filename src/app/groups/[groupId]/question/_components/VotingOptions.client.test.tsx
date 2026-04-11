@@ -32,7 +32,8 @@ describe("VotingOptions", () => {
         fireEvent.click(screen.getByRole("button", { name: "Submit" }));
 
         await waitFor(() => expect(fetchMock).toHaveBeenCalled());
-        const init = fetchMock.mock.calls[fetchMock.mock.calls.length - 1]?.[1] as RequestInit;
+        const voteCall = fetchMock.mock.calls.find((c) => String(c[0]).includes("/vote"));
+        const init = voteCall?.[1] as RequestInit;
         expect(init.method).toBe("POST");
         expect(JSON.parse(String(init.body))).toEqual({ response: ["A"] });
         expect(onVote).toHaveBeenCalled();
@@ -62,7 +63,8 @@ describe("VotingOptions", () => {
         fireEvent.click(screen.getByRole("button", { name: "Submit" }));
 
         await waitFor(() => expect(fetchMock).toHaveBeenCalled());
-        const init = fetchMock.mock.calls[fetchMock.mock.calls.length - 1]?.[1] as RequestInit;
+        const voteCall = fetchMock.mock.calls.find((c) => String(c[0]).includes("/vote"));
+        const init = voteCall?.[1] as RequestInit;
         expect(JSON.parse(String(init.body))).toEqual({ response: ["A", "C"] });
     });
 
@@ -93,7 +95,8 @@ describe("VotingOptions", () => {
         fireEvent.click(screen.getByRole("button", { name: "Submit" }));
 
         await waitFor(() => expect(fetchMock).toHaveBeenCalled());
-        const init = fetchMock.mock.calls[fetchMock.mock.calls.length - 1]?.[1] as RequestInit;
+        const voteCall = fetchMock.mock.calls.find((c) => String(c[0]).includes("/vote"));
+        const init = voteCall?.[1] as RequestInit;
         expect(JSON.parse(String(init.body))).toEqual({ response: ["k1"] });
     });
 
@@ -120,7 +123,8 @@ describe("VotingOptions", () => {
         fireEvent.click(screen.getByRole("button", { name: "Submit" }));
 
         await waitFor(() => expect(fetchMock).toHaveBeenCalled());
-        const init = fetchMock.mock.calls[fetchMock.mock.calls.length - 1]?.[1] as RequestInit;
+        const voteCall = fetchMock.mock.calls.find((c) => String(c[0]).includes("/vote"));
+        const init = voteCall?.[1] as RequestInit;
         expect(JSON.parse(String(init.body))).toEqual({ response: ["Hello"] });
     });
 });

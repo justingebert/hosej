@@ -12,9 +12,8 @@ import {
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
-import useSWR from "swr";
-import fetcher from "@/lib/fetcher";
-import type { PictureSubmissionWithUrlDTO, RallyDTO } from "@/types/models/rally";
+import { useRallySubmissions } from "@/hooks/data/useRallySubmissions";
+import type { RallyDTO } from "@/types/models/rally";
 import { useAppHaptics } from "@/hooks/useAppHaptics";
 import type { Session } from "next-auth";
 
@@ -32,12 +31,10 @@ const RallyVoteCarousel = ({ user, rally, onVote }: RallyVoteCarouselProps) => {
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [currentIndex, setCurrentIndex] = useState(0);
 
-    const { data, isLoading } = useSWR<{ submissions: PictureSubmissionWithUrlDTO[] }>(
-        `/api/groups/${rally.groupId}/rally/${rally._id}/submissions`,
-        fetcher
+    const { submissions, isLoading, voteSubmission } = useRallySubmissions(
+        rally.groupId,
+        rally._id
     );
-
-    const submissions = useMemo(() => data?.submissions || [], [data?.submissions]);
 
     const isOwnSubmission = useMemo(() => {
         if (!user || currentIndex < 0 || currentIndex >= submissions.length) return false;
@@ -73,10 +70,7 @@ const RallyVoteCarousel = ({ user, rally, onVote }: RallyVoteCarouselProps) => {
         setIsSubmitting(true);
 
         try {
-            await fetch(
-                `/api/groups/${rally.groupId}/rally/${rally._id}/submissions/${selectedSubmission}/vote`,
-                { method: "POST", headers: { "Content-Type": "application/json" } }
-            );
+            await voteSubmission(selectedSubmission);
             onVote();
         } finally {
             setIsSubmitting(false);

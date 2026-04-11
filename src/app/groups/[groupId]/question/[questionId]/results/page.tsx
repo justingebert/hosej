@@ -2,19 +2,16 @@
 
 import React, { Suspense } from "react";
 import { useParams } from "next/navigation";
-import useSWR from "swr";
 import VoteResults from "@/app/groups/[groupId]/question/_components/VoteResults.client";
 import BackLink from "@/components/ui/custom/BackLink";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import Image from "next/image";
-import fetcher from "@/lib/fetcher";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SkeletonList } from "@/components/ui/custom/SkeletonList";
+import { useQuestionDetails } from "@/hooks/data/useQuestionDetails";
 
-import type { QuestionDTO, QuestionOptionDTO } from "@/types/models/question";
-
-type QuestionDetailsDTO = Omit<QuestionDTO, "options"> & { options?: QuestionOptionDTO[] };
+import type { QuestionOptionDTO } from "@/types/models/question";
 
 const ResultsPage = () => {
     const { user } = useAuthRedirect();
@@ -22,14 +19,7 @@ const ResultsPage = () => {
     const groupId = params ? params.groupId : "";
     const questionId = params ? params.questionId : "";
 
-    const {
-        data: question,
-        error,
-        isLoading,
-    } = useSWR<QuestionDetailsDTO>(
-        questionId ? `/api/groups/${groupId}/question/${questionId}` : null,
-        fetcher
-    );
+    const { question, error, isLoading } = useQuestionDetails(groupId, questionId);
 
     if (isLoading) return <Loading />;
     if (error) return <div className="text-red-500">Failed to load question data.</div>;

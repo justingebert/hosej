@@ -16,17 +16,8 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Check, ChevronsUpDown, Package } from "lucide-react";
 import { cn } from "@/lib/utils/utils";
-import useSWR from "swr";
-import fetcher from "@/lib/fetcher";
-import type { QuestionPackDTO } from "@/types/models/questionPack";
-
-interface AdminGroup {
-    _id: string;
-    name: string;
-    memberCount: number;
-}
-
-type PackWithStatus = QuestionPackDTO & { added: boolean };
+import { useAdminGroups, type AdminGroup } from "@/hooks/data/useAdminGroups";
+import { useQuestionPacks } from "@/hooks/data/useQuestionPacks";
 
 export default function GroupPackManager() {
     const { toast } = useToast();
@@ -34,37 +25,15 @@ export default function GroupPackManager() {
     const [selectedGroup, setSelectedGroup] = useState<AdminGroup | null>(null);
     const [addingPackId, setAddingPackId] = useState<string | null>(null);
 
-    const { data: groups } = useSWR<AdminGroup[]>("/api/admin/groups", fetcher, {
-        onError: () => {},
-        shouldRetryOnError: false,
-    });
-
-    const { data: packs, mutate } = useSWR<PackWithStatus[]>(
-        selectedGroup ? `/api/groups/${selectedGroup._id}/question-packs` : null,
-        fetcher,
-        {
-            onError: () => {},
-            shouldRetryOnError: false,
-        }
-    );
+    const { groups } = useAdminGroups();
+    const { packs, addPackToGroup } = useQuestionPacks(selectedGroup?._id ?? null);
 
     const addPack = async (packId: string) => {
         if (!selectedGroup) return;
         setAddingPackId(packId);
         try {
-            const response = await fetch(`/api/groups/${selectedGroup._id}/question-packs`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ packId }),
-            });
-
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.message || "Failed to add pack");
-            }
-
+            await addPackToGroup(packId);
             toast({ title: "Pack Added", description: `Pack added to ${selectedGroup.name}` });
-            mutate();
         } catch (error) {
             toast({
                 title: "Error",

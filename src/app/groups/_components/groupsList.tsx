@@ -2,9 +2,8 @@ import type { Session } from "next-auth";
 import Link from "next/link";
 import { useAppHaptics } from "@/hooks/useAppHaptics";
 import { useEffect, useState } from "react";
-import useSWR from "swr";
-import type { GroupDTO } from "@/types/models/group";
-import fetcher from "@/lib/fetcher";
+import { useGroups } from "@/hooks/data/useGroups";
+import { useGroupsActivity } from "@/hooks/data/useGroupsActivity";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -73,16 +72,8 @@ export function GroupsList({ user }: { user?: Session["user"] }) {
         }
     }
 
-    const { data, isLoading } = useSWR<{ groups: GroupDTO[] }>(
-        user ? `/api/groups` : null,
-        fetcher
-    );
-    const groups = data?.groups || [];
-
-    const { data: groupsActivity } = useSWR<Record<string, boolean>>(
-        user ? `/api/activity/groups` : null,
-        fetcher
-    );
+    const { groups, isLoading } = useGroups(!!user);
+    const { activity: groupsActivity } = useGroupsActivity(!!user);
 
     return (
         <>

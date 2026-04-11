@@ -5,17 +5,11 @@ import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import useSWR from "swr";
-import fetcher from "@/lib/fetcher";
 import type { Session } from "next-auth";
 import { useAppHaptics } from "@/hooks/useAppHaptics";
+import { useQuestionResults } from "@/hooks/data/useQuestionDetails";
 
-import type {
-    IPairingResult,
-    IResult,
-    QuestionDTO,
-    QuestionResultsDTO,
-} from "@/types/models/question";
+import type { IPairingResult, IResult, QuestionDTO } from "@/types/models/question";
 import { Badge } from "@/components/ui/badge";
 import ChatComponent from "@/components/common/Chat";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -30,10 +24,7 @@ type VoteResultsProps = {
 const VoteResults = ({ user, question, available, returnTo }: VoteResultsProps) => {
     const [animationTriggered, setAnimationTriggered] = useState(false);
     const { play } = useAppHaptics();
-    const { data, error } = useSWR<QuestionResultsDTO>(
-        `/api/groups/${question.groupId}/question/${question._id}/results/`,
-        fetcher
-    );
+    const { results: data, error } = useQuestionResults(question.groupId, question._id);
 
     useEffect(() => {
         if (data) setAnimationTriggered(true);

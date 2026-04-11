@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
 import type { QuestionOptionDTO, QuestionWithUserStateDTO } from "@/types/models/question";
 import PairingVoting from "./PairingVoting";
+import { useQuestionActions } from "@/hooks/data/useActiveQuestions";
 
 function optionResponseValue(option: QuestionOptionDTO): string {
     return typeof option === "string" ? option : option.key;
@@ -30,6 +31,7 @@ const VoteOptions = ({
     const [textResponse, setTextResponse] = useState<string>("");
     const [selectedResponses, setSelectedResponses] = useState<string[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const { voteQuestion } = useQuestionActions(question.groupId);
 
     const toggleOption = (option: QuestionOptionDTO) => {
         const value = optionResponseValue(option);
@@ -47,16 +49,7 @@ const VoteOptions = ({
         const response = isText ? [textResponse] : selectedResponses;
 
         try {
-            await fetch(`/api/groups/${question.groupId}/question/${question._id}/vote`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    response,
-                }),
-            });
-
+            await voteQuestion(question._id, response);
             onVote();
         } finally {
             setIsSubmitting(false);

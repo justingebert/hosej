@@ -6,9 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DataTableFacetedFilter } from "./data-table-faceted-filter";
 import { useParams } from "next/navigation";
-import useSWR from "swr";
-import fetcher from "@/lib/fetcher";
-import type { GroupDTO } from "@/types/models/group";
+import { useGroup } from "@/hooks/data/useGroup";
 import { QuestionType } from "@/types/models/question";
 
 interface DataTableToolbarProps<TData> {
@@ -38,12 +36,12 @@ export function DataTableToolbar<TData>({
 }: DataTableToolbarProps<TData>) {
     const params = useParams<{ groupId: string }>();
     const groupId = params ? params.groupId : "";
-    const { data: users } = useSWR<GroupDTO["members"]>(`/api/groups/${groupId}/members`, fetcher);
+    const { group } = useGroup(groupId || null);
 
-    const groupMembers = users
-        ? users.map((user) => ({
-              label: user.name,
-              value: String(user.user),
+    const groupMembers = group?.members
+        ? group.members.map((member) => ({
+              label: member.name,
+              value: String(member.user),
           }))
         : [];
 

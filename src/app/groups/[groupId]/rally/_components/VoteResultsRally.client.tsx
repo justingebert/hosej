@@ -1,19 +1,17 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import useSWR from "swr";
-import fetcher from "@/lib/fetcher";
+import { useRallySubmissions } from "@/hooks/data/useRallySubmissions";
 import { RallyVotesChart } from "@/app/groups/[groupId]/rally/_components/RallyResultsChart";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import ChatComponent from "@/components/common/Chat";
 import { Heart } from "lucide-react";
 import type { Session } from "next-auth";
-import type { RallyDTO, PictureSubmissionWithUrlDTO } from "@/types/models/rally";
+import type { RallyDTO } from "@/types/models/rally";
 
 interface RallyResultsProps {
     user: Session["user"] | undefined;
@@ -25,12 +23,7 @@ const MEDALS = ["🥇", "🥈", "🥉"];
 const RallyResults = ({ user, rally }: RallyResultsProps) => {
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-    const { data } = useSWR<{ submissions: PictureSubmissionWithUrlDTO[] }>(
-        `/api/groups/${rally.groupId}/rally/${rally._id}/submissions`,
-        fetcher
-    );
-
-    const submissions = useMemo(() => data?.submissions || [], [data?.submissions]);
+    const { submissions } = useRallySubmissions(rally.groupId, rally._id);
 
     if (submissions.length === 0) return null;
 

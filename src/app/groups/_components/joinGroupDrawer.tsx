@@ -9,15 +9,14 @@ import {
 } from "@/components/ui/drawer";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { mutate } from "swr";
-import { useAuthRedirect } from "@/hooks/useAuthRedirect";
+import { useGroups } from "@/hooks/data/useGroups";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 export function JoinGroupDrawer() {
     const [groupId, setGroupId] = useState("");
     const { toast } = useToast();
-    const { user } = useAuthRedirect();
+    const { joinGroup } = useGroups(false);
 
     const extractGroupId = (input: string): string => {
         const trimmed = input.trim();
@@ -30,23 +29,11 @@ export function JoinGroupDrawer() {
         if (groupId.trim() === "") return;
         const parsedId = extractGroupId(groupId);
         try {
-            const res = await fetch(`/api/groups/${parsedId}/members`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
-
-            if (!res.ok) {
-                const response = await res.json();
-                toast({ title: "Error", description: response.message, variant: "destructive" });
-                return;
-            }
-
-            mutate(user ? `/api/groups` : null);
+            await joinGroup(parsedId);
         } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : "Failed to join group";
             console.error("Failed to join group: ", error);
-            toast({ title: "Failed to join group!", variant: "destructive" });
+            toast({ title: "Error", description: message, variant: "destructive" });
         } finally {
             setGroupId("");
         }

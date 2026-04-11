@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { Send } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import useSWR from "swr";
-import fetcher from "@/lib/fetcher";
+import { useChat } from "@/hooks/data/useChat";
 
 import type { ChatDTO } from "@/types/models/chat";
 import { Button } from "@/components/ui/button";
@@ -28,53 +27,35 @@ function ChatComponent({ user, entity, available }: ChatComponentProps) {
     const [newMessage, setNewMessage] = useState("");
     const [sending, setSending] = useState(false);
 
-    const { data, error, mutate } = useSWR<ChatDTO>(
-        entity.chat ? `/api/groups/${entity.groupId}/chats/${entity.chat}` : null,
-        fetcher,
-        { onError: () => {} }
-    );
+    const { chat, error, mutate, sendMessage } = useChat(entity.groupId, entity.chat ?? null);
 
-    const messages = (data?.messages || []) as unknown as PopulatedMessage[];
+    const messages = (chat?.messages || []) as unknown as PopulatedMessage[];
 
     const handleSendMessage = async () => {
         if (!newMessage.trim()) return;
         setSending(true);
 
         try {
-            const messageData = { message: newMessage };
-            const response = await fetch(
-                `/api/groups/${entity.groupId}/chats/${entity.chat}/messages`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(messageData),
-                }
+            const newMsg = await sendMessage(newMessage);
+            const completeMessage = {
+                ...newMsg,
+                user: {
+                    _id: user._id,
+                    username: user.username,
+                },
+            };
+
+            // Optimistically update the messages cache
+            mutate(
+                (data) =>
+                    ({
+                        ...data,
+                        messages: [...messages, completeMessage],
+                    }) as unknown as ChatDTO,
+                false
             );
 
-            if (response.ok) {
-                const newMsg = await response.json();
-                const completeMessage = {
-                    ...newMsg,
-                    user: {
-                        _id: user._id,
-                        username: user.username,
-                    },
-                };
-
-                // Update the messages cache with the new message
-                mutate(
-                    (data) =>
-                        ({
-                            ...data,
-                            messages: [...messages, completeMessage],
-                        }) as ChatDTO,
-                    false // Revalidate after this update
-                );
-
-                setNewMessage("");
-            }
+            setNewMessage("");
         } catch (error) {
             console.error("Failed to send message", error);
         } finally {

@@ -18,7 +18,6 @@ import {
 } from "@/components/ui/drawer";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
-import { mutate } from "swr";
 import { CheckCheck } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { AnimatePresence, motion } from "framer-motion";
@@ -30,6 +29,7 @@ import type {
 } from "@/types/models/question";
 import { buildFlatQuestionList } from "@/app/groups/[groupId]/question/_components/questionTabsUtils";
 import { useAppHaptics } from "@/hooks/useAppHaptics";
+import { useQuestionActions } from "@/hooks/data/useActiveQuestions";
 
 type RateValue = Exclude<UserRating, null>;
 
@@ -56,15 +56,10 @@ export default function QuestionsTabs({
         returnToParam || (flatList.length > 0 ? flatList[0].question._id : undefined);
 
     const [activeTab, setActiveTab] = useState(defaultTab);
+    const { rateQuestion: rateQuestionHook } = useQuestionActions(groupId);
 
     const rateQuestion = async (questionId: string, rating: RateValue) => {
-        await fetch(`/api/groups/${groupId}/question/${questionId}/rate`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ rating }),
-        });
-
-        mutate(`/api/groups/${groupId}/question`);
+        await rateQuestionHook(questionId, rating);
         play("success");
     };
 
@@ -98,7 +93,6 @@ export default function QuestionsTabs({
                     {question._id === activeTab && (
                         <QuestionContent
                             user={user}
-                            groupId={groupId}
                             question={question}
                             drawerOpen={drawerOpen}
                             setDrawerOpen={setDrawerOpen}
@@ -115,7 +109,6 @@ export default function QuestionsTabs({
 // Extracted question content component
 function QuestionContent({
     user,
-    groupId,
     question,
     drawerOpen,
     setDrawerOpen,
@@ -123,13 +116,13 @@ function QuestionContent({
     handleDrawer,
 }: {
     user: Session["user"];
-    groupId: string;
     question: QuestionWithUserStateDTO;
     drawerOpen: boolean;
     setDrawerOpen: Dispatch<SetStateAction<boolean>>;
     rateQuestion: (questionId: string, rating: RateValue) => Promise<void>;
     handleDrawer: () => void;
 }) {
+    const { play } = useAppHaptics();
     return (
         <>
             <RatingDrawer
@@ -173,8 +166,8 @@ function QuestionContent({
                             <VoteOptions
                                 question={question}
                                 onVote={() => {
-                                    mutate(`/api/groups/${groupId}/question`);
                                     handleDrawer();
+                                    play("buzz");
                                 }}
                             />
                         </motion.div>

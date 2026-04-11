@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import ImageUploader from "@/components/common/ImageUploader";
 import { useImageUploader } from "@/hooks/useImageUploader";
+import { useRallySubmissions } from "@/hooks/data/useRallySubmissions";
 import { Progress } from "@/components/ui/progress";
 import { Camera, CheckCircle2, Clock, Users } from "lucide-react";
 import type { Session } from "next-auth";
@@ -54,6 +55,7 @@ export default function SubmitRally({
     const [progressValue, setProgressValue] = useState(0);
     const { toast } = useToast();
     const { uploading, compressImages, handleImageUpload } = useImageUploader();
+    const { submitPhoto } = useRallySubmissions(groupId, rally._id);
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -76,15 +78,7 @@ export default function SubmitRally({
                 compressedMainImage,
             ]);
             if (uploadResult && uploadResult.length > 0) {
-                const res = await fetch(`/api/groups/${groupId}/rally/${rally._id}/submissions`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ imageKey: uploadResult[0].key }),
-                });
-                if (!res.ok) {
-                    const data = await res.json();
-                    throw new Error(data.message || "Submission failed");
-                }
+                await submitPhoto(uploadResult[0].key);
             }
             onMutate();
             toast({ title: "Submission successful!" });

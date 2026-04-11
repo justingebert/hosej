@@ -2,7 +2,7 @@ import type { IJukeboxProcessed, IProcessedSong } from "@/types/models/jukebox";
 import type { Session } from "next-auth";
 import { useAppHaptics } from "@/hooks/useAppHaptics";
 import { useState } from "react";
-import { mutate } from "swr";
+import { useJukeboxes } from "@/hooks/data/useJukeboxes";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { AnimatePresence, motion } from "framer-motion";
@@ -34,6 +34,7 @@ export function JukeboxSubmissions({
     const [expandedSongs, setExpandedSongs] = useState<{ [key: string]: boolean }>({});
     const [expandAll, setExpandAll] = useState(false);
     const [sliderMoved, setSliderMoved] = useState(false);
+    const { rateSong } = useJukeboxes(jukebox.groupId);
 
     const handleExpandAll = () => {
         setExpandAll((prevExpandAll) => {
@@ -65,22 +66,7 @@ export function JukeboxSubmissions({
         setIsSubmitting(true);
 
         try {
-            const response = await fetch(
-                `/api/groups/${jukebox.groupId}/jukebox/${jukebox._id}/song/${selectedSong._id}/rate`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ rating: ratingValue }),
-                }
-            );
-
-            if (!response.ok) {
-                throw new Error("Failed to submit song rating");
-            }
-
-            mutate(`/api/groups/${jukebox.groupId}/jukebox?isActive=true`);
+            await rateSong(jukebox._id, selectedSong._id, ratingValue);
             play("success");
         } catch (error) {
             console.error("Error submitting rating:", error);

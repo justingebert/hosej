@@ -1,21 +1,15 @@
 "use client";
 
-import useSWR from "swr";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Header from "@/components/ui/custom/Header";
 import Image from "next/image";
 import BackLink from "@/components/ui/custom/BackLink";
-import fetcher from "@/lib/fetcher";
 import { SkeletonList } from "@/components/ui/custom/SkeletonList";
 import { useParams, useSearchParams } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useQuestionResults } from "@/hooks/data/useQuestionDetails";
 
-import type {
-    IPairingResult,
-    IResult,
-    IResultUser,
-    QuestionResultsDTO,
-} from "@/types/models/question";
+import type { IPairingResult, IResult, IResultUser } from "@/types/models/question";
 
 function UserChip({ user }: { user: IResultUser }) {
     return (
@@ -38,10 +32,7 @@ export default function ResultsDetailPage() {
     const questionId = params?.questionId ?? "";
     const returnTo = searchParams?.get("returnTo") ?? "";
 
-    const { data, isLoading } = useSWR<QuestionResultsDTO>(
-        `/api/groups/${groupId}/question/${questionId}/results`,
-        fetcher
-    );
+    const { results: data, isLoading } = useQuestionResults(groupId, questionId);
 
     if (isLoading)
         return (

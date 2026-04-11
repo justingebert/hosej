@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
+import { useGroupRallies } from "@/hooks/data/useGroupRallies";
 import type { createRallyData } from "@/types/create";
 
 interface CreateRallyProps {
@@ -17,6 +18,7 @@ const CreateRally = ({ rallyData, setRallyData }: CreateRallyProps) => {
     const params = useParams<{ groupId: string }>();
     const groupId = params?.groupId;
     const { toast } = useToast();
+    const { createRally } = useGroupRallies(groupId);
 
     const lengthInputRef = useRef<HTMLInputElement>(null);
 
@@ -24,34 +26,16 @@ const CreateRally = ({ rallyData, setRallyData }: CreateRallyProps) => {
         e.preventDefault();
         setLoading(true);
 
-        const rallyPayload = {
-            task: rallyData.task,
-            lengthInDays: rallyData.lengthInDays,
-        };
-
         try {
-            const response = await fetch(`/api/groups/${groupId}/rally`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(rallyPayload),
+            await createRally({
+                task: rallyData.task,
+                lengthInDays: rallyData.lengthInDays,
             });
-
-            if (!response.ok) {
-                toast({ title: "Failed to create rally!", variant: "destructive" });
-            } else {
-                toast({ title: "Rally created successfully!" });
-            }
-
-            // Reset the state
+            toast({ title: "Rally created successfully!" });
             setRallyData({ task: "", lengthInDays: 0 });
-        } catch (err: any) {
-            toast({
-                title: "Error",
-                description: err.message,
-                variant: "destructive",
-            });
+        } catch (err) {
+            const message = err instanceof Error ? err.message : "Failed to create rally!";
+            toast({ title: "Error", description: message, variant: "destructive" });
         } finally {
             setLoading(false);
         }
