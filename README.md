@@ -1,17 +1,16 @@
-# hosej
+# Hosej
 
-Social Hub app for me and my friends — a mobile-first PWA to organize groups, daily questions, photo rallies, music jukeboxes, and more.
+Social hub mobile-first PWA to organize groups, answer daily questions, run photo rallies, build a jukebox, chat, and keep score.
 
 ## Features
 
-- Groups
-- Daily Questions with voting + results
-- Photo Rallies (tasks for taking a photo) with voting + results
-- Jukebox (with Spotify integration) — submit and rate songs
-- Chats
-- History
-- Statistics
-- Leaderboard
+- **Groups** — invite friends
+- **Daily Questions** — one question a day, create, vote, rate, see results, 
+- **Photo Rallies** — task-based photo contests with a submission → voting → results lifecycle
+- **Jukebox** — submit songs (with Spotify search) and rate each other's picks
+- **Chats** — per-feature chat threads attached to questions, rallies, and jukeboxes
+- **Dashboard** — activity feed showing what's new since your last visit
+- **Leaderboard & Stats** — per-group points, participation stats, history
 
 ## Technical Features
 
@@ -27,32 +26,28 @@ HoseJ is a Next.js 14 App Router application. The UI is built with client compon
 
 ## Stack
 
-- Language: TypeScript
-- Runtime: Node.js
-- Framework: Next.js 14 (App Router)
-- Package Manager: npm (package-lock.json)
-- Styling: Tailwind CSS, shadcn/ui, 
-- State/Data fetching: SWR
-- Auth: NextAuth (Google provider + credentials), next-auth/jwt in middleware
-- Database: MongoDB with Mongoose
-- Notifications: Firebase Admin SDK + FCM
-- Storage: AWS S3
-- PWA: Serwist + @ducanh2912/next-pwa
-- Charts/Visuals: recharts, framer-motion
-- Deployment: Vercel
+- **Language:** TypeScript
+- **Framework:** Next.js 16 (App Router), React 19
+- **Styling:** Tailwind CSS, shadcn/ui (Radix primitives)
+- **Animations:** View Transitions API, framer-motion
+- **Data fetching:** SWR
+- **Auth:** NextAuth (credentials + Google), JWT sessions
+- **Database:** MongoDB with Mongoose
+- **Notifications:** Firebase Admin SDK + FCM
+- **Storage:** AWS S3 (presigned uploads)
+- **Rate Limiting:** Upstash Redis
+- **PWA:** Serwist service worker
+- **Charts:** recharts
+- **Testing:** Vitest + @testing-library/react + jsdom
+- **Deployment:** Vercel
 
 ---
 
 ## Quick Start
 
 ```bash
-# Clone the repository
-git clone <repo-url> && cd hosej
-
-# Install dependencies
 npm install
 
-# Copy environment variables
 cp .env.example .env.local
 # Edit .env.local with your actual values
 
@@ -60,31 +55,13 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to view the app.
 
 ---
 
-## Project Structure
-
+## Architecture
 ```
-src/
-├── app/                    # Next.js App Router pages and API routes
-│   ├── api/               # API route handlers
-│   ├── groups/            # Group-related pages
-│   └── ...
-├── components/
-│   ├── ui/                # shadcn/ui components
-│   ├── features/          # Feature-specific components
-│   └── wrappers/          # Context providers and wrappers
-├── db/
-│   ├── models/            # Mongoose schemas
-│   └── dbConnect.ts       # Database connection utility
-├── lib/
-│   ├── api/               # API utilities (auth, error handling)
-│   ├── services/          # Business logic layer
-│   └── ...
-├── hooks/                 # Custom React hooks
-├── types/                 # TypeScript type definitions
-│   └── models/            # Model interfaces and DTOs
-└── middleware.ts          # Auth middleware
+Pages (src/app/)           → Client components, SWR for data fetching
+API Routes (src/app/api/)  → Thin handlers, auth checks, call services
+Services (src/lib/services/) → Business logic, DB access, typed errors
+Models (src/db/models/)    → Mongoose schemas
 ```
