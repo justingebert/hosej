@@ -6,12 +6,16 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Flame, Image as ImageIcon } from "lucide-react";
+import PWAInstallButton from "@/components/common/PWAInstallButton";
+import { useAppHaptics } from "@/hooks/useAppHaptics";
 
 export default function LandingPage() {
     // Advanced Desktop Interactivity: 3D Parallax effect for the card cluster
     const clusterRef = useRef<HTMLDivElement>(null);
     const mouseX = useMotionValue(0);
     const mouseY = useMotionValue(0);
+
+    const { play } = useAppHaptics();
 
     const handleMouseMove = (e: React.MouseEvent) => {
         if (!clusterRef.current) return;
@@ -107,16 +111,26 @@ export default function LandingPage() {
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.2 }}
-                            className="mt-12"
+                            className="mt-12 flex flex-col sm:flex-row justify-center lg:justify-start items-center gap-4 lg:gap-6 w-[95%] sm:w-full max-w-md sm:max-w-none mx-auto lg:mx-0"
                         >
-                            <Link href="/login">
-                                <Button className="rounded-full h-16 sm:h-20 pl-10 pr-6 text-xl sm:text-2xl font-bold bg-accent text-accent-foreground hover:bg-accent/90 w-full sm:w-auto flex items-center justify-between group shadow-xl shadow-accent/20">
-                                    <span>Start now!</span>
-                                    <div className="w-12 h-12 ml-6 rounded-full bg-background flex items-center justify-center group-hover:scale-110 group-hover:rotate-[-45deg] transition-transform duration-300">
-                                        <ArrowRight className="w-6 h-6 text-accent" />
+                            <Link
+                                href="/login"
+                                className="w-full sm:w-auto"
+                                onClick={() => {
+                                    play("buzz");
+                                }}
+                            >
+                                <Button className="rounded-full h-16 sm:h-20 pl-8 pr-6 text-xl sm:text-2xl font-bold bg-accent text-accent-foreground hover:bg-accent/90 w-full flex items-center justify-center sm:justify-between group shadow-xl shadow-accent/20">
+                                    <span>Start Here!</span>
+                                    <div className="w-10 h-10 sm:w-12 sm:h-12 ml-4 rounded-full bg-background flex items-center justify-center group-hover:scale-110 group-hover:rotate-[-45deg] transition-transform duration-300">
+                                        <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 text-accent" />
                                     </div>
                                 </Button>
                             </Link>
+
+                            <div className="w-full sm:w-auto">
+                                <PWAInstallButton className="rounded-full h-16 sm:h-20 px-8 text-xl sm:text-2xl font-bold bg-secondary text-secondary-foreground hover:bg-secondary/90 w-full shadow-xl" />
+                            </div>
                         </motion.div>
                     </section>
 
