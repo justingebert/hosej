@@ -314,5 +314,5 @@ export async function getGroupHistory(
         filter.question = { $regex: search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), $options: "i" };
     }
 
-    return Question.find(filter).skip(offset).limit(limit).sort({ createdAt: -1 });
+    return Question.find(filter).skip(offset).limit(limit).sort({ usedAt: -1, createdAt: -1 });
 }

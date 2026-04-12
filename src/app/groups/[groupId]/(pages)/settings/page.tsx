@@ -8,7 +8,7 @@ import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import useSWR from "swr";
+import useSWR, { mutate as globalMutate } from "swr";
 import fetcher from "@/lib/fetcher";
 import type { FeatureStatus } from "@/types/models/appConfig";
 import { GroupInfoCard } from "@/app/groups/[groupId]/(pages)/settings/_components/GroupInfoCard";
@@ -51,7 +51,7 @@ export default function GroupSettingsPage() {
         ? group.members.find((member) => member.user === group.admin)?.name || "N/A"
         : "N/A";
 
-    const currentMember = group?.members.find((member) => member.user === user?._id);
+    const currentMember = group?.members?.find((member) => member.user === user?._id);
     const currentMemberName = currentMember?.name || "Member not found";
 
     const updateQuestionSettings = (
@@ -129,6 +129,7 @@ export default function GroupSettingsPage() {
         }
     };
 
+    //TODO this should also remove the stars from localstorage
     const leaveGroup = async () => {
         try {
             const res = await fetch(`/api/groups/${groupId}/members/${user?._id}`, {
@@ -137,9 +138,11 @@ export default function GroupSettingsPage() {
             if (!res.ok) {
                 toast({ title: "Failed to leave group", variant: "destructive" });
             }
-            mutate();
-            toast({ title: "You have left the group" });
             router.push("/groups");
+
+            globalMutate("/api/groups");
+
+            toast({ title: "You have left the group" });
         } catch (error) {
             console.error("Failed to leave group:", error);
             toast({ title: "Something went wrong", variant: "destructive" });
@@ -162,7 +165,7 @@ export default function GroupSettingsPage() {
         <>
             <Header title={group?.name || null} />
 
-            {isLoading ? (
+            {isLoading || !group || !features ? (
                 <SkeletonList count={3} className="h-52 mb-4" />
             ) : (
                 <div className="space-y-6 pb-12">

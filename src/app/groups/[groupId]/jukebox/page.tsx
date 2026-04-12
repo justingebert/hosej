@@ -15,6 +15,7 @@ import { JukeboxSearch } from "@/app/groups/[groupId]/jukebox/_components/jukebo
 import { JukeboxSubmissions } from "@/app/groups/[groupId]/jukebox/_components/jukeboxSubmissions";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMarkFeatureSeen } from "@/hooks/useMarkFeatureSeen";
+import { SkeletonList } from "@/components/ui/custom/SkeletonList";
 
 const JukeboxPage = () => {
     const { user } = useAuthRedirect();
@@ -53,9 +54,7 @@ const JukeboxPage = () => {
             {isLoading || !jukeboxes ? (
                 <div className="flex flex-col gap-3">
                     <Skeleton className="w-full h-10" />
-                    {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
-                        <Skeleton key={i} className="w-full h-14" />
-                    ))}
+                    <SkeletonList count={7} className="w-full h-24" />
                 </div>
             ) : jukeboxes.length === 0 ? (
                 <div className="flex items-center justify-center">

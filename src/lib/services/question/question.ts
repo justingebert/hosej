@@ -43,7 +43,6 @@ async function populateFromMembers(question: QuestionDocument): Promise<Question
     if (isPairingMembers && question.pairing) {
         question.pairing.keys = memberNames;
     }
-    await question.save();
 
     return question;
 }
