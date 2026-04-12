@@ -200,7 +200,7 @@ export default function LandingPage() {
                                     damping: 15,
                                     delay: 0.3,
                                 }}
-                                className="absolute right-0 sm:right-[-20%] top-[5%] lg:top-[5%] w-[230px] sm:w-[280px] z-10 hover:z-50 hover:scale-105 transition-all duration-300"
+                                className="absolute right-0 sm:right-[-20%] top-[5%] lg:top-[5%] w-[230px] sm:w-[280px] z-10 hover:z-50 hover:scale-105 transition-all duration-300 drop-shadow-2xl"
                             >
                                 <motion.div
                                     animate={{ y: [0, -8, 0] }}
@@ -249,7 +249,7 @@ export default function LandingPage() {
                                     damping: 15,
                                     delay: 0.45,
                                 }}
-                                className="absolute left-0 sm:left-[-20%] top-[20%] lg:top-[35%] w-[280px] sm:w-[360px] z-40 hover:z-50 hover:scale-105 transition-all duration-300"
+                                className="absolute left-0 sm:left-[-20%] top-[20%] lg:top-[35%] w-[280px] sm:w-[360px] z-30 hover:z-50 hover:scale-105 transition-all duration-300 drop-shadow-2xl"
                             >
                                 <motion.div
                                     animate={{ y: [0, -12, 0] }}
@@ -291,7 +291,7 @@ export default function LandingPage() {
                                     damping: 15,
                                     delay: 0.6,
                                 }}
-                                className="absolute right-2 sm:right-[-10%] top-[70%] lg:top-auto lg:bottom-[0%] w-[240px] sm:w-[300px] z-50 hover:z-50 hover:scale-105 transition-all duration-300 group/rally"
+                                className="absolute right-2 sm:right-[-10%] top-[70%] lg:top-auto lg:bottom-[0%] w-[240px] sm:w-[300px] z-40 hover:z-50 hover:scale-105 transition-all duration-300 group/rally drop-shadow-2xl"
                             >
                                 <motion.div
                                     animate={{ y: [0, -10, 0] }}
