@@ -71,29 +71,11 @@ const StatsPage = () => {
           )
         : 0;
 
-    const isLoading = statsLoading || groupLoading;
+    const groupReady = !groupLoading && !!group;
+    const statsReady = !statsLoading && !!stats;
 
-    if (isLoading || !stats || !group) {
-        return (
-            <>
-                <Header title="Statistics" />
-                <div className="grid grid-cols-3 gap-3 mb-4">
-                    {[...Array(3)].map((_, i) => (
-                        <Skeleton key={i} className="h-24" />
-                    ))}
-                </div>
-                <Skeleton className="h-10 mb-2" />
-                {[...Array(5)].map((_, i) => (
-                    <Skeleton key={i} className="h-12 mb-1" />
-                ))}
-                <Skeleton className="h-64 mt-6" />
-                <Skeleton className="h-64 mt-4" />
-            </>
-        );
-    }
-
-    const totalQuestions = stats.questionsUsedCount + stats.questionsLeftCount;
-    const totalRallies = stats.ralliesCompletedCount + stats.ralliesCreatedCount;
+    const totalQuestions = stats ? stats.questionsUsedCount + stats.questionsLeftCount : 0;
+    const totalRallies = stats ? stats.ralliesCompletedCount + stats.ralliesCreatedCount : 0;
 
     return (
         <>
@@ -101,21 +83,27 @@ const StatsPage = () => {
 
             {/* Overview cards */}
             <div className="grid grid-cols-3 gap-3">
-                <StatCard
-                    label="days active"
-                    value={groupAgeDays}
-                    icon={<Calendar className="h-4 w-4" />}
-                />
-                <StatCard
-                    label="messages"
-                    value={stats.messagesCount}
-                    icon={<MessageSquare className="h-4 w-4" />}
-                />
-                <StatCard
-                    label="members"
-                    value={group.members.length}
-                    icon={<Trophy className="h-4 w-4" />}
-                />
+                {groupReady && statsReady ? (
+                    <>
+                        <StatCard
+                            label="days active"
+                            value={groupAgeDays}
+                            icon={<Calendar className="h-4 w-4" />}
+                        />
+                        <StatCard
+                            label="messages"
+                            value={stats!.messagesCount}
+                            icon={<MessageSquare className="h-4 w-4" />}
+                        />
+                        <StatCard
+                            label="members"
+                            value={group!.members.length}
+                            icon={<Trophy className="h-4 w-4" />}
+                        />
+                    </>
+                ) : (
+                    [0, 1, 2].map((i) => <Skeleton key={i} className="h-24" />)
+                )}
             </div>
 
             {/* Leaderboard */}
@@ -130,57 +118,89 @@ const StatsPage = () => {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {sortedUsers.map((member: GroupMemberDTO, index: number) => (
-                        <TableRow key={String(member.user)}>
-                            <TableCell className="font-medium text-muted-foreground">
-                                {index + 1}
-                            </TableCell>
-                            <TableCell className="font-medium">
-                                <div className="flex items-center gap-2">
-                                    <Avatar className="h-7 w-7 shrink-0">
-                                        {member.avatarUrl && (
-                                            <AvatarImage src={member.avatarUrl} alt={member.name} />
-                                        )}
-                                        <AvatarFallback className="text-xs">
-                                            {(member.name || "?").slice(0, 1).toUpperCase()}
-                                        </AvatarFallback>
-                                    </Avatar>
-                                    <span className="truncate">{member.name}</span>
-                                </div>
-                            </TableCell>
-                            <TableCell className="text-right">{member.points}</TableCell>
-                            <TableCell className="text-right">
-                                {member.streak > 0 ? `${member.streak} 👖` : "—"}
-                            </TableCell>
-                        </TableRow>
-                    ))}
+                    {groupReady
+                        ? sortedUsers.map((member: GroupMemberDTO, index: number) => (
+                              <TableRow key={String(member.user)}>
+                                  <TableCell className="font-medium text-muted-foreground">
+                                      {index + 1}
+                                  </TableCell>
+                                  <TableCell className="font-medium">
+                                      <div className="flex items-center gap-2">
+                                          <Avatar className="h-7 w-7 shrink-0">
+                                              {member.avatarUrl && (
+                                                  <AvatarImage
+                                                      src={member.avatarUrl}
+                                                      alt={member.name}
+                                                  />
+                                              )}
+                                              <AvatarFallback className="text-xs">
+                                                  {(member.name || "?").slice(0, 1).toUpperCase()}
+                                              </AvatarFallback>
+                                          </Avatar>
+                                          <span className="truncate">{member.name}</span>
+                                      </div>
+                                  </TableCell>
+                                  <TableCell className="text-right">{member.points}</TableCell>
+                                  <TableCell className="text-right">
+                                      {member.streak > 0 ? `${member.streak} 👖` : "—"}
+                                  </TableCell>
+                              </TableRow>
+                          ))
+                        : [0, 1, 2, 3, 4].map((i) => (
+                              <TableRow key={i}>
+                                  <TableCell colSpan={4} className="py-2">
+                                      <Skeleton className="h-8 w-full" />
+                                  </TableCell>
+                              </TableRow>
+                          ))}
                 </TableBody>
             </Table>
 
             {/* Questions */}
             <SectionHeader>Questions</SectionHeader>
             <div className="grid grid-cols-3 gap-3 mb-4">
-                <StatCard label="used" value={stats.questionsUsedCount} />
-                <StatCard label="remaining" value={stats.questionsLeftCount} />
-                <StatCard label="total" value={totalQuestions} />
+                {statsReady ? (
+                    <>
+                        <StatCard label="used" value={stats!.questionsUsedCount} />
+                        <StatCard label="remaining" value={stats!.questionsLeftCount} />
+                        <StatCard label="total" value={totalQuestions} />
+                    </>
+                ) : (
+                    [0, 1, 2].map((i) => <Skeleton key={i} className="h-24" />)
+                )}
             </div>
             <div className="space-y-3">
-                <QuestionsByType data={stats.questionsByType} />
-                <QuestionsByUser data={stats.questionsByUser} />
+                {statsReady ? (
+                    <>
+                        <QuestionsByType data={stats!.questionsByType} />
+                        <QuestionsByUser data={stats!.questionsByUser} />
+                    </>
+                ) : (
+                    <>
+                        <Skeleton className="h-64" />
+                        <Skeleton className="h-64" />
+                    </>
+                )}
             </div>
 
             {/* Rallies */}
             <SectionHeader>Rallies</SectionHeader>
             <div className="grid grid-cols-3 gap-3 mb-4">
-                <StatCard label="completed" value={stats.ralliesCompletedCount} />
-                <StatCard label="created" value={stats.ralliesCreatedCount} />
-                <StatCard label="total" value={totalRallies} />
+                {statsReady ? (
+                    <>
+                        <StatCard label="completed" value={stats!.ralliesCompletedCount} />
+                        <StatCard label="created" value={stats!.ralliesCreatedCount} />
+                        <StatCard label="total" value={totalRallies} />
+                    </>
+                ) : (
+                    [0, 1, 2].map((i) => <Skeleton key={i} className="h-24" />)
+                )}
             </div>
-            {stats.rallyWins?.length > 0 && (
+            {statsReady && stats!.rallyWins?.length > 0 && (
                 <Card>
                     <CardContent className="p-4">
                         <div className="text-sm font-medium mb-2">Rally Wins</div>
-                        {stats.rallyWins.map((entry, i) => (
+                        {stats!.rallyWins.map((entry, i) => (
                             <div
                                 key={entry.username}
                                 className="flex justify-between items-center py-1"
@@ -201,16 +221,22 @@ const StatsPage = () => {
             {/* Jukebox */}
             <SectionHeader>Jukebox</SectionHeader>
             <div className="grid grid-cols-2 gap-3 mb-8">
-                <StatCard
-                    label="songs shared"
-                    value={stats.jukeboxSongsCount}
-                    icon={<Music className="h-4 w-4" />}
-                />
-                <StatCard
-                    label="avg rating"
-                    value={stats.jukeboxAvgRating > 0 ? `${stats.jukeboxAvgRating}` : "—"}
-                    icon={<Star className="h-4 w-4" />}
-                />
+                {statsReady ? (
+                    <>
+                        <StatCard
+                            label="songs shared"
+                            value={stats!.jukeboxSongsCount}
+                            icon={<Music className="h-4 w-4" />}
+                        />
+                        <StatCard
+                            label="avg rating"
+                            value={stats!.jukeboxAvgRating > 0 ? `${stats!.jukeboxAvgRating}` : "—"}
+                            icon={<Star className="h-4 w-4" />}
+                        />
+                    </>
+                ) : (
+                    [0, 1].map((i) => <Skeleton key={i} className="h-24" />)
+                )}
             </div>
         </>
     );

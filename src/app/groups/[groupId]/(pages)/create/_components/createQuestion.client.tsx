@@ -22,9 +22,9 @@ import { PairingKeySource, PairingMode } from "@/types/models/question";
 import useSWR from "swr";
 import type { GroupDTO } from "@/types/models/group";
 import fetcher from "@/lib/fetcher";
-import { DisplayOptions } from "./DisplayOptions";
-import type { OptionsMode } from "./DisplayOptions";
-import PairingConfig from "./PairingConfig";
+import { DisplayOptions } from "../../../question/_components/DisplayOptions";
+import type { OptionsMode } from "../../../question/_components/DisplayOptions";
+import PairingConfig from "../../../question/_components/PairingConfig";
 
 interface CreateQuestionProps {
     questionData: createQuestionData;

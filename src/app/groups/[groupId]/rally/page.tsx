@@ -54,30 +54,22 @@ const RallyPage = () => {
         return map;
     }, [rallies, user?._id]);
 
-    if (isLoading || !data) {
-        return (
-            <div>
-                <Header
-                    leftComponent={<BackLink href={`/groups/${groupId}/dashboard`} />}
-                    title="Rallies"
-                />
-                <div>
-                    <Skeleton className="w-full h-10 mb-4" />
-                    <Skeleton className="w-full h-20 mb-20" />
-                    <Skeleton className="w-full h-96 mb-20" />
-                    <Skeleton className="w-full h-12 mb-6" />
-                </div>
-            </div>
-        );
-    }
+    const loading = isLoading || !data;
 
-    if (rallies.length === 0) {
-        return (
-            <div className="flex flex-col h-[100dvh]">
-                <Header
-                    leftComponent={<BackLink href={`/groups/${groupId}/dashboard`} />}
-                    title="Rallies"
-                />
+    return (
+        <div className="flex flex-col h-[100dvh]">
+            <Header
+                leftComponent={<BackLink href={`/groups/${groupId}/dashboard`} />}
+                title="Rallies"
+            />
+            {loading ? (
+                <div className="flex flex-col gap-4">
+                    <Skeleton className="w-full h-10" />
+                    <Skeleton className="w-full h-20" />
+                    <Skeleton className="w-full h-96" />
+                    <Skeleton className="w-full h-12" />
+                </div>
+            ) : rallies.length === 0 ? (
                 <div className="flex flex-grow justify-center items-center">
                     <div className="flex flex-col gap-y-4">
                         <Card className="text-center p-6">
@@ -97,24 +89,16 @@ const RallyPage = () => {
                         )}
                     </div>
                 </div>
-            </div>
-        );
-    }
-
-    return (
-        <div>
-            <Header
-                leftComponent={<BackLink href={`/groups/${groupId}/dashboard`} />}
-                title="Rallies"
-            />
-            <RallyTabs
-                groupId={groupId}
-                user={user}
-                rallies={rallies}
-                userHasVoted={userHasVoted}
-                userHasUploaded={userHasUploaded}
-                onMutate={() => mutateRallies()}
-            />
+            ) : (
+                <RallyTabs
+                    groupId={groupId}
+                    user={user}
+                    rallies={rallies}
+                    userHasVoted={userHasVoted}
+                    userHasUploaded={userHasUploaded}
+                    onMutate={() => mutateRallies()}
+                />
+            )}
         </div>
     );
 };

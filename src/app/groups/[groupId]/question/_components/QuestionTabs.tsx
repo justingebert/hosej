@@ -130,6 +130,7 @@ function QuestionContent({
     rateQuestion: (questionId: string, rating: RateValue) => Promise<void>;
     handleDrawer: () => void;
 }) {
+    const { play } = useAppHaptics();
     return (
         <>
             <RatingDrawer
@@ -175,6 +176,7 @@ function QuestionContent({
                                 onVote={() => {
                                     mutate(`/api/groups/${groupId}/question`);
                                     handleDrawer();
+                                    play("buzz");
                                 }}
                             />
                         </motion.div>

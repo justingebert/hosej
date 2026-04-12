@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { JukeboxSearch } from "@/app/groups/[groupId]/jukebox/_components/jukeboxSearch";
 import { JukeboxSubmissions } from "@/app/groups/[groupId]/jukebox/_components/jukeboxSubmissions";
-import JukeboxLoading from "@/app/groups/[groupId]/jukebox/loading";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useMarkFeatureSeen } from "@/hooks/useMarkFeatureSeen";
 
 const JukeboxPage = () => {
@@ -51,7 +51,12 @@ const JukeboxPage = () => {
                 title={`Jukebox`}
             />
             {isLoading || !jukeboxes ? (
-                <JukeboxLoading />
+                <div className="flex flex-col gap-3">
+                    <Skeleton className="w-full h-10" />
+                    {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+                        <Skeleton key={i} className="w-full h-14" />
+                    ))}
+                </div>
             ) : jukeboxes.length === 0 ? (
                 <div className="flex items-center justify-center">
                     <Card className="text-center p-6 ">

@@ -4,6 +4,7 @@ import Header from "@/components/ui/custom/Header";
 import ThemeSelector from "@/components/ui/custom/ThemeSelector";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { useEffect, useState } from "react";
 import { signOut } from "next-auth/react";
@@ -15,7 +16,6 @@ import { requestPermissionReturnToken } from "@/hooks/useFcmToken";
 import BackLink from "@/components/ui/custom/BackLink";
 import { UserDataTable } from "@/app/settings/_components/userDataTable";
 import { GoogleConnectButton } from "@/app/settings/_components/googleConnectButton";
-import { SettingsSkeleton } from "@/app/settings/_components/settingsSkeleton";
 import { ProfileEditor } from "@/app/settings/_components/ProfileEditor";
 
 export default function SettingsPage() {
@@ -40,7 +40,7 @@ export default function SettingsPage() {
         }
     }, [status, user]);
 
-    if (status === "loading" || !user) return <SettingsSkeleton />;
+    const ready = status !== "loading" && !!user;
 
     const handleLogout = async () => {
         const confirmation = window.confirm(
@@ -90,31 +90,52 @@ export default function SettingsPage() {
             <div className="flex-grow mt-4">
                 <div className="flex items-center justify-between mb-4">
                     <span>Notifications</span>
-                    <Switch
-                        checked={notificationsEnabled}
-                        onCheckedChange={handleNotificationToggle}
-                    />
+                    {ready ? (
+                        <Switch
+                            checked={notificationsEnabled}
+                            onCheckedChange={handleNotificationToggle}
+                        />
+                    ) : (
+                        <Skeleton className="h-6 w-10" />
+                    )}
                 </div>
 
-                <ProfileEditor user={user} />
-                <UserDataTable user={user} />
-                <GoogleConnectButton user={user} className="mt-4" />
+                {ready ? (
+                    <>
+                        <ProfileEditor user={user!} />
+                        <UserDataTable user={user!} />
+                        <GoogleConnectButton user={user!} className="mt-4" />
 
-                {isGlobalAdmin && (
-                    <Button
-                        variant="outline"
-                        className="w-full mt-4"
-                        onClick={() => router.push("/admin")}
-                    >
-                        <Shield className="h-4 w-4 mr-2" />
-                        Admin Dashboard
-                    </Button>
+                        {isGlobalAdmin && (
+                            <Button
+                                variant="outline"
+                                className="w-full mt-4"
+                                onClick={() => router.push("/admin")}
+                            >
+                                <Shield className="h-4 w-4 mr-2" />
+                                Admin Dashboard
+                            </Button>
+                        )}
+                    </>
+                ) : (
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-4">
+                            <Skeleton className="h-16 w-16 rounded-full" />
+                            <Skeleton className="h-9 w-32" />
+                        </div>
+                        <Skeleton className="h-10 w-full" />
+                        <Skeleton className="h-10 w-full" />
+                    </div>
                 )}
             </div>
             <div className="mt-auto mb-14">
-                <Button onClick={handleLogout} variant="destructive" className="w-full">
-                    Logout
-                </Button>
+                {ready ? (
+                    <Button onClick={handleLogout} variant="destructive" className="w-full">
+                        Logout
+                    </Button>
+                ) : (
+                    <Skeleton className="h-10 w-full" />
+                )}
             </div>
         </div>
     );

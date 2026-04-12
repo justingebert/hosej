@@ -10,7 +10,7 @@ import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import BackLink from "@/components/ui/custom/BackLink";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
-import QuestionsTabs from "./QuestionTabs";
+import QuestionsTabs from "./_components/QuestionTabs";
 
 import type { QuestionWithUserStateDTO } from "@/types/models/question";
 import { useMarkFeatureSeen } from "@/hooks/useMarkFeatureSeen";
@@ -35,11 +35,9 @@ const DailyQuestionPage = () => {
             />
 
             {isLoading || !data ? (
-                <div className="flex flex-col">
-                    <Skeleton className="w-full h-10 mb-6" />
-                    <Skeleton className="w-full h-20 mb-6" />
-                    <Skeleton className="w-full h-[300px] mb-6" />
-                    <Skeleton className="w-full h-[300px] mb-6" />
+                <div className="flex flex-col gap-4">
+                    <Skeleton className="w-full h-10" />
+                    <Skeleton className="w-full h-[300px]" />
                 </div>
             ) : data.questions && data.questions.length > 0 ? (
                 <QuestionsTabs user={user!} groupId={groupId} questions={data.questions} />

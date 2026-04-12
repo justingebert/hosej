@@ -63,7 +63,7 @@ export default function Dashboard() {
                 <h1
                     className={`flex-grow ${titleClass} font-bold text-center tracking-tight break-words px-4`}
                 >
-                    {group?.name}
+                    {group?.name ?? <Skeleton className="h-8 w-40 mx-auto rounded-md" />}
                 </h1>
                 <Link
                     href={`/groups/${groupId}/info`}

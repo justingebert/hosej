@@ -3,6 +3,7 @@
 import { useCallback } from "react";
 import type { HapticInput, TriggerOptions } from "web-haptics";
 import { useWebHaptics } from "web-haptics/react";
+import { defaultPatterns } from "web-haptics";
 
 export type AppHapticType =
     | "none"
@@ -13,7 +14,8 @@ export type AppHapticType =
     | "warning"
     | "error"
     | "heavy"
-    | "nudge";
+    | "nudge"
+    | "buzz";
 
 const APP_HAPTIC_PATTERNS: Record<Exclude<AppHapticType, "none">, HapticInput> = {
     tap: [{ duration: 18, intensity: 0.45 }],
@@ -30,8 +32,10 @@ const APP_HAPTIC_PATTERNS: Record<Exclude<AppHapticType, "none">, HapticInput> =
         { duration: 80, intensity: 0.8 },
         { delay: 80, duration: 50, intensity: 0.3 },
     ],
+    buzz: defaultPatterns.buzz,
 };
 
+//TODO remove this, unssesary abstraction
 export const useAppHaptics = () => {
     const { trigger, cancel, isSupported } = useWebHaptics();
 

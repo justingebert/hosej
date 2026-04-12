@@ -45,8 +45,6 @@ export default function GroupSettingsPage() {
         }
     }, [group]);
 
-    if (error) return <p className="text-red-500">Failed to load group data</p>;
-
     const userIsAdmin = !!group?.userIsAdmin;
 
     const adminName = group?.admin
@@ -165,24 +163,20 @@ export default function GroupSettingsPage() {
             <Header title={group?.name || null} />
 
             {isLoading ? (
-                <SkeletonList count={10} className="h-12 mb-4" />
-            ) : !group ? (
-                <p>Group not found.</p>
-            ) : !user || !features ? (
-                <SkeletonList count={10} className="h-12 mb-4" />
+                <SkeletonList count={3} className="h-52 mb-4" />
             ) : (
                 <div className="space-y-6 pb-12">
                     <GroupInfoCard
                         currentMemberName={currentMemberName}
                         groupId={groupId}
-                        createdAt={new Date(group.createdAt)}
+                        createdAt={new Date(group!.createdAt)}
                         adminName={adminName}
                     />
 
                     {userIsAdmin && (
                         <GroupFeatureSettingsCard
                             groupId={groupId}
-                            features={features}
+                            features={features!}
                             globalFeatures={globalFeatures}
                             onQuestionCountChange={(value) =>
                                 updateQuestionSettings({ questionCount: value })
@@ -211,14 +205,14 @@ export default function GroupSettingsPage() {
                     )}
 
                     <GroupMembersCard
-                        members={group.members}
-                        currentUserId={user._id}
+                        members={group!.members}
+                        currentUserId={user!._id}
                         userIsAdmin={userIsAdmin}
                         onKickMember={kickMember}
                     />
 
                     <GroupDangerZoneCard
-                        groupName={group.name}
+                        groupName={group!.name}
                         userIsAdmin={userIsAdmin}
                         onLeaveGroup={leaveGroup}
                         onDeleteGroup={deleteGroup}
