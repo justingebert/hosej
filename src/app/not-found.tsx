@@ -37,9 +37,6 @@ export default function NotFound() {
                         <CardDescription>
                             The page you&apos;re looking for doesn&apos;t exist or has been moved.
                             <br />
-                            <span className="text-xs text-muted-foreground mt-2 block">
-                                Redirecting to groups in 5 seconds...
-                            </span>
                         </CardDescription>
                     </CardHeader>
                     <CardContent>

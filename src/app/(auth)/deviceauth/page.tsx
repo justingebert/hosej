@@ -12,7 +12,7 @@ export default function DeviceAuth() {
 
     const handleStart = async () => {
         localStorage.setItem("deviceId", deviceID);
-        router.push("/");
+        router.push("/login");
     };
 
     return (

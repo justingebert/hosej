@@ -50,7 +50,7 @@ export default function SettingsPage() {
 
         localStorage.removeItem("deviceId");
         await signOut();
-        router.push("/");
+        router.push("/login");
     };
 
     const handleNotificationToggle = async () => {

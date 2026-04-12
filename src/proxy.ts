@@ -48,6 +48,7 @@ export async function proxy(req: NextRequest) {
         "/auth/error",
         "/offline",
         "/",
+        "/login",
     ]);
     if (publicRoutes.has(pathname) || (pathname == "/api/users" && req.method === "POST")) {
         return NextResponse.next();
@@ -59,7 +60,7 @@ export async function proxy(req: NextRequest) {
             return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
         }
 
-        const loginUrl = new URL("/", req.url);
+        const loginUrl = new URL("/login", req.url);
         loginUrl.searchParams.set("callbackUrl", pathname);
         return NextResponse.redirect(loginUrl);
     }

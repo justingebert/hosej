@@ -44,13 +44,13 @@ function AuthErrorContent() {
                     )}
                     <div className="flex gap-2">
                         <Button asChild variant="outline" className="flex-1">
-                            <Link href="/">
+                            <Link href="/login">
                                 <RotateCcw className="h-4 w-4 mr-2" />
                                 Try Again
                             </Link>
                         </Button>
                         <Button asChild className="flex-1">
-                            <Link href="/">
+                            <Link href="/login">
                                 <Home className="h-4 w-4 mr-2" />
                                 Go Home
                             </Link>

@@ -26,7 +26,7 @@ export const authOptions: AuthOptions = {
         session: sessionCallback,
     },
     pages: {
-        signIn: "/",
+        signIn: "/login",
         error: "/auth/error",
     },
     secret: env.NEXTAUTH_SECRET,
