@@ -145,10 +145,10 @@
 
 /* Default: quick cross-fade for page-level transitions */
 ::view-transition-old(.vt-page) {
-    animation: vt-fade-out 150ms ease-out;
+    animation: none; /*vt-fade-out 150ms ease-out;*/
 }
 ::view-transition-new(.vt-page) {
-    animation: vt-fade-in 200ms ease-out 50ms both;
+    animation: none; /*vt-fade-in 200ms ease-out 50ms both;*/
 }
 
 /* Suppress page-level animation during tab slides (tab-content handles it) */
@@ -160,7 +160,7 @@
 /* Tab content default: subtle fade — prevents browser's resize/scale animation
    (e.g. during Suspense loading.tsx → page.tsx resolution) */
 ::view-transition-group(.vt-tab-content) {
-    animation: none;
+    animation: vt-fade-out 120ms ease-out;
 }
 ::view-transition-old(.vt-tab-content) {
     animation: vt-fade-out 120ms ease-out;
