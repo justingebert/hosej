@@ -47,6 +47,7 @@ export async function proxy(req: NextRequest) {
         "/setup-name",
         "/auth/error",
         "/offline",
+        "/public",
         "/",
         "/login",
     ]);
@@ -84,5 +85,7 @@ export async function proxy(req: NextRequest) {
 
 // Proxy configuration to match relevant routes
 export const config = {
-    matcher: ["/((?!_next/static|_next/image|favicon.ico|assets|public|manifest.json|AppIcons).*)"],
+    matcher: [
+        "/((?!_next/static|_next/image|favicon.ico|assets|public|manifest.json|AppIcons|.*\\.(?:jpg|jpeg|png|gif|svg|webp|ico|webmanifest)).*)",
+    ],
 };
