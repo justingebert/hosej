@@ -8,8 +8,18 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Flame, Image as ImageIcon } from "lucide-react";
 import PWAInstallButton from "@/components/common/PWAInstallButton";
 import { useAppHaptics } from "@/hooks/useAppHaptics";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export default function LandingPage() {
+    const { status } = useSession();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (status === "authenticated") {
+            router.replace("/groups");
+        }
+    }, [status, router]);
     // Advanced Desktop Interactivity: 3D Parallax effect for the card cluster
     const clusterRef = useRef<HTMLDivElement>(null);
     const mouseX = useMotionValue(0);
