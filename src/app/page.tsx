@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useCallback } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
@@ -32,27 +32,62 @@ export default function LandingPage() {
     };
 
     // Mobile Device Orientation Hook for Parallax
-    useEffect(() => {
-        const handleOrientation = (e: DeviceOrientationEvent) => {
+    const orientationActive = useRef(false);
+
+    const handleOrientation = useCallback(
+        (e: DeviceOrientationEvent) => {
             const { gamma, beta } = e;
             if (gamma === null || beta === null) return;
 
-            // gamma (left-to-right tilt): [-90, 90]
-            // beta (front-to-back tilt): [-180, 180], typical holding angle is ~50deg
-
-            // Dampen values to mirror the [-20, 20] range established by the mouse logic
             const normalizedGamma = Math.min(Math.max(gamma / 2, -20), 20);
             const normalizedBeta = Math.min(Math.max((beta - 50) / 2, -20), 20);
 
             mouseX.set(normalizedGamma);
             mouseY.set(normalizedBeta);
-        };
+        },
+        [mouseX, mouseY]
+    );
 
-        if (typeof window !== "undefined" && window.DeviceOrientationEvent) {
+    // On iOS, requestPermission must be called from a user gesture.
+    // Request on first touch, then start listening.
+    useEffect(() => {
+        const DOE = DeviceOrientationEvent as unknown as {
+            requestPermission?: () => Promise<string>;
+        };
+        const needsPermission = typeof DOE.requestPermission === "function";
+
+        // Android / desktop — no permission needed, just listen
+        if (!needsPermission && typeof window !== "undefined" && window.DeviceOrientationEvent) {
             window.addEventListener("deviceorientation", handleOrientation);
+            orientationActive.current = true;
             return () => window.removeEventListener("deviceorientation", handleOrientation);
         }
-    }, [mouseX, mouseY]);
+
+        // iOS — request permission on first user tap
+        if (!needsPermission) return;
+
+        const requestOnTap = async () => {
+            if (orientationActive.current) return;
+            try {
+                const permission = await DOE.requestPermission!();
+                if (permission === "granted") {
+                    window.addEventListener("deviceorientation", handleOrientation);
+                    orientationActive.current = true;
+                }
+            } catch {
+                // permission denied or failed — ignore
+            }
+            document.removeEventListener("touchend", requestOnTap);
+        };
+
+        document.addEventListener("touchend", requestOnTap, { once: true });
+        return () => {
+            document.removeEventListener("touchend", requestOnTap);
+            if (orientationActive.current) {
+                window.removeEventListener("deviceorientation", handleOrientation);
+            }
+        };
+    }, [handleOrientation]);
 
     const rotateX = useSpring(useTransform(mouseY, [-20, 20], [15, -15]), {
         stiffness: 100,
