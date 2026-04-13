@@ -24,6 +24,9 @@ const securityHeaders = [
 export default withSerwist({
     experimental: {
         viewTransition: true,
+        staleTimes: {
+            dynamic: 30,
+        },
     },
     allowedDevOrigins: [],
     // Empty turbopack config silences the "webpack config found" error
