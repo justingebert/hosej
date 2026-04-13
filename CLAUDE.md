@@ -21,8 +21,6 @@ npm run test:coverage    # Tests with coverage report
 npx tsc --noEmit         # Type check without emitting
 ```
 
-CI on PRs: `npm run lint` → `npx tsc --noEmit` → `npm test` → `npm build`
-
 ## Architecture
 
 **Next.js 16 App Router** — frontend pages = client components; app logic lives in API routes.

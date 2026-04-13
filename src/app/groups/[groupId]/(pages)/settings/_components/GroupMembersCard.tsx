@@ -3,17 +3,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import ResponsiveConfirm from "@/components/common/ResponsiveConfirm";
 import type { GroupDTO } from "@/types/models/group";
 import { UserRoundMinus } from "lucide-react";
 
@@ -69,31 +59,22 @@ export function GroupMembersCard({
                             </div>
                         </div>
                         {userIsAdmin && member.user !== currentUserId && (
-                            <AlertDialog>
-                                <AlertDialogTrigger asChild>
+                            <ResponsiveConfirm
+                                trigger={
                                     <Button variant="destructive" size="icon">
                                         <UserRoundMinus size={18} />
                                     </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                            This action cannot be undone. This will remove{" "}
-                                            {member.name} from the group.
-                                        </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                        <AlertDialogAction
-                                            onClick={() => onKickMember(member.user)}
-                                            className="bg-destructive"
-                                        >
-                                            Kick
-                                        </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
+                                }
+                                title="Are you sure?"
+                                description={
+                                    <>
+                                        This action cannot be undone. This will remove {member.name}{" "}
+                                        from the group.
+                                    </>
+                                }
+                                confirmLabel="Kick"
+                                onConfirm={() => onKickMember(member.user)}
+                            />
                         )}
                     </div>
                 ))}
