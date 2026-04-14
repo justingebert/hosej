@@ -76,7 +76,7 @@ const VoteResults = ({ user, question, available, returnTo }: VoteResultsProps) 
                                         {topValues.length === 0 ? (
                                             <Badge variant="outline">-</Badge>
                                         ) : topValues.length === 1 ? (
-                                            <Badge className="truncate max-w-full">
+                                            <Badge className="truncate max-w-full bg-accent/50 text-primary">
                                                 {topValues[0].value}
                                             </Badge>
                                         ) : (
@@ -84,7 +84,7 @@ const VoteResults = ({ user, question, available, returnTo }: VoteResultsProps) 
                                                 <Badge
                                                     key={tv.value}
                                                     variant="outline"
-                                                    className="truncate max-w-full"
+                                                    className="truncate max-w-full bg-accent/20 text-primary"
                                                 >
                                                     {tv.value}
                                                 </Badge>
@@ -104,9 +104,9 @@ const VoteResults = ({ user, question, available, returnTo }: VoteResultsProps) 
                             href={`/groups/${question.groupId}/question/${question._id}/resultsdetailed/?returnTo=${encodeURIComponent(returnTo || "")}`}
                             onClick={() => play("selection")}
                         >
-                            <div className="bg-secondary my-2 rounded-md relative">
+                            <div className="bg-secondary my-2 rounded-2xl relative">
                                 <motion.div
-                                    className="bg-secondarydark h-12 rounded"
+                                    className="bg-accent/10 h-12 rounded-2xl"
                                     initial={{ width: 0 }}
                                     animate={{
                                         width: animationTriggered ? `${result.percentage}%` : "0%",
@@ -135,7 +135,9 @@ const VoteResults = ({ user, question, available, returnTo }: VoteResultsProps) 
                                             {result.option}
                                         </span>
                                     )}
-                                    <Badge>{result.percentage} %</Badge>
+                                    <Badge className="bg-accent/50 text-primary">
+                                        {result.percentage} %
+                                    </Badge>
                                 </div>
                             </div>
                         </Link>

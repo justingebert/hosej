@@ -134,8 +134,12 @@ function ChatComponent({ user, entity, available }: ChatComponentProps) {
                                 }
                             }}
                         />
-                        <Button onClick={handleSendMessage} disabled={sending}>
-                            <Send size={20} />
+                        <Button
+                            onClick={handleSendMessage}
+                            disabled={sending}
+                            className={`${newMessage.trim() ? "bg-accent" : "bg-primary/50"}`}
+                        >
+                            <Send size={20} className="text-background" />
                         </Button>
                     </div>
                 </div>
