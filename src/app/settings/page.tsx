@@ -5,11 +5,12 @@ import ThemeSelector from "@/components/ui/custom/ThemeSelector";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import { useEffect, useState } from "react";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Shield } from "lucide-react";
+import { Shield, User, Bell, Link2, LogOut } from "lucide-react";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
 import { requestPermissionReturnToken } from "@/hooks/useFcmToken";
@@ -81,56 +82,101 @@ export default function SettingsPage() {
     };
 
     return (
-        <div className="flex flex-col h-[100dvh]">
+        <div className="flex flex-col min-h-[100dvh]">
             <Header
                 leftComponent={<BackLink href={`/groups/`} />}
                 title="Settings"
                 rightComponent={<ThemeSelector />}
             />
-            <div className="flex-grow mt-4">
-                <div className="flex items-center justify-between mb-4">
-                    <span>Notifications</span>
-                    {ready ? (
-                        <Switch
-                            checked={notificationsEnabled}
-                            onCheckedChange={handleNotificationToggle}
-                        />
-                    ) : (
-                        <Skeleton className="h-6 w-10" />
-                    )}
-                </div>
-
+            <div className="flex-grow mt-4 space-y-6">
                 {ready ? (
                     <>
-                        <ProfileEditor user={user!} />
-                        <UserDataTable user={user!} />
-                        <GoogleConnectButton user={user!} className="mt-4" />
+                        <Card>
+                            <CardHeader className="pb-4">
+                                <CardTitle className="text-lg flex items-center gap-2">
+                                    <Bell className="h-5 w-5 text-muted-foreground" />
+                                    Preferences
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="flex items-center justify-between">
+                                    <div className="space-y-0.5">
+                                        <div className="font-medium text-sm">
+                                            Push Notifications
+                                        </div>
+                                        <div className="text-sm text-muted-foreground line-clamp-1">
+                                            Daily Reminder to participate.
+                                        </div>
+                                    </div>
+                                    <Switch
+                                        checked={notificationsEnabled}
+                                        onCheckedChange={handleNotificationToggle}
+                                    />
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <Card>
+                            <CardHeader className="pb-4">
+                                <CardTitle className="text-lg flex items-center gap-2">
+                                    <User className="h-5 w-5 text-muted-foreground" />
+                                    Profile
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-6">
+                                <ProfileEditor user={user!} />
+                                <div className="border-t pt-4">
+                                    <UserDataTable user={user!} />
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        <Card>
+                            <CardHeader className="pb-4">
+                                <CardTitle className="text-lg flex items-center gap-2">
+                                    <Link2 className="h-5 w-5 text-muted-foreground" />
+                                    Connections
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <GoogleConnectButton user={user!} className="" />
+                            </CardContent>
+                        </Card>
 
                         {isGlobalAdmin && (
-                            <Button
-                                variant="outline"
-                                className="w-full mt-4"
-                                onClick={() => router.push("/admin")}
-                            >
-                                <Shield className="h-4 w-4 mr-2" />
-                                Admin Dashboard
-                            </Button>
+                            <Card>
+                                <CardHeader className="pb-4">
+                                    <CardTitle className="text-lg flex items-center gap-2">
+                                        <Shield className="h-5 w-5 text-muted-foreground" />
+                                        Administration
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <Button
+                                        variant="outline"
+                                        className="w-full"
+                                        onClick={() => router.push("/admin")}
+                                    >
+                                        <Shield className="h-4 w-4 mr-2" />
+                                        Admin Dashboard
+                                    </Button>
+                                </CardContent>
+                            </Card>
                         )}
                     </>
                 ) : (
-                    <div className="space-y-4">
-                        <div className="flex items-center gap-4">
-                            <Skeleton className="h-16 w-16 rounded-full" />
-                            <Skeleton className="h-9 w-32" />
-                        </div>
-                        <Skeleton className="h-10 w-full" />
-                        <Skeleton className="h-10 w-full" />
+                    <div className="space-y-6">
+                        <Skeleton className="h-[250px] w-full rounded-xl" />
+                        <Skeleton className="h-[120px] w-full rounded-xl" />
+                        <Skeleton className="h-[120px] w-full rounded-xl" />
                     </div>
                 )}
             </div>
-            <div className="mt-auto mb-14">
+
+            <div className="mt-8 mb-14 shrink-0">
                 {ready ? (
                     <Button onClick={handleLogout} variant="destructive" className="w-full">
+                        <LogOut className="h-4 w-4 mr-2" />
                         Logout
                     </Button>
                 ) : (
