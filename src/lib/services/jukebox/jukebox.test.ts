@@ -13,12 +13,26 @@ vi.mock("firebase-admin", () => ({
 vi.mock("@/lib/sendNotification", () => ({
     sendNotification: vi.fn().mockResolvedValue(undefined),
 }));
+vi.mock("@/lib/services/chat", () => ({
+    createChatForEntity: vi.fn().mockImplementation(async () => ({
+        _id: new Types.ObjectId(),
+        save: vi.fn().mockResolvedValue(undefined),
+    })),
+}));
 
-import { addSong, rateSong, activateJukeboxes, deactivateGroupJukeboxes } from "./jukebox";
+import {
+    addSong,
+    rateSong,
+    activateJukeboxes,
+    deactivateGroupJukeboxes,
+    createGroupJukebox,
+} from "./jukebox";
 import Jukebox from "@/db/models/Jukebox";
 import Chat from "@/db/models/Chat";
 import { sendNotification } from "@/lib/sendNotification";
 import { ConflictError, NotFoundError, ValidationError } from "@/lib/api/errorHandling";
+import { EntityModel } from "@/types/models/chat";
+import { createChatForEntity } from "@/lib/services/chat";
 
 const mockGroupId = new Types.ObjectId().toString();
 const mockUserId = new Types.ObjectId().toString();
@@ -251,14 +265,48 @@ describe("activateJukeboxes", () => {
         expect(sendNotification).toHaveBeenCalled();
     });
 
-    it("should send notification with month name", async () => {
+    it("should create new Jukebox and Chat", async () => {
         const group = createMockGroup([today.getDate()], ["Theme"]);
 
+        const mockSavedJukeboxId = new Types.ObjectId();
         vi.mocked(Jukebox).mockImplementation(function (this: any, data: any) {
+            Object.assign(this, data);
+            this.save = vi.fn().mockImplementation(async () => {
+                return { ...this, _id: mockSavedJukeboxId };
+            });
+            return this;
+        } as any);
+        vi.mocked(Chat).mockImplementation(function (this: any, data: any) {
             Object.assign(this, data, {
                 _id: new Types.ObjectId(),
                 save: vi.fn().mockResolvedValue(this),
             });
+            return this;
+        } as any);
+        (sendNotification as Mock).mockResolvedValue(undefined);
+
+        await createGroupJukebox(group._id, group.features.jukebox.settings.concurrent[0]);
+
+        expect(Jukebox).toHaveBeenCalledWith({
+            groupId: group._id,
+            active: true,
+            title: group.features.jukebox.settings.concurrent[0],
+        });
+        expect(createChatForEntity).toHaveBeenCalledWith(
+            group._id,
+            expect.any(Types.ObjectId),
+            EntityModel.Jukebox
+        );
+        expect(sendNotification).not.toHaveBeenCalled();
+    });
+
+    it("should send notification with month name", async () => {
+        const group = createMockGroup([today.getDate()], ["Theme"]);
+
+        vi.mocked(Jukebox).mockImplementation(function (this: any, data: any) {
+            Object.assign(this, data);
+            this._id = new Types.ObjectId();
+            this.save = vi.fn().mockImplementation(async () => this);
             return this;
         } as any);
         vi.mocked(Chat).mockImplementation(function (this: any, data: any) {

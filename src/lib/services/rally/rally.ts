@@ -190,9 +190,9 @@ export async function processRallyStateTransitions(groupId: string): Promise<voi
 }
 
 /**
- * Create a new rally for a group.
+ * Create a new rally for a group. With authorization and points
  */
-export async function createRally(
+export async function createRallyByUser(
     userId: string,
     groupId: string,
     data: { task: string; lengthInDays: number }
@@ -208,43 +208,36 @@ export async function createRally(
     const submittingUser = await User.findById(userId);
     if (!group || !submittingUser) throw new NotFoundError("Group or user not found");
 
-    const newRally = new Rally({
-        groupId,
-        task,
-        lengthInDays,
-        createdBy: submittingUser._id,
-    });
-    await newRally.save();
-
-    const chat = await createChatForEntity(groupId, newRally._id, EntityModel.Rally);
-    newRally.chat = chat._id;
-    await newRally.save();
+    await createRally(groupId, data);
 
     await addPointsToMember(group, userId, CREATED_RALLY_POINTS);
 }
 
 /**
- * Activate pending rallies up to the group's configured rally count.
- * Admin-only operation.
+ * Create a new rally for a group.
  */
-export async function activateRallies(
-    userId: string,
-    groupId: string
-): Promise<{ message: string; rallies: RallyDocument[] }> {
-    await isUserAdmin(userId, groupId);
-
-    const group = await Group.findById(groupId);
-    if (!group) throw new NotFoundError("Group not found");
-
-    const activeRallies = await Rally.find({
+export async function createRally(
+    groupId: string | Types.ObjectId,
+    data: { task: string; lengthInDays: number }
+): Promise<void> {
+    const newRally = new Rally({
         groupId,
-        status: { $in: ACTIVE_STATUSES },
+        task: data.task,
+        lengthInDays: data.lengthInDays,
     });
-    if (activeRallies.length >= group.features.rallies.settings.rallyCount) {
-        return { message: "rallies already active", rallies: activeRallies };
-    }
+    await newRally.save();
+    const chat = await createChatForEntity(groupId, newRally._id, EntityModel.Rally);
+    newRally.chat = chat._id;
+    await newRally.save();
+}
 
-    const countToActivate = group.features.rallies.settings.rallyCount - activeRallies.length;
+/** Activate a specified number of created rallies for a group, transitioning them to submission phase.
+ * Returns the activated rallies.
+ */
+export async function activateCreatedRallies(
+    groupId: string | Types.ObjectId,
+    countToActivate: number
+) {
     const rallies = await Rally.find({
         groupId,
         status: RallyStatus.Created,
@@ -256,9 +249,43 @@ export async function activateRallies(
         rally.startTime = now;
         rally.submissionEnd = new Date(now.getTime() + rally.lengthInDays * 24 * 60 * 60 * 1000);
         await rally.save();
+
+        recordActivity({
+            groupId,
+            type: ActivityType.RallyActivated,
+            feature: ActivityFeature.Rally,
+            entityId: rally._id.toString(),
+        }).catch((err) => console.error("Activity log failed", err));
     }
 
-    return { message: "Activated rallies", rallies };
+    return rallies;
+}
+
+/**
+ * Activate pending rallies up to the group's configured rally count.
+ * Admin-only operation.
+ */
+export async function activateRallies(
+    userId: string,
+    groupId: string
+): Promise<{ rallies: RallyDocument[] }> {
+    await isUserAdmin(userId, groupId);
+
+    const group = await Group.findById(groupId);
+    if (!group) throw new NotFoundError("Group not found");
+
+    const activeRallies = await Rally.find({
+        groupId,
+        status: { $in: ACTIVE_STATUSES },
+    });
+    if (activeRallies.length >= group.features.rallies.settings.rallyCount) {
+        return { rallies: activeRallies };
+    }
+
+    const countToActivate = group.features.rallies.settings.rallyCount - activeRallies.length;
+    const rallies = await activateCreatedRallies(groupId, countToActivate);
+
+    return { rallies };
 }
 
 /**

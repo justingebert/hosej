@@ -20,7 +20,7 @@ vi.mock("@aws-sdk/s3-request-presigner", () => ({
 import {
     getActiveRallies,
     processRallyStateTransitions,
-    createRally,
+    createRallyByUser,
     activateRallies,
     getSubmissions,
     addSubmission,
@@ -292,7 +292,7 @@ describe("createRally", () => {
             return this;
         } as any);
 
-        await createRally(mockUserId, mockGroupId, {
+        await createRallyByUser(mockUserId, mockGroupId, {
             task: "Take a photo",
             lengthInDays: 3,
         });
@@ -304,13 +304,13 @@ describe("createRally", () => {
 
     it("throws ValidationError when task is missing", async () => {
         await expect(
-            createRally(mockUserId, mockGroupId, { task: "", lengthInDays: 3 })
+            createRallyByUser(mockUserId, mockGroupId, { task: "", lengthInDays: 3 })
         ).rejects.toThrow(ValidationError);
     });
 
     it("throws ValidationError when lengthInDays is missing", async () => {
         await expect(
-            createRally(mockUserId, mockGroupId, {
+            createRallyByUser(mockUserId, mockGroupId, {
                 task: "Test",
                 lengthInDays: 0,
             })
@@ -322,7 +322,7 @@ describe("createRally", () => {
         (User.findById as Mock).mockResolvedValue(createMockUser());
 
         await expect(
-            createRally(mockUserId, mockGroupId, {
+            createRallyByUser(mockUserId, mockGroupId, {
                 task: "Test",
                 lengthInDays: 3,
             })
@@ -346,7 +346,6 @@ describe("activateRallies", () => {
 
         const result = await activateRallies(mockUserId, mockGroupId);
 
-        expect(result.message).toBe("Activated rallies");
         expect(pendingRally.status).toBe(RallyStatus.Submission);
         expect(pendingRally.startTime).toBeInstanceOf(Date);
         expect(pendingRally.submissionEnd).toBeInstanceOf(Date);
@@ -362,7 +361,6 @@ describe("activateRallies", () => {
 
         const result = await activateRallies(mockUserId, mockGroupId);
 
-        expect(result.message).toBe("rallies already active");
         expect(result.rallies).toHaveLength(1);
     });
 

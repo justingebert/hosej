@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
-import { getActiveRallies, createRally } from "@/lib/services/rally";
+import { getActiveRallies, createRallyByUser } from "@/lib/services/rally";
 import { parseBody } from "@/lib/validation/parseBody";
 import { CreateRallySchema } from "@/lib/validation/rally";
 
@@ -32,7 +32,7 @@ export const POST = withAuthAndErrors(
         }>
     ) => {
         const { task, lengthInDays } = await parseBody(req, CreateRallySchema);
-        await createRally(userId, params.groupId, { task, lengthInDays });
+        await createRallyByUser(userId, params.groupId, { task, lengthInDays });
         return NextResponse.json({ message: "Rally created successfully" });
     }
 );

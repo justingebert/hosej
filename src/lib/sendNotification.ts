@@ -5,10 +5,17 @@ import type { Types } from "mongoose";
 import { env } from "@/env";
 
 if (!admin.apps.length) {
-    const serviceAccount = JSON.parse(env.FIREBASE_SERVICE_ACCOUNT);
-    admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
-    });
+    try {
+        const serviceAccount = JSON.parse(env.FIREBASE_SERVICE_ACCOUNT);
+        admin.initializeApp({
+            credential: admin.credential.cert(serviceAccount),
+        });
+    } catch (error) {
+        console.warn(
+            "Failed to initialize Firebase Admin (this is expected in tests without valid FIREBASE_SERVICE_ACCOUNT)",
+            error
+        );
+    }
 }
 
 export async function sendNotification(

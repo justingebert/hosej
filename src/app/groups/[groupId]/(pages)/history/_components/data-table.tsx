@@ -18,6 +18,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { DataTableToolbar } from "./data-table-toolbar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SkeletonList } from "@/components/ui/custom/SkeletonList";
 import { useRouter } from "next/navigation";
 import type { IQuestion } from "@/types/models/question";
 
@@ -104,14 +105,17 @@ export function DataTable({
                                   </TableCell>
                               </TableRow>
                           )}
-                    {loading &&
-                        [...Array(10)].map((_, i) => (
-                            <TableRow key={i}>
-                                <TableCell className="p-2">
-                                    <Skeleton className="h-10" />
-                                </TableCell>
-                            </TableRow>
-                        ))}
+                    {loading && (
+                        <SkeletonList count={10}>
+                            {(i) => (
+                                <TableRow key={i}>
+                                    <TableCell className="p-2" colSpan={columns.length}>
+                                        <Skeleton className="h-10" />
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </SkeletonList>
+                    )}
                 </TableBody>
             </Table>
             {hasMore && !loading && (
