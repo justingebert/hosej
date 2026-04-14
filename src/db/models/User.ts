@@ -47,6 +47,10 @@ const UserSchema = new Schema<IUser>({
     lastOnline: {
         type: Date,
     },
+    onboardingCompleted: {
+        type: Boolean,
+        default: false,
+    },
     createdAt: {
         type: Date,
         default: Date.now,

@@ -71,6 +71,9 @@ export async function updateUser(userId: string, data: UpdateUserData): Promise<
             set.avatar = data.avatar;
         }
     }
+    if (data.onboardingCompleted !== undefined) {
+        set.onboardingCompleted = data.onboardingCompleted;
+    }
 
     const update: Record<string, unknown> = {};
     if (Object.keys(set).length > 0) update.$set = set;

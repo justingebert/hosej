@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useRef, useEffect, useCallback } from "react";
+import React, { useEffect, useRef } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Flame, Image as ImageIcon } from "lucide-react";
+import { ArrowRight, Flame } from "lucide-react";
 import PWAInstallButton from "@/components/common/PWAInstallButton";
 import { useAppHaptics } from "@/hooks/useAppHaptics";
 import { useSession } from "next-auth/react";
@@ -41,64 +41,6 @@ export default function LandingPage() {
         mouseY.set(0);
     };
 
-    // Mobile Device Orientation Hook for Parallax
-    const orientationActive = useRef(false);
-
-    const handleOrientation = useCallback(
-        (e: DeviceOrientationEvent) => {
-            const { gamma, beta } = e;
-            if (gamma === null || beta === null) return;
-
-            const normalizedGamma = Math.min(Math.max(gamma / 2, -20), 20);
-            const normalizedBeta = Math.min(Math.max((beta - 50) / 2, -20), 20);
-
-            mouseX.set(normalizedGamma);
-            mouseY.set(normalizedBeta);
-        },
-        [mouseX, mouseY]
-    );
-
-    // On iOS, requestPermission must be called from a user gesture.
-    // Request on first touch, then start listening.
-    useEffect(() => {
-        const DOE = DeviceOrientationEvent as unknown as {
-            requestPermission?: () => Promise<string>;
-        };
-        const needsPermission = typeof DOE.requestPermission === "function";
-
-        // Android / desktop — no permission needed, just listen
-        if (!needsPermission && typeof window !== "undefined" && window.DeviceOrientationEvent) {
-            window.addEventListener("deviceorientation", handleOrientation);
-            orientationActive.current = true;
-            return () => window.removeEventListener("deviceorientation", handleOrientation);
-        }
-
-        // iOS — request permission on first user tap
-        if (!needsPermission) return;
-
-        const requestOnTap = async () => {
-            if (orientationActive.current) return;
-            try {
-                const permission = await DOE.requestPermission!();
-                if (permission === "granted") {
-                    window.addEventListener("deviceorientation", handleOrientation);
-                    orientationActive.current = true;
-                }
-            } catch {
-                // permission denied or failed — ignore
-            }
-            document.removeEventListener("touchend", requestOnTap);
-        };
-
-        document.addEventListener("touchend", requestOnTap, { once: true });
-        return () => {
-            document.removeEventListener("touchend", requestOnTap);
-            if (orientationActive.current) {
-                window.removeEventListener("deviceorientation", handleOrientation);
-            }
-        };
-    }, [handleOrientation]);
-
     const rotateX = useSpring(useTransform(mouseY, [-20, 20], [15, -15]), {
         stiffness: 100,
         damping: 25,
@@ -110,8 +52,6 @@ export default function LandingPage() {
 
     return (
         <div className="flex flex-col min-h-[calc(100dvh+3rem)] w-[calc(100%+3rem)] -m-6 bg-background overflow-x-hidden p-4 relative text-foreground rounded-none">
-            {/* Premium tactile noise overlay removed as requested */}
-
             <div className="max-w-[1400px] mx-auto w-full px-4 sm:px-6 md:px-10 flex flex-col flex-1 relative z-10">
                 <header className="flex justify-between items-center w-full mt-4 mb-4 lg:mb-16">
                     <div className="text-xl font-black tracking-tight flex items-center gap-2">

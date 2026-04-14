@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import type { createRallyData } from "@/types/create";
+import { Textarea } from "@/components/ui/textarea";
 
 interface CreateRallyProps {
     rallyData: createRallyData;
@@ -60,8 +61,7 @@ const CreateRally = ({ rallyData, setRallyData }: CreateRallyProps) => {
     return (
         <div>
             <div className="mt-5">
-                <Input
-                    type="text"
+                <Textarea
                     placeholder="Enter task"
                     value={rallyData.task}
                     onChange={(e) => setRallyData((prev) => ({ ...prev, task: e.target.value }))}
@@ -80,7 +80,7 @@ const CreateRally = ({ rallyData, setRallyData }: CreateRallyProps) => {
                     min={1}
                     max={30}
                     type="number"
-                    placeholder="Enter time for task in days"
+                    placeholder="Time for task in days"
                     value={rallyData.lengthInDays || ""}
                     onChange={(e) => {
                         const value = e.target.valueAsNumber;

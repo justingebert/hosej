@@ -91,6 +91,7 @@ export async function jwtCallback({
                 token.groups = deviceUser.groups.map(String);
                 token.createdAt = String(deviceUser.createdAt);
                 token.needsNameSetup = false;
+                token.onboardingCompleted = deviceUser.onboardingCompleted ?? true;
             } else {
                 // Fresh Google signup — create a new user
                 const newUser = new User({
@@ -105,6 +106,7 @@ export async function jwtCallback({
                 token.groups = [];
                 token.createdAt = String(newUser.createdAt);
                 token.needsNameSetup = true;
+                token.onboardingCompleted = false;
             }
         } else {
             token.userId = existingUser._id.toString();
@@ -113,6 +115,7 @@ export async function jwtCallback({
             token.groups = existingUser.groups.map(String);
             token.createdAt = String(existingUser.createdAt);
             token.needsNameSetup = false;
+            token.onboardingCompleted = existingUser.onboardingCompleted ?? true;
         }
     } else if (user) {
         // Device credentials sign-in — user object comes from authorizeDevice
@@ -128,6 +131,8 @@ export async function jwtCallback({
         token.googleConnected = u.googleConnected ?? false;
         token.groups = u.groups ?? [];
         token.createdAt = u.createdAt ?? "";
+        token.onboardingCompleted =
+            (u as unknown as { onboardingCompleted?: boolean }).onboardingCompleted ?? true;
     }
 
     // Refresh user data when update() is called or when token is missing fields
@@ -142,6 +147,7 @@ export async function jwtCallback({
             token.groups = freshUser.groups.map(String);
             token.createdAt = String(freshUser.createdAt);
             token.needsNameSetup = false;
+            token.onboardingCompleted = freshUser.onboardingCompleted ?? true;
         }
     }
 
@@ -160,6 +166,7 @@ export async function sessionCallback({ session, token }: { session: Session; to
         groups: token.groups,
         createdAt: token.createdAt,
         needsNameSetup: token.needsNameSetup,
+        onboardingCompleted: token.onboardingCompleted,
     };
     return session;
 }

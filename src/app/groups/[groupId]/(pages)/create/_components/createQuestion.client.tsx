@@ -1,7 +1,6 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
 import type { MouseEvent } from "react";
-import { Input } from "@/components/ui/input";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
     Select,
@@ -22,9 +21,12 @@ import { PairingKeySource, PairingMode } from "@/types/models/question";
 import useSWR from "swr";
 import type { GroupDTO } from "@/types/models/group";
 import fetcher from "@/lib/fetcher";
-import { DisplayOptions } from "../../../question/_components/DisplayOptions";
 import type { OptionsMode } from "../../../question/_components/DisplayOptions";
+import { DisplayOptions } from "../../../question/_components/DisplayOptions";
 import PairingConfig from "../../../question/_components/PairingConfig";
+import { Info } from "lucide-react";
+import { QuestionTypesInfo } from "@/app/groups/[groupId]/(pages)/create/_components/questionTypesInfo";
+import { Textarea } from "@/components/ui/textarea";
 
 interface CreateQuestionProps {
     questionData: createQuestionData;
@@ -38,6 +40,7 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
     const groupId = params ? params.groupId : "";
     const { user } = useAuthRedirect();
     const { toast } = useToast();
+    const [showInfo, setShowInfo] = useState(false);
     const [clearImageInput, setClearImageInput] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { uploading, compressImages, handleImageUpload } = useImageUploader();
@@ -389,24 +392,28 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
     return (
         <>
             <div className="mt-5">
-                <Select value={questionData.questionType} onValueChange={handleTypeSelect}>
-                    <SelectTrigger>
-                        <SelectValue placeholder="Select Question Type" />
-                    </SelectTrigger>
-                    <SelectContent className="absolute z-50">
-                        <SelectItem value="users">Vote Users</SelectItem>
-                        <SelectItem value="custom">Vote Custom Options</SelectItem>
-                        <SelectItem value="text">Text Reply</SelectItem>
-                        <SelectItem value="rating">Rating (1-10)</SelectItem>
-                        <SelectItem value="image">Vote Custom Images</SelectItem>
-                        <SelectItem value="pairing">Pairing</SelectItem>
-                    </SelectContent>
-                </Select>
+                <div className="flex items-center gap-2">
+                    <Button variant="outline" onClick={() => setShowInfo(true)}>
+                        <Info className="h-4 w-4" />
+                    </Button>
+                    <Select value={questionData.questionType} onValueChange={handleTypeSelect}>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Select Question Type" />
+                        </SelectTrigger>
+                        <SelectContent className="absolute z-50">
+                            <SelectItem value="users">Vote Users</SelectItem>
+                            <SelectItem value="custom">Vote Custom Options</SelectItem>
+                            <SelectItem value="text">Text Reply</SelectItem>
+                            <SelectItem value="rating">Rating (1-10)</SelectItem>
+                            <SelectItem value="image">Vote Custom Images</SelectItem>
+                            <SelectItem value="pairing">Pairing</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
             </div>
 
             <div className="mt-5">
-                <Input
-                    type="text"
+                <Textarea
                     placeholder="Enter question"
                     value={questionData.question}
                     onChange={(e) =>
@@ -427,7 +434,7 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                     label="Add image"
                 />
                 {showMultiSelectToggle && (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 bg-secondary p-2 rounded-2xl">
                         <Switch
                             id="multi-select"
                             checked={questionData.multiSelect}
@@ -436,7 +443,7 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                             }
                         />
                         <Label htmlFor="multi-select" className="text-sm text-muted-foreground">
-                            Allow multiple
+                            Allow multi select
                         </Label>
                     </div>
                 )}
@@ -489,6 +496,7 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                     {uploading || isSubmitting ? "Creating..." : "Create Question"}
                 </Button>
             </div>
+            <QuestionTypesInfo open={showInfo} onOpenChange={setShowInfo} />
         </>
     );
 };

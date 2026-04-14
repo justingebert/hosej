@@ -8,6 +8,7 @@ export const CreateDeviceUserSchema = z.object({
 export const UpdateUserSchema = z.object({
     username: z.string().min(1, "username is required").max(50).optional(),
     avatar: z.string().max(500).nullable().optional(),
+    onboardingCompleted: z.boolean().optional(),
 });
 
 export const GoogleDisconnectSchema = z.object({
