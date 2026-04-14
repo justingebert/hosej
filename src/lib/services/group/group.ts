@@ -172,7 +172,6 @@ export async function updateGroup(
 /**
  * Delete a group (admin only).
  * Uses bulk $pull instead of looping users one by one.
- * TODO this should also delete all related documents (questions, rallies, chats)
  */
 export async function deleteGroup(userId: string, groupId: string): Promise<void> {
     const group = await Group.findById(groupId);
@@ -185,6 +184,11 @@ export async function deleteGroup(userId: string, groupId: string): Promise<void
     await User.updateMany({ _id: { $in: memberUserIds } }, { $pull: { groups: groupId } });
 
     await Group.findByIdAndDelete(groupId);
+
+    await Chat.deleteMany({ group: groupId });
+    await Jukebox.deleteMany({ group: groupId });
+    await Question.deleteMany({ group: groupId });
+    await Rally.deleteMany({ group: groupId });
 }
 
 // ─── Stats ───────────────────────────────────────────────────
