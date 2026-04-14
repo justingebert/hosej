@@ -1,6 +1,7 @@
 import type { Session } from "next-auth";
 import Link from "next/link";
 import { useAppHaptics } from "@/hooks/useAppHaptics";
+import type { MouseEvent } from "react";
 import { useEffect, useState } from "react";
 import useSWR from "swr";
 import type { GroupDTO } from "@/types/models/group";
@@ -36,7 +37,8 @@ export function GroupsList({ user }: { user?: Session["user"] }) {
         }
     }, []);
 
-    const handleStar = (groupId: string, e: React.MouseEvent) => {
+    const handleStar = (groupId: string, e: MouseEvent) => {
+        e.preventDefault();
         e.stopPropagation();
         if (starredGroupId === groupId) {
             localStorage.removeItem("starredGroupId");
@@ -141,6 +143,7 @@ export function GroupsList({ user }: { user?: Session["user"] }) {
                                                     size="icon"
                                                     className="rounded-full hover:bg-primary/10 transition-colors"
                                                     onClick={(e) => {
+                                                        e.preventDefault();
                                                         e.stopPropagation();
                                                         shareGroup(group._id, group.name);
                                                     }}

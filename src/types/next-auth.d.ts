@@ -10,6 +10,7 @@ declare module "next-auth" {
             groups: string[];
             createdAt: string;
             needsNameSetup?: boolean;
+            onboardingCompleted?: boolean;
         };
     }
 }
@@ -22,5 +23,6 @@ declare module "next-auth/jwt" {
         groups: string[];
         createdAt: string;
         needsNameSetup?: boolean;
+        onboardingCompleted?: boolean;
     }
 }

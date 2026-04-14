@@ -15,6 +15,7 @@ export interface IUser {
 
     avatar?: string;
     lastOnline?: Date;
+    onboardingCompleted?: boolean;
 
     createdAt: Date;
 }
@@ -28,4 +29,5 @@ export type UserDTO = ToDTO<IUser> & {
 export interface UpdateUserData {
     username?: string;
     avatar?: string | null;
+    onboardingCompleted?: boolean;
 }
