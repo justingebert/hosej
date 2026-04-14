@@ -19,7 +19,7 @@ const FEATURE_TO_SEEN_KEY: Record<string, "question" | "rally" | "jukebox"> = {
  * from feature services so it never blocks the main action.
  */
 export async function recordActivity(params: {
-    groupId: string;
+    groupId: string | Types.ObjectId;
     actorUser?: string | null;
     type: ActivityType;
     feature: ActivityFeature;

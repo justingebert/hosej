@@ -25,7 +25,6 @@ export interface IJukebox {
     groupId: Types.ObjectId | string;
     title?: string;
     active: boolean;
-    date: Date;
     songs: ISong[];
     chat: Types.ObjectId;
     createdAt: Date;

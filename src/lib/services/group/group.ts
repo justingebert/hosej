@@ -16,6 +16,8 @@ import type {
 import { ForbiddenError, NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 import { addTemplatePackToGroup, activateSmartQuestions } from "@/lib/services/question";
 import { resolveAvatarUrl } from "@/lib/services/user/user";
+import { createGroupJukebox } from "../jukebox";
+import { activateCreatedRallies, activateRallies, createRally } from "../rally";
 
 /**
  * Enrich a list of group members with avatar/lastOnline pulled from the
@@ -101,10 +103,20 @@ export async function createGroup(userId: string, name: string): Promise<GroupDo
 
     userAdmin.groups.push(newGroup._id);
     await userAdmin.save();
-
+    //questions
     await addTemplatePackToGroup(newGroup._id, "trade-off-v2");
     await activateSmartQuestions(newGroup._id);
 
+    //activate stating rally
+    await createRally(newGroup._id, {
+        task: "Geilstes Essen der Woche",
+        lengthInDays: 5,
+    });
+    await activateCreatedRallies(newGroup._id, 1);
+
+    //TODO move to config
+    const initialJukeboxTitle = "Jukebox";
+    await createGroupJukebox(newGroup._id, initialJukeboxTitle);
     return newGroup;
 }
 

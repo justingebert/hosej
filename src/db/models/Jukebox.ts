@@ -46,7 +46,6 @@ const jukeboxSchema = new mongoose.Schema<IJukebox>({
     groupId: { type: mongoose.Schema.Types.ObjectId, ref: "Group", required: true },
     title: { type: String },
     active: { type: Boolean, default: false },
-    date: { type: Date, required: true },
     songs: [SongSchema],
     chat: { type: mongoose.Schema.Types.ObjectId, ref: "Chat" },
     createdAt: { type: Date, default: Date.now },

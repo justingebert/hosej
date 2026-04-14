@@ -12,6 +12,7 @@ import { EntityModel } from "@/types/models/chat";
 import { recordActivity } from "@/lib/services/activity";
 import { ActivityFeature, ActivityType } from "@/types/models/activityEvent";
 import { resolveAvatarUrl } from "@/lib/services/user/user";
+import type { Types } from "mongoose";
 
 // ─── Query helpers ───────────────────────────────────────────
 
@@ -228,28 +229,34 @@ export async function activateJukeboxes(group: IGroup) {
     await Jukebox.updateMany({ active: true, groupId: group._id }, { active: false });
 
     for (let i = 0; i < group.features.jukebox.settings.concurrent.length; i++) {
-        const newJukebox = await new Jukebox({
-            groupId: group._id,
-            date: today,
-            active: true,
-            title: group.features.jukebox.settings.concurrent[i],
-        }).save();
-
-        const newChat = await createChatForEntity(group._id, newJukebox._id, EntityModel.Jukebox);
-        newJukebox.chat = newChat._id;
-        await newJukebox.save();
-
-        recordActivity({
-            groupId: String(group._id),
-            type: ActivityType.JukeboxActivated,
-            feature: ActivityFeature.Jukebox,
-            entityId: String(newJukebox._id),
-            meta: { title: newJukebox.title },
-        }).catch((err) => console.error("Activity log failed", err));
+        await createGroupJukebox(group._id, group.features.jukebox.settings.concurrent[i]);
     }
 
     const monthName = new Intl.DateTimeFormat("en-US", { month: "long" }).format(today);
     await sendNotification(`🎶JUKEBOX - ${monthName} 🎶`, "🎶SUBMIT YOUR SONGS🎶", group._id);
+}
+
+export async function createGroupJukebox(
+    groupId: string | Types.ObjectId,
+    title: string
+): Promise<void> {
+    const newJukebox = await new Jukebox({
+        groupId,
+        active: true,
+        title,
+    }).save();
+
+    const newChat = await createChatForEntity(groupId, newJukebox._id, EntityModel.Jukebox);
+    newJukebox.chat = newChat._id;
+    await newJukebox.save();
+
+    recordActivity({
+        groupId,
+        type: ActivityType.JukeboxActivated,
+        feature: ActivityFeature.Jukebox,
+        entityId: String(newJukebox._id),
+        meta: { title: newJukebox.title },
+    }).catch((err) => console.error("Activity log failed", err));
 }
 
 export async function deactivateGroupJukeboxes(groupId: string) {

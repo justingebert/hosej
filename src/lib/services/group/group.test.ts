@@ -8,6 +8,11 @@ vi.mock("@/db/models/Rally");
 vi.mock("@/db/models/Chat");
 vi.mock("@/db/models/Jukebox");
 vi.mock("@/lib/services/question");
+vi.mock("../jukebox", () => ({ createGroupJukebox: vi.fn().mockResolvedValue(undefined) }));
+vi.mock("../rally", () => ({
+    createRally: vi.fn().mockResolvedValue(undefined),
+    activateCreatedRallies: vi.fn().mockResolvedValue(undefined),
+}));
 
 import {
     isUserInGroup,
@@ -301,6 +306,25 @@ describe("deleteGroup", () => {
             { _id: { $in: expect.any(Array) } },
             { $pull: { groups: mockGroupId } }
         );
+        expect(Group.findByIdAndDelete).toHaveBeenCalledWith(mockGroupId);
+    });
+
+    it("should delte all related entities", async () => {
+        const mockGroup = createMockGroup();
+        (Group.findById as Mock).mockResolvedValue(mockGroup);
+        (User.updateMany as Mock).mockResolvedValue({ modifiedCount: 1 });
+        (Group.findByIdAndDelete as Mock).mockResolvedValue(undefined);
+        (Chat.deleteMany as Mock).mockResolvedValue(undefined);
+        (Jukebox.deleteMany as Mock).mockResolvedValue(undefined);
+        (Question.deleteMany as Mock).mockResolvedValue(undefined);
+        (Rally.deleteMany as Mock).mockResolvedValue(undefined);
+
+        await deleteGroup(mockUserId, mockGroupId);
+
+        expect(Chat.deleteMany).toHaveBeenCalledWith({ group: mockGroupId });
+        expect(Jukebox.deleteMany).toHaveBeenCalledWith({ group: mockGroupId });
+        expect(Question.deleteMany).toHaveBeenCalledWith({ group: mockGroupId });
+        expect(Rally.deleteMany).toHaveBeenCalledWith({ group: mockGroupId });
         expect(Group.findByIdAndDelete).toHaveBeenCalledWith(mockGroupId);
     });
 

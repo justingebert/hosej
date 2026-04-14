@@ -1,4 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton";
+import React from "react";
 
 interface SkeletonListProps {
     count: number;
@@ -11,7 +12,7 @@ export function SkeletonList({ count, className = "h-12 mb-4", children }: Skele
         <>
             {[...Array(count)].map((_, i) =>
                 children ? (
-                    <div key={i}>{children(i)}</div>
+                    <React.Fragment key={i}>{children(i)}</React.Fragment>
                 ) : (
                     <Skeleton key={i} className={className} />
                 )
