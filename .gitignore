@@ -92,3 +92,5 @@ certificates
 .ai
 
 plans
+# Sentry Config File
+.env.sentry-build-plugin
