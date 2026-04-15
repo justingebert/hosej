@@ -19,6 +19,7 @@ import type {
 import { Badge } from "@/components/ui/badge";
 import ChatComponent from "@/components/common/Chat";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ChevronRightIcon } from "lucide-react";
 
 type VoteResultsProps = {
     user: Session["user"];
@@ -68,28 +69,31 @@ const VoteResults = ({ user, question, available, returnTo }: VoteResultsProps) 
                                 href={`/groups/${question.groupId}/question/${question._id}/resultsdetailed/?returnTo=${encodeURIComponent(returnTo || "")}`}
                                 onClick={() => play("selection")}
                             >
-                                <div className="bg-secondary my-2 rounded-md p-3 flex justify-between items-center gap-2 min-w-0">
+                                <div className="bg-secondary my-2 rounded-md p-3 flex justify-between items-center gap-2 min-w-0 drop-shadow-sm">
                                     <span className="font-medium truncate shrink-0 max-w-[40%]">
                                         {pr.key}
                                     </span>
-                                    <div className="flex gap-1 flex-wrap justify-end min-w-0 max-w-[60%]">
-                                        {topValues.length === 0 ? (
-                                            <Badge variant="outline">-</Badge>
-                                        ) : topValues.length === 1 ? (
-                                            <Badge className="truncate max-w-full bg-accent/50 text-primary">
-                                                {topValues[0].value}
-                                            </Badge>
-                                        ) : (
-                                            topValues.map((tv) => (
-                                                <Badge
-                                                    key={tv.value}
-                                                    variant="outline"
-                                                    className="truncate max-w-full bg-accent/20 text-primary"
-                                                >
-                                                    {tv.value}
+                                    <div className="flex items-center gap-1 justify-end">
+                                        <div className="flex gap-1 flex-wrap justify-end min-w-0 max-w-[60%]">
+                                            {topValues.length === 0 ? (
+                                                <Badge variant="outline">-</Badge>
+                                            ) : topValues.length === 1 ? (
+                                                <Badge className="truncate max-w-full bg-accent/50 text-primary">
+                                                    {topValues[0].value}
                                                 </Badge>
-                                            ))
-                                        )}
+                                            ) : (
+                                                topValues.map((tv) => (
+                                                    <Badge
+                                                        key={tv.value}
+                                                        variant="outline"
+                                                        className="truncate max-w-full bg-accent/20 text-primary"
+                                                    >
+                                                        {tv.value}
+                                                    </Badge>
+                                                ))
+                                            )}
+                                        </div>
+                                        <ChevronRightIcon className="h-4 w-4" />
                                     </div>
                                 </div>
                             </Link>
@@ -104,9 +108,9 @@ const VoteResults = ({ user, question, available, returnTo }: VoteResultsProps) 
                             href={`/groups/${question.groupId}/question/${question._id}/resultsdetailed/?returnTo=${encodeURIComponent(returnTo || "")}`}
                             onClick={() => play("selection")}
                         >
-                            <div className="bg-secondary my-2 rounded-2xl relative">
+                            <div className="bg-secondary my-2 rounded-2xl relative drop-shadow-sm">
                                 <motion.div
-                                    className="bg-accent/10 h-12 rounded-2xl"
+                                    className="bg-accent/10 h-12 rounded-2xl drop-shadow-sm"
                                     initial={{ width: 0 }}
                                     animate={{
                                         width: animationTriggered ? `${result.percentage}%` : "0%",
@@ -135,9 +139,12 @@ const VoteResults = ({ user, question, available, returnTo }: VoteResultsProps) 
                                             {result.option}
                                         </span>
                                     )}
-                                    <Badge className="bg-accent/50 text-primary">
-                                        {result.percentage} %
-                                    </Badge>
+                                    <div className="flex items-center gap-1">
+                                        <Badge className="bg-accent/50 text-primary">
+                                            {result.percentage} %
+                                        </Badge>
+                                        <ChevronRightIcon className="h-4 w-4 shrink-0" />
+                                    </div>
                                 </div>
                             </div>
                         </Link>
