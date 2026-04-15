@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, ArrowLeft, RefreshCw } from "lucide-react";
+import * as Sentry from "@sentry/nextjs";
 
 export default function GlobalError({
     error,
@@ -13,8 +14,7 @@ export default function GlobalError({
     reset: () => void;
 }) {
     useEffect(() => {
-        // Log the error to an error reporting service
-        console.error("Global error:", error);
+        Sentry.captureException(error);
     }, [error]);
 
     return (
