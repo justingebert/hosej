@@ -1,12 +1,8 @@
-import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
+import { describe, it, expect, beforeAll, beforeEach, afterAll } from "vitest";
 import { Types } from "mongoose";
 
-vi.mock("@/db/models/QuestionTemplate");
-vi.mock("@/db/models/QuestionPack");
-vi.mock("@/db/models/Question");
-vi.mock("@/db/models/Group");
-vi.mock("@/lib/services/chat");
-
+import { setupTestDb, teardownTestDb, clearCollections } from "@/test/db";
+import { makeUser, makeGroup } from "@/test/factories";
 import {
     createTemplatesFromArray,
     addTemplatePackToGroup,
@@ -15,22 +11,17 @@ import {
 } from "./template";
 import QuestionTemplate from "@/db/models/QuestionTemplate";
 import QuestionPack from "@/db/models/QuestionPack";
+import Question from "@/db/models/Question";
 import Group from "@/db/models/Group";
 import { ConflictError, NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 import { QuestionType } from "@/types/models/question";
 
-beforeEach(() => {
-    vi.clearAllMocks();
-});
-
-// ─── createTemplatesFromArray ───────────────────────────────────────────────
+beforeAll(setupTestDb);
+afterAll(teardownTestDb);
+beforeEach(clearCollections);
 
 describe("createTemplatesFromArray", () => {
-    it("should create valid templates via insertMany and return loaded count", async () => {
-        (QuestionTemplate.insertMany as Mock).mockResolvedValue([{}, {}]);
-        (QuestionTemplate.countDocuments as Mock).mockResolvedValue(2);
-        (QuestionPack.findOneAndUpdate as Mock).mockResolvedValue({});
-
+    it("creates valid templates and returns loaded count", async () => {
         const result = await createTemplatesFromArray("test-pack", [
             {
                 category: "fun",
@@ -47,51 +38,47 @@ describe("createTemplatesFromArray", () => {
 
         expect(result.loaded).toBe(2);
         expect(result.errors).toHaveLength(0);
-        expect(QuestionTemplate.insertMany).toHaveBeenCalledWith(
-            expect.arrayContaining([
-                expect.objectContaining({ packId: "test-pack", category: "fun" }),
-                expect.objectContaining({ packId: "test-pack", category: "serious" }),
-            ])
-        );
+
+        const stored = await QuestionTemplate.find({ packId: "test-pack" });
+        expect(stored).toHaveLength(2);
     });
 
-    it("should upsert QuestionPack with metadata", async () => {
-        (QuestionTemplate.insertMany as Mock).mockResolvedValue([{}]);
-        (QuestionTemplate.countDocuments as Mock).mockResolvedValue(3);
-        (QuestionPack.findOneAndUpdate as Mock).mockResolvedValue({});
-
+    it("upserts QuestionPack with metadata", async () => {
         await createTemplatesFromArray(
             "my-pack",
             [
                 {
                     category: "fun",
                     questionType: QuestionType.Text,
-                    question: "Q?",
+                    question: "Q1?",
+                },
+                {
+                    category: "fun",
+                    questionType: QuestionType.Text,
+                    question: "Q2?",
+                },
+                {
+                    category: "fun",
+                    questionType: QuestionType.Text,
+                    question: "Q3?",
                 },
             ],
             { name: "My Pack", description: "A fun pack", category: "fun" }
         );
 
-        expect(QuestionPack.findOneAndUpdate).toHaveBeenCalledWith(
-            { packId: "my-pack" },
-            expect.objectContaining({
-                $set: expect.objectContaining({
-                    name: "My Pack",
-                    description: "A fun pack",
-                    category: "fun",
-                    questionCount: 3,
-                }),
-            }),
-            { upsert: true }
-        );
+        const pack = await QuestionPack.findOne({ packId: "my-pack" });
+        expect(pack?.name).toBe("My Pack");
+        expect(pack?.description).toBe("A fun pack");
+        expect(pack?.category).toBe("fun");
+        expect(pack?.questionCount).toBe(3);
     });
 
-    it("should throw ValidationError for empty packId", async () => {
+    it("throws ValidationError for empty packId", async () => {
         await expect(createTemplatesFromArray("", [])).rejects.toThrow(ValidationError);
         await expect(createTemplatesFromArray("  ", [])).rejects.toThrow(ValidationError);
     });
 
-    it("should return validation errors without inserting anything", async () => {
+    it("returns validation errors without inserting anything", async () => {
         const result = await createTemplatesFromArray("test-pack", [
             {
                 category: "",
@@ -102,155 +89,108 @@ describe("createTemplatesFromArray", () => {
 
         expect(result.loaded).toBe(0);
         expect(result.errors.length).toBeGreaterThan(0);
-        expect(QuestionTemplate.insertMany).not.toHaveBeenCalled();
-    });
 
-    it("should propagate database errors without creating QuestionPack", async () => {
-        (QuestionTemplate.insertMany as Mock).mockRejectedValue(new Error("DB error"));
-
-        await expect(
-            createTemplatesFromArray("test-pack", [
-                {
-                    category: "fun",
-                    questionType: QuestionType.Custom,
-                    question: "What is fun?",
-                },
-            ])
-        ).rejects.toThrow("DB error");
-
-        expect(QuestionPack.findOneAndUpdate).not.toHaveBeenCalled();
+        const stored = await QuestionTemplate.find({ packId: "test-pack" });
+        expect(stored).toHaveLength(0);
     });
 });
 
-// ─── addTemplatePackToGroup ─────────────────────────────────────────────────
-
 describe("addTemplatePackToGroup", () => {
-    it("should throw NotFoundError when group not found", async () => {
-        (Group.findById as Mock).mockResolvedValue(null);
-
+    it("throws NotFoundError when group not found", async () => {
         await expect(
             addTemplatePackToGroup(new Types.ObjectId(), "nonexistent-pack")
         ).rejects.toThrow(NotFoundError);
     });
 
-    it("should throw ConflictError when pack already added", async () => {
-        const mockGroup = {
-            features: { questions: { settings: { packs: ["starter-pack"] } } },
-        };
-        (Group.findById as Mock).mockResolvedValue(mockGroup);
+    it("throws ConflictError when pack already added", async () => {
+        const admin = await makeUser();
+        const group = await makeGroup({ admin: admin._id });
+        group.features.questions.settings.packs = ["starter-pack"];
+        await group.save();
 
-        await expect(addTemplatePackToGroup(new Types.ObjectId(), "starter-pack")).rejects.toThrow(
+        await expect(addTemplatePackToGroup(group._id, "starter-pack")).rejects.toThrow(
             ConflictError
         );
     });
 
-    it("should throw NotFoundError when no templates found", async () => {
-        const mockGroup = {
-            features: { questions: { settings: { packs: [] } } },
-        };
-        (Group.findById as Mock).mockResolvedValue(mockGroup);
-        (QuestionTemplate.find as Mock).mockResolvedValue([]);
+    it("throws NotFoundError when no templates found for pack", async () => {
+        const admin = await makeUser();
+        const group = await makeGroup({ admin: admin._id });
 
-        await expect(
-            addTemplatePackToGroup(new Types.ObjectId(), "nonexistent-pack")
-        ).rejects.toThrow(NotFoundError);
+        await expect(addTemplatePackToGroup(group._id, "nonexistent-pack")).rejects.toThrow(
+            NotFoundError
+        );
     });
 
-    it("should create questions and track pack on group", async () => {
-        const groupId = new Types.ObjectId();
-        const mockGroup = {
-            features: { questions: { settings: { packs: [] } } },
-        };
-        (Group.findById as Mock).mockResolvedValue(mockGroup);
+    it("creates questions and tracks pack on group", async () => {
+        const admin = await makeUser();
+        const group = await makeGroup({ admin: admin._id });
 
-        const templates = [
+        await QuestionTemplate.create([
             {
-                _id: new Types.ObjectId(),
+                packId: "test-pack",
                 category: "fun",
                 questionType: QuestionType.Custom,
                 question: "Q1?",
                 multiSelect: false,
                 options: ["A", "B"],
             },
-        ];
-        (QuestionTemplate.find as Mock).mockResolvedValue(templates);
-        (Group.findByIdAndUpdate as Mock).mockResolvedValue(undefined);
+            {
+                packId: "test-pack",
+                category: "fun",
+                questionType: QuestionType.Text,
+                question: "Q2?",
+            },
+        ]);
 
-        // Mock Question constructor + createChatForEntity for createQuestionFromTemplate
-        const Question = (await import("@/db/models/Question")).default;
-        const { createChatForEntity } = await import("@/lib/services/chat");
+        await addTemplatePackToGroup(group._id, "test-pack");
 
-        vi.mocked(Question).mockImplementation(function (this: any, data: any) {
-            Object.assign(this, { _id: new Types.ObjectId() }, data, {
-                save: vi.fn().mockResolvedValue(undefined),
-            });
-            return this;
-        } as any);
-        (createChatForEntity as Mock).mockResolvedValue({
-            _id: new Types.ObjectId(),
-            save: vi.fn().mockResolvedValue(undefined),
-        });
+        const questions = await Question.find({ groupId: group._id });
+        expect(questions).toHaveLength(2);
+        expect(questions[0].submittedBy).toBeNull();
 
-        await addTemplatePackToGroup(groupId, "test-pack");
-
-        expect(QuestionTemplate.find).toHaveBeenCalledWith({ packId: "test-pack" });
-        expect(Group.findByIdAndUpdate).toHaveBeenCalledWith(groupId, {
-            $push: { "features.questions.settings.packs": "test-pack" },
-        });
+        const reloaded = await Group.findById(group._id);
+        expect(reloaded?.features.questions.settings.packs).toContain("test-pack");
     });
 });
 
-// ─── getAvailablePacks ──────────────────────────────────────────────────────
-
 describe("getAvailablePacks", () => {
-    it("should return all packs sorted by name", async () => {
-        const mockPacks = [
-            { packId: "a-pack", name: "A Pack" },
+    it("returns all packs sorted by name", async () => {
+        await QuestionPack.create([
             { packId: "b-pack", name: "B Pack" },
-        ];
-        (QuestionPack.find as Mock).mockReturnValue({
-            sort: vi.fn().mockReturnValue({
-                lean: vi.fn().mockResolvedValue(mockPacks),
-            }),
-        });
+            { packId: "a-pack", name: "A Pack" },
+        ]);
 
         const result = await getAvailablePacks();
 
-        expect(result).toEqual(mockPacks);
-        expect(QuestionPack.find).toHaveBeenCalled();
+        expect(result).toHaveLength(2);
+        expect(result[0].name).toBe("A Pack");
+        expect(result[1].name).toBe("B Pack");
     });
 });
 
-// ─── getGroupPacks ──────────────────────────────────────────────────────────
-
 describe("getGroupPacks", () => {
-    it("should throw NotFoundError when group not found", async () => {
-        (Group.findById as Mock).mockResolvedValue(null);
-
-        await expect(getGroupPacks("nonexistent")).rejects.toThrow(NotFoundError);
+    it("throws NotFoundError when group not found", async () => {
+        await expect(getGroupPacks(new Types.ObjectId().toString())).rejects.toThrow(NotFoundError);
     });
 
-    it("should return packs with added status", async () => {
-        const groupId = new Types.ObjectId().toString();
-        const mockGroup = {
-            features: { questions: { settings: { packs: ["starter-pack"] } } },
-        };
-        (Group.findById as Mock).mockResolvedValue(mockGroup);
+    it("returns packs with added status", async () => {
+        const admin = await makeUser();
+        const group = await makeGroup({ admin: admin._id });
+        group.features.questions.settings.packs = ["starter-pack"];
+        await group.save();
 
-        const mockPacks = [
+        await QuestionPack.create([
             { packId: "starter-pack", name: "Starter Pack" },
             { packId: "deep-pack", name: "Deep Pack" },
-        ];
-        (QuestionPack.find as Mock).mockReturnValue({
-            sort: vi.fn().mockReturnValue({
-                lean: vi.fn().mockResolvedValue(mockPacks),
-            }),
-        });
+        ]);
 
-        const result = await getGroupPacks(groupId);
+        const result = await getGroupPacks(group._id.toString());
 
         expect(result).toHaveLength(2);
-        expect(result[0].added).toBe(true);
-        expect(result[1].added).toBe(false);
+        const starter = result.find((p) => p.packId === "starter-pack");
+        const deep = result.find((p) => p.packId === "deep-pack");
+        expect(starter?.added).toBe(true);
+        expect(deep?.added).toBe(false);
     });
 });

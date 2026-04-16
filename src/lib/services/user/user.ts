@@ -3,7 +3,7 @@ import User from "@/db/models/User";
 import type { UserDocument, UserDTO } from "@/types/models/user";
 import type { UpdateUserData } from "@/types/models/user";
 import { ConflictError, NotFoundError, ValidationError } from "@/lib/api/errorHandling";
-import { generateSignedUrl } from "@/lib/s3";
+import { generateSignedUrl } from "@/lib/integrations/storage";
 
 const CONNECT_TOKEN_TTL_MS = 5 * 60 * 1000; // 5 minutes
 

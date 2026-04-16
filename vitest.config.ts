@@ -8,8 +8,12 @@ export default defineConfig({
         environment: "jsdom",
         globals: true,
         setupFiles: ["./src/test/setup.ts"],
+        globalSetup: ["./src/test/globalSetup.ts"],
         include: ["src/**/*.{test,spec}.{ts,tsx}"],
         exclude: ["node_modules", ".next"],
+        testTimeout: 15000,
+        pool: "forks",
+        fileParallelism: false,
         coverage: {
             provider: "v8",
             reporter: ["text", "html"],

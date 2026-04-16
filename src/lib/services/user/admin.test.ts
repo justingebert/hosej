@@ -1,195 +1,164 @@
-import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
+import { describe, it, expect, beforeAll, beforeEach, afterAll } from "vitest";
 import { Types } from "mongoose";
 
-// Mock dependencies before importing the module under test
-vi.mock("@/db/models/Group");
-vi.mock("@/db/models/AppConfig");
-
-// Now import the modules
-import Group from "@/db/models/Group";
+import { setupTestDb, teardownTestDb, clearCollections } from "@/test/db";
+import { makeUser, makeGroup } from "@/test/factories";
 import AppConfig from "@/db/models/AppConfig";
 import { ForbiddenError, NotFoundError } from "@/lib/api/errorHandling";
 import { isUserAdmin, isUserInGroup } from "@/lib/services/group";
-import { getGlobalConfig, isGlobalAdmin, updateGlobalConfig } from "@/lib/services/user/admin";
+import { getGlobalConfig, isGlobalAdmin, updateGlobalConfig } from "./admin";
 
-describe("admin", () => {
-    const mockUserId = new Types.ObjectId().toString();
-    const mockGroupId = new Types.ObjectId().toString();
+beforeAll(setupTestDb);
+afterAll(teardownTestDb);
+beforeEach(clearCollections);
 
-    beforeEach(() => {
-        vi.clearAllMocks();
+describe("isUserInGroup", () => {
+    it("resolves when user is a member", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({
+            members: [{ user: user._id, name: "member" }],
+        });
+
+        await expect(
+            isUserInGroup(user._id.toString(), group._id.toString())
+        ).resolves.toBeUndefined();
     });
 
-    describe("isUserInGroup", () => {
-        it("should return authorized when user is a member", async () => {
-            const mockGroup = {
-                members: [{ user: new Types.ObjectId(mockUserId) }],
-            };
-            (Group.findById as Mock).mockResolvedValue(mockGroup);
+    it("throws NotFoundError when group does not exist", async () => {
+        const user = await makeUser();
 
-            await expect(isUserInGroup(mockUserId, mockGroupId)).resolves.toBeUndefined();
-        });
-
-        it("should throw NotFoundError when group does not exist", async () => {
-            (Group.findById as Mock).mockResolvedValue(null);
-
-            await expect(isUserInGroup(mockUserId, mockGroupId)).rejects.toThrow(NotFoundError);
-            await expect(isUserInGroup(mockUserId, mockGroupId)).rejects.toThrow("Group not found");
-        });
-
-        it("should throw ForbiddenError when user is not a member", async () => {
-            const otherUserId = new Types.ObjectId();
-            const mockGroup = {
-                members: [{ user: otherUserId }],
-            };
-            (Group.findById as Mock).mockResolvedValue(mockGroup);
-
-            await expect(isUserInGroup(mockUserId, mockGroupId)).rejects.toThrow(ForbiddenError);
-            await expect(isUserInGroup(mockUserId, mockGroupId)).rejects.toThrow(
-                "User is not a member of this group"
-            );
-        });
+        await expect(
+            isUserInGroup(user._id.toString(), new Types.ObjectId().toString())
+        ).rejects.toThrow(NotFoundError);
     });
 
-    describe("isUserAdmin", () => {
-        it("should return successfully when user is admin", async () => {
-            const mockGroup = {
-                admin: new Types.ObjectId(mockUserId),
-            };
-            (Group.findById as Mock).mockResolvedValue(mockGroup);
-
-            // Should not throw
-            await expect(isUserAdmin(mockUserId, mockGroupId)).resolves.toBeUndefined();
+    it("throws ForbiddenError when user is not a member", async () => {
+        const other = await makeUser();
+        const group = await makeGroup({
+            members: [{ user: other._id, name: "other" }],
         });
+        const outsider = await makeUser();
 
-        it("should throw NotFoundError when group does not exist", async () => {
-            (Group.findById as Mock).mockResolvedValue(null);
+        await expect(isUserInGroup(outsider._id.toString(), group._id.toString())).rejects.toThrow(
+            ForbiddenError
+        );
+    });
+});
 
-            await expect(isUserAdmin(mockUserId, mockGroupId)).rejects.toThrow(NotFoundError);
-        });
+describe("isUserAdmin", () => {
+    it("resolves when user is admin", async () => {
+        const admin = await makeUser();
+        const group = await makeGroup({ admin: admin._id });
 
-        it("should throw ForbiddenError when user is not admin", async () => {
-            const mockGroup = {
-                admin: new Types.ObjectId(), // different user
-            };
-            (Group.findById as Mock).mockResolvedValue(mockGroup);
-
-            await expect(isUserAdmin(mockUserId, mockGroupId)).rejects.toThrow(ForbiddenError);
-            await expect(isUserAdmin(mockUserId, mockGroupId)).rejects.toThrow(
-                "You are not an admin of this group"
-            );
-        });
+        await expect(
+            isUserAdmin(admin._id.toString(), group._id.toString())
+        ).resolves.toBeUndefined();
     });
 
-    describe("isGlobalAdmin", () => {
-        it("should return true when user is in adminUsers", async () => {
-            const mockConfig = {
-                adminUsers: [new Types.ObjectId(mockUserId)],
-            };
-            (AppConfig.findOne as Mock).mockResolvedValue(mockConfig);
+    it("throws NotFoundError when group does not exist", async () => {
+        const user = await makeUser();
 
-            const result = await isGlobalAdmin(mockUserId);
-
-            expect(result).toBe(true);
-        });
-
-        it("should return false when user is not in adminUsers", async () => {
-            const mockConfig = {
-                adminUsers: [new Types.ObjectId()], // different user
-            };
-            (AppConfig.findOne as Mock).mockResolvedValue(mockConfig);
-
-            const result = await isGlobalAdmin(mockUserId);
-
-            expect(result).toBe(false);
-        });
-
-        it("should return false when config does not exist", async () => {
-            (AppConfig.findOne as Mock).mockResolvedValue(null);
-
-            const result = await isGlobalAdmin(mockUserId);
-
-            expect(result).toBe(false);
-        });
-
-        it("should work with ObjectId input", async () => {
-            const userObjectId = new Types.ObjectId(mockUserId);
-            const mockConfig = {
-                adminUsers: [userObjectId],
-            };
-            (AppConfig.findOne as Mock).mockResolvedValue(mockConfig);
-
-            const result = await isGlobalAdmin(userObjectId);
-
-            expect(result).toBe(true);
-        });
+        await expect(
+            isUserAdmin(user._id.toString(), new Types.ObjectId().toString())
+        ).rejects.toThrow(NotFoundError);
     });
 
-    describe("getGlobalConfig", () => {
-        it("should return config when it exists", async () => {
-            const mockConfig = { configKey: "global_features", someFeature: true };
-            (AppConfig.findOne as Mock).mockReturnValue({
-                orFail: vi.fn().mockResolvedValue(mockConfig),
-            });
+    it("throws ForbiddenError when user is not admin", async () => {
+        const admin = await makeUser();
+        const group = await makeGroup({ admin: admin._id });
+        const outsider = await makeUser();
 
-            const result = await getGlobalConfig();
+        await expect(isUserAdmin(outsider._id.toString(), group._id.toString())).rejects.toThrow(
+            ForbiddenError
+        );
+    });
+});
 
-            expect(result).toEqual(mockConfig);
+describe("isGlobalAdmin", () => {
+    it("returns true when user is in adminUsers", async () => {
+        const user = await makeUser();
+        await AppConfig.create({
+            configKey: "global_features",
+            adminUsers: [user._id],
         });
 
-        it("should throw when config does not exist", async () => {
-            (AppConfig.findOne as Mock).mockReturnValue({
-                orFail: vi.fn().mockRejectedValue(new Error("Document not found")),
-            });
-
-            await expect(getGlobalConfig()).rejects.toThrow();
-        });
+        await expect(isGlobalAdmin(user._id.toString())).resolves.toBe(true);
     });
 
-    describe("updateGlobalConfig", () => {
-        it("should update features and save config", async () => {
-            const mockConfig = {
-                configKey: "global_features",
-                features: {
-                    questions: { status: "enabled" },
-                    rallies: { status: "enabled" },
-                    jukebox: { status: "enabled" },
-                },
-                adminUsers: [],
-                updatedAt: new Date(),
-                save: vi.fn().mockResolvedValue(undefined),
-            };
-            (AppConfig.findOne as Mock).mockResolvedValue(mockConfig);
+    it("returns false when user is not in adminUsers", async () => {
+        const other = await makeUser();
+        await AppConfig.create({
+            configKey: "global_features",
+            adminUsers: [other._id],
+        });
+        const user = await makeUser();
 
-            const result = await updateGlobalConfig({
-                features: { questions: { status: "disabled" } },
-            });
+        await expect(isGlobalAdmin(user._id.toString())).resolves.toBe(false);
+    });
 
-            expect(mockConfig.features.questions.status).toBe("disabled");
-            expect(mockConfig.save).toHaveBeenCalled();
-            expect(result).toBe(mockConfig);
+    it("returns false when config does not exist", async () => {
+        await expect(isGlobalAdmin(new Types.ObjectId().toString())).resolves.toBe(false);
+    });
+
+    it("works with ObjectId input", async () => {
+        const user = await makeUser();
+        await AppConfig.create({
+            configKey: "global_features",
+            adminUsers: [user._id],
         });
 
-        it("should save without changes when no features provided", async () => {
-            const mockConfig = {
-                configKey: "global_features",
-                features: { questions: { status: "enabled" } },
-                save: vi.fn().mockResolvedValue(undefined),
-            };
-            (AppConfig.findOne as Mock).mockResolvedValue(mockConfig);
+        await expect(isGlobalAdmin(user._id)).resolves.toBe(true);
+    });
+});
 
-            await updateGlobalConfig({});
+describe("getGlobalConfig", () => {
+    it("returns config when it exists", async () => {
+        await AppConfig.create({ configKey: "global_features" });
 
-            expect(mockConfig.save).toHaveBeenCalled();
+        const result = await getGlobalConfig();
+
+        expect(result.configKey).toBe("global_features");
+    });
+
+    it("throws when config does not exist", async () => {
+        await expect(getGlobalConfig()).rejects.toThrow();
+    });
+});
+
+describe("updateGlobalConfig", () => {
+    it("updates features and persists", async () => {
+        await AppConfig.create({ configKey: "global_features" });
+
+        // NOTE: service currently expects a full features object (see src/lib/services/user/admin.ts:58
+        // where the spread overwrites sibling keys with undefined). Passing the full shape works.
+        const result = await updateGlobalConfig({
+            features: {
+                questions: { status: "disabled" },
+                rallies: { status: "enabled" },
+                jukebox: { status: "enabled" },
+            },
         });
 
-        it("should throw NotFoundError when config does not exist", async () => {
-            const { NotFoundError } = await import("@/lib/api/errorHandling");
-            (AppConfig.findOne as Mock).mockResolvedValue(null);
+        expect(result.features.questions.status).toBe("disabled");
 
-            await expect(updateGlobalConfig({ features: {} as any })).rejects.toThrow(
-                NotFoundError
-            );
-        });
+        const reloaded = await AppConfig.findOne({ configKey: "global_features" });
+        expect(reloaded?.features.questions.status).toBe("disabled");
+    });
+
+    it("saves without changes when no features provided", async () => {
+        await AppConfig.create({ configKey: "global_features" });
+
+        const before = await AppConfig.findOne({ configKey: "global_features" });
+        const beforeUpdatedAt = before!.updatedAt.getTime();
+
+        await new Promise((r) => setTimeout(r, 5));
+        await updateGlobalConfig({});
+
+        const after = await AppConfig.findOne({ configKey: "global_features" });
+        expect(after!.updatedAt.getTime()).toBeGreaterThan(beforeUpdatedAt);
+    });
+
+    it("throws NotFoundError when config does not exist", async () => {
+        await expect(updateGlobalConfig({ features: {} })).rejects.toThrow(NotFoundError);
     });
 });

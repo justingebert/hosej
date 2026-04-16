@@ -6,7 +6,7 @@ import type { createSong, IJukebox, IRating, ISong } from "@/types/models/jukebo
 import type { IUser } from "@/types/models/user";
 import type { IGroup } from "@/types/models/group";
 import { ConflictError, NotFoundError, ValidationError } from "@/lib/api/errorHandling";
-import { sendNotification } from "@/lib/sendNotification";
+import { sendNotification } from "@/lib/integrations/push";
 import { createChatForEntity } from "@/lib/services/chat";
 import { EntityModel } from "@/types/models/chat";
 import { recordActivity } from "@/lib/services/activity";

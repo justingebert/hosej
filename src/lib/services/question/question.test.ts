@@ -1,13 +1,10 @@
-import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
+import { describe, it, expect, vi, beforeAll, beforeEach, afterAll } from "vitest";
 import { Types } from "mongoose";
 
-vi.mock("@/db/models/Question");
-vi.mock("@/db/models/Group");
-vi.mock("@/db/models/User");
-vi.mock("@/db/models/ActivityEvent");
-vi.mock("@/lib/s3");
-vi.mock("@/lib/services/chat");
+vi.mock("@/lib/integrations/storage", () => import("@/test/fakes/storage"));
 
+import { setupTestDb, teardownTestDb, clearCollections } from "@/test/db";
+import { makeUser, makeGroup, makeQuestion } from "@/test/factories";
 import {
     createQuestion,
     createQuestionFromTemplate,
@@ -22,141 +19,91 @@ import {
     parseVoteResponse,
 } from "./question";
 import Question from "@/db/models/Question";
-import Group from "@/db/models/Group";
-import User from "@/db/models/User";
-import { createChatForEntity } from "@/lib/services/chat";
-import { generateSignedUrl } from "@/lib/s3";
+import Chat from "@/db/models/Chat";
+import { resetStorageFake } from "@/test/fakes/storage";
 import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 import { PairingKeySource, PairingMode, QuestionType } from "@/types/models/question";
 
-const mockUserId = new Types.ObjectId().toString();
-const mockGroupId = new Types.ObjectId().toString();
-const mockQuestionId = new Types.ObjectId().toString();
-const mockChatId = new Types.ObjectId();
-
-function createMockQuestion(overrides: Record<string, any> = {}) {
-    return {
-        _id: new Types.ObjectId(mockQuestionId),
-        groupId: new Types.ObjectId(mockGroupId),
-        category: "general",
-        questionType: QuestionType.Custom,
-        question: "Test question?",
-        image: "",
-        multiSelect: false,
-        options: ["A", "B", "C"],
-        answers: [] as any[],
-        rating: { good: [] as any[], ok: [] as any[], bad: [] as any[] },
-        used: false,
-        active: false,
-        usedAt: null,
-        submittedBy: null,
-        chat: mockChatId,
-        createdAt: new Date(),
-        save: vi.fn().mockResolvedValue(undefined),
-        toObject: vi.fn().mockReturnThis(),
-        ...overrides,
-    };
-}
-
-function createMockGroup(overrides = {}) {
-    return {
-        _id: new Types.ObjectId(mockGroupId),
-        name: "Test Group",
-        members: [
-            { user: new Types.ObjectId(mockUserId), name: "User1" },
-            { user: new Types.ObjectId(), name: "User2" },
-        ],
-        addPoints: vi.fn().mockResolvedValue(undefined),
-        save: vi.fn().mockResolvedValue(undefined),
-        ...overrides,
-    };
-}
-
-/** Sets up Question constructor mock + createChatForEntity mock. */
-function mockConstructors(questionOverrides = {}) {
-    const mockQuestion = createMockQuestion(questionOverrides);
-    const mockChat = { _id: mockChatId, save: vi.fn().mockResolvedValue(undefined) };
-
-    vi.mocked(Question).mockImplementation(function (this: any, data: any) {
-        Object.assign(this, mockQuestion, data);
-        return this;
-    } as any);
-    (createChatForEntity as Mock).mockResolvedValue(mockChat);
-
-    return { mockQuestion, mockChat };
-}
-
-beforeEach(() => {
+beforeAll(setupTestDb);
+afterAll(teardownTestDb);
+beforeEach(async () => {
+    await clearCollections();
+    resetStorageFake();
     vi.clearAllMocks();
-    (generateSignedUrl as Mock).mockResolvedValue({ key: "test-key", url: "https://signed.url" });
 });
 
-// ─── createQuestion ─────────────────────────────────────────────────────────
-
 describe("createQuestion", () => {
-    it("should create a question with a linked chat and award points", async () => {
-        const { mockQuestion, mockChat } = mockConstructors();
-        const mockGroup = createMockGroup();
-        (Group.findById as Mock).mockReturnValue({ orFail: () => mockGroup });
+    it("creates a question with a linked chat and awards points", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({
+            admin: user._id,
+            members: [{ user: user._id, name: "U", points: 0 }],
+        });
 
-        const result = await createQuestion(mockGroupId, mockUserId, {
+        const result = await createQuestion(group._id.toString(), user._id.toString(), {
             category: "general",
             questionType: QuestionType.Custom,
             question: "Test?",
-            submittedBy: mockUserId,
+            submittedBy: user._id.toString(),
             options: ["A", "B"],
         });
 
-        expect(mockQuestion.save).toHaveBeenCalled();
-        expect(createChatForEntity).toHaveBeenCalled();
-        expect(mockGroup.addPoints).toHaveBeenCalledWith(mockUserId, expect.any(Number));
-        expect(result).toBeDefined();
+        expect(result.question).toBe("Test?");
+        expect(result.chat).toBeTruthy();
+
+        const stored = await Question.findById(result._id);
+        expect(stored?.options).toEqual(["A", "B"]);
+
+        const chat = await Chat.findById(result.chat);
+        expect(chat?.entity.toString()).toBe(stored?._id.toString());
+
+        const reloaded = await (await import("@/db/models/Group")).default.findById(group._id);
+        expect(reloaded?.members[0].points).toBeGreaterThan(0);
     });
 
-    it("should throw ValidationError when required fields are missing", async () => {
+    it("throws ValidationError when required fields are missing", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({ admin: user._id });
+
         await expect(
-            createQuestion(mockGroupId, mockUserId, {
+            createQuestion(group._id.toString(), user._id.toString(), {
                 category: "",
                 questionType: QuestionType.Custom,
                 question: "Test?",
-                submittedBy: mockUserId,
+                submittedBy: user._id.toString(),
             })
         ).rejects.toThrow(ValidationError);
     });
 
-    it("should auto-generate 1-10 options for rating type", async () => {
-        const savedData: Record<string, unknown> = {};
-        vi.mocked(Question).mockImplementation(function (this: any, data: any) {
-            Object.assign(savedData, data);
-            Object.assign(this, createMockQuestion(), data, savedData);
-            return this;
-        } as any);
-        (createChatForEntity as Mock).mockResolvedValue({
-            _id: mockChatId,
-            save: vi.fn().mockResolvedValue(undefined),
+    it("auto-generates 1-10 options for rating type", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({
+            admin: user._id,
+            members: [{ user: user._id, name: "U" }],
         });
-        (Group.findById as Mock).mockReturnValue({ orFail: () => createMockGroup() });
 
-        await createQuestion(mockGroupId, mockUserId, {
+        const result = await createQuestion(group._id.toString(), user._id.toString(), {
             category: "fun",
             questionType: QuestionType.Rating,
             question: "Rate this?",
-            submittedBy: mockUserId,
+            submittedBy: user._id.toString(),
         });
 
-        expect(savedData.options).toEqual(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]);
+        expect(result.options).toEqual(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]);
     });
 
-    it("should create a pairing question with required fields", async () => {
-        mockConstructors();
-        const mockGroup = createMockGroup();
-        (Group.findById as Mock).mockReturnValue({ orFail: () => mockGroup });
+    it("creates a pairing question with required fields", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({
+            admin: user._id,
+            members: [{ user: user._id, name: "U" }],
+        });
 
-        const result = await createQuestion(mockGroupId, mockUserId, {
+        const result = await createQuestion(group._id.toString(), user._id.toString(), {
             category: "fun",
             questionType: QuestionType.Pairing,
             question: "Match members to traits",
-            submittedBy: mockUserId,
+            submittedBy: user._id.toString(),
             pairing: {
                 keySource: PairingKeySource.Custom,
                 mode: PairingMode.Exclusive,
@@ -165,27 +112,33 @@ describe("createQuestion", () => {
             },
         });
 
-        expect(result).toBeDefined();
+        expect(result.pairing?.keys).toEqual(["Alice", "Bob"]);
     });
 
-    it("should throw ValidationError for pairing without pairing config", async () => {
+    it("throws ValidationError for pairing without pairing config", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({ admin: user._id });
+
         await expect(
-            createQuestion(mockGroupId, mockUserId, {
+            createQuestion(group._id.toString(), user._id.toString(), {
                 category: "fun",
                 questionType: QuestionType.Pairing,
                 question: "Match?",
-                submittedBy: mockUserId,
+                submittedBy: user._id.toString(),
             })
         ).rejects.toThrow(ValidationError);
     });
 
-    it("should throw ValidationError for pairing with fewer than 2 values", async () => {
+    it("throws ValidationError for pairing with fewer than 2 values", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({ admin: user._id });
+
         await expect(
-            createQuestion(mockGroupId, mockUserId, {
+            createQuestion(group._id.toString(), user._id.toString(), {
                 category: "fun",
                 questionType: QuestionType.Pairing,
                 question: "Match?",
-                submittedBy: mockUserId,
+                submittedBy: user._id.toString(),
                 pairing: {
                     keySource: PairingKeySource.Custom,
                     mode: PairingMode.Open,
@@ -196,13 +149,16 @@ describe("createQuestion", () => {
         ).rejects.toThrow(ValidationError);
     });
 
-    it("should throw ValidationError for exclusive pairing with fewer values than keys", async () => {
+    it("throws ValidationError for exclusive pairing with fewer values than keys", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({ admin: user._id });
+
         await expect(
-            createQuestion(mockGroupId, mockUserId, {
+            createQuestion(group._id.toString(), user._id.toString(), {
                 category: "fun",
                 questionType: QuestionType.Pairing,
                 question: "Match?",
-                submittedBy: mockUserId,
+                submittedBy: user._id.toString(),
                 pairing: {
                     keySource: PairingKeySource.Custom,
                     mode: PairingMode.Exclusive,
@@ -214,14 +170,16 @@ describe("createQuestion", () => {
     });
 });
 
-// ─── createQuestionFromTemplate ─────────────────────────────────────────────
-
 describe("createQuestionFromTemplate", () => {
-    it("should create a question without awarding points", async () => {
-        mockConstructors();
+    it("creates a question without awarding points", async () => {
+        const admin = await makeUser();
+        const group = await makeGroup({
+            admin: admin._id,
+            members: [{ user: admin._id, name: "A", points: 0 }],
+        });
 
         const result = await createQuestionFromTemplate(
-            mockGroupId,
+            group._id,
             "general",
             QuestionType.Custom,
             "Template Q?",
@@ -230,37 +188,51 @@ describe("createQuestionFromTemplate", () => {
             new Types.ObjectId()
         );
 
-        expect(result).toBeDefined();
-        expect(Group.findById).not.toHaveBeenCalled();
+        expect(result.question).toBe("Template Q?");
+        expect(result.submittedBy).toBeNull();
+
+        const Group = (await import("@/db/models/Group")).default;
+        const reloaded = await Group.findById(group._id);
+        expect(reloaded?.members[0].points ?? 0).toBe(0);
     });
 });
 
-// ─── getActiveQuestions ─────────────────────────────────────────────────────
-
 describe("getActiveQuestions", () => {
-    it("should return empty array when no active questions", async () => {
-        (Question.find as Mock).mockReturnValue({ lean: () => [] });
+    it("returns empty array when no active questions", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({
+            admin: user._id,
+            members: [{ user: user._id, name: "U" }],
+        });
 
-        const result = await getActiveQuestions(mockGroupId, mockUserId);
+        const result = await getActiveQuestions(group._id.toString(), user._id.toString());
 
         expect(result.questions).toEqual([]);
         expect(result.completionPercentage).toBe(0);
     });
 
-    it("should return questions with userHasVoted and userRating", async () => {
-        const questions = [
-            {
-                ...createMockQuestion({ active: true, used: true }),
-                answers: [
-                    { user: new Types.ObjectId(mockUserId), response: "A", time: new Date() },
-                ],
-                rating: { good: [new Types.ObjectId(mockUserId)], ok: [], bad: [] },
-            },
-        ];
-        (Question.find as Mock).mockReturnValue({ lean: () => questions });
-        (Group.findById as Mock).mockReturnValue({ orFail: () => createMockGroup() });
+    it("returns questions with userHasVoted and userRating", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({
+            admin: user._id,
+            members: [{ user: user._id, name: "U" }],
+        });
+        const q = await makeQuestion({
+            groupId: group._id,
+            active: true,
+            used: true,
+            options: ["A", "B"],
+        });
+        q.answers.push({
+            user: user._id,
+            response: "A",
+            time: new Date(),
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any);
+        q.rating.good.push(user._id);
+        await q.save();
 
-        const result = await getActiveQuestions(mockGroupId, mockUserId);
+        const result = await getActiveQuestions(group._id.toString(), user._id.toString());
 
         expect(result.questions).toHaveLength(1);
         expect(result.questions[0]).toMatchObject({
@@ -269,383 +241,412 @@ describe("getActiveQuestions", () => {
         });
     });
 
-    it("should calculate completion percentage", async () => {
-        const questions = [
-            {
-                ...createMockQuestion({ active: true, used: true }),
-                answers: [
-                    { user: new Types.ObjectId(mockUserId), response: "A", time: new Date() },
-                    { user: new Types.ObjectId(), response: "B", time: new Date() },
-                ],
-                rating: { good: [], ok: [], bad: [] },
-            },
-        ];
-        (Question.find as Mock).mockReturnValue({ lean: () => questions });
-        (Group.findById as Mock).mockReturnValue({ orFail: () => createMockGroup() });
+    it("calculates completion percentage", async () => {
+        const user = await makeUser();
+        const other = await makeUser();
+        const group = await makeGroup({
+            admin: user._id,
+            members: [
+                { user: user._id, name: "U" },
+                { user: other._id, name: "O" },
+            ],
+        });
+        const q = await makeQuestion({ groupId: group._id, active: true, used: true });
+        q.answers.push(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            { user: user._id, response: "A", time: new Date() } as any,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            { user: other._id, response: "B", time: new Date() } as any
+        );
+        await q.save();
 
-        const result = await getActiveQuestions(mockGroupId, mockUserId);
+        const result = await getActiveQuestions(group._id.toString(), user._id.toString());
 
-        // 2 votes / (1 question * 2 members) = 100%
         expect(result.completionPercentage).toBe(100);
     });
 });
 
-// ─── getQuestionById ────────────────────────────────────────────────────────
-
 describe("getQuestionById", () => {
-    it("should return question when found", async () => {
-        const mockQuestion = createMockQuestion();
-        mockQuestion.toObject = vi.fn().mockReturnValue({ ...mockQuestion, image: "" });
-        (Question.findOne as Mock).mockResolvedValue(mockQuestion);
+    it("returns question when found", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({ admin: user._id });
+        const q = await makeQuestion({ groupId: group._id });
 
-        const result = await getQuestionById(mockGroupId, mockQuestionId);
+        const result = await getQuestionById(group._id.toString(), q._id.toString());
 
-        expect(result).toBeDefined();
-        expect(Question.findOne).toHaveBeenCalledWith({
-            groupId: mockGroupId,
-            _id: mockQuestionId,
-        });
+        expect(result.question).toBe(q.question);
     });
 
-    it("should throw NotFoundError when question not found", async () => {
-        (Question.findOne as Mock).mockResolvedValue(null);
+    it("throws NotFoundError when question not found", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({ admin: user._id });
 
-        await expect(getQuestionById(mockGroupId, mockQuestionId)).rejects.toThrow(NotFoundError);
+        await expect(
+            getQuestionById(group._id.toString(), new Types.ObjectId().toString())
+        ).rejects.toThrow(NotFoundError);
     });
 
-    it("should generate signed URL for image questions", async () => {
-        const mockQuestion = createMockQuestion({ image: "group1/question/q1/image.jpg" });
-        mockQuestion.toObject = vi.fn().mockReturnValue({
-            ...mockQuestion,
-            image: "group1/question/q1/image.jpg",
+    it("generates signed URL for image questions", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({ admin: user._id });
+        const q = await makeQuestion({
+            groupId: group._id,
+            question: "Pick one",
             questionType: QuestionType.Custom,
         });
-        (Question.findOne as Mock).mockResolvedValue(mockQuestion);
+        q.image = "group1/question/q1/image.jpg";
+        await q.save();
 
-        const result = await getQuestionById(mockGroupId, mockQuestionId);
+        const result = await getQuestionById(group._id.toString(), q._id.toString());
 
-        expect(generateSignedUrl).toHaveBeenCalled();
-        expect(result.imageUrl).toBe("https://signed.url");
+        expect(result.imageUrl).toBe("https://fake-s3.example.com/group1/question/q1/image.jpg");
     });
 });
 
-// ─── voteOnQuestion ─────────────────────────────────────────────────────────
-
 describe("voteOnQuestion", () => {
-    it("should submit a vote and award points", async () => {
-        const mockUser = { _id: new Types.ObjectId(mockUserId), username: "testuser" };
-        const mockQuestion = createMockQuestion({ answers: [] });
-        const mockGroup = createMockGroup();
+    it("submits a vote and awards points", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({
+            admin: user._id,
+            members: [{ user: user._id, name: "U", points: 0 }],
+        });
+        const q = await makeQuestion({ groupId: group._id, options: ["A", "B"] });
 
-        (Question.findById as Mock).mockResolvedValue(mockQuestion);
-        (User.findById as Mock).mockResolvedValue(mockUser);
-        (Question.findByIdAndUpdate as Mock).mockResolvedValue(mockQuestion);
-        (Group.findById as Mock).mockResolvedValue(mockGroup);
-
-        const result = await voteOnQuestion(mockGroupId, mockQuestionId, mockUserId, "A");
+        const result = await voteOnQuestion(
+            group._id.toString(),
+            q._id.toString(),
+            user._id.toString(),
+            "A"
+        );
 
         expect(result.alreadyVoted).toBe(false);
-        expect(Question.findByIdAndUpdate).toHaveBeenCalledWith(
-            mockQuestionId,
-            expect.objectContaining({ $push: expect.any(Object) }),
-            expect.any(Object)
-        );
-        expect(mockGroup.addPoints).toHaveBeenCalled();
+
+        const reloaded = await Question.findById(q._id);
+        expect(reloaded?.answers).toHaveLength(1);
+
+        const Group = (await import("@/db/models/Group")).default;
+        const groupReloaded = await Group.findById(group._id);
+        expect(groupReloaded?.members[0].points).toBeGreaterThan(0);
     });
 
-    it("should return alreadyVoted=true when user already voted", async () => {
-        const userOid = new Types.ObjectId(mockUserId);
-        const mockQuestion = createMockQuestion({
-            answers: [{ user: userOid, response: "A", time: new Date() }],
+    it("returns alreadyVoted=true when user already voted", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({
+            admin: user._id,
+            members: [{ user: user._id, name: "U" }],
         });
-        mockQuestion.answers[0].user.equals = (id: Types.ObjectId) =>
-            id.toString() === userOid.toString();
+        const q = await makeQuestion({ groupId: group._id });
+        q.answers.push(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            { user: user._id, response: "A", time: new Date() } as any
+        );
+        await q.save();
 
-        (Question.findById as Mock).mockResolvedValue(mockQuestion);
-        (User.findById as Mock).mockResolvedValue({ _id: userOid });
-
-        const result = await voteOnQuestion(mockGroupId, mockQuestionId, mockUserId, "B");
+        const result = await voteOnQuestion(
+            group._id.toString(),
+            q._id.toString(),
+            user._id.toString(),
+            "B"
+        );
 
         expect(result.alreadyVoted).toBe(true);
-        expect(Question.findByIdAndUpdate).not.toHaveBeenCalled();
     });
 
-    it("should throw NotFoundError when question not found", async () => {
-        (Question.findById as Mock).mockResolvedValue(null);
+    it("throws NotFoundError when question not found", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({ admin: user._id });
 
-        await expect(voteOnQuestion(mockGroupId, mockQuestionId, mockUserId, "A")).rejects.toThrow(
-            NotFoundError
-        );
+        await expect(
+            voteOnQuestion(
+                group._id.toString(),
+                new Types.ObjectId().toString(),
+                user._id.toString(),
+                "A"
+            )
+        ).rejects.toThrow(NotFoundError);
     });
 
-    it("should throw ValidationError for invalid response", async () => {
-        const mockQuestion = createMockQuestion({ answers: [] });
-        (Question.findById as Mock).mockResolvedValue(mockQuestion);
+    it("throws ValidationError for invalid response", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({ admin: user._id });
+        const q = await makeQuestion({ groupId: group._id });
 
-        await expect(voteOnQuestion(mockGroupId, mockQuestionId, mockUserId, 123)).rejects.toThrow(
-            ValidationError
-        );
+        await expect(
+            voteOnQuestion(
+                group._id.toString(),
+                q._id.toString(),
+                user._id.toString(),
+                123 as unknown as string
+            )
+        ).rejects.toThrow(ValidationError);
     });
 
-    it("should accept pairing vote with valid keys and values", async () => {
-        const mockUser = { _id: new Types.ObjectId(mockUserId), username: "testuser" };
-        const mockQuestion = createMockQuestion({
-            answers: [],
+    it("accepts pairing vote with valid keys and values", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({
+            admin: user._id,
+            members: [{ user: user._id, name: "U" }],
+        });
+        const q = await makeQuestion({
+            groupId: group._id,
             questionType: QuestionType.Pairing,
-            pairing: {
-                keySource: PairingKeySource.Custom,
-                mode: PairingMode.Exclusive,
-                keys: ["Alice", "Bob"],
-                values: ["Funny", "Smart"],
-            },
         });
-        const mockGroup = createMockGroup();
+        q.pairing = {
+            keySource: PairingKeySource.Custom,
+            mode: PairingMode.Exclusive,
+            keys: ["Alice", "Bob"],
+            values: ["Funny", "Smart"],
+        };
+        await q.save();
 
-        (Question.findById as Mock).mockResolvedValue(mockQuestion);
-        (User.findById as Mock).mockResolvedValue(mockUser);
-        (Question.findByIdAndUpdate as Mock).mockResolvedValue(mockQuestion);
-        (Group.findById as Mock).mockResolvedValue(mockGroup);
-
-        const result = await voteOnQuestion(mockGroupId, mockQuestionId, mockUserId, {
-            Alice: "Funny",
-            Bob: "Smart",
-        });
+        const result = await voteOnQuestion(
+            group._id.toString(),
+            q._id.toString(),
+            user._id.toString(),
+            { Alice: "Funny", Bob: "Smart" }
+        );
 
         expect(result.alreadyVoted).toBe(false);
     });
 
-    it("should reject exclusive pairing vote with duplicate values", async () => {
-        const mockUser = { _id: new Types.ObjectId(mockUserId), username: "testuser" };
-        const mockQuestion = createMockQuestion({
-            answers: [],
-            questionType: QuestionType.Pairing,
-            pairing: {
-                keySource: PairingKeySource.Custom,
-                mode: PairingMode.Exclusive,
-                keys: ["Alice", "Bob"],
-                values: ["Funny", "Smart"],
-            },
-        });
-
-        (Question.findById as Mock).mockResolvedValue(mockQuestion);
-        (User.findById as Mock).mockResolvedValue(mockUser);
+    it("rejects exclusive pairing vote with duplicate values", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({ admin: user._id });
+        const q = await makeQuestion({ groupId: group._id, questionType: QuestionType.Pairing });
+        q.pairing = {
+            keySource: PairingKeySource.Custom,
+            mode: PairingMode.Exclusive,
+            keys: ["Alice", "Bob"],
+            values: ["Funny", "Smart"],
+        };
+        await q.save();
 
         await expect(
-            voteOnQuestion(mockGroupId, mockQuestionId, mockUserId, {
+            voteOnQuestion(group._id.toString(), q._id.toString(), user._id.toString(), {
                 Alice: "Funny",
                 Bob: "Funny",
             })
         ).rejects.toThrow(ValidationError);
     });
 
-    it("should allow open pairing vote with duplicate values", async () => {
-        const mockUser = { _id: new Types.ObjectId(mockUserId), username: "testuser" };
-        const mockQuestion = createMockQuestion({
-            answers: [],
-            questionType: QuestionType.Pairing,
-            pairing: {
-                keySource: PairingKeySource.Custom,
-                mode: PairingMode.Open,
-                keys: ["Alice", "Bob"],
-                values: ["Funny", "Smart"],
-            },
+    it("allows open pairing vote with duplicate values", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({
+            admin: user._id,
+            members: [{ user: user._id, name: "U" }],
         });
-        const mockGroup = createMockGroup();
+        const q = await makeQuestion({ groupId: group._id, questionType: QuestionType.Pairing });
+        q.pairing = {
+            keySource: PairingKeySource.Custom,
+            mode: PairingMode.Open,
+            keys: ["Alice", "Bob"],
+            values: ["Funny", "Smart"],
+        };
+        await q.save();
 
-        (Question.findById as Mock).mockResolvedValue(mockQuestion);
-        (User.findById as Mock).mockResolvedValue(mockUser);
-        (Question.findByIdAndUpdate as Mock).mockResolvedValue(mockQuestion);
-        (Group.findById as Mock).mockResolvedValue(mockGroup);
-
-        const result = await voteOnQuestion(mockGroupId, mockQuestionId, mockUserId, {
-            Alice: "Funny",
-            Bob: "Funny",
-        });
+        const result = await voteOnQuestion(
+            group._id.toString(),
+            q._id.toString(),
+            user._id.toString(),
+            { Alice: "Funny", Bob: "Funny" }
+        );
 
         expect(result.alreadyVoted).toBe(false);
     });
 
-    it("should reject pairing vote with invalid key", async () => {
-        const mockUser = { _id: new Types.ObjectId(mockUserId), username: "testuser" };
-        const mockQuestion = createMockQuestion({
-            answers: [],
-            questionType: QuestionType.Pairing,
-            pairing: {
-                keySource: PairingKeySource.Custom,
-                mode: PairingMode.Open,
-                keys: ["Alice", "Bob"],
-                values: ["Funny", "Smart"],
-            },
-        });
-
-        (Question.findById as Mock).mockResolvedValue(mockQuestion);
-        (User.findById as Mock).mockResolvedValue(mockUser);
+    it("rejects pairing vote with invalid key", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({ admin: user._id });
+        const q = await makeQuestion({ groupId: group._id, questionType: QuestionType.Pairing });
+        q.pairing = {
+            keySource: PairingKeySource.Custom,
+            mode: PairingMode.Open,
+            keys: ["Alice", "Bob"],
+            values: ["Funny", "Smart"],
+        };
+        await q.save();
 
         await expect(
-            voteOnQuestion(mockGroupId, mockQuestionId, mockUserId, {
+            voteOnQuestion(group._id.toString(), q._id.toString(), user._id.toString(), {
                 Charlie: "Funny",
             })
         ).rejects.toThrow(ValidationError);
     });
 });
 
-// ─── rateQuestion ───────────────────────────────────────────────────────────
-
 describe("rateQuestion", () => {
-    it("should add a new rating", async () => {
-        const mockQuestion = createMockQuestion();
-        (Question.findById as Mock).mockResolvedValue(mockQuestion);
+    it("adds a new rating", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({ admin: user._id });
+        const q = await makeQuestion({ groupId: group._id });
 
-        const result = await rateQuestion(mockQuestionId, mockUserId, "good");
+        const result = await rateQuestion(q._id.toString(), user._id.toString(), "good");
 
         expect(result.previousRating).toBeNull();
         expect(result.newRating).toBe("good");
-        expect(mockQuestion.rating.good).toHaveLength(1);
-        expect(mockQuestion.save).toHaveBeenCalled();
+
+        const reloaded = await Question.findById(q._id);
+        expect(reloaded?.rating.good).toHaveLength(1);
     });
 
-    it("should change rating from good to ok", async () => {
-        const userOid = new Types.ObjectId(mockUserId);
-        userOid.equals = (id: Types.ObjectId) => id.toString() === mockUserId;
+    it("changes rating from good to ok", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({ admin: user._id });
+        const q = await makeQuestion({ groupId: group._id });
+        q.rating.good.push(user._id);
+        await q.save();
 
-        const mockQuestion = createMockQuestion({
-            rating: { good: [userOid], ok: [], bad: [] },
-        });
-        (Question.findById as Mock).mockResolvedValue(mockQuestion);
-
-        const result = await rateQuestion(mockQuestionId, mockUserId, "ok");
+        const result = await rateQuestion(q._id.toString(), user._id.toString(), "ok");
 
         expect(result.previousRating).toBe("good");
         expect(result.newRating).toBe("ok");
-        expect(mockQuestion.rating.good).toHaveLength(0);
-        expect(mockQuestion.rating.ok).toHaveLength(1);
-        expect(mockQuestion.save).toHaveBeenCalled();
+
+        const reloaded = await Question.findById(q._id);
+        expect(reloaded?.rating.good).toHaveLength(0);
+        expect(reloaded?.rating.ok).toHaveLength(1);
     });
 
-    it("should handle re-submitting the same rating", async () => {
-        const userOid = new Types.ObjectId(mockUserId);
-        userOid.equals = (id: Types.ObjectId) => id.toString() === mockUserId;
+    it("handles re-submitting the same rating", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({ admin: user._id });
+        const q = await makeQuestion({ groupId: group._id });
+        q.rating.ok.push(user._id);
+        await q.save();
 
-        const mockQuestion = createMockQuestion({
-            rating: { good: [], ok: [userOid], bad: [] },
-        });
-        (Question.findById as Mock).mockResolvedValue(mockQuestion);
-
-        const result = await rateQuestion(mockQuestionId, mockUserId, "ok");
+        const result = await rateQuestion(q._id.toString(), user._id.toString(), "ok");
 
         expect(result.previousRating).toBe("ok");
         expect(result.newRating).toBe("ok");
-        expect(mockQuestion.rating.ok).toHaveLength(1);
-        expect(mockQuestion.save).toHaveBeenCalled();
+
+        const reloaded = await Question.findById(q._id);
+        expect(reloaded?.rating.ok).toHaveLength(1);
     });
 
-    it("should throw ValidationError for invalid rating", async () => {
-        await expect(rateQuestion(mockQuestionId, mockUserId, "excellent")).rejects.toThrow(
-            ValidationError
-        );
+    it("throws ValidationError for invalid rating", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({ admin: user._id });
+        const q = await makeQuestion({ groupId: group._id });
+
+        await expect(
+            rateQuestion(q._id.toString(), user._id.toString(), "excellent")
+        ).rejects.toThrow(ValidationError);
     });
 
-    it("should throw NotFoundError when question not found", async () => {
-        (Question.findById as Mock).mockResolvedValue(null);
+    it("throws NotFoundError when question not found", async () => {
+        const user = await makeUser();
 
-        await expect(rateQuestion(mockQuestionId, mockUserId, "good")).rejects.toThrow(
-            NotFoundError
-        );
+        await expect(
+            rateQuestion(new Types.ObjectId().toString(), user._id.toString(), "good")
+        ).rejects.toThrow(NotFoundError);
     });
 });
 
-// ─── getQuestionResults ─────────────────────────────────────────────────────
-
 describe("getQuestionResults", () => {
-    it("should return aggregated results sorted by count", async () => {
-        const mockQuestion = {
-            _id: new Types.ObjectId(mockQuestionId),
-            groupId: new Types.ObjectId(mockGroupId),
+    it("returns aggregated results sorted by count", async () => {
+        const alice = await makeUser({ username: "Alice" });
+        const bob = await makeUser({ username: "Bob" });
+        const charlie = await makeUser({ username: "Charlie" });
+        const group = await makeGroup({
+            admin: alice._id,
+            members: [
+                { user: alice._id, name: "Alice" },
+                { user: bob._id, name: "Bob" },
+                { user: charlie._id, name: "Charlie" },
+            ],
+        });
+        const q = await makeQuestion({
+            groupId: group._id,
             questionType: QuestionType.Custom,
             multiSelect: false,
-            answers: [
-                { user: { username: "Alice" }, response: "A", time: new Date() },
-                { user: { username: "Bob" }, response: "A", time: new Date() },
-                { user: { username: "Charlie" }, response: "B", time: new Date() },
-            ],
-        };
-
-        (Question.findById as Mock).mockReturnValue({
-            populate: vi.fn().mockResolvedValue(mockQuestion),
+            options: ["A", "B"],
         });
-        (Group.findById as Mock).mockReturnValue({ orFail: () => createMockGroup() });
+        q.answers.push(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            { user: alice._id, response: "A", time: new Date() } as any,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            { user: bob._id, response: "A", time: new Date() } as any,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            { user: charlie._id, response: "B", time: new Date() } as any
+        );
+        await q.save();
 
-        const result = await getQuestionResults(mockQuestionId);
+        const result = await getQuestionResults(q._id.toString());
 
         expect(result.totalVotes).toBe(3);
-        expect(result.totalUsers).toBe(2);
+        expect(result.totalUsers).toBe(3);
         expect(result.results[0].option).toBe("A");
         expect(result.results[0].count).toBe(2);
-        expect(result.results[0].users.map((u) => u.username)).toEqual(["Alice", "Bob"]);
+        expect(result.results[0].users.map((u) => u.username).sort()).toEqual(["Alice", "Bob"]);
         expect(result.results[1].option).toBe("B");
         expect(result.results[1].count).toBe(1);
     });
 
-    it("should throw NotFoundError when question not found", async () => {
-        (Question.findById as Mock).mockReturnValue({
-            populate: vi.fn().mockResolvedValue(null),
-        });
-
-        await expect(getQuestionResults(mockQuestionId)).rejects.toThrow(NotFoundError);
+    it("throws NotFoundError when question not found", async () => {
+        await expect(getQuestionResults(new Types.ObjectId().toString())).rejects.toThrow(
+            NotFoundError
+        );
     });
 
-    it("should handle array responses (multi-select)", async () => {
-        const mockQuestion = {
-            _id: new Types.ObjectId(mockQuestionId),
-            groupId: new Types.ObjectId(mockGroupId),
-            questionType: QuestionType.Custom,
-            multiSelect: true,
-            answers: [{ user: { username: "Alice" }, response: ["A", "B"], time: new Date() }],
-        };
-
-        (Question.findById as Mock).mockReturnValue({
-            populate: vi.fn().mockResolvedValue(mockQuestion),
+    it("handles array responses (multi-select)", async () => {
+        const user = await makeUser({ username: "Alice" });
+        const group = await makeGroup({
+            admin: user._id,
+            members: [{ user: user._id, name: "Alice" }],
         });
-        (Group.findById as Mock).mockReturnValue({ orFail: () => createMockGroup() });
+        const q = await makeQuestion({
+            groupId: group._id,
+            multiSelect: true,
+            options: ["A", "B"],
+        });
+        q.answers.push(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            { user: user._id, response: ["A", "B"], time: new Date() } as any
+        );
+        await q.save();
 
-        const result = await getQuestionResults(mockQuestionId);
+        const result = await getQuestionResults(q._id.toString());
 
         expect(result.totalVotes).toBe(1);
         expect(result.results).toHaveLength(2);
     });
 
-    it("should return pairing results for pairing questions", async () => {
-        const mockQuestion = {
-            _id: new Types.ObjectId(mockQuestionId),
-            groupId: new Types.ObjectId(mockGroupId),
-            questionType: QuestionType.Pairing,
-            multiSelect: false,
-            pairing: {
-                keySource: PairingKeySource.Custom,
-                mode: PairingMode.Exclusive,
-                keys: ["Alice", "Bob"],
-                values: ["Funny", "Smart"],
-            },
-            answers: [
-                {
-                    user: { username: "User1" },
-                    response: { Alice: "Funny", Bob: "Smart" },
-                    time: new Date(),
-                },
-                {
-                    user: { username: "User2" },
-                    response: { Alice: "Smart", Bob: "Funny" },
-                    time: new Date(),
-                },
+    it("returns pairing results for pairing questions", async () => {
+        const u1 = await makeUser({ username: "User1" });
+        const u2 = await makeUser({ username: "User2" });
+        const group = await makeGroup({
+            admin: u1._id,
+            members: [
+                { user: u1._id, name: "User1" },
+                { user: u2._id, name: "User2" },
             ],
-        };
-
-        (Question.findById as Mock).mockReturnValue({
-            populate: vi.fn().mockResolvedValue(mockQuestion),
         });
-        (Group.findById as Mock).mockReturnValue({ orFail: () => createMockGroup() });
+        const q = await makeQuestion({
+            groupId: group._id,
+            questionType: QuestionType.Pairing,
+        });
+        q.pairing = {
+            keySource: PairingKeySource.Custom,
+            mode: PairingMode.Exclusive,
+            keys: ["Alice", "Bob"],
+            values: ["Funny", "Smart"],
+        };
+        q.answers.push(
+            {
+                user: u1._id,
+                response: { Alice: "Funny", Bob: "Smart" },
+                time: new Date(),
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } as any,
+            {
+                user: u2._id,
+                response: { Alice: "Smart", Bob: "Funny" },
+                time: new Date(),
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } as any
+        );
+        await q.save();
 
-        const result = await getQuestionResults(mockQuestionId);
+        const result = await getQuestionResults(q._id.toString());
 
         expect(result.pairingResults).toBeDefined();
         expect(result.pairingResults).toHaveLength(2);
@@ -657,145 +658,153 @@ describe("getQuestionResults", () => {
     });
 });
 
-// ─── updateQuestionAttachments ──────────────────────────────────────────────
-
 describe("updateQuestionAttachments", () => {
-    it("should attach an image to a question", async () => {
-        const mockQuestion = createMockQuestion();
-        (Question.findOne as Mock).mockResolvedValue(mockQuestion);
+    it("attaches an image to a question", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({ admin: user._id });
+        const q = await makeQuestion({ groupId: group._id });
 
-        await updateQuestionAttachments(mockGroupId, mockQuestionId, {
+        await updateQuestionAttachments(group._id.toString(), q._id.toString(), {
             imageKey: "group1/question/q1/img.jpg",
         });
 
-        expect(mockQuestion.image).toBe("group1/question/q1/img.jpg");
-        expect(mockQuestion.save).toHaveBeenCalled();
+        const reloaded = await Question.findById(q._id);
+        expect(reloaded?.image).toBe("group1/question/q1/img.jpg");
     });
 
-    it("should attach options to a question", async () => {
-        const mockQuestion = createMockQuestion();
-        (Question.findOne as Mock).mockResolvedValue(mockQuestion);
+    it("attaches options to a question", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({ admin: user._id });
+        const q = await makeQuestion({ groupId: group._id });
 
-        await updateQuestionAttachments(mockGroupId, mockQuestionId, {
+        await updateQuestionAttachments(group._id.toString(), q._id.toString(), {
             options: ["X", "Y", "Z"],
         });
 
-        expect(mockQuestion.options).toEqual(["X", "Y", "Z"]);
-        expect(mockQuestion.save).toHaveBeenCalled();
+        const reloaded = await Question.findById(q._id);
+        expect(reloaded?.options).toEqual(["X", "Y", "Z"]);
     });
 
-    it("should attach both image and options in one call", async () => {
-        const mockQuestion = createMockQuestion();
-        (Question.findOne as Mock).mockResolvedValue(mockQuestion);
+    it("attaches both image and options in one call", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({ admin: user._id });
+        const q = await makeQuestion({ groupId: group._id });
 
-        await updateQuestionAttachments(mockGroupId, mockQuestionId, {
+        await updateQuestionAttachments(group._id.toString(), q._id.toString(), {
             imageKey: "group1/question/q1/img.jpg",
             options: ["A", "B"],
         });
 
-        expect(mockQuestion.image).toBe("group1/question/q1/img.jpg");
-        expect(mockQuestion.options).toEqual(["A", "B"]);
-        expect(mockQuestion.save).toHaveBeenCalledTimes(1);
+        const reloaded = await Question.findById(q._id);
+        expect(reloaded?.image).toBe("group1/question/q1/img.jpg");
+        expect(reloaded?.options).toEqual(["A", "B"]);
     });
 
-    it("should throw ValidationError when neither imageKey nor options provided", async () => {
-        await expect(updateQuestionAttachments(mockGroupId, mockQuestionId, {})).rejects.toThrow(
-            ValidationError
-        );
-    });
+    it("throws ValidationError when neither imageKey nor options provided", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({ admin: user._id });
+        const q = await makeQuestion({ groupId: group._id });
 
-    it("should throw ValidationError when options is empty array", async () => {
         await expect(
-            updateQuestionAttachments(mockGroupId, mockQuestionId, { options: [] })
+            updateQuestionAttachments(group._id.toString(), q._id.toString(), {})
         ).rejects.toThrow(ValidationError);
     });
 
-    it("should throw NotFoundError when question not found", async () => {
-        (Question.findOne as Mock).mockResolvedValue(null);
+    it("throws ValidationError when options is empty array", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({ admin: user._id });
+        const q = await makeQuestion({ groupId: group._id });
 
         await expect(
-            updateQuestionAttachments(mockGroupId, mockQuestionId, {
+            updateQuestionAttachments(group._id.toString(), q._id.toString(), { options: [] })
+        ).rejects.toThrow(ValidationError);
+    });
+
+    it("throws NotFoundError when question not found", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({ admin: user._id });
+
+        await expect(
+            updateQuestionAttachments(group._id.toString(), new Types.ObjectId().toString(), {
                 imageKey: "group1/question/q1/img.jpg",
             })
         ).rejects.toThrow(NotFoundError);
     });
 });
 
-// ─── activateSmartQuestions ─────────────────────────────────────────────────
-
 describe("activateSmartQuestions", () => {
-    const groupId = new Types.ObjectId(mockGroupId);
+    it("deactivates currently active questions first", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({ admin: user._id });
+        const active = await makeQuestion({ groupId: group._id, active: true, used: true });
 
-    it("should deactivate current questions first", async () => {
-        const activeQ = createMockQuestion({ active: true });
-        (Question.find as Mock).mockResolvedValue([activeQ]);
-        (Question.findOne as Mock).mockReturnValue({
-            sort: vi.fn().mockResolvedValue(null),
-        });
+        await activateSmartQuestions(group._id);
 
-        await activateSmartQuestions(groupId);
-
-        expect(activeQ.active).toBe(false);
-        expect(activeQ.save).toHaveBeenCalled();
+        const reloaded = await Question.findById(active._id);
+        expect(reloaded?.active).toBe(false);
     });
 
-    it("should activate one custom + one template question", async () => {
-        const customQ = createMockQuestion({ submittedBy: new Types.ObjectId() });
-        const templateQ = createMockQuestion({ submittedBy: null });
+    it("activates one custom + one template question", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({
+            admin: user._id,
+            members: [{ user: user._id, name: "U" }],
+        });
+        const customQ = await makeQuestion({
+            groupId: group._id,
+            submittedBy: user._id,
+            used: false,
+            active: false,
+        });
+        const templateQ = await makeQuestion({
+            groupId: group._id,
+            submittedBy: undefined,
+            used: false,
+            active: false,
+        });
 
-        (Group.findById as Mock).mockReturnValue({ orFail: () => createMockGroup() });
-        (Question.find as Mock).mockResolvedValue([]);
-        (Question.findOne as Mock)
-            .mockReturnValueOnce({ sort: vi.fn().mockResolvedValue(customQ) })
-            .mockReturnValueOnce({ sort: vi.fn().mockResolvedValue(templateQ) });
-
-        const result = await activateSmartQuestions(groupId);
+        const result = await activateSmartQuestions(group._id);
 
         expect(result).toHaveLength(2);
-        expect(customQ.active).toBe(true);
-        expect(customQ.used).toBe(true);
-        expect(customQ.usedAt).toBeInstanceOf(Date);
-        expect(templateQ.active).toBe(true);
+        const customReloaded = await Question.findById(customQ._id);
+        const templateReloaded = await Question.findById(templateQ._id);
+        expect(customReloaded?.active).toBe(true);
+        expect(customReloaded?.used).toBe(true);
+        expect(templateReloaded?.active).toBe(true);
     });
 
-    it("should return empty array when no questions available", async () => {
-        (Question.find as Mock).mockResolvedValue([]);
-        (Question.findOne as Mock).mockReturnValue({
-            sort: vi.fn().mockResolvedValue(null),
-        });
+    it("returns empty array when no questions available", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({ admin: user._id });
 
-        const result = await activateSmartQuestions(groupId);
+        const result = await activateSmartQuestions(group._id);
 
         expect(result).toHaveLength(0);
     });
 });
 
-// ─── deactivateCurrentQuestions ─────────────────────────────────────────────
-
 describe("deactivateCurrentQuestions", () => {
-    it("should set active=false on all active questions for group", async () => {
-        const q1 = createMockQuestion({ active: true });
-        const q2 = createMockQuestion({ active: true });
-        (Question.find as Mock).mockResolvedValue([q1, q2]);
+    it("sets active=false on all active questions for group", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({ admin: user._id });
+        const q1 = await makeQuestion({ groupId: group._id, active: true });
+        const q2 = await makeQuestion({ groupId: group._id, active: true });
 
-        await deactivateCurrentQuestions(new Types.ObjectId(mockGroupId));
+        await deactivateCurrentQuestions(group._id);
 
-        expect(q1.active).toBe(false);
-        expect(q2.active).toBe(false);
-        expect(q1.save).toHaveBeenCalled();
-        expect(q2.save).toHaveBeenCalled();
+        const r1 = await Question.findById(q1._id);
+        const r2 = await Question.findById(q2._id);
+        expect(r1?.active).toBe(false);
+        expect(r2?.active).toBe(false);
     });
 
-    it("should do nothing when no active questions", async () => {
-        (Question.find as Mock).mockResolvedValue([]);
+    it("does nothing when no active questions", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({ admin: user._id });
 
-        await deactivateCurrentQuestions(new Types.ObjectId(mockGroupId));
-
-        expect(Question.find).toHaveBeenCalled();
+        await expect(deactivateCurrentQuestions(group._id)).resolves.toBeUndefined();
     });
 });
-
-// ─── parseVoteResponse ──────────────────────────────────────────────────────
 
 describe("parseVoteResponse", () => {
     it("accepts a string", () => {

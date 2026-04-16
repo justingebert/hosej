@@ -1,25 +1,10 @@
-import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
+import { describe, it, expect, vi, beforeAll, beforeEach, afterAll } from "vitest";
 import { Types } from "mongoose";
 
-vi.mock("@/db/dbConnect", () => ({ default: vi.fn() }));
-vi.mock("@/db/models/Jukebox");
-vi.mock("@/db/models/Chat");
-vi.mock("@/db/models/User");
-vi.mock("@/db/models/Group");
-vi.mock("@/db/models/ActivityEvent");
-vi.mock("firebase-admin", () => ({
-    default: { apps: [], initializeApp: vi.fn(), credential: { cert: vi.fn() } },
-}));
-vi.mock("@/lib/sendNotification", () => ({
-    sendNotification: vi.fn().mockResolvedValue(undefined),
-}));
-vi.mock("@/lib/services/chat", () => ({
-    createChatForEntity: vi.fn().mockImplementation(async () => ({
-        _id: new Types.ObjectId(),
-        save: vi.fn().mockResolvedValue(undefined),
-    })),
-}));
+vi.mock("@/lib/integrations/push", () => import("@/test/fakes/push"));
 
+import { setupTestDb, teardownTestDb, clearCollections } from "@/test/db";
+import { makeUser, makeGroup, makeJukebox } from "@/test/factories";
 import {
     addSong,
     rateSong,
@@ -29,49 +14,55 @@ import {
 } from "./jukebox";
 import Jukebox from "@/db/models/Jukebox";
 import Chat from "@/db/models/Chat";
-import { sendNotification } from "@/lib/sendNotification";
+import { getPushCalls, resetPushFake } from "@/test/fakes/push";
 import { ConflictError, NotFoundError, ValidationError } from "@/lib/api/errorHandling";
-import { EntityModel } from "@/types/models/chat";
-import { createChatForEntity } from "@/lib/services/chat";
+import type { IGroup } from "@/types/models/group";
 
-const mockGroupId = new Types.ObjectId().toString();
-const mockUserId = new Types.ObjectId().toString();
-const mockJukeboxId = new Types.ObjectId().toString();
-const mockSongId = new Types.ObjectId().toString();
-
-beforeEach(() => {
+beforeAll(setupTestDb);
+afterAll(teardownTestDb);
+beforeEach(async () => {
+    await clearCollections();
+    resetPushFake();
     vi.clearAllMocks();
 });
 
-// ─── addSong ─────────────────────────────────────────────────
-
 describe("addSong", () => {
-    it("should add a song to an active jukebox", async () => {
-        const mockJukebox = {
-            _id: mockJukeboxId,
-            songs: [] as any[],
-            save: vi.fn().mockResolvedValue(undefined),
-        };
-        (Jukebox.findOne as Mock).mockResolvedValue(mockJukebox);
-
-        const result = await addSong(mockJukeboxId, mockGroupId, mockUserId, {
-            spotifyTrackId: "track-1",
-            title: "Test Song",
-            artist: "Test Artist",
-            album: "Test Album",
-            coverImageUrl: "https://example.com/cover.jpg",
+    it("adds a song to an active jukebox", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({
+            admin: user._id,
+            members: [{ user: user._id, name: "u" }],
         });
+        const jukebox = await makeJukebox({ groupId: group._id, active: true });
 
-        expect(mockJukebox.songs).toHaveLength(1);
-        expect(mockJukebox.songs[0].spotifyTrackId).toBe("track-1");
-        expect(mockJukebox.songs[0].submittedBy).toBe(mockUserId);
-        expect(mockJukebox.save).toHaveBeenCalled();
-        expect(result).toBe(mockJukebox);
+        const result = await addSong(
+            jukebox._id.toString(),
+            group._id.toString(),
+            user._id.toString(),
+            {
+                spotifyTrackId: "track-1",
+                title: "Test Song",
+                artist: "Test Artist",
+                album: "Test Album",
+                coverImageUrl: "https://example.com/cover.jpg",
+            }
+        );
+
+        expect(result.songs).toHaveLength(1);
+        expect(result.songs[0].spotifyTrackId).toBe("track-1");
+        expect(result.songs[0].submittedBy.toString()).toBe(user._id.toString());
+
+        const reloaded = await Jukebox.findById(jukebox._id);
+        expect(reloaded?.songs).toHaveLength(1);
     });
 
-    it("should throw ValidationError when required fields are missing", async () => {
+    it("throws ValidationError when required fields are missing", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({ admin: user._id });
+        const jukebox = await makeJukebox({ groupId: group._id, active: true });
+
         await expect(
-            addSong(mockJukeboxId, mockGroupId, mockUserId, {
+            addSong(jukebox._id.toString(), group._id.toString(), user._id.toString(), {
                 spotifyTrackId: "",
                 title: "Test",
                 artist: "Artist",
@@ -79,11 +70,12 @@ describe("addSong", () => {
         ).rejects.toThrow(ValidationError);
     });
 
-    it("should throw NotFoundError when jukebox not found", async () => {
-        (Jukebox.findOne as Mock).mockResolvedValue(null);
+    it("throws NotFoundError when jukebox not found", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({ admin: user._id });
 
         await expect(
-            addSong(mockJukeboxId, mockGroupId, mockUserId, {
+            addSong(new Types.ObjectId().toString(), group._id.toString(), user._id.toString(), {
                 spotifyTrackId: "track-1",
                 title: "Test Song",
                 artist: "Test Artist",
@@ -91,16 +83,39 @@ describe("addSong", () => {
         ).rejects.toThrow(NotFoundError);
     });
 
-    it("should throw ConflictError when user already submitted a song", async () => {
-        const mockJukebox = {
-            _id: mockJukeboxId,
-            songs: [{ submittedBy: new Types.ObjectId(mockUserId) }],
-            save: vi.fn(),
-        };
-        (Jukebox.findOne as Mock).mockResolvedValue(mockJukebox);
+    it("throws NotFoundError when jukebox is inactive", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({ admin: user._id });
+        const jukebox = await makeJukebox({ groupId: group._id, active: false });
 
         await expect(
-            addSong(mockJukeboxId, mockGroupId, mockUserId, {
+            addSong(jukebox._id.toString(), group._id.toString(), user._id.toString(), {
+                spotifyTrackId: "track-1",
+                title: "Test Song",
+                artist: "Test Artist",
+            })
+        ).rejects.toThrow(NotFoundError);
+    });
+
+    it("throws ConflictError when user already submitted a song", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({ admin: user._id });
+        const jukebox = await makeJukebox({
+            groupId: group._id,
+            active: true,
+            songs: [
+                {
+                    spotifyTrackId: "existing",
+                    title: "Existing",
+                    artist: "A",
+                    submittedBy: user._id,
+                    ratings: [],
+                },
+            ],
+        });
+
+        await expect(
+            addSong(jukebox._id.toString(), group._id.toString(), user._id.toString(), {
                 spotifyTrackId: "track-2",
                 title: "Another Song",
                 artist: "Artist",
@@ -109,238 +124,226 @@ describe("addSong", () => {
     });
 });
 
-// ─── rateSong ────────────────────────────────────────────────
-
 describe("rateSong", () => {
-    function createMockJukeboxWithSong(songSubmittedBy: string, existingRatings: any[] = []) {
-        return {
-            _id: mockJukeboxId,
-            groupId: new Types.ObjectId(mockGroupId),
+    async function setupJukeboxWithSong(
+        submitterId: Types.ObjectId,
+        groupAdmin?: Types.ObjectId,
+        existingRatings: Array<{ userId: Types.ObjectId; rating: number }> = []
+    ) {
+        const admin = groupAdmin ?? (await makeUser())._id;
+        const group = await makeGroup({ admin, members: [{ user: admin, name: "a" }] });
+        const jukebox = await makeJukebox({
+            groupId: group._id,
+            active: true,
             songs: [
                 {
-                    _id: new Types.ObjectId(mockSongId),
-                    submittedBy: new Types.ObjectId(songSubmittedBy),
+                    spotifyTrackId: "t",
+                    title: "Song",
+                    artist: "Artist",
+                    submittedBy: submitterId,
                     ratings: existingRatings,
                 },
             ],
-            save: vi.fn().mockResolvedValue(undefined),
-        };
+        });
+        return { group, jukebox, songId: jukebox.songs[0]._id as Types.ObjectId };
     }
 
-    const otherUserId = new Types.ObjectId().toString();
+    it("adds a rating to a song", async () => {
+        const submitter = await makeUser();
+        const rater = await makeUser();
+        const { jukebox, songId } = await setupJukeboxWithSong(submitter._id);
 
-    it("should add a rating to a song", async () => {
-        const mockJukebox = createMockJukeboxWithSong(otherUserId);
-        (Jukebox.findById as Mock).mockResolvedValue(mockJukebox);
-
-        const result = await rateSong(mockJukeboxId, mockSongId, mockUserId, 75);
-
-        expect(mockJukebox.songs[0].ratings).toHaveLength(1);
-        expect(mockJukebox.songs[0].ratings[0].rating).toBe(75);
-        expect(mockJukebox.save).toHaveBeenCalled();
-        expect(result).toBe(mockJukebox.songs[0]);
-    });
-
-    it("should throw ValidationError for rating below 1", async () => {
-        await expect(rateSong(mockJukeboxId, mockSongId, mockUserId, 0)).rejects.toThrow(
-            ValidationError
+        const result = await rateSong(
+            jukebox._id.toString(),
+            songId.toString(),
+            rater._id.toString(),
+            75
         );
+
+        expect(result.ratings).toHaveLength(1);
+        expect(result.ratings[0].rating).toBe(75);
+
+        const reloaded = await Jukebox.findById(jukebox._id);
+        expect(reloaded?.songs[0].ratings).toHaveLength(1);
+        expect(reloaded?.songs[0].ratings[0].rating).toBe(75);
     });
 
-    it("should throw ValidationError for rating above 100", async () => {
-        await expect(rateSong(mockJukeboxId, mockSongId, mockUserId, 101)).rejects.toThrow(
-            ValidationError
-        );
+    it("throws ValidationError for rating below 1", async () => {
+        const submitter = await makeUser();
+        const rater = await makeUser();
+        const { jukebox, songId } = await setupJukeboxWithSong(submitter._id);
+
+        await expect(
+            rateSong(jukebox._id.toString(), songId.toString(), rater._id.toString(), 0)
+        ).rejects.toThrow(ValidationError);
     });
 
-    it("should throw ValidationError for non-number rating", async () => {
-        await expect(rateSong(mockJukeboxId, mockSongId, mockUserId, "abc" as any)).rejects.toThrow(
-            ValidationError
-        );
+    it("throws ValidationError for rating above 100", async () => {
+        const submitter = await makeUser();
+        const rater = await makeUser();
+        const { jukebox, songId } = await setupJukeboxWithSong(submitter._id);
+
+        await expect(
+            rateSong(jukebox._id.toString(), songId.toString(), rater._id.toString(), 101)
+        ).rejects.toThrow(ValidationError);
     });
 
-    it("should throw NotFoundError when jukebox not found", async () => {
-        (Jukebox.findById as Mock).mockResolvedValue(null);
+    it("throws ValidationError for non-number rating", async () => {
+        const submitter = await makeUser();
+        const rater = await makeUser();
+        const { jukebox, songId } = await setupJukeboxWithSong(submitter._id);
 
-        await expect(rateSong(mockJukeboxId, mockSongId, mockUserId, 50)).rejects.toThrow(
-            NotFoundError
-        );
+        await expect(
+            rateSong(
+                jukebox._id.toString(),
+                songId.toString(),
+                rater._id.toString(),
+                "abc" as unknown as number
+            )
+        ).rejects.toThrow(ValidationError);
     });
 
-    it("should throw NotFoundError when song not found", async () => {
-        const mockJukebox = { _id: mockJukeboxId, songs: [], save: vi.fn() };
-        (Jukebox.findById as Mock).mockResolvedValue(mockJukebox);
+    it("throws NotFoundError when jukebox not found", async () => {
+        const rater = await makeUser();
 
-        await expect(rateSong(mockJukeboxId, mockSongId, mockUserId, 50)).rejects.toThrow(
-            NotFoundError
-        );
+        await expect(
+            rateSong(
+                new Types.ObjectId().toString(),
+                new Types.ObjectId().toString(),
+                rater._id.toString(),
+                50
+            )
+        ).rejects.toThrow(NotFoundError);
     });
 
-    it("should throw ConflictError when rating own song", async () => {
-        const mockJukebox = createMockJukeboxWithSong(mockUserId);
-        (Jukebox.findById as Mock).mockResolvedValue(mockJukebox);
+    it("throws NotFoundError when song not found", async () => {
+        const rater = await makeUser();
+        const admin = await makeUser();
+        const group = await makeGroup({ admin: admin._id });
+        const jukebox = await makeJukebox({ groupId: group._id, active: true, songs: [] });
 
-        await expect(rateSong(mockJukeboxId, mockSongId, mockUserId, 50)).rejects.toThrow(
-            ConflictError
-        );
+        await expect(
+            rateSong(
+                jukebox._id.toString(),
+                new Types.ObjectId().toString(),
+                rater._id.toString(),
+                50
+            )
+        ).rejects.toThrow(NotFoundError);
     });
 
-    it("should throw ConflictError when user already rated", async () => {
-        const mockJukebox = createMockJukeboxWithSong(otherUserId, [
-            { userId: new Types.ObjectId(mockUserId), rating: 60 },
+    it("throws ConflictError when rating own song", async () => {
+        const submitter = await makeUser();
+        const { jukebox, songId } = await setupJukeboxWithSong(submitter._id);
+
+        await expect(
+            rateSong(jukebox._id.toString(), songId.toString(), submitter._id.toString(), 50)
+        ).rejects.toThrow(ConflictError);
+    });
+
+    it("throws ConflictError when user already rated", async () => {
+        const submitter = await makeUser();
+        const rater = await makeUser();
+        const { jukebox, songId } = await setupJukeboxWithSong(submitter._id, undefined, [
+            { userId: rater._id, rating: 60 },
         ]);
-        (Jukebox.findById as Mock).mockResolvedValue(mockJukebox);
 
-        await expect(rateSong(mockJukeboxId, mockSongId, mockUserId, 50)).rejects.toThrow(
-            ConflictError
-        );
+        await expect(
+            rateSong(jukebox._id.toString(), songId.toString(), rater._id.toString(), 50)
+        ).rejects.toThrow(ConflictError);
     });
 });
-
-// ─── activateJukeboxes ──────────────────────────────────────
 
 describe("activateJukeboxes", () => {
     const today = new Date();
 
-    function createMockGroup(activationDays: number[], concurrent: string[]) {
-        return {
-            _id: new Types.ObjectId(mockGroupId),
-            features: {
-                jukebox: {
-                    enabled: true,
-                    settings: {
-                        activationDays,
-                        concurrent,
-                    },
-                },
-            },
-        } as any;
+    async function makeJukeboxGroup(activationDays: number[], concurrent: string[]) {
+        const admin = await makeUser();
+        const group = await makeGroup({
+            admin: admin._id,
+            members: [{ user: admin._id, name: "a" }],
+        });
+        group.features.jukebox.enabled = true;
+        group.features.jukebox.settings.activationDays = activationDays;
+        group.features.jukebox.settings.concurrent = concurrent;
+        await group.save();
+        return group;
     }
 
-    it("should skip activation if today is not an activation day", async () => {
-        const group = createMockGroup([99], ["Theme A"]);
-        await activateJukeboxes(group);
+    it("skips activation when today is not an activation day", async () => {
+        const notToday = today.getDate() === 1 ? 15 : 1;
+        const group = await makeJukeboxGroup([notToday], ["Theme A"]);
 
-        expect(Jukebox.updateMany).not.toHaveBeenCalled();
+        await activateJukeboxes(group as unknown as IGroup);
+
+        expect(await Jukebox.countDocuments({ groupId: group._id })).toBe(0);
+        expect(getPushCalls()).toHaveLength(0);
     });
 
-    it("should deactivate old and create new jukeboxes on activation day", async () => {
-        const group = createMockGroup([today.getDate()], ["Rock", "Pop"]);
+    it("deactivates old and creates new jukeboxes on activation day", async () => {
+        const group = await makeJukeboxGroup([today.getDate()], ["Rock", "Pop"]);
+        await makeJukebox({ groupId: group._id, active: true, title: "Old" });
 
-        const mockSavedJukebox = {
-            _id: new Types.ObjectId(),
-            chat: null,
-            save: vi.fn().mockResolvedValue(undefined),
-        };
-        const mockSavedChat = {
-            _id: new Types.ObjectId(),
-            save: vi.fn().mockResolvedValue(undefined),
-        };
+        await activateJukeboxes(group as unknown as IGroup);
 
-        (Jukebox.updateMany as Mock).mockResolvedValue({});
-        vi.mocked(Jukebox).mockImplementation(function (this: any, data: any) {
-            Object.assign(this, data, {
-                _id: mockSavedJukebox._id,
-                save: vi.fn().mockImplementation(async () => {
-                    return this;
-                }),
-            });
-            return this;
-        } as any);
-        vi.mocked(Chat).mockImplementation(function (this: any, data: any) {
-            Object.assign(this, data, {
-                _id: mockSavedChat._id,
-                save: vi.fn().mockResolvedValue(this),
-            });
-            return this;
-        } as any);
-        (sendNotification as Mock).mockResolvedValue(undefined);
+        const active = await Jukebox.find({ groupId: group._id, active: true });
+        expect(active).toHaveLength(2);
+        expect(active.map((j) => j.title).sort()).toEqual(["Pop", "Rock"]);
 
-        await activateJukeboxes(group);
+        const deactivated = await Jukebox.find({ groupId: group._id, active: false });
+        expect(deactivated).toHaveLength(1);
+        expect(deactivated[0].title).toBe("Old");
 
-        expect(Jukebox.updateMany).toHaveBeenCalledWith(
-            { active: true, groupId: group._id },
-            { active: false }
-        );
-        expect(sendNotification).toHaveBeenCalled();
-    });
-
-    it("should create new Jukebox and Chat", async () => {
-        const group = createMockGroup([today.getDate()], ["Theme"]);
-
-        const mockSavedJukeboxId = new Types.ObjectId();
-        vi.mocked(Jukebox).mockImplementation(function (this: any, data: any) {
-            Object.assign(this, data);
-            this.save = vi.fn().mockImplementation(async () => {
-                return { ...this, _id: mockSavedJukeboxId };
-            });
-            return this;
-        } as any);
-        vi.mocked(Chat).mockImplementation(function (this: any, data: any) {
-            Object.assign(this, data, {
-                _id: new Types.ObjectId(),
-                save: vi.fn().mockResolvedValue(this),
-            });
-            return this;
-        } as any);
-        (sendNotification as Mock).mockResolvedValue(undefined);
-
-        await createGroupJukebox(group._id, group.features.jukebox.settings.concurrent[0]);
-
-        expect(Jukebox).toHaveBeenCalledWith({
-            groupId: group._id,
-            active: true,
-            title: group.features.jukebox.settings.concurrent[0],
-        });
-        expect(createChatForEntity).toHaveBeenCalledWith(
-            group._id,
-            expect.any(Types.ObjectId),
-            EntityModel.Jukebox
-        );
-        expect(sendNotification).not.toHaveBeenCalled();
-    });
-
-    it("should send notification with month name", async () => {
-        const group = createMockGroup([today.getDate()], ["Theme"]);
-
-        vi.mocked(Jukebox).mockImplementation(function (this: any, data: any) {
-            Object.assign(this, data);
-            this._id = new Types.ObjectId();
-            this.save = vi.fn().mockImplementation(async () => this);
-            return this;
-        } as any);
-        vi.mocked(Chat).mockImplementation(function (this: any, data: any) {
-            Object.assign(this, data, {
-                _id: new Types.ObjectId(),
-                save: vi.fn().mockResolvedValue(this),
-            });
-            return this;
-        } as any);
-        (Jukebox.updateMany as Mock).mockResolvedValue({});
-        (sendNotification as Mock).mockResolvedValue(undefined);
-
-        await activateJukeboxes(group);
-
+        const pushes = getPushCalls();
+        expect(pushes).toHaveLength(1);
         const monthName = new Intl.DateTimeFormat("en-US", { month: "long" }).format(today);
-        expect(sendNotification).toHaveBeenCalledWith(
-            expect.stringContaining(monthName),
-            expect.any(String),
-            group._id
-        );
+        expect(pushes[0].title).toContain(monthName);
     });
 });
 
-// ─── deactivateGroupJukeboxes ────────────────────────────────
+describe("createGroupJukebox", () => {
+    it("creates jukebox and associated chat", async () => {
+        const admin = await makeUser();
+        const group = await makeGroup({ admin: admin._id });
+
+        await createGroupJukebox(group._id, "My Theme");
+
+        const jukebox = await Jukebox.findOne({ groupId: group._id, title: "My Theme" });
+        expect(jukebox).not.toBeNull();
+        expect(jukebox?.active).toBe(true);
+        expect(jukebox?.chat).toBeTruthy();
+
+        const chat = await Chat.findById(jukebox?.chat);
+        expect(chat?.entityModel).toBe("Jukebox");
+        expect(chat?.entity.toString()).toBe(jukebox?._id.toString());
+    });
+});
 
 describe("deactivateGroupJukeboxes", () => {
-    it("should deactivate all active jukeboxes for a group", async () => {
-        (Jukebox.updateMany as Mock).mockResolvedValue({});
+    it("deactivates all active jukeboxes for a group", async () => {
+        const admin = await makeUser();
+        const group = await makeGroup({ admin: admin._id });
+        await makeJukebox({ groupId: group._id, active: true });
+        await makeJukebox({ groupId: group._id, active: true });
 
-        await deactivateGroupJukeboxes(mockGroupId);
+        await deactivateGroupJukeboxes(group._id.toString());
 
-        expect(Jukebox.updateMany).toHaveBeenCalledWith(
-            { active: true, groupId: mockGroupId },
-            { active: false }
-        );
+        const active = await Jukebox.find({ groupId: group._id, active: true });
+        expect(active).toHaveLength(0);
+        const inactive = await Jukebox.find({ groupId: group._id, active: false });
+        expect(inactive).toHaveLength(2);
+    });
+
+    it("does not touch other groups' jukeboxes", async () => {
+        const admin = await makeUser();
+        const groupA = await makeGroup({ admin: admin._id });
+        const groupB = await makeGroup({ admin: admin._id });
+        await makeJukebox({ groupId: groupA._id, active: true });
+        const bJukebox = await makeJukebox({ groupId: groupB._id, active: true });
+
+        await deactivateGroupJukeboxes(groupA._id.toString());
+
+        const reloaded = await Jukebox.findById(bJukebox._id);
+        expect(reloaded?.active).toBe(true);
     });
 });

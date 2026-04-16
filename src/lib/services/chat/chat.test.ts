@@ -1,160 +1,114 @@
-import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
+import { describe, it, expect, beforeAll, beforeEach, afterAll } from "vitest";
 import { Types } from "mongoose";
 
-vi.mock("@/db/models/Chat");
-vi.mock("@/db/models/User");
-vi.mock("@/db/models/ActivityEvent");
-
+import { setupTestDb, teardownTestDb, clearCollections } from "@/test/db";
+import { makeUser, makeGroup, makeChat } from "@/test/factories";
 import { createChatForEntity, getChatById, addMessage } from "./chat";
 import Chat from "@/db/models/Chat";
 import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 import { EntityModel } from "@/types/models/chat";
 
-const mockChatId = new Types.ObjectId().toString();
-const mockGroupId = new Types.ObjectId().toString();
-const mockEntityId = new Types.ObjectId();
-const mockUserId = new Types.ObjectId().toString();
-
-function createMockChat(overrides: Record<string, any> = {}) {
-    return {
-        _id: new Types.ObjectId(mockChatId),
-        group: new Types.ObjectId(mockGroupId),
-        entity: mockEntityId,
-        entityModel: EntityModel.Question,
-        messages: [] as any[],
-        save: vi.fn().mockResolvedValue(undefined),
-        ...overrides,
-    };
-}
-
-beforeEach(() => {
-    vi.clearAllMocks();
-});
-
-// ─── createChatForEntity ────────────────────────────────────────────────────
+beforeAll(setupTestDb);
+afterAll(teardownTestDb);
+beforeEach(clearCollections);
 
 describe("createChatForEntity", () => {
-    it("should create and save a chat with correct entity data", async () => {
-        let constructorData: any;
-        vi.mocked(Chat).mockImplementation(function (this: any, data: any) {
-            constructorData = data;
-            Object.assign(this, data, { save: vi.fn().mockResolvedValue(undefined) });
-            return this;
-        } as any);
+    it("creates and persists a chat with entity data", async () => {
+        const group = await makeGroup();
+        const entityId = new Types.ObjectId();
 
-        const result = await createChatForEntity(mockGroupId, mockEntityId, EntityModel.Question);
+        const result = await createChatForEntity(group._id, entityId, EntityModel.Question);
 
-        expect(result.save).toHaveBeenCalled();
-        expect(constructorData.entity).toEqual(mockEntityId);
-        expect(constructorData.entityModel).toBe(EntityModel.Question);
-        expect(constructorData.messages).toEqual([]);
+        expect(result.entity.toString()).toBe(entityId.toString());
+        expect(result.entityModel).toBe(EntityModel.Question);
+        expect(result.messages).toHaveLength(0);
+
+        const stored = await Chat.findById(result._id);
+        expect(stored?.entity.toString()).toBe(entityId.toString());
     });
 
-    it("should pass the correct entity model for Rally", async () => {
-        let constructorData: any;
-        vi.mocked(Chat).mockImplementation(function (this: any, data: any) {
-            constructorData = data;
-            Object.assign(this, data, { save: vi.fn().mockResolvedValue(undefined) });
-            return this;
-        } as any);
+    it("passes the correct entity model for Rally", async () => {
+        const group = await makeGroup();
+        const entityId = new Types.ObjectId();
 
-        await createChatForEntity(mockGroupId, mockEntityId, EntityModel.Rally);
+        const result = await createChatForEntity(group._id, entityId, EntityModel.Rally);
 
-        expect(constructorData.entityModel).toBe(EntityModel.Rally);
+        expect(result.entityModel).toBe(EntityModel.Rally);
     });
 });
-
-// ─── getChatById ────────────────────────────────────────────────────────────
 
 describe("getChatById", () => {
-    it("should return a chat with populated messages", async () => {
-        const mockChat = createMockChat({
-            messages: [
-                {
-                    user: { _id: mockUserId, username: "TestUser" },
-                    message: "Hello",
-                    createdAt: new Date(),
-                },
-            ],
+    it("returns a chat with populated message users", async () => {
+        const user = await makeUser({ username: "TestUser" });
+        const chat = await makeChat({
+            messages: [{ user: user._id, message: "Hello" }],
         });
 
-        const populateMock = vi.fn().mockResolvedValue(mockChat);
-        (Chat.findById as Mock).mockReturnValue({ populate: populateMock });
+        const result = await getChatById(chat._id.toString());
 
-        const result = await getChatById(mockChatId);
-
-        expect(Chat.findById).toHaveBeenCalledWith(mockChatId);
-        expect(populateMock).toHaveBeenCalledWith({
-            path: "messages.user",
-            model: expect.anything(),
-        });
         expect(result.messages).toHaveLength(1);
+        const msgUser = result.messages[0].user as unknown as { username: string };
+        expect(msgUser.username).toBe("TestUser");
     });
 
-    it("should throw NotFoundError when chat not found", async () => {
-        const populateMock = vi.fn().mockResolvedValue(null);
-        (Chat.findById as Mock).mockReturnValue({ populate: populateMock });
-
-        await expect(getChatById(mockChatId)).rejects.toThrow(NotFoundError);
+    it("throws NotFoundError when chat not found", async () => {
+        await expect(getChatById(new Types.ObjectId().toString())).rejects.toThrow(NotFoundError);
     });
 });
 
-// ─── addMessage ─────────────────────────────────────────────────────────────
-
 describe("addMessage", () => {
-    it("should add a message and return the new subdocument", async () => {
-        const newMsg = { user: mockUserId, message: "Hello!", createdAt: new Date() };
-        const mockChat = createMockChat({
-            messages: {
-                push: vi.fn(),
-                length: 1,
-                0: newMsg,
-                [Symbol.iterator]: function* () {
-                    yield newMsg;
-                },
-            } as any,
-        });
-        // After push, messages[messages.length - 1] should return the new message
-        Object.defineProperty(mockChat.messages, "length", { get: () => 1, configurable: true });
-        mockChat.messages[0] = newMsg;
+    it("adds a message and persists it", async () => {
+        const user = await makeUser();
+        const chat = await makeChat();
 
-        (Chat.findById as Mock).mockResolvedValue(mockChat);
+        const result = await addMessage(chat._id.toString(), user._id.toString(), "Hello!");
 
-        const result = await addMessage(mockChatId, mockUserId, "Hello!");
+        expect(result.message).toBe("Hello!");
 
-        expect(mockChat.messages.push).toHaveBeenCalledWith(
-            expect.objectContaining({ user: mockUserId, message: "Hello!" })
-        );
-        expect(mockChat.save).toHaveBeenCalled();
+        const reloaded = await Chat.findById(chat._id);
+        expect(reloaded?.messages).toHaveLength(1);
+        expect(reloaded?.messages[0].message).toBe("Hello!");
     });
 
-    it("should trim the message before saving", async () => {
-        const mockChat = createMockChat();
-        mockChat.messages = [] as any;
-        (Chat.findById as Mock).mockResolvedValue(mockChat);
+    it("trims the message before saving", async () => {
+        const user = await makeUser();
+        const chat = await makeChat();
 
-        await addMessage(mockChatId, mockUserId, "  Hello!  ");
+        await addMessage(chat._id.toString(), user._id.toString(), "  Hello!  ");
 
-        expect(mockChat.messages[0].message).toBe("Hello!");
+        const reloaded = await Chat.findById(chat._id);
+        expect(reloaded?.messages[0].message).toBe("Hello!");
     });
 
-    it("should throw ValidationError for empty message", async () => {
-        await expect(addMessage(mockChatId, mockUserId, "")).rejects.toThrow(ValidationError);
-        await expect(addMessage(mockChatId, mockUserId, "   ")).rejects.toThrow(ValidationError);
-    });
+    it("throws ValidationError for empty message", async () => {
+        const user = await makeUser();
+        const chat = await makeChat();
 
-    it("should throw ValidationError for non-string message", async () => {
-        await expect(addMessage(mockChatId, mockUserId, null as any)).rejects.toThrow(
+        await expect(addMessage(chat._id.toString(), user._id.toString(), "")).rejects.toThrow(
             ValidationError
         );
-        await expect(addMessage(mockChatId, mockUserId, undefined as any)).rejects.toThrow(
+        await expect(addMessage(chat._id.toString(), user._id.toString(), "   ")).rejects.toThrow(
             ValidationError
         );
     });
 
-    it("should throw NotFoundError when chat not found", async () => {
-        (Chat.findById as Mock).mockResolvedValue(null);
+    it("throws ValidationError for non-string message", async () => {
+        const user = await makeUser();
+        const chat = await makeChat();
 
-        await expect(addMessage(mockChatId, mockUserId, "Hello")).rejects.toThrow(NotFoundError);
+        await expect(
+            addMessage(chat._id.toString(), user._id.toString(), null as unknown as string)
+        ).rejects.toThrow(ValidationError);
+        await expect(
+            addMessage(chat._id.toString(), user._id.toString(), undefined as unknown as string)
+        ).rejects.toThrow(ValidationError);
+    });
+
+    it("throws NotFoundError when chat not found", async () => {
+        const user = await makeUser();
+
+        await expect(
+            addMessage(new Types.ObjectId().toString(), user._id.toString(), "Hello")
+        ).rejects.toThrow(NotFoundError);
     });
 });

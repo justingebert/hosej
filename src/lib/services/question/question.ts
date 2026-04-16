@@ -3,7 +3,7 @@ import Group from "@/db/models/Group";
 import User from "@/db/models/User";
 import { Types } from "mongoose";
 import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
-import { generateSignedUrl } from "@/lib/s3";
+import { generateSignedUrl } from "@/lib/integrations/storage";
 import { resolveAvatarUrl } from "@/lib/services/user/user";
 import { CREATED_QUESTION_POINTS, VOTED_QUESTION_POINTS } from "@/lib/utils/POINT_CONFIG";
 import { createChatForEntity } from "@/lib/services/chat";

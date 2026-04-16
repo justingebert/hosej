@@ -1,5 +1,5 @@
 import { isUserInGroup } from "@/lib/services/group";
-import { searchSpotifyTracks } from "@/lib/services/jukebox";
+import { searchSpotifyTracks } from "@/lib/integrations/spotify";
 import { ValidationError } from "@/lib/api/errorHandling";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
