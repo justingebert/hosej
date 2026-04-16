@@ -10,6 +10,24 @@ afterEach(() => {
     vi.unstubAllGlobals();
 });
 
+// Prevent firebase-admin from parsing the stub service account at module import.
+// Per-test mocks of @/lib/integrations/push still override this where needed.
+vi.mock("firebase-admin", () => {
+    const messaging = {
+        sendEachForMulticast: vi
+            .fn()
+            .mockResolvedValue({ responses: [], successCount: 0, failureCount: 0 }),
+    };
+    return {
+        default: {
+            apps: [{}],
+            credential: { cert: vi.fn() },
+            initializeApp: vi.fn(),
+            messaging: () => messaging,
+        },
+    };
+});
+
 // Mock web-haptics hook used by client components
 vi.mock("web-haptics/react", () => ({
     useWebHaptics: () => ({
