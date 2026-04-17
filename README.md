@@ -14,7 +14,7 @@ Social hub mobile-first PWA to organize groups, answer daily questions, run phot
 
 ## Technical Features
 
-HoseJ is a Next.js 14 App Router application. The UI is built with client components and communicates with backend logic exposed through API routes. Data is persisted in MongoDB using Mongoose. The app is designed as a PWA and supports push notifications via Firebase Cloud Messaging. Media uploads are stored on AWS S3. Optional Google OAuth is available using NextAuth.
+HoseJ is a Next.js 16 App Router application. The UI is built with client components and communicates with backend logic exposed through API routes. Data is persisted in MongoDB using Mongoose. The app is designed as a PWA and supports push notifications via Firebase Cloud Messaging. Media uploads are stored on AWS S3. Optional Google OAuth is available using NextAuth.
 
 - Installable (PWA) via Serwist service worker
 - Push Notifications (Firebase Cloud Messaging)
