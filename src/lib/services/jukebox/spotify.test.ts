@@ -1,20 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-vi.mock("@/db/dbConnect", () => ({ default: vi.fn() }));
-
 import { getSpotifyAccessToken, searchSpotifyTracks, _resetTokenCache } from "./spotify";
 import { ValidationError } from "@/lib/api/errorHandling";
 
 const mockFetch = vi.fn();
-global.fetch = mockFetch;
 
 beforeEach(() => {
-    vi.clearAllMocks();
+    mockFetch.mockReset();
+    vi.stubGlobal("fetch", mockFetch);
     _resetTokenCache();
 });
 
 describe("getSpotifyAccessToken", () => {
-    it("should fetch and return an access token", async () => {
+    it("fetches and returns an access token", async () => {
         mockFetch.mockResolvedValueOnce({
             ok: true,
             json: () => Promise.resolve({ access_token: "test-token", expires_in: 3600 }),
@@ -29,7 +27,7 @@ describe("getSpotifyAccessToken", () => {
         );
     });
 
-    it("should return cached token on second call", async () => {
+    it("returns cached token on second call", async () => {
         mockFetch.mockResolvedValueOnce({
             ok: true,
             json: () => Promise.resolve({ access_token: "cached-token", expires_in: 3600 }),
@@ -43,11 +41,8 @@ describe("getSpotifyAccessToken", () => {
         expect(mockFetch).toHaveBeenCalledTimes(1);
     });
 
-    it("should throw when Spotify API returns error", async () => {
-        mockFetch.mockResolvedValueOnce({
-            ok: false,
-            statusText: "Unauthorized",
-        });
+    it("throws when Spotify API returns error", async () => {
+        mockFetch.mockResolvedValueOnce({ ok: false, statusText: "Unauthorized" });
 
         await expect(getSpotifyAccessToken()).rejects.toThrow(
             "Failed to fetch Spotify access token"
@@ -56,19 +51,17 @@ describe("getSpotifyAccessToken", () => {
 });
 
 describe("searchSpotifyTracks", () => {
-    it("should throw ValidationError for empty query", async () => {
+    it("throws ValidationError for empty query", async () => {
         await expect(searchSpotifyTracks("")).rejects.toThrow(ValidationError);
     });
 
-    it("should search Spotify and return results", async () => {
+    it("searches Spotify and returns results", async () => {
         const mockResults = { tracks: { items: [{ id: "1", name: "Test" }] } };
 
-        // Token fetch
         mockFetch.mockResolvedValueOnce({
             ok: true,
             json: () => Promise.resolve({ access_token: "search-token", expires_in: 3600 }),
         });
-        // Search fetch
         mockFetch.mockResolvedValueOnce({
             ok: true,
             json: () => Promise.resolve(mockResults),
@@ -86,17 +79,12 @@ describe("searchSpotifyTracks", () => {
         );
     });
 
-    it("should throw when Spotify search fails", async () => {
-        // Token fetch
+    it("throws when Spotify search fails", async () => {
         mockFetch.mockResolvedValueOnce({
             ok: true,
             json: () => Promise.resolve({ access_token: "fail-token", expires_in: 3600 }),
         });
-        // Search fetch fails
-        mockFetch.mockResolvedValueOnce({
-            ok: false,
-            statusText: "Bad Request",
-        });
+        mockFetch.mockResolvedValueOnce({ ok: false, statusText: "Bad Request" });
 
         await expect(searchSpotifyTracks("test")).rejects.toThrow("Failed to fetch Spotify data");
     });

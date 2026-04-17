@@ -3,12 +3,12 @@ import Group from "@/db/models/Group";
 import User from "@/db/models/User";
 import { Types } from "mongoose";
 import { ConflictError, NotFoundError, ValidationError } from "@/lib/api/errorHandling";
-import { generateSignedUrl } from "@/lib/s3";
+import { generateSignedUrl } from "@/lib/integrations/storage";
 import { resolveAvatarUrl } from "@/lib/services/user/user";
 import { isUserAdmin, isUserInGroup, addPointsToMember } from "@/lib/services/group";
 import { createChatForEntity } from "@/lib/services/chat";
 import { EntityModel } from "@/types/models/chat";
-import { sendNotification } from "@/lib/sendNotification";
+import { sendNotification } from "@/lib/integrations/push";
 import {
     CREATED_RALLY_POINTS,
     SUBMITTED_RALLY_POINTS,

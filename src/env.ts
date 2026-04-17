@@ -14,7 +14,8 @@ function requireEnv(name: string): string {
 }
 
 function optionalEnv(name: string): string | undefined {
-    if (!process.env[name] && process.env.ENV !== "dev") {
+    const silent = process.env.ENV === "dev" || process.env.NODE_ENV === "test";
+    if (!process.env[name] && !silent) {
         console.warn(
             `Warning: Optional environment variable ${name} is not set. This may disable certain features or cause unexpected behavior.`
         );

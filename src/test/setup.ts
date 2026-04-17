@@ -2,28 +2,30 @@ import React from "react";
 import "@testing-library/jest-dom/vitest";
 import { afterEach, vi } from "vitest";
 
-// Mock validated env module so tests never throw for missing env vars
-vi.mock("@/env", () => ({
-    env: {
-        MONGODB_URI: "mongodb://test:27017/test",
-        NEXTAUTH_SECRET: "test-secret",
-        AUTH_GOOGLE_ID: "test-google-id",
-        AUTH_GOOGLE_SECRET: "test-google-secret",
-        FIREBASE_SERVICE_ACCOUNT: JSON.stringify({ project_id: "test" }),
-        AWS_REGION: "eu-central-1",
-        AWS_BUCKET_NAME: "test-bucket",
-        SPOTIFY_CLIENT_ID: "test-spotify-id",
-        SPOTIFY_CLIENT_SECRET: "test-spotify-secret",
-        CRON_SECRET: "test-cron-secret",
-    },
-}));
-
-// Global test setup
-// Add any global mocks or setup here
+// Env vars are populated by ./globalSetup.ts before any test file loads,
+// so @/env validates against real values (including the memory-server URI).
 
 afterEach(() => {
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
+});
+
+// Prevent firebase-admin from parsing the stub service account at module import.
+// Per-test mocks of @/lib/integrations/push still override this where needed.
+vi.mock("firebase-admin", () => {
+    const messaging = {
+        sendEachForMulticast: vi
+            .fn()
+            .mockResolvedValue({ responses: [], successCount: 0, failureCount: 0 }),
+    };
+    return {
+        default: {
+            apps: [{}],
+            credential: { cert: vi.fn() },
+            initializeApp: vi.fn(),
+            messaging: () => messaging,
+        },
+    };
 });
 
 // Mock web-haptics hook used by client components

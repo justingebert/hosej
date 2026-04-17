@@ -6,7 +6,7 @@ import { activateSmartQuestions } from "@/lib/services/question";
 import { activateJukeboxes } from "@/lib/services/jukebox";
 import { processRallyStateTransitions } from "@/lib/services/rally";
 import { getGlobalConfig } from "@/lib/services/user";
-import { sendNotification } from "@/lib/sendNotification";
+import { sendNotification } from "@/lib/integrations/push";
 import { NextResponse } from "next/server";
 import { env } from "@/env";
 

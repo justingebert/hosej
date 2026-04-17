@@ -1,8 +1,8 @@
-import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
+import { describe, it, expect, beforeAll, beforeEach, afterAll } from "vitest";
 import { Types } from "mongoose";
 
-vi.mock("@/db/models/User");
-
+import { setupTestDb, teardownTestDb, clearCollections } from "@/test/db";
+import { makeUser } from "@/test/factories";
 import {
     getUserById,
     createDeviceUser,
@@ -15,223 +15,184 @@ import {
 import User from "@/db/models/User";
 import { ConflictError, NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 
-const mockUserId = new Types.ObjectId().toString();
-
-function createMockUser(overrides = {}) {
-    return {
-        _id: new Types.ObjectId(mockUserId),
-        username: "testuser",
-        groups: [],
-        deviceId: "device-123",
-        fcmToken: undefined,
-        googleConnected: false,
-        googleId: undefined,
-        connectToken: undefined,
-        connectTokenExpiresAt: undefined,
-        save: vi.fn().mockResolvedValue(undefined),
-        ...overrides,
-    };
-}
-
-beforeEach(() => {
-    vi.clearAllMocks();
-});
+beforeAll(setupTestDb);
+afterAll(teardownTestDb);
+beforeEach(clearCollections);
 
 describe("getUserById", () => {
-    it("should return user when found", async () => {
-        const mockUser = createMockUser();
-        (User.findById as Mock).mockResolvedValue(mockUser);
+    it("returns user when found", async () => {
+        const user = await makeUser();
 
-        const result = await getUserById(mockUserId);
+        const result = await getUserById(user._id.toString());
 
-        expect(result).toEqual(mockUser);
+        expect(result._id.equals(user._id)).toBe(true);
     });
 
-    it("should throw NotFoundError when user not found", async () => {
-        (User.findById as Mock).mockResolvedValue(null);
-
-        await expect(getUserById(mockUserId)).rejects.toThrow(NotFoundError);
+    it("throws NotFoundError when user not found", async () => {
+        await expect(getUserById(new Types.ObjectId().toString())).rejects.toThrow(NotFoundError);
     });
 });
 
 describe("createDeviceUser", () => {
-    it("should create and return a new user", async () => {
-        const mockUser = createMockUser();
-        (User.findOne as Mock).mockResolvedValue(null);
-        // Mock the User constructor by replacing prototype
-        vi.mocked(User).mockImplementation(function (this: any, data: any) {
-            Object.assign(this, mockUser, data);
-            this.save = mockUser.save;
-            return this;
-        } as any);
-
+    it("creates and persists a new user", async () => {
         const result = await createDeviceUser("device-123", "testuser");
 
-        expect(result.save).toHaveBeenCalled();
+        expect(result.username).toBe("testuser");
+        expect(result.deviceId).toBe("device-123");
+
+        const stored = await User.findById(result._id);
+        expect(stored).not.toBeNull();
     });
 
-    it("should throw ValidationError when deviceId is missing", async () => {
+    it("throws ValidationError when deviceId is missing", async () => {
         await expect(createDeviceUser("", "testuser")).rejects.toThrow(ValidationError);
     });
 
-    it("should throw ValidationError when username is missing", async () => {
+    it("throws ValidationError when username is missing", async () => {
         await expect(createDeviceUser("device-123", "")).rejects.toThrow(ValidationError);
     });
 
-    it("should throw ConflictError when deviceId already exists", async () => {
-        (User.findOne as Mock).mockResolvedValue(createMockUser());
+    it("throws ConflictError when deviceId already exists", async () => {
+        await makeUser({ deviceId: "device-123" });
 
         await expect(createDeviceUser("device-123", "testuser")).rejects.toThrow(ConflictError);
     });
 });
 
 describe("updateUser", () => {
-    it("should update username", async () => {
-        const updatedUser = createMockUser({ username: "newname" });
-        (User.findByIdAndUpdate as Mock).mockResolvedValue(updatedUser);
+    it("updates username", async () => {
+        const user = await makeUser();
 
-        const result = await updateUser(mockUserId, { username: "newname" });
+        const result = await updateUser(user._id.toString(), { username: "newname" });
 
         expect(result.username).toBe("newname");
-        expect(User.findByIdAndUpdate).toHaveBeenCalledWith(
-            mockUserId,
-            { $set: { username: "newname" } },
-            { new: true }
-        );
     });
 
-    it("should throw NotFoundError when user not found", async () => {
-        (User.findByIdAndUpdate as Mock).mockResolvedValue(null);
-
-        await expect(updateUser(mockUserId, { username: "newname" })).rejects.toThrow(
-            NotFoundError
-        );
+    it("throws NotFoundError when user not found", async () => {
+        await expect(
+            updateUser(new Types.ObjectId().toString(), { username: "newname" })
+        ).rejects.toThrow(NotFoundError);
     });
 
-    it("should only pass allowlisted fields", async () => {
-        const updatedUser = createMockUser();
-        (User.findByIdAndUpdate as Mock).mockResolvedValue(updatedUser);
+    it("ignores non-allowlisted fields", async () => {
+        const user = await makeUser();
 
-        // Pass extra fields that should be ignored
-        await updateUser(mockUserId, { username: "newname" } as any);
+        const result = await updateUser(user._id.toString(), {
+            username: "newname",
+            // @ts-expect-error — deliberately passing a field not in UpdateUserData
+            deviceId: "should-be-ignored",
+        });
 
-        expect(User.findByIdAndUpdate).toHaveBeenCalledWith(
-            mockUserId,
-            { $set: { username: "newname" } },
-            { new: true }
-        );
+        expect(result.username).toBe("newname");
+        expect(result.deviceId).toBe(user.deviceId);
     });
 });
 
 describe("registerPushToken", () => {
-    it("should register a new token", async () => {
-        const mockUser = createMockUser({ fcmToken: undefined });
-        (User.findById as Mock).mockResolvedValue(mockUser);
+    it("registers a new token", async () => {
+        const user = await makeUser();
 
-        const result = await registerPushToken(mockUserId, "new-token");
+        const result = await registerPushToken(user._id.toString(), "new-token");
+        const reloaded = await User.findById(user._id);
 
         expect(result.alreadyRegistered).toBe(false);
-        expect(mockUser.fcmToken).toBe("new-token");
-        expect(mockUser.save).toHaveBeenCalled();
+        expect(reloaded?.fcmToken).toBe("new-token");
     });
 
-    it("should return alreadyRegistered when token matches", async () => {
-        const mockUser = createMockUser({ fcmToken: "existing-token" });
-        (User.findById as Mock).mockResolvedValue(mockUser);
+    it("returns alreadyRegistered when token matches", async () => {
+        const user = await makeUser({ fcmToken: "existing-token" });
 
-        const result = await registerPushToken(mockUserId, "existing-token");
+        const result = await registerPushToken(user._id.toString(), "existing-token");
 
         expect(result.alreadyRegistered).toBe(true);
-        expect(mockUser.save).not.toHaveBeenCalled();
     });
 
-    it("should throw ValidationError when token is empty", async () => {
-        await expect(registerPushToken(mockUserId, "")).rejects.toThrow(ValidationError);
+    it("throws ValidationError when token is empty", async () => {
+        const user = await makeUser();
+
+        await expect(registerPushToken(user._id.toString(), "")).rejects.toThrow(ValidationError);
     });
 
-    it("should throw NotFoundError when user not found", async () => {
-        (User.findById as Mock).mockResolvedValue(null);
-
-        await expect(registerPushToken(mockUserId, "token")).rejects.toThrow(NotFoundError);
+    it("throws NotFoundError when user not found", async () => {
+        await expect(registerPushToken(new Types.ObjectId().toString(), "token")).rejects.toThrow(
+            NotFoundError
+        );
     });
 });
 
 describe("unregisterPushToken", () => {
-    it("should clear fcmToken", async () => {
-        const mockUser = createMockUser({ fcmToken: "some-token" });
-        (User.findById as Mock).mockResolvedValue(mockUser);
+    it("clears fcmToken", async () => {
+        const user = await makeUser({ fcmToken: "some-token" });
 
-        await unregisterPushToken(mockUserId, "some-token");
+        await unregisterPushToken(user._id.toString(), "some-token");
+        const reloaded = await User.findById(user._id);
 
-        expect(mockUser.fcmToken).toBeUndefined();
-        expect(mockUser.save).toHaveBeenCalled();
+        expect(reloaded?.fcmToken).toBeUndefined();
     });
 
-    it("should throw ValidationError when token is empty", async () => {
-        await expect(unregisterPushToken(mockUserId, "")).rejects.toThrow(ValidationError);
+    it("throws ValidationError when token is empty", async () => {
+        const user = await makeUser();
+
+        await expect(unregisterPushToken(user._id.toString(), "")).rejects.toThrow(ValidationError);
     });
 
-    it("should throw NotFoundError when user not found", async () => {
-        (User.findById as Mock).mockResolvedValue(null);
-
-        await expect(unregisterPushToken(mockUserId, "token")).rejects.toThrow(NotFoundError);
+    it("throws NotFoundError when user not found", async () => {
+        await expect(unregisterPushToken(new Types.ObjectId().toString(), "token")).rejects.toThrow(
+            NotFoundError
+        );
     });
 });
 
 describe("generateConnectToken", () => {
-    it("should generate and store a connect token for device user", async () => {
-        const mockUser = createMockUser({ deviceId: "device-123" });
-        (User.findById as Mock).mockResolvedValue(mockUser);
+    it("generates and stores a connect token for a device user", async () => {
+        const user = await makeUser({ deviceId: "device-123" });
 
-        const token = await generateConnectToken(mockUserId);
+        const token = await generateConnectToken(user._id.toString());
+        const reloaded = await User.findById(user._id);
 
-        expect(token).toBeDefined();
         expect(typeof token).toBe("string");
         expect(token.length).toBeGreaterThan(0);
-        expect(mockUser.connectToken).toBe(token);
-        expect(mockUser.connectTokenExpiresAt).toBeInstanceOf(Date);
-        expect(mockUser.save).toHaveBeenCalled();
+        expect(reloaded?.connectToken).toBe(token);
+        expect(reloaded?.connectTokenExpiresAt).toBeInstanceOf(Date);
     });
 
-    it("should throw NotFoundError when user not found", async () => {
-        (User.findById as Mock).mockResolvedValue(null);
-
-        await expect(generateConnectToken(mockUserId)).rejects.toThrow(NotFoundError);
+    it("throws NotFoundError when user not found", async () => {
+        await expect(generateConnectToken(new Types.ObjectId().toString())).rejects.toThrow(
+            NotFoundError
+        );
     });
 
-    it("should throw ValidationError for non-device user", async () => {
-        const mockUser = createMockUser({ deviceId: undefined });
-        (User.findById as Mock).mockResolvedValue(mockUser);
+    it("throws ValidationError for a non-device user", async () => {
+        const user = await makeUser();
+        await User.findByIdAndUpdate(user._id, { $unset: { deviceId: "" } });
 
-        await expect(generateConnectToken(mockUserId)).rejects.toThrow(ValidationError);
+        await expect(generateConnectToken(user._id.toString())).rejects.toThrow(ValidationError);
     });
 });
 
 describe("disconnectGoogleAccount", () => {
-    it("should set deviceId and clear google fields", async () => {
-        const mockUser = createMockUser({
-            googleId: "google-123",
-            googleConnected: true,
-        });
-        (User.findById as Mock).mockResolvedValue(mockUser);
+    it("sets deviceId and clears google fields", async () => {
+        const user = await makeUser({ googleId: "google-123", googleConnected: true });
 
-        await disconnectGoogleAccount(mockUserId, "new-device-id");
+        await disconnectGoogleAccount(user._id.toString(), "new-device-id");
+        const reloaded = await User.findById(user._id);
 
-        expect(mockUser.deviceId).toBe("new-device-id");
-        expect(mockUser.googleId).toBeUndefined();
-        expect(mockUser.googleConnected).toBe(false);
-        expect(mockUser.save).toHaveBeenCalled();
+        expect(reloaded?.deviceId).toBe("new-device-id");
+        expect(reloaded?.googleId).toBeUndefined();
+        expect(reloaded?.googleConnected).toBe(false);
     });
 
-    it("should throw ValidationError when deviceId is missing", async () => {
-        await expect(disconnectGoogleAccount(mockUserId, "")).rejects.toThrow(ValidationError);
-    });
+    it("throws ValidationError when deviceId is missing", async () => {
+        const user = await makeUser();
 
-    it("should throw NotFoundError when user not found", async () => {
-        (User.findById as Mock).mockResolvedValue(null);
-
-        await expect(disconnectGoogleAccount(mockUserId, "device-id")).rejects.toThrow(
-            NotFoundError
+        await expect(disconnectGoogleAccount(user._id.toString(), "")).rejects.toThrow(
+            ValidationError
         );
+    });
+
+    it("throws NotFoundError when user not found", async () => {
+        await expect(
+            disconnectGoogleAccount(new Types.ObjectId().toString(), "device-id")
+        ).rejects.toThrow(NotFoundError);
     });
 });
