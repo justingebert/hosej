@@ -11,6 +11,7 @@ declare module "next-auth" {
             createdAt: string;
             needsNameSetup?: boolean;
             onboardingCompleted?: boolean;
+            announcementsSeen?: string[];
         };
     }
 }
@@ -24,5 +25,6 @@ declare module "next-auth/jwt" {
         createdAt: string;
         needsNameSetup?: boolean;
         onboardingCompleted?: boolean;
+        announcementsSeen?: string[];
     }
 }

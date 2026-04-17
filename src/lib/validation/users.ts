@@ -9,6 +9,7 @@ export const UpdateUserSchema = z.object({
     username: z.string().min(1, "username is required").max(50).optional(),
     avatar: z.string().max(500).nullable().optional(),
     onboardingCompleted: z.boolean().optional(),
+    announcementsSeen: z.array(z.string().min(1).max(100)).max(500).optional(),
 });
 
 export const GoogleDisconnectSchema = z.object({

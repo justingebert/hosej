@@ -121,5 +121,50 @@ Enabled via `experimental.viewTransition: true` in `next.config.mjs`. Uses React
 
 - Framework: Vitest + @testing-library/react + jsdom
 - Test files: `src/**/*.{test,spec}.{ts,tsx}`
-- Setup file (`src/test/setup.ts`) mocks `next/link`, `next/image`, `next/navigation`, `web-haptics/react`, `ResizeObserver`
-- Test coverage still being built out
+
+### Real MongoDB via mongodb-memory-server
+
+Service tests run against a real in-memory MongoDB instance, not mocked Mongoose models.
+
+- `src/test/globalSetup.ts` boots a `MongoMemoryServer` once per test run and sets `process.env.MONGODB_URI` before any test file loads. It also populates required env vars (NEXTAUTH_SECRET, FIREBASE_SERVICE_ACCOUNT stub, AWS/Spotify/Cron secrets).
+- `src/test/db.ts` exports `setupTestDb` (calls `dbConnect()`), `teardownTestDb` (drops DB + disconnects), `clearCollections` (wipes all collections between tests).
+- `src/test/setup.ts` (per-file setup) mocks `next/link`, `next/image`, `next/navigation`, `web-haptics/react`, `ResizeObserver`, and globally mocks `firebase-admin` so `sendNotification.ts` can be imported transitively without crashing on the stub service account.
+- `src/env.ts` `optionalEnv()` is silent under `NODE_ENV=test` to avoid Upstash warnings in logs.
+
+Typical service test shape:
+
+```ts
+import { setupTestDb, teardownTestDb, clearCollections } from "@/test/db";
+import { makeUser, makeGroup } from "@/test/factories";
+
+beforeAll(setupTestDb);
+afterAll(teardownTestDb);
+beforeEach(clearCollections);
+```
+
+### Factories
+
+`src/test/factories/index.ts` exports `makeUser`, `makeGroup`, `makeQuestion`, `makeRally`, `makeJukebox`, `makeChat`. Each accepts a typed `Overrides` object and persists via the real model. Add new override fields to the corresponding `*Overrides` type when a test needs them.
+
+### Fakes for external integrations
+
+Third-party side-effects live behind thin `src/lib/integrations/*` modules and are stubbed per-test via `vi.mock`:
+
+- `src/test/fakes/push.ts` — `sendNotification` records calls
+- `src/test/fakes/spotify.ts` — Spotify search
+- `src/test/fakes/storage.ts` — S3 signed URL generation
+
+Pattern: `vi.mock("@/lib/integrations/push", () => import("@/test/fakes/push"));` at the top of the test file; assert via the exported `getXCalls()` / reset with `resetXFake()`.
+
+### When to mock vs. use real DB
+
+- **Service / data-layer tests** → use `setupTestDb` + factories. Drives the real Mongoose validation path and surfaces schema issues.
+- **Pure functions** → no DB needed; call directly. If the function takes a user doc as input, a factory + `.toObject()` still reads cleaner than hand-rolled `IUser` literals.
+- **External APIs / notifications / storage** → mock via `@/lib/integrations/*` fakes.
+- **React components** → jsdom + testing-library; mock network calls at the fetcher boundary.
+
+### Known footguns
+
+- Top-level module side-effects (Firebase init, Spotify token cache) must be neutralized in setup or reset via exported helpers (e.g. `_resetTokenCache()`).
+- `vi.restoreAllMocks()` runs in `afterEach`; global `vi.mock(...)` declarations at module scope (like `firebase-admin` in setup.ts) survive across tests.
+- No MongoDB transactions (requires a replica set) — noted with TODO comments in service code.

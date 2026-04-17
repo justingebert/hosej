@@ -16,6 +16,7 @@ export interface IUser {
     avatar?: string;
     lastOnline?: Date;
     onboardingCompleted?: boolean;
+    announcementsSeen?: string[];
 
     createdAt: Date;
 }
@@ -30,4 +31,5 @@ export interface UpdateUserData {
     username?: string;
     avatar?: string | null;
     onboardingCompleted?: boolean;
+    announcementsSeen?: string[];
 }

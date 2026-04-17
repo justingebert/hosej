@@ -92,6 +92,7 @@ export async function jwtCallback({
                 token.createdAt = String(deviceUser.createdAt);
                 token.needsNameSetup = false;
                 token.onboardingCompleted = deviceUser.onboardingCompleted ?? true;
+                token.announcementsSeen = deviceUser.announcementsSeen ?? [];
             } else {
                 // Fresh Google signup — create a new user
                 const newUser = new User({
@@ -107,6 +108,7 @@ export async function jwtCallback({
                 token.createdAt = String(newUser.createdAt);
                 token.needsNameSetup = true;
                 token.onboardingCompleted = false;
+                token.announcementsSeen = [];
             }
         } else {
             token.userId = existingUser._id.toString();
@@ -116,6 +118,7 @@ export async function jwtCallback({
             token.createdAt = String(existingUser.createdAt);
             token.needsNameSetup = false;
             token.onboardingCompleted = existingUser.onboardingCompleted ?? true;
+            token.announcementsSeen = existingUser.announcementsSeen ?? [];
         }
     } else if (user) {
         // Device credentials sign-in — user object comes from authorizeDevice
@@ -133,6 +136,8 @@ export async function jwtCallback({
         token.createdAt = u.createdAt ?? "";
         token.onboardingCompleted =
             (u as unknown as { onboardingCompleted?: boolean }).onboardingCompleted ?? true;
+        token.announcementsSeen =
+            (u as unknown as { announcementsSeen?: string[] }).announcementsSeen ?? [];
     }
 
     // Refresh user data when update() is called or when token is missing fields
@@ -148,6 +153,7 @@ export async function jwtCallback({
             token.createdAt = String(freshUser.createdAt);
             token.needsNameSetup = false;
             token.onboardingCompleted = freshUser.onboardingCompleted ?? true;
+            token.announcementsSeen = freshUser.announcementsSeen ?? [];
         }
     }
 
@@ -167,6 +173,7 @@ export async function sessionCallback({ session, token }: { session: Session; to
         createdAt: token.createdAt,
         needsNameSetup: token.needsNameSetup,
         onboardingCompleted: token.onboardingCompleted,
+        announcementsSeen: token.announcementsSeen ?? [],
     };
     return session;
 }
