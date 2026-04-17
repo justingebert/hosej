@@ -13,6 +13,8 @@ import GlobalFeatureControl from "@/app/admin/_components/GlobalFeatureControl";
 import GroupPackManager from "@/app/admin/_components/GroupPackManager";
 import Header from "@/components/ui/custom/Header";
 import BackLink from "@/components/ui/custom/BackLink";
+import { Button } from "@/components/ui/button";
+import { Megaphone } from "lucide-react";
 
 interface GlobalConfig {
     features: {
@@ -135,18 +137,27 @@ export default function AdminPage() {
         <>
             <Header title="Admin Panel" leftComponent={<BackLink href={`/settings`} />} />
 
-            <div className="space-y-4">
+            <div className="space-y-4 pb-12">
                 <GroupPackManager />
 
                 <TemplateUploadCard />
 
-                <GlobalFeatureControl
-                    config={config}
-                    localConfig={localConfig}
-                    onUpdateFeature={updateFeature}
-                    onSave={saveSettings}
-                    saving={saving}
-                />
+                <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => router.push("/admin/announcements")}
+                >
+                    <Megaphone className="mr-2" />
+                    Announcements
+                </Button>
+
+                {/*<GlobalFeatureControl*/}
+                {/*    config={config}*/}
+                {/*    localConfig={localConfig}*/}
+                {/*    onUpdateFeature={updateFeature}*/}
+                {/*    onSave={saveSettings}*/}
+                {/*    saving={saving}*/}
+                {/*/>*/}
             </div>
         </>
     );

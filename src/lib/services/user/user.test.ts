@@ -86,6 +86,26 @@ describe("updateUser", () => {
         expect(result.username).toBe("newname");
         expect(result.deviceId).toBe(user.deviceId);
     });
+
+    it("merges announcementsSeen instead of overwriting (stale client snapshot safe)", async () => {
+        const user = await makeUser({ announcementsSeen: ["a", "b"] });
+
+        const result = await updateUser(user._id.toString(), {
+            announcementsSeen: ["c"],
+        });
+
+        expect(result.announcementsSeen?.sort()).toEqual(["a", "b", "c"]);
+    });
+
+    it("deduplicates when adding already-seen ids", async () => {
+        const user = await makeUser({ announcementsSeen: ["a"] });
+
+        const result = await updateUser(user._id.toString(), {
+            announcementsSeen: ["a", "b", "b"],
+        });
+
+        expect(result.announcementsSeen?.sort()).toEqual(["a", "b"]);
+    });
 });
 
 describe("registerPushToken", () => {

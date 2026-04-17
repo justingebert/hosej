@@ -6,12 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
 
 const MOCK_QUESTION = "Best pizza topping?";
-const MOCK_OPTIONS = ["Pepperoni", "Mushrooms", "Pineapple", "Margherita"];
+const MOCK_OPTIONS = ["Pineapple", "Mushrooms", "Pepperoni", "Margherita"];
 const MOCK_RESULTS = [
-    { option: "Pepperoni", pct: 42 },
-    { option: "Mushrooms", pct: 25 },
-    { option: "Pineapple", pct: 8 },
-    { option: "Margherita", pct: 25 },
+    { option: "Pineapple", pct: 45 },
+    { option: "Mushrooms", pct: 20 },
+    { option: "Pepperoni", pct: 15 },
+    { option: "Margherita", pct: 20 },
 ];
 
 export function CustomVotingStep() {
@@ -69,7 +69,7 @@ export function CustomVotingStep() {
                             {MOCK_RESULTS.map((r) => (
                                 <div key={r.option} className="flex items-center gap-2">
                                     <span className="text-xs w-20 truncate">{r.option}</span>
-                                    <div className="flex-1 h-6 bg-secondary rounded-full overflow-hidden">
+                                    <div className="flex-1 h-6 bg-secondary rounded-2xl overflow-hidden">
                                         <motion.div
                                             className="h-full bg-primary rounded-full flex items-center justify-end pr-2"
                                             initial={{ width: 0 }}
@@ -81,9 +81,6 @@ export function CustomVotingStep() {
                                             </span>
                                         </motion.div>
                                     </div>
-                                    {r.option === selected && (
-                                        <Check className="h-4 w-4 text-primary shrink-0" />
-                                    )}
                                 </div>
                             ))}
                             <p className="text-xs text-muted-foreground text-center mt-2">

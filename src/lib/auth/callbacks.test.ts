@@ -314,6 +314,9 @@ describe("sessionCallback", () => {
             googleConnected: true,
             groups: ["g1"],
             createdAt: "2024-01-01",
+            needsNameSetup: undefined,
+            onboardingCompleted: undefined,
+            announcementsSeen: [],
         });
     });
 });

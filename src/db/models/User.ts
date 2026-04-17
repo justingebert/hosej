@@ -51,6 +51,10 @@ const UserSchema = new Schema<IUser>({
         type: Boolean,
         default: false,
     },
+    announcementsSeen: {
+        type: [String],
+        default: [],
+    },
     createdAt: {
         type: Date,
         default: Date.now,

@@ -20,6 +20,8 @@ export type UserOverrides = Partial<{
     fcmToken: string;
     onboardingCompleted: boolean;
     avatar: string;
+    announcementsSeen: string[];
+    createdAt: Date;
 }>;
 
 export async function makeUser(overrides: UserOverrides = {}) {

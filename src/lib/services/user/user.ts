@@ -74,10 +74,18 @@ export async function updateUser(userId: string, data: UpdateUserData): Promise<
     if (data.onboardingCompleted !== undefined) {
         set.onboardingCompleted = data.onboardingCompleted;
     }
+    const addToSet: Record<string, unknown> = {};
+    if (data.announcementsSeen !== undefined) {
+        const unique = Array.from(new Set(data.announcementsSeen));
+        if (unique.length > 0) {
+            addToSet.announcementsSeen = { $each: unique };
+        }
+    }
 
     const update: Record<string, unknown> = {};
     if (Object.keys(set).length > 0) update.$set = set;
     if (Object.keys(unset).length > 0) update.$unset = unset;
+    if (Object.keys(addToSet).length > 0) update.$addToSet = addToSet;
 
     const updatedUser = await User.findByIdAndUpdate(userId, update, { new: true });
     if (!updatedUser) throw new NotFoundError("User not found");
