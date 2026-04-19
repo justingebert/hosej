@@ -1,6 +1,12 @@
 import type { Types } from "mongoose";
 import type { ToDTO } from "../common";
 
+export enum QuestionPackStatus {
+    Active = "active",
+    Deprecated = "deprecated",
+    Archived = "archived",
+}
+
 export interface IQuestionPack {
     _id: Types.ObjectId;
     packId: string;
@@ -8,6 +14,7 @@ export interface IQuestionPack {
     description: string;
     category: string;
     questionCount: number;
+    status: QuestionPackStatus;
     createdAt: Date;
 }
 

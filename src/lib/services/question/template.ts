@@ -3,7 +3,7 @@ import QuestionPack from "@/db/models/QuestionPack";
 import Group from "@/db/models/Group";
 import { ConflictError, NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 import type { QuestionType } from "@/types/models/question";
-import type { IQuestionPack } from "@/types/models/questionPack";
+import { QuestionPackStatus, type IQuestionPack } from "@/types/models/questionPack";
 import { createQuestionFromTemplate } from "./question";
 import { validateTemplates } from "./validateTemplateQuestions";
 import type { Types } from "mongoose";
@@ -73,6 +73,7 @@ export async function createTemplatesFromArray(
                 category: packMeta?.category || "",
                 questionCount: totalCount,
             },
+            $setOnInsert: { status: QuestionPackStatus.Active },
         },
         { upsert: true }
     );
@@ -84,6 +85,14 @@ export async function addTemplatePackToGroup(
     groupId: string | Types.ObjectId,
     packId: string
 ): Promise<void> {
+    const pack = await QuestionPack.findOne({ packId });
+    if (!pack) {
+        throw new NotFoundError(`Pack "${packId}" not found`);
+    }
+    if (pack.status !== QuestionPackStatus.Active) {
+        throw new ValidationError(`Pack "${packId}" is not active and cannot be added`);
+    }
+
     // Check if pack is already added to this group
     const group = await Group.findById(groupId);
     if (!group) {
@@ -126,6 +135,10 @@ export async function addTemplatePackToGroup(
 // ─── Pack queries ───────────────────────────────────────────────────────────
 
 export async function getAvailablePacks(): Promise<IQuestionPack[]> {
+    return QuestionPack.find({ status: QuestionPackStatus.Active }).sort({ name: 1 }).lean();
+}
+
+export async function getAllPacks(): Promise<IQuestionPack[]> {
     return QuestionPack.find().sort({ name: 1 }).lean();
 }
 
@@ -138,10 +151,68 @@ export async function getGroupPacks(
     }
 
     const addedPacks = group.features.questions.settings.packs || [];
-    const allPacks = await QuestionPack.find().sort({ name: 1 }).lean();
 
-    return allPacks.map((pack) => ({
+    // Show active packs + any packs the group already has (even if deprecated/archived)
+    const visiblePacks = await QuestionPack.find({
+        $or: [{ status: QuestionPackStatus.Active }, { packId: { $in: addedPacks } }],
+    })
+        .sort({ name: 1 })
+        .lean();
+
+    return visiblePacks.map((pack) => ({
         ...pack,
         added: addedPacks.includes(pack.packId),
     }));
+}
+
+// ─── Pack lifecycle ─────────────────────────────────────────────────────────
+
+export async function updatePackStatus(
+    packId: string,
+    status: QuestionPackStatus
+): Promise<IQuestionPack> {
+    if (!Object.values(QuestionPackStatus).includes(status)) {
+        throw new ValidationError(`Invalid pack status: ${status}`);
+    }
+
+    const updated = await QuestionPack.findOneAndUpdate(
+        { packId },
+        { $set: { status } },
+        { new: true }
+    ).lean();
+
+    if (!updated) {
+        throw new NotFoundError(`Pack "${packId}" not found`);
+    }
+
+    return updated;
+}
+
+/**
+ * Hard-delete a pack and its templates, and remove the pack reference from all groups.
+ * Historical Question.templateId values are left dangling by design — they stay as
+ * metadata on past questions but no longer resolve to a template.
+ */
+export async function deletePack(packId: string): Promise<{
+    templatesDeleted: number;
+    groupsUpdated: number;
+}> {
+    const pack = await QuestionPack.findOne({ packId });
+    if (!pack) {
+        throw new NotFoundError(`Pack "${packId}" not found`);
+    }
+
+    const templateResult = await QuestionTemplate.deleteMany({ packId });
+
+    const groupResult = await Group.updateMany(
+        { "features.questions.settings.packs": packId },
+        { $pull: { "features.questions.settings.packs": packId } }
+    );
+
+    await QuestionPack.deleteOne({ packId });
+
+    return {
+        templatesDeleted: templateResult.deletedCount ?? 0,
+        groupsUpdated: groupResult.modifiedCount ?? 0,
+    };
 }

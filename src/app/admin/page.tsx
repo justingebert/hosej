@@ -11,6 +11,7 @@ import type { FeatureStatus } from "@/types/models/appConfig";
 import TemplateUploadCard from "@/app/admin/_components/TemplateUploadCard";
 import GlobalFeatureControl from "@/app/admin/_components/GlobalFeatureControl";
 import GroupPackManager from "@/app/admin/_components/GroupPackManager";
+import PackLifecycleCard from "@/app/admin/_components/PackLifecycleCard";
 import Header from "@/components/ui/custom/Header";
 import BackLink from "@/components/ui/custom/BackLink";
 import { Button } from "@/components/ui/button";
@@ -139,6 +140,8 @@ export default function AdminPage() {
 
             <div className="space-y-4 pb-12">
                 <GroupPackManager />
+
+                <PackLifecycleCard />
 
                 <TemplateUploadCard />
 
