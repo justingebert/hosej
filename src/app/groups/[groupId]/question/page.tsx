@@ -11,6 +11,8 @@ import BackLink from "@/components/ui/custom/BackLink";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
 import QuestionsTabs from "./_components/QuestionTabs";
+import { EmptyQuestionGuide } from "./_components/emptyQuestionGuide";
+import type { GroupDTO } from "@/types/models/group";
 
 import type { QuestionWithUserStateDTO } from "@/types/models/question";
 import { useMarkFeatureSeen } from "@/hooks/useMarkFeatureSeen";
@@ -22,7 +24,15 @@ const DailyQuestionPage = () => {
     useMarkFeatureSeen(groupId, "question");
     const router = useRouter();
 
-    const { data, isLoading } = useSWR<{ questions: QuestionWithUserStateDTO[] }>(
+    const { data: group } = useSWR<GroupDTO>(groupId ? `/api/groups/${groupId}` : null, fetcher);
+    const userIsAdmin =
+        group && group.admin && user?._id && group.admin.toString() === user._id.toString();
+
+    const {
+        data,
+        isLoading,
+        mutate: mutateQuestions,
+    } = useSWR<{ questions: QuestionWithUserStateDTO[] }>(
         user ? `/api/groups/${groupId}/question` : null,
         fetcher
     );
@@ -42,18 +52,16 @@ const DailyQuestionPage = () => {
             ) : data.questions && data.questions.length > 0 ? (
                 <QuestionsTabs user={user!} groupId={groupId} questions={data.questions} />
             ) : (
-                <div className="flex flex-grow justify-center items-center">
-                    <Card className="w-full">
-                        <CardContent className="flex flex-col justify-center">
-                            <h2 className="font-bold p-6 text-center text-xl text-nowrap">
-                                {"No questions available :("}
-                            </h2>
-                            <Button onClick={() => router.push(`/groups/${groupId}/create`)}>
-                                Create Questions
-                            </Button>
-                        </CardContent>
-                    </Card>
-                </div>
+                <EmptyQuestionGuide
+                    groupId={groupId}
+                    userIsAdmin={!!userIsAdmin}
+                    onActivate={async () => {
+                        await fetch(`/api/groups/${groupId}/question/activate`, {
+                            method: "POST",
+                        });
+                        mutateQuestions();
+                    }}
+                />
             )}
         </div>
     );

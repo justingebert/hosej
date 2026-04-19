@@ -4,14 +4,13 @@ import { useParams } from "next/navigation";
 import useSWR from "swr";
 import Header from "@/components/ui/custom/Header";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
-import { Card } from "@/components/ui/card";
 import BackLink from "@/components/ui/custom/BackLink";
 import { RallyTabs } from "./_components/RallyTabs";
+import { EmptyRallyGuide } from "./_components/emptyRallyGuide";
 import fetcher from "@/lib/fetcher";
 import type { RallyDTO } from "@/types/models/rally";
 import { useMemo } from "react";
 import type { GroupDTO } from "@/types/models/group";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMarkFeatureSeen } from "@/hooks/useMarkFeatureSeen";
 
@@ -70,25 +69,16 @@ const RallyPage = () => {
                     <Skeleton className="w-full h-12" />
                 </div>
             ) : rallies.length === 0 ? (
-                <div className="flex flex-grow justify-center items-center">
-                    <div className="flex flex-col gap-y-4">
-                        <Card className="text-center p-6">
-                            <h2 className="font-bold">No active rallies</h2>
-                        </Card>
-                        {userIsAdmin && (
-                            <Button
-                                onClick={async () => {
-                                    await fetch(`/api/groups/${groupId}/rally/activate`, {
-                                        method: "POST",
-                                    });
-                                    mutateRallies();
-                                }}
-                            >
-                                Activate Rally
-                            </Button>
-                        )}
-                    </div>
-                </div>
+                <EmptyRallyGuide
+                    groupId={groupId}
+                    userIsAdmin={!!userIsAdmin}
+                    onActivate={async () => {
+                        await fetch(`/api/groups/${groupId}/rally/activate`, {
+                            method: "POST",
+                        });
+                        mutateRallies();
+                    }}
+                />
             ) : (
                 <RallyTabs
                     groupId={groupId}
