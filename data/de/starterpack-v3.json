@@ -1,6 +1,6 @@
 [
   {
-    "category": "Trade-Off",
+    "category": "Starter-Pack",
     "questionType": "custom",
     "multiSelect": false,
     "question": "Du musst ein Zimmer untervermieten. Wen nimmst du?",
@@ -33,7 +33,7 @@
     }
   },
   {
-    "category": "Trade-Off",
+    "category": "Starter-Pack",
     "questionType": "custom",
     "multiSelect": false,
     "question": "Ein verpeilter Fee-Praktikant gibt dir eine B-Sortiment-Superkraft. Was nimmst du?",
@@ -47,7 +47,7 @@
     ]
   },
   {
-    "category": "Trade-Off",
+    "category": "Starter-Pack",
     "questionType": "custom",
     "multiSelect": false,
     "question": "Wähle deinen Haushalts-Fluch:",
@@ -61,7 +61,7 @@
     ]
   },
   {
-    "category": "Trade-Off",
+    "category": "Starter-Pack",
     "questionType": "custom",
     "multiSelect": false,
     "question": "Die Hexe verflucht dich. Welchen Alltags-Fluch wählst du?",
@@ -75,7 +75,7 @@
     ]
   },
   {
-    "category": "Trade-Off",
+    "category": "Starter-Pack",
     "questionType": "custom",
     "multiSelect": false,
     "question": "Du wirst als Gegenstand in einer WG wiedergeboren. Als was?",
@@ -89,7 +89,7 @@
     ]
   },
   {
-    "category": "Trade-Off",
+    "category": "Starter-Pack",
     "questionType": "custom",
     "multiSelect": false,
     "question": "Der Teufel macht dir ein Angebot. Welche Essgewohnheit akzeptierst du?",
@@ -102,7 +102,7 @@
     ]
   },
   {
-    "category": "Trade-Off",
+    "category": "Starter-Pack",
     "questionType": "custom",
     "multiSelect": false,
     "question": "Auf der einsamen Insel gibt es nur einen Snack. Welchen wählst du?",
@@ -116,7 +116,7 @@
     ]
   },
   {
-    "category": "Trade-Off",
+    "category": "Starter-Pack",
     "questionType": "custom",
     "multiSelect": false,
     "question": "Was ist das Schlimmste?",
@@ -130,7 +130,7 @@
     ]
   },
   {
-    "category": "Trade-Off",
+    "category": "Starter-Pack",
     "questionType": "custom",
     "multiSelect": false,
     "question": "Worauf würdest du zuerst verzichten, wenn das Leben stressig wird?",
