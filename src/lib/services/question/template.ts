@@ -30,7 +30,7 @@ export async function createTemplatesFromArray(
             values: string[];
         };
     }[],
-    packMeta?: { name?: string; description?: string; category?: string }
+    packMeta?: { name?: string; description?: string; category?: string; tags?: string[] }
 ): Promise<{
     loaded: number;
     errors: { index: number; field: string; message: string }[];
@@ -71,6 +71,7 @@ export async function createTemplatesFromArray(
                 name: packMeta?.name || packId,
                 description: packMeta?.description || "",
                 category: packMeta?.category || "",
+                tags: packMeta?.tags ?? [],
                 questionCount: totalCount,
             },
             $setOnInsert: { status: QuestionPackStatus.Active },
@@ -178,6 +179,34 @@ export async function updatePackStatus(
     const updated = await QuestionPack.findOneAndUpdate(
         { packId },
         { $set: { status } },
+        { new: true }
+    ).lean();
+
+    if (!updated) {
+        throw new NotFoundError(`Pack "${packId}" not found`);
+    }
+
+    return updated;
+}
+
+export async function updatePack(
+    packId: string,
+    updates: { status?: QuestionPackStatus; tags?: string[] }
+): Promise<IQuestionPack> {
+    const set: Record<string, unknown> = {};
+    if (updates.status !== undefined) {
+        if (!Object.values(QuestionPackStatus).includes(updates.status)) {
+            throw new ValidationError(`Invalid pack status: ${updates.status}`);
+        }
+        set.status = updates.status;
+    }
+    if (updates.tags !== undefined) {
+        set.tags = Array.from(new Set(updates.tags.map((t) => t.trim()).filter(Boolean)));
+    }
+
+    const updated = await QuestionPack.findOneAndUpdate(
+        { packId },
+        { $set: set },
         { new: true }
     ).lean();
 

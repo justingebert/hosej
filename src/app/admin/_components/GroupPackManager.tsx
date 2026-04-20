@@ -83,7 +83,6 @@ export default function GroupPackManager() {
                     <Package className="h-5 w-5" />
                     <div>
                         <CardTitle>Manage Group Packs</CardTitle>
-                        <CardDescription>Add question packs to a group</CardDescription>
                     </div>
                 </div>
             </CardHeader>
@@ -156,12 +155,20 @@ export default function GroupPackManager() {
                                         <span className="font-medium text-sm truncate">
                                             {pack.name}
                                         </span>
-                                        {pack.category && (
-                                            <Badge variant="secondary" className="text-xs shrink-0">
-                                                {pack.category}
-                                            </Badge>
-                                        )}
                                     </div>
+                                    {pack.tags && pack.tags.length > 0 && (
+                                        <div className="flex flex-wrap gap-1 mt-1">
+                                            {pack.tags.map((tag) => (
+                                                <Badge
+                                                    key={tag}
+                                                    variant="outline"
+                                                    className="text-xs"
+                                                >
+                                                    {tag}
+                                                </Badge>
+                                            ))}
+                                        </div>
+                                    )}
                                     {pack.description && (
                                         <p className="text-xs text-muted-foreground mt-0.5 truncate">
                                             {pack.description}

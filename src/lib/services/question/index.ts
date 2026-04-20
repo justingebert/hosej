@@ -21,6 +21,7 @@ export {
     getAllPacks,
     getGroupPacks,
     updatePackStatus,
+    updatePack,
     deletePack,
 } from "./template";
 

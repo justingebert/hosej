@@ -4,9 +4,9 @@ import { ForbiddenError } from "@/lib/api/errorHandling";
 import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { isGlobalAdmin } from "@/lib/services/user/admin";
-import { updatePackStatus, deletePack } from "@/lib/services/question";
+import { updatePack, deletePack } from "@/lib/services/question";
 import { parseBody } from "@/lib/validation/parseBody";
-import { UpdatePackStatusSchema } from "@/lib/validation/admin";
+import { UpdatePackSchema } from "@/lib/validation/admin";
 
 export const PATCH = withAuthAndErrors(
     async (req: NextRequest, { params, userId }: AuthedContext<{ params: { packId: string } }>) => {
@@ -15,8 +15,8 @@ export const PATCH = withAuthAndErrors(
             throw new ForbiddenError("Global admin access required");
         }
 
-        const { status } = await parseBody(req, UpdatePackStatusSchema);
-        const pack = await updatePackStatus(params.packId, status);
+        const updates = await parseBody(req, UpdatePackSchema);
+        const pack = await updatePack(params.packId, updates);
 
         return NextResponse.json(pack, { status: 200 });
     }

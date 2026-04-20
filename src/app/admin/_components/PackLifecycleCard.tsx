@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import ResponsiveConfirm from "@/components/common/ResponsiveConfirm";
 import { useToast } from "@/hooks/use-toast";
@@ -121,10 +122,6 @@ export default function PackLifecycleCard() {
                     <Layers className="h-5 w-5 shrink-0" />
                     <div>
                         <CardTitle>Question Packs</CardTitle>
-                        <CardDescription>
-                            Deprecate, archive, or delete packs. Deprecated packs stay on groups
-                            that already have them but are hidden from new additions.
-                        </CardDescription>
                     </div>
                 </div>
             </CardHeader>

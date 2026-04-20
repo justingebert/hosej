@@ -13,6 +13,7 @@ export interface IQuestionPack {
     name: string;
     description: string;
     category: string;
+    tags: string[];
     questionCount: number;
     status: QuestionPackStatus;
     createdAt: Date;

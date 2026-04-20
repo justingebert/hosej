@@ -26,6 +26,7 @@ export default function TemplateUploadCard() {
     const [packName, setPackName] = useState("");
     const [packDescription, setPackDescription] = useState("");
     const [packCategory, setPackCategory] = useState("");
+    const [packTags, setPackTags] = useState("");
     const [templatesJson, setTemplatesJson] = useState("");
     const [uploading, setUploading] = useState(false);
     const [uploadResult, setUploadResult] = useState<UploadResult | null>(null);
@@ -88,6 +89,10 @@ export default function TemplateUploadCard() {
                     name: packName.trim() || undefined,
                     description: packDescription.trim() || undefined,
                     category: packCategory.trim() || undefined,
+                    tags: packTags
+                        .split(",")
+                        .map((t) => t.trim())
+                        .filter(Boolean),
                     templates,
                 }),
             });
@@ -132,9 +137,6 @@ export default function TemplateUploadCard() {
                 <div className="flex items-center gap-2">
                     <div>
                         <CardTitle>Upload Question Templates</CardTitle>
-                        <CardDescription>
-                            Paste JSON array of question templates to create a new pack
-                        </CardDescription>
                     </div>
                 </div>
             </CardHeader>
@@ -148,7 +150,6 @@ export default function TemplateUploadCard() {
                     <Label htmlFor="packName">Pack Name</Label>
                     <Input
                         id="packName"
-                        placeholder="e.g. Starter Pack"
                         value={packName}
                         onChange={(e) => setPackName(e.target.value)}
                     />
@@ -158,7 +159,6 @@ export default function TemplateUploadCard() {
                     <Label htmlFor="packDescription">Description</Label>
                     <Input
                         id="packDescription"
-                        placeholder="Short description of the pack"
                         value={packDescription}
                         onChange={(e) => setPackDescription(e.target.value)}
                     />
@@ -168,9 +168,18 @@ export default function TemplateUploadCard() {
                     <Label htmlFor="packCategory">Category</Label>
                     <Input
                         id="packCategory"
-                        placeholder="e.g. icebreaker, deep, fun"
                         value={packCategory}
                         onChange={(e) => setPackCategory(e.target.value)}
+                    />
+                </div>
+
+                <div className="space-y-2">
+                    <Label htmlFor="packTags">Tags</Label>
+                    <Input
+                        id="packTags"
+                        placeholder="e.g. de, en, family friendly"
+                        value={packTags}
+                        onChange={(e) => setPackTags(e.target.value)}
                     />
                 </div>
 

@@ -6,6 +6,7 @@ const questionPackSchema = new mongoose.Schema<IQuestionPack>({
     name: { type: String, required: true },
     description: { type: String, default: "" },
     category: { type: String, default: "" },
+    tags: { type: [String], default: [] },
     questionCount: { type: Number, default: 0 },
     status: {
         type: String,
@@ -18,6 +19,7 @@ const questionPackSchema = new mongoose.Schema<IQuestionPack>({
 
 questionPackSchema.index({ packId: 1 }, { unique: true });
 questionPackSchema.index({ status: 1 });
+questionPackSchema.index({ tags: 1 });
 
 const QuestionPack =
     (mongoose.models.QuestionPack as mongoose.Model<IQuestionPack>) ||
