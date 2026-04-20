@@ -22,7 +22,7 @@ function createLimiter(prefix: string, tokens: number, windowSeconds: number) {
 export const generalLimiter = createLimiter("general", 100, 60);
 
 /** 10 req / 60s — auth & device registration */
-export const authLimiter = createLimiter("auth", 10, 60);
+export const authLimiter = createLimiter("auth", 20, 60);
 
 /** 20 req / 60s — voting endpoints */
 export const voteLimiter = createLimiter("vote", 20, 60);
