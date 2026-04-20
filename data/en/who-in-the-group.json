@@ -1,0 +1,140 @@
+[
+  {
+    "category": "Who in the Group",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Who's most likely to be the most successful in 10 years – if they really wanted to be?"
+  },
+  {
+    "category": "Who in the Group",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Who would be the best crisis manager when everything really goes sideways?"
+  },
+  {
+    "category": "Who in the Group",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Who would have the most fun on a 24h survival trip with no phone and no plan?"
+  },
+  {
+    "category": "Who in the Group",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Who is the most honest – even when the truth hurts?"
+  },
+  {
+    "category": "Who in the Group",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Who could get along with literally anyone on the planet?"
+  },
+  {
+    "category": "Who in the Group",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Who would be the first to start their own business – and actually make it work?"
+  },
+  {
+    "category": "Who in the Group",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Who writes the longest, most emotional birthday messages?"
+  },
+  {
+    "category": "Who in the Group",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Who finds a joke in every situation – even when it's completely inappropriate?"
+  },
+  {
+    "category": "Who in the Group",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Who is actually the emotional anchor of the group?"
+  },
+  {
+    "category": "Who in the Group",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Who would drop everything to spontaneously take off for a week?"
+  },
+  {
+    "category": "Who in the Group",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Who has the best compass for what really matters in life?"
+  },
+  {
+    "category": "Who in the Group",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Who would be the biggest source of chaos and stress on a shared vacation?"
+  },
+  {
+    "category": "Who in the Group",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Who dances the hardest at the next party – with zero shame?"
+  },
+  {
+    "category": "Who in the Group",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Who's most likely to be the village elder in a small mountain town?"
+  },
+  {
+    "category": "Who in the Group",
+    "questionType": "users",
+    "multiSelect": true,
+    "question": "Who would be the best travel partners for a 3-week backpacking tour with no fixed plan?"
+  },
+  {
+    "category": "Who in the Group",
+    "questionType": "users",
+    "multiSelect": true,
+    "question": "Who are the quiet heroes of the group – never appreciated enough?"
+  },
+  {
+    "category": "Who in the Group",
+    "questionType": "users",
+    "multiSelect": true,
+    "question": "Who can you call anytime – no matter what, no matter how late?"
+  },
+  {
+    "category": "Who in the Group",
+    "questionType": "users",
+    "multiSelect": true,
+    "question": "Who holds the group together the most?"
+  },
+  {
+    "category": "Who in the Group",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Which animal would you be if you were one?",
+    "options": [
+      "Lion – leads, even if no one follows",
+      "Dolphin – too smart for their own good",
+      "Dog – loyal to the grave",
+      "Cat – does what they want, guilty of nothing",
+      "Owl – says little, sees everything",
+      "Otter – turns everything into fun",
+      "Bear – social, but not before 10 AM"
+    ]
+  },
+  {
+    "category": "Who in the Group",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "What job would you have in a medieval town?",
+    "options": [
+      "King / Queen",
+      "Court jester",
+      "Blacksmith",
+      "Merchant",
+      "Knight",
+      "Witch / Wizard",
+      "Farmer (happy with it)"
+    ]
+  }
+]

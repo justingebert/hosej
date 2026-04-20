@@ -1,0 +1,155 @@
+[
+  {
+    "category": "Group Trip",
+    "questionType": "pairing",
+    "question": "What vacation role does each person play on a group trip?",
+    "pairing": {
+      "keySource": "members",
+      "mode": "open",
+      "values": [
+        "The Navigator – has the map in their head",
+        "The Foodie – googles restaurants instead of sights",
+        "The Photographer – needs good light, needs patience",
+        "The Party Animal – night > day",
+        "The Culture Nerd – knows every museum",
+        "The Beach Veggie – no plan, just lying down",
+        "The Complication Magnet – loses passport, phone, friends"
+      ]
+    }
+  },
+  {
+    "category": "Group Trip",
+    "questionType": "pairing",
+    "question": "What's each person's luggage profile?",
+    "pairing": {
+      "keySource": "members",
+      "mode": "open",
+      "values": [
+        "Minimal packer – hand luggage for 2 weeks",
+        "Suitcase hoarder – 3 outfits a day",
+        "Last-minute disaster – packs in the taxi",
+        "Pharmacy on wheels – has something for everyone",
+        "Forgets the essentials – passport, charger, toothbrush",
+        "Perfectly organized – packing cubes, lists, backups",
+        "Packs more books than clothes"
+      ]
+    }
+  },
+  {
+    "category": "Group Trip",
+    "questionType": "pairing",
+    "question": "Which country truly suits each person?",
+    "pairing": {
+      "keySource": "members",
+      "mode": "open",
+      "values": [
+        "Japan – order and respect",
+        "Italy – loud hands, good food",
+        "Iceland – alone with yourself and a sheep",
+        "Thailand – chaos and beach",
+        "Portugal – chill and nice tiles",
+        "Mexico – energy without a break",
+        "Scotland – rain and whisky",
+        "South Africa – nature to the horizon"
+      ]
+    }
+  },
+  {
+    "category": "Group Trip",
+    "questionType": "pairing",
+    "question": "What travel mode is each person?",
+    "pairing": {
+      "keySource": "members",
+      "mode": "open",
+      "values": [
+        "Backpacker – flip-flops and a book",
+        "All-inclusive – wristband and lounger",
+        "Road trip – car full, no plans",
+        "City hopper – new city every 2 days",
+        "Hiker – up every mountain",
+        "Digital nomad – laptop by the pool",
+        "Luxury – spa, butler, quiet please"
+      ]
+    }
+  },
+  {
+    "category": "Group Trip",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "What's your perfect group travel destination?",
+    "options": [
+      "Beach vacation with evening parties",
+      "City trip with lots of culture",
+      "Road trip with no fixed plan",
+      "Mountains and hiking",
+      "All-inclusive and doing nothing",
+      "A festival or event as the main reason",
+      "Exotic adventure far away"
+    ]
+  },
+  {
+    "category": "Group Trip",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "What's guaranteed to happen on our trip?",
+    "options": [
+      "Someone sleeps through the flight",
+      "Argument over where to eat",
+      "Someone loses passport or phone",
+      "A spontaneous tattoo night",
+      "We miss the planned highlight",
+      "Someone falls dramatically in love",
+      "A day in the hospital"
+    ]
+  },
+  {
+    "category": "Group Trip",
+    "questionType": "custom",
+    "multiSelect": true,
+    "question": "What has to be part of every group trip?",
+    "options": [
+      "One shared dinner per day",
+      "At least one wild night",
+      "A chill day with no program",
+      "An activity that overwhelms everyone",
+      "A moment people talk about for years",
+      "An argument about money",
+      "A group photo nobody likes"
+    ]
+  },
+  {
+    "category": "Group Trip",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Who actually organizes the trip – even if others claim they do?"
+  },
+  {
+    "category": "Group Trip",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Who causes the first drama on vacation?"
+  },
+  {
+    "category": "Group Trip",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Who haggles hardest at the market?"
+  },
+  {
+    "category": "Group Trip",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Who would be the first to lose their passport?"
+  },
+  {
+    "category": "Group Trip",
+    "questionType": "users",
+    "multiSelect": true,
+    "question": "Who could you really survive 3 weeks in close quarters with?"
+  },
+  {
+    "category": "Group Trip",
+    "questionType": "rating",
+    "question": "How well would we survive a 3-week trip as a group without fighting?"
+  }
+]

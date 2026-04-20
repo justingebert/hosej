@@ -1,0 +1,140 @@
+[
+  {
+    "category": "Apocalypse",
+    "questionType": "pairing",
+    "question": "What role does each person have on the survival crew?",
+    "pairing": {
+      "keySource": "members",
+      "mode": "open",
+      "values": [
+        "Leader – has a plan, most of the time",
+        "Scout – first around every corner",
+        "Medic – tapes everything back together",
+        "Cook – turns canned food into gourmet",
+        "Tech wizard – fixes the generator",
+        "Morale booster – keeps the crew together",
+        "Deadweight – gets dragged along anyway"
+      ]
+    }
+  },
+  {
+    "category": "Apocalypse",
+    "questionType": "pairing",
+    "question": "Which weapon suits each person?",
+    "pairing": {
+      "keySource": "members",
+      "mode": "open",
+      "values": [
+        "Baseball bat with nails",
+        "Crossbow – silent but deadly",
+        "Kitchen knife from the good set",
+        "Pepper spray and fast legs",
+        "Just harsh words",
+        "A loyal dog",
+        "Nothing – negotiates their way through"
+      ]
+    }
+  },
+  {
+    "category": "Apocalypse",
+    "questionType": "pairing",
+    "question": "What does each person do in the first hour after the outbreak?",
+    "pairing": {
+      "keySource": "members",
+      "mode": "open",
+      "values": [
+        "Runs to the supermarket",
+        "Calls mom",
+        "Builds a barricade at the door",
+        "Grabs a go-bag that's been ready for years",
+        "Posts one last Instagram story",
+        "Is already on the way to the crew",
+        "Keeps sleeping – notices nothing"
+      ]
+    }
+  },
+  {
+    "category": "Apocalypse",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Who mentally breaks down first?"
+  },
+  {
+    "category": "Apocalypse",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Who secretly sabotages the group for their own benefit?"
+  },
+  {
+    "category": "Apocalypse",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Who becomes the unexpected hero when it really matters?"
+  },
+  {
+    "category": "Apocalypse",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Who tries to negotiate with the zombies first?"
+  },
+  {
+    "category": "Apocalypse",
+    "questionType": "users",
+    "multiSelect": true,
+    "question": "Who is guaranteed to survive the first 48 hours?"
+  },
+  {
+    "category": "Apocalypse",
+    "questionType": "users",
+    "multiSelect": true,
+    "question": "Who would honestly rather have stayed home?"
+  },
+  {
+    "category": "Apocalypse",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Which apocalypse scenario would hit us the hardest?",
+    "options": [
+      "Zombie outbreak",
+      "Total worldwide blackout",
+      "AI takeover",
+      "Pandemic 2.0",
+      "Meteor impact",
+      "Internet gone forever"
+    ]
+  },
+  {
+    "category": "Apocalypse",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "What's your one luxury item you're taking?",
+    "options": [
+      "Favorite headphones",
+      "A book",
+      "Coffee stash",
+      "Family photo",
+      "That one bottle of good whisky",
+      "Toothbrush",
+      "Bluetooth speaker"
+    ]
+  },
+  {
+    "category": "Apocalypse",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "How does our group really end in the movie?",
+    "options": [
+      "We found a new settlement",
+      "We become the feared raider gang",
+      "We fall out over canned food",
+      "We save the world, nobody believes us",
+      "We die with dignity together",
+      "One betrays everyone, gets rich"
+    ]
+  },
+  {
+    "category": "Apocalypse",
+    "questionType": "rating",
+    "question": "How good are our survival odds as a group? (1 = dead on day 1, 10 = we take over the new world)"
+  }
+]

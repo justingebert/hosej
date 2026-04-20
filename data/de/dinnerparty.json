@@ -1,0 +1,104 @@
+[
+  {
+    "category": "Dinner-Party",
+    "questionType": "pairing",
+    "question": "Plant das perfekte 4-Gänge-Menü – jeder Gang bekommt ein Gericht.",
+    "pairing": {
+      "keySource": "custom",
+      "mode": "exclusive",
+      "keys": [
+        "Vorspeise",
+        "Hauptgang",
+        "Dessert",
+        "Digestif"
+      ],
+      "values": [
+        "Omas Rouladen",
+        "Sushi-Platte",
+        "Tomate-Mozzarella",
+        "Tiramisu",
+        "Käseplatte",
+        "Steak mit Pommes",
+        "Espresso Martini",
+        "Schnaps aus Opas Keller",
+        "Gazpacho",
+        "Mousse au Chocolat"
+      ]
+    }
+  },
+  {
+    "category": "Dinner-Party",
+    "questionType": "pairing",
+    "question": "Welcher Cocktail ist jeder von euch?",
+    "pairing": {
+      "keySource": "members",
+      "mode": "open",
+      "values": [
+        "Espresso Martini – zu viel Energie",
+        "Aperol Spritz – basic, aber verlässlich",
+        "Old Fashioned – ernst genommen werden wollen",
+        "Mojito – zu viel Deko",
+        "Gin Tonic – neutral, immer da",
+        "Tequila Sunrise – eskaliert schnell",
+        "Wasser mit Zitrone – hat morgen was vor"
+      ]
+    }
+  },
+  {
+    "category": "Dinner-Party",
+    "questionType": "pairing",
+    "question": "Welches Essen bringt jeder mit?",
+    "pairing": {
+      "keySource": "members",
+      "mode": "open",
+      "values": [
+        "Salat aus dem Supermarkt (ungeöffnet)",
+        "Selbstgemachte Lasagne",
+        "Chips und Dip",
+        "Ein ambitioniertes 3-Stunden-Projekt",
+        "Brot. Nur Brot.",
+        "Dessert aus der Kühltheke",
+        "Sagte zu, brachte nichts"
+      ]
+    }
+  },
+  {
+    "category": "Dinner-Party",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Was ist das ultimative Comfort-Food nach einem harten Tag?",
+    "options": [
+      "Tiefkühlpizza",
+      "Instant-Ramen",
+      "Bolognese vom Vortag",
+      "Toast mit Käse",
+      "Eis direkt aus der Packung",
+      "Cornflakes zum Abendessen",
+      "Döner auf dem Heimweg"
+    ]
+  },
+  {
+    "category": "Dinner-Party",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Wer würde ein eigenes Restaurant eröffnen – und es würde funktionieren?"
+  },
+  {
+    "category": "Dinner-Party",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Wer ruiniert jedes gemeinsame Kochen mit Anweisungen?"
+  },
+  {
+    "category": "Dinner-Party",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Wer bringt immer den besten Wein mit?"
+  },
+  {
+    "category": "Dinner-Party",
+    "questionType": "users",
+    "multiSelect": true,
+    "question": "Wer würde ehrlich auch 3-Sterne-Gourmet-Essen bestellen – und dann Ketchup drauf kippen?"
+  }
+]

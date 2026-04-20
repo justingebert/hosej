@@ -1,0 +1,104 @@
+[
+  {
+    "category": "Dinner Party",
+    "questionType": "pairing",
+    "question": "Plan the perfect 4-course menu – each course gets one dish.",
+    "pairing": {
+      "keySource": "custom",
+      "mode": "exclusive",
+      "keys": [
+        "Starter",
+        "Main",
+        "Dessert",
+        "Digestif"
+      ],
+      "values": [
+        "Grandma's beef roulades",
+        "Sushi platter",
+        "Tomato and mozzarella",
+        "Tiramisu",
+        "Cheese board",
+        "Steak with fries",
+        "Espresso Martini",
+        "Schnapps from grandpa's cellar",
+        "Gazpacho",
+        "Chocolate mousse"
+      ]
+    }
+  },
+  {
+    "category": "Dinner Party",
+    "questionType": "pairing",
+    "question": "Which cocktail is each of you?",
+    "pairing": {
+      "keySource": "members",
+      "mode": "open",
+      "values": [
+        "Espresso Martini – too much energy",
+        "Aperol Spritz – basic but reliable",
+        "Old Fashioned – desperate to be taken seriously",
+        "Mojito – too much garnish",
+        "Gin & Tonic – neutral, always around",
+        "Tequila Sunrise – escalates quickly",
+        "Water with lemon – has plans tomorrow"
+      ]
+    }
+  },
+  {
+    "category": "Dinner Party",
+    "questionType": "pairing",
+    "question": "What food does each person bring?",
+    "pairing": {
+      "keySource": "members",
+      "mode": "open",
+      "values": [
+        "Supermarket salad (unopened)",
+        "Homemade lasagna",
+        "Chips and dip",
+        "An ambitious 3-hour project",
+        "Bread. Just bread.",
+        "Dessert from the freezer aisle",
+        "Said yes, brought nothing"
+      ]
+    }
+  },
+  {
+    "category": "Dinner Party",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "What's the ultimate comfort food after a rough day?",
+    "options": [
+      "Frozen pizza",
+      "Instant ramen",
+      "Yesterday's bolognese",
+      "Cheese on toast",
+      "Ice cream straight out of the tub",
+      "Cereal for dinner",
+      "Kebab on the way home"
+    ]
+  },
+  {
+    "category": "Dinner Party",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Who would open their own restaurant – and actually make it work?"
+  },
+  {
+    "category": "Dinner Party",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Who ruins every group cook-off with instructions?"
+  },
+  {
+    "category": "Dinner Party",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Who always brings the best wine?"
+  },
+  {
+    "category": "Dinner Party",
+    "questionType": "users",
+    "multiSelect": true,
+    "question": "Who would honestly order 3-star gourmet food – and then drown it in ketchup?"
+  }
+]

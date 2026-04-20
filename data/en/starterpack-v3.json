@@ -1,0 +1,286 @@
+[
+  {
+    "category": "Starter-Pack",
+    "questionType": "custom",
+    "multiSelect": true,
+    "question": "A scatterbrained fairy intern grants you a B-tier superpower. Which do you take?",
+    "options": [
+      "I can always guess to the cent how much my grocery shop will cost",
+      "I always insert USB sticks the right way up on the first try",
+      "I can telepathically transfer my hangover to people I don't like (Sundays only)",
+      "My hair air-dries into perfect styling on command",
+      "I know instantly which Tupperware lid belongs to which container",
+      "I can understand all animals, but they speak in thick regional dialect about their tax returns"
+    ]
+  },
+  {
+    "category": "Starter Pack",
+    "questionType": "pairing",
+    "question": "Your group pulls a heist tomorrow. Who gets which role?",
+    "pairing": {
+      "keySource": "members",
+      "mode": "open",
+      "values": [
+        "The mastermind – has a 40-slide plan and a moodboard",
+        "The getaway driver – scary calm at 180 km/h",
+        "The hacker – 14 monitors, zero social life",
+        "The charming distraction – talks the guard into handing over the keys",
+        "The muscle – no plan, pure presence",
+        "The inside contact – knows someone who knows someone",
+        "The loose cannon who ruins it at the worst moment",
+        "The one who disappears with all the money in the end",
+        "The lookout who checks their phone at exactly the wrong second"
+      ]
+    }
+  },
+  {
+    "category": "Starter-Pack",
+    "questionType": "custom",
+    "multiSelect": true,
+    "question": "Choose your household curse:",
+    "options": [
+      "Dishwasher never really cleans",
+      "Laundry is always wrinkled",
+      "Fridge always smells slightly off",
+      "Shower has unpredictable temperature",
+      "Remote is permanently missing",
+      "Trash is always full immediately"
+    ]
+  },
+  {
+    "category": "Starter-Pack",
+    "questionType": "custom",
+    "multiSelect": true,
+    "question": "The witch curses you. Which everyday curse do you pick?",
+    "options": [
+      "There's a tiny pebble in every shoe",
+      "My battery only charges to 84% and jumps from 15% straight to 0%",
+      "There's always a smudge in the middle of my glasses or screen",
+      "Right after brushing my teeth I crave orange juice",
+      "I constantly feel like I need to sneeze",
+      "My WiFi only streams Netflix in pixelated 480p"
+    ]
+  },
+  {
+    "category": "Starter-Pack",
+    "questionType": "custom",
+    "multiSelect": true,
+    "question": "You are reincarnated as an object in a shared flat. As what?",
+    "options": [
+      "The wobbly shopping cart that always pulls left",
+      "The smoke detector that beeps at 3:14 AM",
+      "An ancient HDMI cable behind the TV",
+      "The lint roller that no longer picks up anything",
+      "The tiny spoon that jams the dishwasher",
+      "The single sock without a partner"
+    ]
+  },
+  {
+    "category": "Starter-Pack",
+    "questionType": "custom",
+    "multiSelect": true,
+    "question": "The devil offers you a deal. Which eating habit do you accept?",
+    "options": [
+      "Eating pizza only with knife, fork and ketchup",
+      "Every drink has a warm pickle floating in it",
+      "Pasta only as raw snacks",
+      "Every chocolate croissant is filled with mustard",
+      "I have to loudly praise every meal like a teleshopping host"
+    ]
+  },
+  {
+    "category": "Starter-Pack",
+    "questionType": "custom",
+    "multiSelect": true,
+    "question": "You need to sublet a room. Who do you take?",
+    "options": [
+      "The naked-yoga guy with throat singing",
+      "The meal-prep influencer filming in the kitchen nonstop",
+      "The hobby DJ with 90s eurodance on loop",
+      "The conspiracy theorist who turns off the WiFi at night",
+      "The crypto bro who wants to pay with Bros-Coin"
+    ]
+  },
+  {
+    "category": "Starter-Pack",
+    "questionType": "custom",
+    "multiSelect": true,
+    "question": "There's only one snack on the desert island. Which do you pick?",
+    "options": [
+      "Ice-cold canned ravioli",
+      "Bone-dry rice cakes",
+      "Rock-hard rusks",
+      "Gummy bears (only the white ones)",
+      "Pure fondant",
+      "Gas station muffin"
+    ]
+  },
+  {
+    "category": "Starter-Pack",
+    "questionType": "custom",
+    "multiSelect": true,
+    "question": "Dude, what's the worst?",
+    "options": [
+      "You always have a slight itch somewhere",
+      "Your phone is always at 15% battery",
+      "You're always missing one sock",
+      "Internet is always slightly slow",
+      "Shoes are always minimally uncomfortable",
+      "Coffee is always only lukewarm"
+    ]
+  },
+  {
+    "category": "Starter-Pack",
+    "questionType": "custom",
+    "multiSelect": true,
+    "question": "What would you give up first when life gets stressful?",
+    "options": [
+      "Sleep",
+      "Hobbies",
+      "Social life",
+      "Career progress",
+      "Health routines",
+      "Savings"
+    ]
+  },
+  {
+    "category": "Starter Pack",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "You wake up tomorrow with a new ability – which would you want most?",
+    "options": [
+      "Read minds",
+      "Instantly speak every language",
+      "Never get tired again",
+      "Convince anyone of anything",
+      "Be invisible",
+      "Always have good luck"
+    ]
+  },
+  {
+    "category": "Starter Pack",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "You can only drink one beverage for the rest of your life – what do you pick?",
+    "options": [
+      "Beer",
+      "Wine",
+      "Coffee",
+      "Iced tea",
+      "Mate",
+      "Cocktails",
+      "Energy drinks",
+      "Water (respect)"
+    ]
+  },
+  {
+    "category": "Starter Pack",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "You get a million-euro check – what happens first?",
+    "options": [
+      "Quit immediately",
+      "Fancy car and house",
+      "Take care of your parents",
+      "Travel until the money runs out",
+      "Invest",
+      "Throw a party with the whole group",
+      "Buy real estate and embrace boomer energy"
+    ]
+  },
+  {
+    "category": "Starter Pack",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "If you could travel to another era for one day – when do you go?",
+    "options": [
+      "Ancient Rome at its peak",
+      "Wild America, 1880s",
+      "Swinging Sixties",
+      "80s – neon, cassettes, no internet",
+      "Medieval times (romanticized version)",
+      "Future, +100 years"
+    ]
+  },
+  {
+    "category": "Starter Pack",
+    "questionType": "custom",
+    "multiSelect": true,
+    "question": "Which apps would you keep if you had to delete all the others? (max 3)",
+    "options": [
+      "WhatsApp",
+      "Instagram",
+      "Spotify",
+      "Google Maps",
+      "TikTok",
+      "YouTube",
+      "Reddit",
+      "Netflix",
+      "Banking app",
+      "Weather app"
+    ]
+  },
+  {
+    "category": "Starter Pack",
+    "questionType": "custom",
+    "multiSelect": true,
+    "question": "What makes a perfect group night?",
+    "options": [
+      "No concrete plan",
+      "Good food",
+      "Everyone's in",
+      "Long night",
+      "Spontaneous change of location",
+      "No stress",
+      "Good music",
+      "Full chill mode",
+      "Being outside"
+    ]
+  },
+  {
+    "category": "Starter Pack",
+    "questionType": "rating",
+    "question": "How chaotic is this group? (1 = super organized, 10 = total chaos)"
+  },
+  {
+    "category": "Starter Pack",
+    "questionType": "rating",
+    "question": "How was your week?"
+  },
+  {
+    "category": "Starter Pack",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Who would survive the longest in a zombie attack?"
+  },
+  {
+    "category": "Starter Pack",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Who would be the character that dies first in a horror movie?"
+  },
+  {
+    "category": "Starter Pack",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Who would completely improvise in a job interview – and still get the job?"
+  },
+  {
+    "category": "Starter Pack",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Who is most likely to become surprisingly famous in 10 years?"
+  },
+  {
+    "category": "Starter Pack",
+    "questionType": "users",
+    "multiSelect": true,
+    "question": "Who would be the best roommates in a shared flat?"
+  },
+  {
+    "category": "Starter Pack",
+    "questionType": "users",
+    "multiSelect": true,
+    "question": "Who could really go a week without their phone?"
+  }
+]

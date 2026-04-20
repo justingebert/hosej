@@ -1,0 +1,95 @@
+[
+  {
+    "category": "Archetypes",
+    "questionType": "pairing",
+    "question": "Which Hogwarts house suits each person?",
+    "pairing": {
+      "keySource": "members",
+      "mode": "open",
+      "values": [
+        "Gryffindor",
+        "Slytherin",
+        "Ravenclaw",
+        "Hufflepuff"
+      ]
+    }
+  },
+  {
+    "category": "Archetypes",
+    "questionType": "pairing",
+    "question": "What's each person's true roommate role?",
+    "pairing": {
+      "keySource": "members",
+      "mode": "open",
+      "values": [
+        "The Mom – cleans up after everyone",
+        "The Party Starter – drags everyone off the couch",
+        "The Ghost – technically lives there, nobody knows when",
+        "The Cleaning Tyrant – has a chart on the fridge",
+        "The Snack Thief – never buys, always eats",
+        "The Diplomat – settles every beef",
+        "The Chaos Goblin – leaves traces everywhere"
+      ]
+    }
+  },
+  {
+    "category": "Archetypes",
+    "questionType": "pairing",
+    "question": "Which Disney villain secretly lives inside each person?",
+    "pairing": {
+      "keySource": "members",
+      "mode": "open",
+      "values": [
+        "Scar – overthinks every plan",
+        "Ursula – makes deals no one understands",
+        "Gaston – too confident for the talent on hand",
+        "Hades – permanently mildly annoyed",
+        "Yzma – almost had the perfect plan",
+        "Maleficent – holds a grudge forever",
+        "Cruella – fashion over ethics"
+      ]
+    }
+  },
+  {
+    "category": "Archetypes",
+    "questionType": "pairing",
+    "question": "What's each person's festival profile?",
+    "pairing": {
+      "keySource": "members",
+      "mode": "open",
+      "values": [
+        "The Planner – has the schedule printed out",
+        "The Lost One – phone off, gone since Friday",
+        "The Spontaneous DJ – takes over every boombox",
+        "The Medic – has band-aids and electrolytes",
+        "The Disaster – loses tent, wallet, dignity",
+        "The Silent Observer – sits in the back, sees everything",
+        "The Hype-Man – screams for every act"
+      ]
+    }
+  },
+  {
+    "category": "Archetypes",
+    "questionType": "pairing",
+    "question": "If you were a band – what role does each person play?",
+    "pairing": {
+      "keySource": "members",
+      "mode": "open",
+      "values": [
+        "Frontperson – lives for the stage",
+        "Lead guitar – too many feelings",
+        "Bassist – quiet, essential",
+        "Drummer – too loud, too much coffee",
+        "Producer in the background",
+        "Manager – runs everything, plays nothing",
+        "The drama that breaks the band up"
+      ]
+    }
+  },
+  {
+    "category": "Archetypes",
+    "questionType": "users",
+    "multiSelect": true,
+    "question": "Who are the absolute main characters of this group?"
+  }
+]

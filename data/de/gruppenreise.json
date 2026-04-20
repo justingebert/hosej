@@ -1,0 +1,155 @@
+[
+  {
+    "category": "Gruppenreise",
+    "questionType": "pairing",
+    "question": "Welche Urlaubs-Rolle hat jeder im Gruppentrip?",
+    "pairing": {
+      "keySource": "members",
+      "mode": "open",
+      "values": [
+        "Der Navigator – hat die Karte im Kopf",
+        "Der Foodie – googelt Restaurants statt Sehenswürdigkeiten",
+        "Der Fotograf – braucht gutes Licht, braucht Geduld",
+        "Der Party-Mensch – Nacht > Tag",
+        "Der Kultur-Nerd – kennt jedes Museum",
+        "Der Strand-Gemüse – kein Plan, nur liegen",
+        "Der Komplikations-Magnet – verliert Pass, Handy, Freunde"
+      ]
+    }
+  },
+  {
+    "category": "Gruppenreise",
+    "questionType": "pairing",
+    "question": "Welches Gepäck-Profil hat jeder?",
+    "pairing": {
+      "keySource": "members",
+      "mode": "open",
+      "values": [
+        "Minimal-Packer – Handgepäck für 2 Wochen",
+        "Koffer-Hoarder – 3 Outfits pro Tag",
+        "Last-Minute-Katastrophe – packt im Taxi",
+        "Apotheke auf Rädern – hat für jeden was dabei",
+        "Vergisst das Wichtigste – Pass, Ladekabel, Zahnbürste",
+        "Perfekt organisiert – Packwürfel, Listen, Ersatz",
+        "Packt mehr Bücher als Klamotten"
+      ]
+    }
+  },
+  {
+    "category": "Gruppenreise",
+    "questionType": "pairing",
+    "question": "Welches Land passt zu jedem wirklich?",
+    "pairing": {
+      "keySource": "members",
+      "mode": "open",
+      "values": [
+        "Japan – Ordnung und Respekt",
+        "Italien – laute Hände, gutes Essen",
+        "Island – allein mit sich und einem Schaf",
+        "Thailand – Chaos und Strand",
+        "Portugal – chill und schöne Fliesen",
+        "Mexiko – Energie ohne Pause",
+        "Schottland – Regen und Whisky",
+        "Südafrika – Natur bis zum Horizont"
+      ]
+    }
+  },
+  {
+    "category": "Gruppenreise",
+    "questionType": "pairing",
+    "question": "Welcher Reise-Modus ist jeder?",
+    "pairing": {
+      "keySource": "members",
+      "mode": "open",
+      "values": [
+        "Backpacker – Flip-Flops und ein Buch",
+        "All-Inclusive – Armband und Liege",
+        "Road Trip – Auto voll, keine Pläne",
+        "City Hopper – neue Stadt alle 2 Tage",
+        "Wanderer – hoch auf jeden Berg",
+        "Digital Nomad – Laptop am Pool",
+        "Luxus – Spa, Butler, ruhig bitte"
+      ]
+    }
+  },
+  {
+    "category": "Gruppenreise",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Was ist euer perfektes Gruppen-Reiseziel?",
+    "options": [
+      "Strandurlaub mit Partys am Abend",
+      "Städtetrip mit viel Kultur",
+      "Roadtrip ohne festen Plan",
+      "Berge und Wandern",
+      "All-Inclusive und nichts tun",
+      "Festival oder Event als Hauptgrund",
+      "Exotisches Abenteuer weit weg"
+    ]
+  },
+  {
+    "category": "Gruppenreise",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Was passiert garantiert auf unserem Trip?",
+    "options": [
+      "Einer verschläft den Flug",
+      "Streit um den Essensplatz",
+      "Jemand verliert Pass oder Handy",
+      "Ein spontaner Tattoo-Abend",
+      "Wir verpassen das geplante Highlight",
+      "Jemand verliebt sich dramatisch",
+      "Ein Tag im Krankenhaus"
+    ]
+  },
+  {
+    "category": "Gruppenreise",
+    "questionType": "custom",
+    "multiSelect": true,
+    "question": "Was muss bei jedem Gruppentrip dabei sein?",
+    "options": [
+      "Ein gemeinsames Abendessen pro Tag",
+      "Mindestens eine wilde Nacht",
+      "Ein Chill-Tag ohne Programm",
+      "Eine Aktivität, die alle überfordert",
+      "Ein Moment, über den man Jahre lang redet",
+      "Eine Diskussion übers Geld",
+      "Ein Gruppenfoto, das keiner gut findet"
+    ]
+  },
+  {
+    "category": "Gruppenreise",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Wer organisiert den Trip wirklich – auch wenn andere es behaupten?"
+  },
+  {
+    "category": "Gruppenreise",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Wer ist das erste Drama im Urlaub?"
+  },
+  {
+    "category": "Gruppenreise",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Wer handelt am härtesten auf dem Markt?"
+  },
+  {
+    "category": "Gruppenreise",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Wer würde den Pass als Erster verlieren?"
+  },
+  {
+    "category": "Gruppenreise",
+    "questionType": "users",
+    "multiSelect": true,
+    "question": "Mit wem würdest du 3 Wochen auf engstem Raum wirklich aushalten?"
+  },
+  {
+    "category": "Gruppenreise",
+    "questionType": "rating",
+    "question": "Wie gut würden wir als Gruppe einen 3-wöchigen Trip ohne Streit überstehen?"
+  }
+]

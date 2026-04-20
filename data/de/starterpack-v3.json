@@ -1,0 +1,286 @@
+[
+  {
+    "category": "Trade-Off",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Du musst ein Zimmer untervermieten. Wen nimmst du?",
+    "options": [
+      "Den Nackt-Yoga-Typ mit Kehlkopfgesängen",
+      "Die Meal-Prep-Influencerin mit Dauer-Dreh in der Küche",
+      "Den Hobby-DJ mit 90er-Eurodance auf Dauerschleife",
+      "Den Verschwörungstheoretiker, der nachts das WLAN ausschaltet",
+      "Den Krypto-Bro, der mit Bros-Coin zahlen will"
+    ]
+  },
+  {
+    "category": "Starter-Pack",
+    "questionType": "pairing",
+    "question": "Eure Gruppe zieht morgen einen Coup durch. Welche Rolle übernimmt wer?",
+    "pairing": {
+      "keySource": "members",
+      "mode": "open",
+      "values": [
+        "Der Mastermind – hat einen 40-Folien-Plan und ein Moodboard",
+        "Die Fluchtwagenfahrerin – unheimlich ruhig bei 180 km/h",
+        "Der Hacker – 14 Monitore, kein Sozialleben",
+        "Die charmante Ablenkung – quatscht dem Wachmann die Schlüssel ab",
+        "Der Muskel – kein Plan, reine Präsenz",
+        "Der Insider – kennt jemanden, der jemanden kennt",
+        "Die Nervensäge, die im entscheidenden Moment alles versaut",
+        "Der Typ, der am Ende mit dem ganzen Geld abhaut",
+        "Der Späher, der genau dann aufs Handy schaut"
+      ]
+    }
+  },
+  {
+    "category": "Trade-Off",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Ein verpeilter Fee-Praktikant gibt dir eine B-Sortiment-Superkraft. Was nimmst du?",
+    "options": [
+      "Ich kann immer auf den Cent genau schätzen, wie viel der Einkauf kosten wird",
+      "Ich treffe beim Einstecken von USB-Sticks immer beim ersten Versuch die richtige Seite",
+      "Ich kann meinen Hangover telepathisch auf Menschen übertragen, die ich nicht leiden kann (nur sonntags)",
+      "Meine Haare trocknen nach dem Duschen auf Kommando im perfekten Styling",
+      "Ich weiß beim Blick in den Schrank sofort, welcher Tupperdeckel zu welcher Dose gehört",
+      "Ich kann alle Tiere verstehen, aber sie reden im tiefsten sächsischen Dialekt über ihre Steuererklärung"
+    ]
+  },
+  {
+    "category": "Trade-Off",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Wähle deinen Haushalts-Fluch:",
+    "options": [
+      "Spülmaschine wäscht nie richtig sauber",
+      "Wäsche wird immer zerknittert",
+      "Kühlschrank riecht immer leicht komisch",
+      "Dusche hat unberechenbare Temperatur",
+      "Fernbedienung ist ständig verschwunden",
+      "Müll ist immer sofort voll"
+    ]
+  },
+  {
+    "category": "Trade-Off",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Die Hexe verflucht dich. Welchen Alltags-Fluch wählst du?",
+    "options": [
+      "In jedem Schuh ist ein winziges Steinchen",
+      "Mein Akku lädt nur bis 84% und springt bei 15% direkt auf 0%",
+      "Auf Brille oder Display ist immer ein Fettfinger in der Mitte",
+      "Nach dem Zähneputzen bekomme ich sofort Durst auf Orangensaft",
+      "Ich habe ständig das Gefühl niesen zu müssen",
+      "Mein WLAN lädt Netflix nur in verpixelten 480p"
+    ]
+  },
+  {
+    "category": "Trade-Off",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Du wirst als Gegenstand in einer WG wiedergeboren. Als was?",
+    "options": [
+      "Der wackelige Einkaufswagen, der immer nach links zieht",
+      "Der Rauchmelder, der um 3:14 Uhr nachts piept",
+      "Ein uraltes HDMI-Kabel hinter dem Fernseher",
+      "Die Fusselrolle, die nichts mehr aufnimmt",
+      "Der kleine Löffel, der die Spülmaschine blockiert",
+      "Die einzelne Socke ohne Partner"
+    ]
+  },
+  {
+    "category": "Trade-Off",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Der Teufel macht dir ein Angebot. Welche Essgewohnheit akzeptierst du?",
+    "options": [
+      "Pizza nur mit Messer, Gabel und Ketchup essen",
+      "In jedem Getränk schwimmt eine warme Essiggurke",
+      "Nudeln nur roh snacken",
+      "Jedes Schokocroissant ist mit Senf gefüllt",
+      "Ich muss jedes Essen laut wie in einer Teleshopping-Show loben"
+    ]
+  },
+  {
+    "category": "Trade-Off",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Auf der einsamen Insel gibt es nur einen Snack. Welchen wählst du?",
+    "options": [
+      "Eiskalte Dosen-Ravioli",
+      "Furztrockene Reiswaffeln",
+      "Harter Zwieback",
+      "Gummibärchen (nur die weißen)",
+      "Purer Fondant",
+      "Tankstellen-Muffin"
+    ]
+  },
+  {
+    "category": "Trade-Off",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Was ist das Schlimmste?",
+    "options": [
+      "Es juckt dich immer irgendwo leicht",
+      "Dein Handy ist immer bei 15 % Akku",
+      "Dir fehlt immer ein Socke",
+      "Internet ist immer leicht langsam",
+      "Schuhe sind immer minimal unbequem",
+      "Kaffee ist immer nur lauwarm"
+    ]
+  },
+  {
+    "category": "Trade-Off",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Worauf würdest du zuerst verzichten, wenn das Leben stressig wird?",
+    "options": [
+      "Schlaf",
+      "Hobbys",
+      "Sozialleben",
+      "Karrierefortschritt",
+      "Gesundheitsroutinen",
+      "Ersparnisse"
+    ]
+  },
+  {
+    "category": "Starter-Pack",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Du wachst morgen mit einer neuen Fähigkeit auf – welche hättest du am liebsten?",
+    "options": [
+      "Gedanken lesen",
+      "Sofort jede Sprache sprechen",
+      "Nie wieder müde werden",
+      "Jeden überzeugen können",
+      "Unsichtbar sein",
+      "Immer Glück haben"
+    ]
+  },
+  {
+    "category": "Starter-Pack",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Du musst den Rest deines Lebens nur noch ein Getränk trinken – was wählst du?",
+    "options": [
+      "Bier",
+      "Wein",
+      "Kaffee",
+      "Eistee",
+      "Mate",
+      "Cocktails",
+      "Energy Drinks",
+      "Wasser (Respekt)"
+    ]
+  },
+  {
+    "category": "Starter-Pack",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Du bekommst einen Millionen-Euro-Scheck – was passiert als Erstes?",
+    "options": [
+      "Sofort kündigen",
+      "Fettes auto und Haus",
+      "Für die Eltern sorgen",
+      "Reisen bis das Geld alle ist",
+      "Investieren",
+      "Party schmeißen mit der ganzen Gruppe",
+      "Immobilien kaufen und Boomer-Energie annehmen"
+    ]
+  },
+  {
+    "category": "Starter-Pack",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Wenn du für einen Tag in eine andere Epoche reisen könntest – wann fährst du hin?",
+    "options": [
+      "Antikes Rom auf dem Höhepunkt",
+      "Wildes Amerika, 1880er",
+      "Swinging Sixties",
+      "80er – Neon, Kassetten, kein Internet",
+      "Mittelalter (romantisierte Version)",
+      "Zukunft, +100 Jahre"
+    ]
+  },
+  {
+    "category": "Starter-Pack",
+    "questionType": "custom",
+    "multiSelect": true,
+    "question": "Welche Apps würdest du behalten, wenn du alle anderen löschen müsstest? (max 3)",
+    "options": [
+      "WhatsApp",
+      "Instagram",
+      "Spotify",
+      "Google Maps",
+      "TikTok",
+      "YouTube",
+      "Reddit",
+      "Netflix",
+      "Banking-App",
+      "Wetter-App"
+    ]
+  },
+  {
+    "category": "Starter-Pack",
+    "questionType": "custom",
+    "multiSelect": true,
+    "question": "Was macht einen perfekten Gruppenabend aus?",
+    "options": [
+      "Kein konkreter Plan",
+      "Gutes Essen",
+      "Alle sind dabei",
+      "Lange Nacht",
+      "Spontaner Location-Wechsel",
+      "Kein Stress",
+      "Gute Musik",
+      "Absoluter Chillen-Modus",
+      "Draußen sein"
+    ]
+  },
+  {
+    "category": "Starter-Pack",
+    "questionType": "rating",
+    "question": "Wie chaotisch ist diese Gruppe? (1 = super organisiert, 10 = totales Chaos)"
+  },
+  {
+    "category": "Starter-Pack",
+    "questionType": "rating",
+    "question": "Wie gut war deine Woche?"
+  },
+  {
+    "category": "Starter-Pack",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Wer würde beim Zombie-Angriff am längsten überleben?"
+  },
+  {
+    "category": "Starter-Pack",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Wer wäre der Charakter, der in einem Horrorfilm als Erster stirbt?"
+  },
+  {
+    "category": "Starter-Pack",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Wer würde bei einem Vorstellungsgespräch komplett improvisieren – und trotzdem den Job bekommen?"
+  },
+  {
+    "category": "Starter-Pack",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Wer wäre am ehesten in 10 Jahren komplett überraschend berühmt?"
+  },
+  {
+    "category": "Starter-Pack",
+    "questionType": "users",
+    "multiSelect": true,
+    "question": "Wer wären die besten Mitbewohner in einer WG?"
+  },
+  {
+    "category": "Starter-Pack",
+    "questionType": "users",
+    "multiSelect": true,
+    "question": "Wer könnte eine Woche ohne Handy wirklich durchhalten?"
+  }
+]
