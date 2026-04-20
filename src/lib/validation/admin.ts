@@ -1,12 +1,8 @@
 import { z } from "zod";
-import { QuestionType } from "@/types/models/question";
+import { PairingKeySource, PairingMode, QuestionType } from "@/types/models/question";
 import { QuestionPackStatus } from "@/types/models/questionPack";
 
 export { UpdateAdminConfigSchema } from "./groups";
-
-export const UpdatePackStatusSchema = z.object({
-    status: z.enum(QuestionPackStatus),
-});
 
 export const UpdatePackSchema = z
     .object({
@@ -28,7 +24,16 @@ export const BulkCreateTemplatesSchema = z.object({
             category: z.string().min(1),
             questionType: z.enum(QuestionType),
             question: z.string().min(1),
+            multiSelect: z.boolean().optional(),
             options: z.array(z.unknown()).optional(),
+            pairing: z
+                .object({
+                    keySource: z.enum(PairingKeySource),
+                    mode: z.enum(PairingMode),
+                    keys: z.array(z.string()).optional(),
+                    values: z.array(z.string()),
+                })
+                .optional(),
         })
     ),
 });
