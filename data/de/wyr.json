@@ -1,0 +1,102 @@
+[
+  {
+    "category": "Würdest du lieber",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Würdest du lieber immer 30 Minuten zu früh oder immer 30 Minuten zu spät ankommen?",
+    "options": [
+      "Immer zu früh – ich steh dann halt rum",
+      "Immer zu spät – alle warten auf mich"
+    ]
+  },
+  {
+    "category": "Würdest du lieber",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Würdest du lieber 10 Jahre länger leben, aber ohne Internet – oder mit Internet, aber 10 Jahre weniger?",
+    "options": [
+      "10 Jahre länger, kein Internet",
+      "10 Jahre kürzer, mit Internet"
+    ]
+  },
+  {
+    "category": "Würdest du lieber",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Würdest du lieber jede Lüge sofort erkennen – oder perfekt lügen können, ohne dass jemand es merkt?",
+    "options": [
+      "Jede Lüge erkennen",
+      "Perfekt lügen können"
+    ]
+  },
+  {
+    "category": "Würdest du lieber",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Würdest du lieber für immer komplett nüchtern bleiben – oder für immer leicht angetrunken sein?",
+    "options": [
+      "Für immer nüchtern",
+      "Für immer leicht angetrunken"
+    ]
+  },
+  {
+    "category": "Würdest du lieber",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Würdest du lieber alles sehen, was über dich im Internet steht – oder gar nichts davon wissen?",
+    "options": [
+      "Alles sehen",
+      "Nichts wissen, nichts stört"
+    ]
+  },
+  {
+    "category": "Würdest du lieber",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Würdest du lieber 1 Jahr lang nur ein Nokia 3310 nutzen – oder 3 Monate keine Öffis?",
+    "options": [
+      "1 Monat Nokia 3310",
+      "3 Monate nur zu Fuß oder Fahrrad"
+    ]
+  },
+  {
+    "category": "Würdest du lieber",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Würdest du lieber einen Sommer ohne Musik leben – oder einen Winter ohne Serien und Filme?",
+    "options": [
+      "Sommer ohne Musik",
+      "Winter ohne Serien und Filme"
+    ]
+  },
+  {
+    "category": "Würdest du lieber",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Würdest du lieber immer der Erste sein, der auf einer Party tanzt – oder immer der Letzte, der geht?",
+    "options": [
+      "Immer der Erste auf der Tanzfläche",
+      "Immer der Letzte, der geht"
+    ]
+  },
+  {
+    "category": "Würdest du lieber",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Würdest du lieber 10 enge Freunde haben, die du nur einmal im Jahr siehst – oder 1 besten Freund, den du täglich siehst?",
+    "options": [
+      "10 enge Freunde, einmal im Jahr",
+      "1 bester Freund, jeden Tag"
+    ]
+  },
+  {
+    "category": "Würdest du lieber",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Würdest du lieber jeden Morgen aufwachen und nicht wissen, was der Tag bringt – oder jeden Tag exakt geplant vor dir haben?",
+    "options": [
+      "Jeden Tag eine Überraschung",
+      "Jeden Tag komplett durchgeplant"
+    ]
+  }
+]

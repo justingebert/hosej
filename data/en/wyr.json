@@ -1,0 +1,102 @@
+[
+  {
+    "category": "Would You Rather",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Would you rather always arrive 30 minutes early or always 30 minutes late?",
+    "options": [
+      "Always early – I'll just stand around",
+      "Always late – everyone waits for me"
+    ]
+  },
+  {
+    "category": "Would You Rather",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Would you rather live 10 years longer but with no internet – or with internet, but 10 years shorter?",
+    "options": [
+      "10 years longer, no internet",
+      "10 years shorter, with internet"
+    ]
+  },
+  {
+    "category": "Would You Rather",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Would you rather instantly detect every lie – or be able to lie perfectly without anyone noticing?",
+    "options": [
+      "Detect every lie",
+      "Lie perfectly"
+    ]
+  },
+  {
+    "category": "Would You Rather",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Would you rather be completely sober forever – or slightly tipsy forever?",
+    "options": [
+      "Forever sober",
+      "Forever slightly tipsy"
+    ]
+  },
+  {
+    "category": "Would You Rather",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Would you rather see everything written about you online – or know none of it?",
+    "options": [
+      "See everything",
+      "Know nothing, nothing bothers me"
+    ]
+  },
+  {
+    "category": "Would You Rather",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Would you rather use only a Nokia 3310 for 1 year – or no public transport for 3 months?",
+    "options": [
+      "1 month with a Nokia 3310",
+      "3 months only on foot or bike"
+    ]
+  },
+  {
+    "category": "Would You Rather",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Would you rather spend a summer without music – or a winter without shows and movies?",
+    "options": [
+      "Summer without music",
+      "Winter without shows and movies"
+    ]
+  },
+  {
+    "category": "Would You Rather",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Would you rather always be the first to dance at a party – or always be the last to leave?",
+    "options": [
+      "Always first on the dancefloor",
+      "Always the last to leave"
+    ]
+  },
+  {
+    "category": "Would You Rather",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Would you rather have 10 close friends you see only once a year – or 1 best friend you see every day?",
+    "options": [
+      "10 close friends, once a year",
+      "1 best friend, every day"
+    ]
+  },
+  {
+    "category": "Would You Rather",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Would you rather wake up every morning not knowing what the day will bring – or have every day fully planned out?",
+    "options": [
+      "A surprise every day",
+      "Every day fully planned"
+    ]
+  }
+]

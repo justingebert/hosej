@@ -1,0 +1,140 @@
+[
+  {
+    "category": "Apokalypse",
+    "questionType": "pairing",
+    "question": "Welche Rolle hat jeder in der Überlebens-Crew?",
+    "pairing": {
+      "keySource": "members",
+      "mode": "open",
+      "values": [
+        "Anführer – hat einen Plan, meistens",
+        "Scout – geht als Erster um die Ecke",
+        "Medic – klebt alles mit Tape zusammen",
+        "Koch – macht aus Dosenfutter Gourmet",
+        "Tech-Wizard – repariert den Generator",
+        "Morale-Booster – hält die Crew zusammen",
+        "Deadweight – wird trotzdem mitgeschleppt"
+      ]
+    }
+  },
+  {
+    "category": "Apokalypse",
+    "questionType": "pairing",
+    "question": "Welche Waffe passt zu jedem?",
+    "pairing": {
+      "keySource": "members",
+      "mode": "open",
+      "values": [
+        "Baseballschläger mit Nägeln",
+        "Armbrust – silent but deadly",
+        "Küchenmesser aus dem guten Set",
+        "Reizgas und schnelle Beine",
+        "Nur harte Worte",
+        "Ein treuer Hund",
+        "Gar nichts – verhandelt sich durch"
+      ]
+    }
+  },
+  {
+    "category": "Apokalypse",
+    "questionType": "pairing",
+    "question": "Was macht jeder in der ersten Stunde nach Ausbruch?",
+    "pairing": {
+      "keySource": "members",
+      "mode": "open",
+      "values": [
+        "Rennt zum Supermarkt",
+        "Ruft Mama an",
+        "Baut Barrikade vor die Tür",
+        "Packt eine Go-Bag, die seit Jahren bereitsteht",
+        "Postet noch eine letzte Instagram-Story",
+        "Ist schon unterwegs zur Crew",
+        "Schläft weiter – merkt nichts"
+      ]
+    }
+  },
+  {
+    "category": "Apokalypse",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Wer bricht als Erster mental zusammen?"
+  },
+  {
+    "category": "Apokalypse",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Wer sabotiert heimlich die Gruppe für eigene Vorteile?"
+  },
+  {
+    "category": "Apokalypse",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Wer wird zum unerwarteten Helden, wenn es drauf ankommt?"
+  },
+  {
+    "category": "Apokalypse",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Wer verhandelt als Erster mit den Zombies?"
+  },
+  {
+    "category": "Apokalypse",
+    "questionType": "users",
+    "multiSelect": true,
+    "question": "Wer überlebt die ersten 48 Stunden garantiert?"
+  },
+  {
+    "category": "Apokalypse",
+    "questionType": "users",
+    "multiSelect": true,
+    "question": "Wer wäre ehrlich gesagt lieber zu Hause geblieben?"
+  },
+  {
+    "category": "Apokalypse",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Welches Apokalypse-Szenario trifft uns am härtesten?",
+    "options": [
+      "Zombie-Ausbruch",
+      "Totaler Stromausfall weltweit",
+      "KI übernimmt",
+      "Pandemie 2.0",
+      "Meteoriten-Einschlag",
+      "Internet ist für immer weg"
+    ]
+  },
+  {
+    "category": "Apokalypse",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Was ist dein einziger Luxus-Gegenstand, den du mitnimmst?",
+    "options": [
+      "Lieblingskopfhörer",
+      "Ein Buch",
+      "Kaffee-Vorrat",
+      "Foto der Familie",
+      "Die eine Flasche guten Whisky",
+      "Zahnbürste",
+      "Bluetooth-Box"
+    ]
+  },
+  {
+    "category": "Apokalypse",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Wie endet unsere Gruppe im Film wirklich?",
+    "options": [
+      "Wir gründen eine neue Siedlung",
+      "Wir werden zur gefürchteten Raider-Gang",
+      "Wir zerstreiten uns wegen Konserven",
+      "Wir retten die Welt, keiner glaubt uns",
+      "Wir sterben würdevoll zusammen",
+      "Einer verrät alle, wird reich"
+    ]
+  },
+  {
+    "category": "Apokalypse",
+    "questionType": "rating",
+    "question": "Wie hoch sind unsere Überlebenschancen als Gruppe? (1 = tot am Tag 1, 10 = wir übernehmen die neue Welt)"
+  }
+]

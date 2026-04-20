@@ -1,0 +1,95 @@
+[
+  {
+    "category": "Archetypen",
+    "questionType": "pairing",
+    "question": "Welches Hogwarts-Haus passt zu jedem?",
+    "pairing": {
+      "keySource": "members",
+      "mode": "open",
+      "values": [
+        "Gryffindor",
+        "Slytherin",
+        "Ravenclaw",
+        "Hufflepuff"
+      ]
+    }
+  },
+  {
+    "category": "Archetypen",
+    "questionType": "pairing",
+    "question": "Welche WG-Rolle hat jeder von euch wirklich?",
+    "pairing": {
+      "keySource": "members",
+      "mode": "open",
+      "values": [
+        "Die Mami – räumt hinter allen her",
+        "Der Party-Starter – holt jeden von der Couch",
+        "Der Geisterbewohner – wohnt da, keiner weiß wann",
+        "Der Putz-Tyrann – hat einen Plan an der Kühlschranktür",
+        "Der Snack-Dieb – kauft nie, isst immer",
+        "Der Diplomat – schlichtet jeden Beef",
+        "Der Chaot – lässt überall Spuren"
+      ]
+    }
+  },
+  {
+    "category": "Archetypen",
+    "questionType": "pairing",
+    "question": "Welcher Disney-Bösewicht steckt heimlich in jedem?",
+    "pairing": {
+      "keySource": "members",
+      "mode": "open",
+      "values": [
+        "Scar – plant zu viel",
+        "Ursula – macht Deals, die niemand versteht",
+        "Gaston – zu selbstbewusst für das vorhandene Talent",
+        "Hades – permanent leicht genervt",
+        "Yzma – hätte fast den perfekten Plan gehabt",
+        "Maleficent – nachtragend für immer",
+        "Cruella – fashion over ethics"
+      ]
+    }
+  },
+  {
+    "category": "Archetypen",
+    "questionType": "pairing",
+    "question": "Welches Festival-Profil ist jeder?",
+    "pairing": {
+      "keySource": "members",
+      "mode": "open",
+      "values": [
+        "Der Planer – hat den Zeitplan ausgedruckt",
+        "Der Verlorene – Handy aus, seit Freitag weg",
+        "Der Spontane DJ – übernimmt jede Boombox",
+        "Der Sanitäter – hat Pflaster und Elektrolyte",
+        "Der Chaot – verliert Zelt, Portemonnaie, Würde",
+        "Der Stille Beobachter – sitzt hinten, sieht alles",
+        "Der Hype-Man – schreit für jeden Act"
+      ]
+    }
+  },
+  {
+    "category": "Archetypen",
+    "questionType": "pairing",
+    "question": "Wenn ihr eine Band wärt – welche Rolle hat jeder?",
+    "pairing": {
+      "keySource": "members",
+      "mode": "open",
+      "values": [
+        "Frontmann – lebt für die Bühne",
+        "Lead-Gitarre – hat zu viele Gefühle",
+        "Bassist – ruhig, unverzichtbar",
+        "Drummer – zu laut, zu viel Kaffee",
+        "Producer im Hintergrund",
+        "Manager – regelt alles, spielt nichts",
+        "Das Drama, das die Band sprengt"
+      ]
+    }
+  },
+  {
+    "category": "Archetypen",
+    "questionType": "users",
+    "multiSelect": true,
+    "question": "Wer sind die absoluten Main Characters dieser Gruppe?"
+  }
+]

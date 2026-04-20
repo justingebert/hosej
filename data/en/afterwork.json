@@ -1,0 +1,149 @@
+[
+  {
+    "category": "After Work",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Who throws the best spontaneous party – on a minimal budget and zero notice?"
+  },
+  {
+    "category": "After Work",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Who suddenly has the best business ideas after 3 cocktails?"
+  },
+  {
+    "category": "After Work",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Who would explain all the rules at game night – and still lose first?"
+  },
+  {
+    "category": "After Work",
+    "questionType": "users",
+    "multiSelect": false,
+    "question": "Who brings the weirdest stuff to a BBQ?"
+  },
+  {
+    "category": "After Work",
+    "questionType": "users",
+    "multiSelect": true,
+    "question": "Who would save the night as DJ – and who would ruin it?"
+  },
+  {
+    "category": "After Work",
+    "questionType": "users",
+    "multiSelect": true,
+    "question": "Who's the classic 'I'll come by later' – and never shows up?"
+  },
+  {
+    "category": "After Work",
+    "questionType": "users",
+    "multiSelect": true,
+    "question": "Who's the best company for a real Lazy Sunday?"
+  },
+  {
+    "category": "After Work",
+    "questionType": "users",
+    "multiSelect": true,
+    "question": "Who reliably turns a quiet evening into an unforgettable one?"
+  },
+  {
+    "category": "After Work",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "What's your after-work type?",
+    "options": [
+      "Couch immediately, phone away",
+      "Quick walk outside, then chill",
+      "Sport or gym – only then can I switch off",
+      "Cooking as therapy",
+      "Straight out with people, I can't wind down at home",
+      "Just go with the flow"
+    ]
+  },
+  {
+    "category": "After Work",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "What's your go-to when you just want to stop thinking?",
+    "options": [
+      "Pointless YouTube rabbit hole",
+      "Binge-watch a series until 2 AM",
+      "Walk with music",
+      "Gaming",
+      "Cooking or baking",
+      "Sleep, immediately and a lot"
+    ]
+  },
+  {
+    "category": "After Work",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "What excuse do you use most when you don't feel like going out?",
+    "options": [
+      "I have to get up early tomorrow (been lying for years)",
+      "I swear I'll come next time",
+      "My bank balance says no",
+      "It's way too cold today",
+      "I just forgot",
+      "I was planning to go to bed early (never happens)",
+      "Uni/work (on a weekend? Sure)"
+    ]
+  },
+  {
+    "category": "After Work",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "What mode are you in right now?",
+    "options": [
+      "Productivity mode",
+      "Total chaos mode",
+      "Chill mode",
+      "'I've got everything under control' mode (lie)",
+      "Vacation countdown mode",
+      "'I'm about to quit' mode"
+    ]
+  },
+  {
+    "category": "After Work",
+    "questionType": "custom",
+    "multiSelect": true,
+    "question": "What absolutely can't be missing from a good group night?",
+    "options": [
+      "Good food",
+      "No strict plan",
+      "Music everyone likes",
+      "Some kind of game",
+      "The right location",
+      "No excuses, everyone's in",
+      "Enough to drink",
+      "Spontaneity"
+    ]
+  },
+  {
+    "category": "After Work",
+    "questionType": "custom",
+    "multiSelect": true,
+    "question": "What stresses you out most during a workday?",
+    "options": [
+      "Unnecessary meetings",
+      "Things dropped on you right before the end of day",
+      "Bad communication",
+      "Commuting",
+      "Too many tasks at once",
+      "People who don't deliver",
+      "Open-plan office noise",
+      "The feeling of having achieved nothing"
+    ]
+  },
+  {
+    "category": "After Work",
+    "questionType": "rating",
+    "question": "How badly do you need a vacation right now? (1 = super rested, 10 = immediately please)"
+  },
+  {
+    "category": "After Work",
+    "questionType": "rating",
+    "question": "How good was your work-life balance this week?"
+  }
+]

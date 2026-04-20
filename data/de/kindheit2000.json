@@ -1,0 +1,106 @@
+[
+  {
+    "category": "Kindheit 2000er",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Was war DEIN Pausenhof-Status-Symbol?",
+    "options": [
+      "Diddl-Blätter-Sammlung",
+      "Pokémon-Karten",
+      "Nintendo DS",
+      "Star Wars-Karten",
+      "Yu-Gi-Oh!-Deck",
+      "Panini-Album WM",
+      "Beyblade mit Ripcord",
+      "Tamagotchi am Schlüsselbund",
+      "Das eine gute Game Boy-Spiel"
+    ]
+  },
+  {
+    "category": "Kindheit 2000er",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Welche Samstagmorgen-Serie hat dich geprägt?",
+    "options": [
+      "Dragonball Z",
+      "Pokémon",
+      "Digimon",
+      "Yu-Gi-Oh!",
+      "Beyblade",
+      "Sailor Moon",
+      "Bob der Baumeister",
+      "Was anderes (in chat)"
+    ]
+  },
+  {
+    "category": "Kindheit 2000er",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Welche Handy-Ära hat dich wirklich geprägt?",
+    "options": [
+      "Nokia 3310 – unkaputtbar",
+      "Klapphandy mit Antenne",
+      "Sony Ericsson Walkman",
+      "Blackberry mit Tastatur",
+      "iPhone 3G – das erste gute",
+      "Samsung Slider",
+      "Das Handy der Eltern, heimlich"
+    ]
+  },
+  {
+    "category": "Kindheit 2000er",
+    "questionType": "custom",
+    "multiSelect": true,
+    "question": "Welche 2000er-Songs triggern sofort Nostalgie?",
+    "options": [
+      "Schnappi – Das kleine Krokodil",
+      "Crazy Frog – Axel F",
+      "Tokio Hotel – Durch den Monsun",
+      "Outkast – Hey Ya",
+      "Sido – Mein Block",
+      "Avril Lavigne – Sk8er Boi",
+      "Gwen Stefani – Hollaback Girl",
+      "Juli – Perfekte Welle"
+    ]
+  },
+  {
+    "category": "Kindheit 2000er",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Was war dein Pausenbrot-Setup?",
+    "options": [
+      "Salami-Toast in Alufolie",
+      "Nutella-Brot, seit 10 Jahren",
+      "Milchschnitte + Capri Sonne",
+      "Äpfel, nie gegessen",
+      "Currywurst vom Bäcker",
+      "Dextro Energy für den Zucker-Boost",
+      "Nichts – Kiosk war besser"
+    ]
+  },
+  {
+    "category": "Kindheit 2000er",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Welches Gaming-Setup war deins?",
+    "options": [
+      "Game Boy Color mit Pokémon",
+      "PS mit FIFA",
+      "Nintendo DS",
+      "Wii Sports",
+      "PC mit Minecraft",
+      "Der eine Freund mit Xbox"
+    ]
+  },
+  {
+    "category": "Kindheit 2000er",
+    "questionType": "users",
+    "multiSelect": true,
+    "question": "Wer hatte als Kind definitiv ein Tamagotchi am Schlüsselbund?"
+  },
+  {
+    "category": "Kindheit 2000er",
+    "questionType": "rating",
+    "question": "Wie sehr vermisst du die 2000er? (1 = gar nicht, 10 = sofort zurück)"
+  }
+]

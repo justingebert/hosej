@@ -1,47 +1,56 @@
 [
   {
     "category": "Feierabend",
-    "questionType": "users-select-one",
+    "questionType": "users",
+    "multiSelect": false,
     "question": "Wer schmeißt spontan die beste Party – mit minimalem Budget und null Vorlauf?"
   },
   {
     "category": "Feierabend",
-    "questionType": "users-select-one",
+    "questionType": "users",
+    "multiSelect": false,
     "question": "Wer hat nach 3 Cocktails plötzlich die besten Ideen für ein neues Business?"
   },
   {
     "category": "Feierabend",
-    "questionType": "users-select-one",
+    "questionType": "users",
+    "multiSelect": false,
     "question": "Wer wäre der Typ, der beim Spieleabend alle Regeln erklärt – und trotzdem als Erster verliert?"
   },
   {
     "category": "Feierabend",
-    "questionType": "users-select-one",
+    "questionType": "users",
+    "multiSelect": false,
     "question": "Wer bringt beim Grillen das seltsamste Zeug mit?"
   },
   {
     "category": "Feierabend",
-    "questionType": "users-select-multiple",
+    "questionType": "users",
+    "multiSelect": true,
     "question": "Wer würde als DJ den Abend retten – und wer würde ihn zerstören?"
   },
   {
     "category": "Feierabend",
-    "questionType": "users-select-multiple",
+    "questionType": "users",
+    "multiSelect": true,
     "question": "Wer ist der klassische 'Ich komm dann nach' – und kommt nie?"
   },
   {
     "category": "Feierabend",
-    "questionType": "users-select-multiple",
+    "questionType": "users",
+    "multiSelect": true,
     "question": "Wer wäre die beste Gesellschaft für einen echten Lazy Sunday?"
   },
   {
     "category": "Feierabend",
-    "questionType": "users-select-multiple",
+    "questionType": "users",
+    "multiSelect": true,
     "question": "Wer macht aus einem ruhigen Abend zuverlässig ein unvergessliches Erlebnis?"
   },
   {
     "category": "Feierabend",
-    "questionType": "custom-select-one",
+    "questionType": "custom",
+    "multiSelect": false,
     "question": "Welcher Feierabend-Typ bist du?",
     "options": [
       "Sofort auf die Couch, Handy weg",
@@ -54,7 +63,8 @@
   },
   {
     "category": "Feierabend",
-    "questionType": "custom-select-one",
+    "questionType": "custom",
+    "multiSelect": false,
     "question": "Was ist dein Go-to, wenn du einfach mal nichts denken willst?",
     "options": [
       "Sinnloser YouTube-Rabbit-Hole",
@@ -67,33 +77,8 @@
   },
   {
     "category": "Feierabend",
-    "questionType": "custom-select-one",
-    "question": "Der perfekte Freitagabend-Plan – den du dir aber nie wirklich gönnst?",
-    "options": [
-      "Nix. Absolut nix. Stille.",
-      "Spontan irgendwo hinsitzen und Bier trinken",
-      "Gutes Essen, gute Leute, kein Plan",
-      "Kino oder Konzert, dann Bar",
-      "Zuhause kochen und dabei Wein trinken",
-      "Einfach raus und schauen was passiert"
-    ]
-  },
-  {
-    "category": "Feierabend",
-    "questionType": "custom-select-one",
-    "question": "Was ist dein erster Gedanke, wenn endlich Urlaub anfängt?",
-    "options": [
-      "Endlich schlafen",
-      "Was machen wir heute Abend?",
-      "Ich muss das kurz noch für die Arbeit checken",
-      "Reise planen – jetzt erst recht",
-      "Nichts. Absolut nichts planen.",
-      "Wann treffen wir uns alle?"
-    ]
-  },
-  {
-    "category": "Feierabend",
-    "questionType": "custom-select-one",
+    "questionType": "custom",
+    "multiSelect": false,
     "question": "Welche Ausrede benutzt du am häufigsten, wenn du keine Lust auf ausgehen hast?",
     "options": [
       "Ich muss morgen früh raus (lüge ich seit Jahren)",
@@ -101,12 +86,14 @@
       "Mein Kontostand sagt nein",
       "Es ist viel zu kalt heute",
       "Ich hab's einfach vergessen",
-      "Ich wollte schon früh schlafen gehen (war noch nie der Fall)"
+      "Ich wollte schon früh schlafen gehen (war noch nie der Fall)",
+      "Uni/Arbeit (am Wochenende? Ja, klar)"
     ]
   },
   {
     "category": "Feierabend",
-    "questionType": "custom-select-one",
+    "questionType": "custom",
+    "multiSelect": false,
     "question": "Welcher Modus bist du gerade?",
     "options": [
       "Im Produktivitäts-Modus",
@@ -119,7 +106,8 @@
   },
   {
     "category": "Feierabend",
-    "questionType": "custom-select-multiple",
+    "questionType": "custom",
+    "multiSelect": true,
     "question": "Was darf auf einem guten Gruppenabend auf keinen Fall fehlen?",
     "options": [
       "Gutes Essen",
@@ -134,7 +122,8 @@
   },
   {
     "category": "Feierabend",
-    "questionType": "custom-select-multiple",
+    "questionType": "custom",
+    "multiSelect": true,
     "question": "Was stresst dich am meisten an einem Arbeitstag?",
     "options": [
       "Unnötige Meetings",

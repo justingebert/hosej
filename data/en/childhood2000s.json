@@ -1,0 +1,106 @@
+[
+  {
+    "category": "2000s Childhood",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "What was YOUR schoolyard status symbol?",
+    "options": [
+      "Diddl paper collection",
+      "Pokémon cards",
+      "Nintendo DS",
+      "Star Wars cards",
+      "Yu-Gi-Oh! deck",
+      "Panini World Cup album",
+      "Beyblade with ripcord",
+      "Tamagotchi on a keychain",
+      "That one great Game Boy game"
+    ]
+  },
+  {
+    "category": "2000s Childhood",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Which Saturday morning show shaped you?",
+    "options": [
+      "Dragon Ball Z",
+      "Pokémon",
+      "Digimon",
+      "Yu-Gi-Oh!",
+      "Beyblade",
+      "Sailor Moon",
+      "Bob the Builder",
+      "Something else (in chat)"
+    ]
+  },
+  {
+    "category": "2000s Childhood",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Which phone era really shaped you?",
+    "options": [
+      "Nokia 3310 – indestructible",
+      "Flip phone with antenna",
+      "Sony Ericsson Walkman",
+      "Blackberry with keyboard",
+      "iPhone 3G – the first good one",
+      "Samsung slider",
+      "Your parents' phone, secretly"
+    ]
+  },
+  {
+    "category": "2000s Childhood",
+    "questionType": "custom",
+    "multiSelect": true,
+    "question": "Which 2000s songs instantly trigger nostalgia?",
+    "options": [
+      "Schnappi – Das kleine Krokodil",
+      "Crazy Frog – Axel F",
+      "Tokio Hotel – Durch den Monsun",
+      "Outkast – Hey Ya",
+      "Sido – Mein Block",
+      "Avril Lavigne – Sk8er Boi",
+      "Gwen Stefani – Hollaback Girl",
+      "Juli – Perfekte Welle"
+    ]
+  },
+  {
+    "category": "2000s Childhood",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "What was your lunchbox setup?",
+    "options": [
+      "Salami toast in tin foil",
+      "Nutella sandwich, for 10 years straight",
+      "Milk Slice + Capri Sun",
+      "Apples, never eaten",
+      "Currywurst from the bakery",
+      "Dextro Energy for the sugar boost",
+      "Nothing – the kiosk was better"
+    ]
+  },
+  {
+    "category": "2000s Childhood",
+    "questionType": "custom",
+    "multiSelect": false,
+    "question": "Which gaming setup was yours?",
+    "options": [
+      "Game Boy Color with Pokémon",
+      "PlayStation with FIFA",
+      "Nintendo DS",
+      "Wii Sports",
+      "PC with Minecraft",
+      "That one friend with an Xbox"
+    ]
+  },
+  {
+    "category": "2000s Childhood",
+    "questionType": "users",
+    "multiSelect": true,
+    "question": "Who definitely had a Tamagotchi on their keychain as a kid?"
+  },
+  {
+    "category": "2000s Childhood",
+    "questionType": "rating",
+    "question": "How much do you miss the 2000s? (1 = not at all, 10 = take me back now)"
+  }
+]
