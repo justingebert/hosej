@@ -40,7 +40,6 @@ const VoteResults = ({ user, question, available, returnTo }: VoteResultsProps) 
         if (data) setAnimationTriggered(true);
     }, [data]);
 
-    if (error) return <div className="text-red-500">Failed to load results</div>;
     if (!data)
         return (
             <div className="flex justify-center">
@@ -139,9 +138,9 @@ const VoteResults = ({ user, question, available, returnTo }: VoteResultsProps) 
                                             {result.option}
                                         </span>
                                     )}
-                                    <div className="flex items-center gap-1">
-                                        <Badge className="bg-accent/50 text-primary">
-                                            {result.percentage} %
+                                    <div className="flex items-center gap-1 shrink-0">
+                                        <Badge className="bg-accent/50 text-primary whitespace-nowrap">
+                                            {result.percentage}&nbsp;%
                                         </Badge>
                                         <ChevronRightIcon className="h-4 w-4 shrink-0" />
                                     </div>
