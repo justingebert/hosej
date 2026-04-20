@@ -146,7 +146,7 @@ describe("createGroup", () => {
         expect(result.language).toBe("de");
         expect(addTemplatePackToGroup).toHaveBeenCalledWith(
             expect.anything(),
-            expect.stringMatching(/^trade-off-v2$/)
+            expect.stringMatching(/^starterpack-v3-de$/)
         );
     });
 
