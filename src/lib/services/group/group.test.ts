@@ -138,6 +138,30 @@ describe("createGroup", () => {
         expect(activateSmartQuestions).toHaveBeenCalled();
     });
 
+    it("defaults language to 'de' and uses the German starter pack", async () => {
+        const user = await makeUser();
+
+        const result = await createGroup(user._id.toString(), "Test Group");
+
+        expect(result.language).toBe("de");
+        expect(addTemplatePackToGroup).toHaveBeenCalledWith(
+            expect.anything(),
+            expect.stringMatching(/^trade-off-v2$/)
+        );
+    });
+
+    it("persists language and picks the English starter pack when language='en'", async () => {
+        const user = await makeUser();
+
+        const result = await createGroup(user._id.toString(), "Test Group", "en");
+
+        expect(result.language).toBe("en");
+        expect(addTemplatePackToGroup).toHaveBeenCalledWith(
+            expect.anything(),
+            expect.stringMatching(/-en$/)
+        );
+    });
+
     it("throws ValidationError when name is missing", async () => {
         const user = await makeUser();
         await expect(createGroup(user._id.toString(), "")).rejects.toThrow(ValidationError);

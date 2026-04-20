@@ -17,6 +17,9 @@ export interface IGroupMember {
     lastSeenAt: IFeatureSeenAt;
 }
 
+export const GROUP_LANGUAGES = ["de", "en"] as const;
+export type GroupLanguage = (typeof GROUP_LANGUAGES)[number];
+
 export interface IGroupJukeboxSettings {
     concurrent: string[]; // array of names of jukebox, length is concurrent count
     activationDays: number[];
@@ -52,6 +55,7 @@ export interface IGroup {
     _id: Types.ObjectId;
     name: string;
     admin: Types.ObjectId;
+    language: GroupLanguage;
     members: IGroupMember[];
     features: IGroupFeatures;
     createdAt: Date;

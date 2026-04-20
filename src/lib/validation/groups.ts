@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { GROUP_LANGUAGES } from "@/types/models/group";
 
 const FeatureStatusSchema = z.enum(["enabled", "disabled", "comingSoon"]);
 
@@ -40,6 +41,7 @@ const GroupFeaturesSchema = z
 
 export const CreateGroupSchema = z.object({
     name: z.string().min(1, "Group name is required").max(100),
+    language: z.enum(GROUP_LANGUAGES).optional(),
 });
 
 export const UpdateGroupSchema = z.object({

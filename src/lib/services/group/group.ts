@@ -8,6 +8,7 @@ import Chat from "@/db/models/Chat";
 import Jukebox from "@/db/models/Jukebox";
 import type {
     GroupDocument,
+    GroupLanguage,
     IGroup,
     IGroupMember,
     GroupStatsDTO,
@@ -87,7 +88,22 @@ export async function isUserAdmin(
 
 // ─── Group CRUD ──────────────────────────────────────────────
 
-export async function createGroup(userId: string, name: string): Promise<GroupDocument> {
+//TODO move to config
+const STARTER_PACK_BY_LANGUAGE: Record<GroupLanguage, string> = {
+    de: "starterpack-v3-de",
+    en: "starterpack-v3-en",
+};
+//TODO move to config
+const STARTER_RALLY_TASK_BY_LANGUAGE: Record<GroupLanguage, string> = {
+    de: "Geilstes Essen der Woche",
+    en: "Best meal of the week",
+};
+
+export async function createGroup(
+    userId: string,
+    name: string,
+    language: GroupLanguage = "de"
+): Promise<GroupDocument> {
     if (!name) throw new ValidationError("Group name is required");
 
     const userAdmin = await User.findById(userId);
@@ -97,6 +113,7 @@ export async function createGroup(userId: string, name: string): Promise<GroupDo
     const newGroup = new Group({
         name,
         admin: userAdmin._id,
+        language,
         members: [member],
     });
     await newGroup.save();
@@ -104,12 +121,12 @@ export async function createGroup(userId: string, name: string): Promise<GroupDo
     userAdmin.groups.push(newGroup._id);
     await userAdmin.save();
     //questions
-    await addTemplatePackToGroup(newGroup._id, "trade-off-v2");
+    await addTemplatePackToGroup(newGroup._id, STARTER_PACK_BY_LANGUAGE[language]);
     await activateSmartQuestions(newGroup._id);
 
     //activate stating rally
     await createRally(newGroup._id, {
-        task: "Geilstes Essen der Woche",
+        task: STARTER_RALLY_TASK_BY_LANGUAGE[language],
         lengthInDays: 5,
     });
     await activateCreatedRallies(newGroup._id, 1);
