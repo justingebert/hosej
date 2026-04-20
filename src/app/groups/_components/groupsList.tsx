@@ -2,7 +2,7 @@ import type { Session } from "next-auth";
 import Link from "next/link";
 import { useAppHaptics } from "@/hooks/useAppHaptics";
 import type { MouseEvent } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 import type { GroupDTO } from "@/types/models/group";
 import fetcher from "@/lib/fetcher";
@@ -13,6 +13,39 @@ import { Share, Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { EmptyGroupsGuide } from "@/app/groups/_components/emptyGroupsGuide";
 import { GroupListSkeleton } from "@/app/groups/_components/groupListSkeleton";
+
+const GROUP_VIBES = [
+    "hosej-ing...",
+    "gossiping...",
+    "scheming...",
+    "plotting...",
+    "rallying...",
+    "jukeboxing...",
+    "squadding...",
+    "huddling...",
+    "bantering...",
+    "vibing...",
+    "yapping...",
+    "pondering...",
+    "musing...",
+    "stirring the pot...",
+    "brewing drama...",
+    "conspiring...",
+    "mingling...",
+    "chattering...",
+    "noodling...",
+    "tallying votes...",
+    "shuffling the deck...",
+    "warming up...",
+    "cooking...",
+    "group-chatting...",
+    "deliberating...",
+    "clique-ing...",
+] as const;
+
+function randomVibe(): string {
+    return GROUP_VIBES[Math.floor(Math.random() * GROUP_VIBES.length)];
+}
 
 export function GroupsList({ user }: { user?: Session["user"] }) {
     const { toast } = useToast();
@@ -81,6 +114,12 @@ export function GroupsList({ user }: { user?: Session["user"] }) {
     );
     const groups = data?.groups || [];
 
+    const vibes = useMemo(() => {
+        const map: Record<string, string> = {};
+        for (const g of groups) map[g._id] = randomVibe();
+        return map;
+    }, [data?.groups]);
+
     const { data: groupsActivity } = useSWR<Record<string, boolean>>(
         user ? `/api/activity/groups` : null,
         fetcher
@@ -113,7 +152,7 @@ export function GroupsList({ user }: { user?: Session["user"] }) {
                                                     {group.name}
                                                 </CardTitle>
                                                 <CardDescription className="text-sm">
-                                                    Go Vote Now!
+                                                    {vibes[group._id]}
                                                 </CardDescription>
                                             </div>
                                             <div className="flex items-center space-x-1">
