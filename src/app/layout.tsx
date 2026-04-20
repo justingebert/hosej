@@ -10,8 +10,9 @@ import { AppWrapper } from "@/components/wrappers/AppWrapper";
 
 export const metadata: Metadata = {
     title: "HoseJ",
-    description: "HoseJ",
-    manifest: "manifest.json",
+    description:
+        "Mobile-first social hub for friend groups. Daily questions, photo rallies, jukebox, chats and leaderboards.",
+    manifest: "/manifest.json",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
