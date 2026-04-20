@@ -1,7 +1,12 @@
 import { z } from "zod";
 import { QuestionType } from "@/types/models/question";
+import { QuestionPackStatus } from "@/types/models/questionPack";
 
 export { UpdateAdminConfigSchema } from "./groups";
+
+export const UpdatePackStatusSchema = z.object({
+    status: z.enum(QuestionPackStatus),
+});
 
 export const BulkCreateTemplatesSchema = z.object({
     packId: z.string().min(1, "packId is required"),

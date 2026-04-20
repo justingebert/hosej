@@ -97,6 +97,9 @@ Scrollbars hidden globally via CSS (`scrollbar-width: none` + `::-webkit-scrollb
 ### Bottom navigation
 - Fixed footer in group tabs layout; pages inside must use `pb-20` (already applied by layout's flex child wrapper)
 
+### Confirmations
+Use `<ResponsiveConfirm>` from `src/components/common/ResponsiveConfirm.tsx` for any destructive or confirmation prompt — renders a bottom drawer on mobile and an AlertDialog on ≥640px. Do NOT use raw `<AlertDialog>` for confirm flows.
+
 ### View Transitions (experimental)
 Enabled via `experimental.viewTransition: true` in `next.config.mjs`. Uses React's `<ViewTransition>` component.
 
