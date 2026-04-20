@@ -37,6 +37,7 @@ export async function makeUser(overrides: UserOverrides = {}) {
 export type GroupOverrides = Partial<{
     name: string;
     admin: Types.ObjectId;
+    language: "de" | "en";
     members: Array<{
         user: Types.ObjectId;
         name?: string;

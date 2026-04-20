@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import type { Model } from "mongoose";
 import type { IGroup, IGroupMember, IGroupMethods } from "@/types/models/group";
+import { GROUP_LANGUAGES } from "@/types/models/group";
 import { addPointsToMember } from "@/lib/services/group";
 
 const memberSchema = new mongoose.Schema<IGroupMember>({
@@ -24,6 +25,12 @@ const groupSchema = new mongoose.Schema<
 >({
     name: { type: String, required: true },
     admin: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    language: {
+        type: String,
+        enum: GROUP_LANGUAGES,
+        default: "de",
+        required: true,
+    },
     members: [memberSchema],
     features: {
         questions: {

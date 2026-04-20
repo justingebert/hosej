@@ -280,6 +280,46 @@ describe("getGroupPacks", () => {
         await expect(getGroupPacks(new Types.ObjectId().toString())).rejects.toThrow(NotFoundError);
     });
 
+    it("filters out active packs tagged with a different language but keeps cross-language added packs", async () => {
+        const admin = await makeUser();
+        const group = await makeGroup({ admin: admin._id, language: "en" });
+        group.features.questions.settings.packs = ["de-added"];
+        await group.save();
+
+        await QuestionPack.create([
+            {
+                packId: "en-pack",
+                name: "English Pack",
+                status: QuestionPackStatus.Active,
+                tags: ["en"],
+            },
+            {
+                packId: "de-pack",
+                name: "German Pack",
+                status: QuestionPackStatus.Active,
+                tags: ["de"],
+            },
+            {
+                packId: "untagged-pack",
+                name: "Untagged Pack",
+                status: QuestionPackStatus.Active,
+                tags: [],
+            },
+            {
+                packId: "de-added",
+                name: "Added German",
+                status: QuestionPackStatus.Active,
+                tags: ["de"],
+            },
+        ]);
+
+        const result = await getGroupPacks(group._id.toString());
+
+        const ids = result.map((p) => p.packId).sort();
+        expect(ids).toEqual(["de-added", "en-pack", "untagged-pack"]);
+        expect(result.find((p) => p.packId === "de-added")?.added).toBe(true);
+    });
+
     it("returns active packs plus any added packs (even deprecated/archived)", async () => {
         const admin = await makeUser();
         const group = await makeGroup({ admin: admin._id });

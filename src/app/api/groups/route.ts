@@ -7,8 +7,8 @@ import { parseBody } from "@/lib/validation/parseBody";
 import { CreateGroupSchema } from "@/lib/validation/groups";
 
 export const POST = withAuthAndErrors(async (req: NextRequest, { userId }: AuthedContext) => {
-    const { name } = await parseBody(req, CreateGroupSchema);
-    const group = await createGroup(userId, name);
+    const { name, language } = await parseBody(req, CreateGroupSchema);
+    const group = await createGroup(userId, name, language);
     return NextResponse.json(group, { status: 201 });
 });
 

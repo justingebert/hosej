@@ -4,6 +4,7 @@ import Group from "@/db/models/Group";
 import { ConflictError, NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 import type { QuestionType } from "@/types/models/question";
 import { QuestionPackStatus, type IQuestionPack } from "@/types/models/questionPack";
+import { GROUP_LANGUAGES } from "@/types/models/group";
 import { createQuestionFromTemplate } from "./question";
 import { validateTemplates } from "./validateTemplateQuestions";
 import type { Types } from "mongoose";
@@ -152,10 +153,18 @@ export async function getGroupPacks(
     }
 
     const addedPacks = group.features.questions.settings.packs || [];
+    const otherLanguages = GROUP_LANGUAGES.filter((l) => l !== group.language);
 
-    // Show active packs + any packs the group already has (even if deprecated/archived)
+    // Show active packs that aren't tagged with another language, plus any packs
+    // the group already has (even if deprecated/archived or cross-language).
     const visiblePacks = await QuestionPack.find({
-        $or: [{ status: QuestionPackStatus.Active }, { packId: { $in: addedPacks } }],
+        $or: [
+            {
+                status: QuestionPackStatus.Active,
+                tags: { $nin: otherLanguages },
+            },
+            { packId: { $in: addedPacks } },
+        ],
     })
         .sort({ name: 1 })
         .lean();
