@@ -50,6 +50,19 @@ export default function SWRErrorHandlingProvider({ children }: { children: React
                         return;
                     }
 
+                    // Handle 429 Too Many Requests - toast only
+                    if (error.status === 429) {
+                        const retryAfter = error.info?.retryAfter;
+                        toast({
+                            title: "Slow down",
+                            description: retryAfter
+                                ? `Too many requests. Try again in ${retryAfter}s.`
+                                : "Too many requests. Try again in a moment.",
+                            variant: "destructive",
+                        });
+                        return;
+                    }
+
                     // For other errors, show a generic error message
                     toast({
                         title: "Failed to fetch data",

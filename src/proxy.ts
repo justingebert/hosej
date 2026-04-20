@@ -17,7 +17,7 @@ export async function proxy(req: NextRequest) {
             if (!success) {
                 const retryAfter = Math.max(Math.ceil((reset - Date.now()) / 1000), 1);
                 return NextResponse.json(
-                    { message: "Too many requests" },
+                    { message: "Too many requests", retryAfter },
                     {
                         status: 429,
                         headers: {

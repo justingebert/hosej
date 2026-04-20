@@ -68,7 +68,7 @@ export class RateLimitError extends AppError {
 function errorResponse(req: NextRequest, error: Error): NextResponse {
     if (error instanceof RateLimitError) {
         return NextResponse.json(
-            { message: error.message },
+            { message: error.message, retryAfter: error.retryAfter },
             {
                 status: 429,
                 headers: {
