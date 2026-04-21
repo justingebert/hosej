@@ -16,7 +16,7 @@ import {
 } from "@/lib/utils/POINT_CONFIG";
 import { RallyStatus } from "@/types/models/rally";
 import type { RallyDocument } from "@/types/models/rally";
-import { recordActivity } from "@/lib/services/activity";
+import { clearActivityForEntities, recordActivity } from "@/lib/services/activity";
 import { ActivityFeature, ActivityType } from "@/types/models/activityEvent";
 
 const VOTING_DURATION_MS = 24 * 60 * 60 * 1000;
@@ -98,6 +98,10 @@ async function advanceRallyStates(
 
                 rally.status = RallyStatus.Completed;
                 await rally.save();
+
+                clearActivityForEntities([rally._id]).catch((err) =>
+                    console.error("Activity cleanup failed", err)
+                );
 
                 // Activate next rally from the pool
                 const gapEnd = new Date(now.getTime() + rallyGapDays * 24 * 60 * 60 * 1000);

@@ -9,7 +9,7 @@ import { ConflictError, NotFoundError, ValidationError } from "@/lib/api/errorHa
 import { sendNotification } from "@/lib/integrations/push";
 import { createChatForEntity } from "@/lib/services/chat";
 import { EntityModel } from "@/types/models/chat";
-import { recordActivity } from "@/lib/services/activity";
+import { clearActivityForEntities, recordActivity } from "@/lib/services/activity";
 import { ActivityFeature, ActivityType } from "@/types/models/activityEvent";
 import { resolveAvatarUrl } from "@/lib/services/user/user";
 import type { Types } from "mongoose";
@@ -226,7 +226,13 @@ export async function activateJukeboxes(group: IGroup) {
         return;
     }
 
+    const oldActive = await Jukebox.find({ active: true, groupId: group._id }, { _id: 1 });
     await Jukebox.updateMany({ active: true, groupId: group._id }, { active: false });
+    if (oldActive.length > 0) {
+        clearActivityForEntities(oldActive.map((j) => j._id)).catch((err) =>
+            console.error("Activity cleanup failed", err)
+        );
+    }
 
     for (let i = 0; i < group.features.jukebox.settings.concurrent.length; i++) {
         await createGroupJukebox(group._id, group.features.jukebox.settings.concurrent[i]);
@@ -260,5 +266,11 @@ export async function createGroupJukebox(
 }
 
 export async function deactivateGroupJukeboxes(groupId: string) {
+    const oldActive = await Jukebox.find({ active: true, groupId }, { _id: 1 });
     await Jukebox.updateMany({ active: true, groupId }, { active: false });
+    if (oldActive.length > 0) {
+        clearActivityForEntities(oldActive.map((j) => j._id)).catch((err) =>
+            console.error("Activity cleanup failed", err)
+        );
+    }
 }

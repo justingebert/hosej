@@ -1,5 +1,6 @@
 export {
     recordActivity,
+    clearActivityForEntities,
     getMissedActivity,
     markFeatureSeen,
     getGroupsWithActivity,

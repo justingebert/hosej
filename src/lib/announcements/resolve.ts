@@ -23,16 +23,16 @@ export function resolveNextAnnouncement(
         createdAtMs <= Date.now() - GOOGLE_NUDGE_MIN_AGE_MS &&
         !seen.has(GOOGLE_NUDGE_ID);
 
-    // if (isEligibleForGoogleNudge) {
-    //     return {
-    //         kind: "cta",
-    //         id: GOOGLE_NUDGE_ID,
-    //         title: "Hey, Please Think About Securing your account",
-    //         body: "Connect Google so you don't lose your groups if your browser data gets cleared.",
-    //         cta: { label: "Open settings", href: "/settings" },
-    //         publishedAt: new Date(0).toISOString(),
-    //     };
-    // }
+    if (isEligibleForGoogleNudge) {
+        return {
+            kind: "cta",
+            id: GOOGLE_NUDGE_ID,
+            title: "Hey, Please Think About Securing your account",
+            body: "Connect Google so you don't lose your groups if your browser data gets cleared.",
+            cta: { label: "Open settings", href: "/settings" },
+            publishedAt: new Date(0).toISOString(),
+        };
+    }
 
     const next = announcements.find(
         (a) => !seen.has(a.id) && new Date(a.publishedAt) > user.createdAt

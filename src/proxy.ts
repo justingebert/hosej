@@ -38,7 +38,6 @@ export async function proxy(req: NextRequest) {
         "/api/auth/signin/google",
         "/api/auth/callback",
         "/api/auth/callback/credentials",
-        "/deviceauth",
         "/manifest.json",
         "/api/cron",
         "/api/auth/callback/google",

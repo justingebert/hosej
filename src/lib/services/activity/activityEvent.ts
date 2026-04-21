@@ -38,6 +38,19 @@ export async function recordActivity(params: {
 }
 
 /**
+ * Delete all activity events tied to the given entity ids.
+ * Called when a question/rally/jukebox rotates so stale events
+ * from the prior cycle don't inflate missed-activity counts.
+ */
+export async function clearActivityForEntities(
+    entityIds: Array<string | Types.ObjectId>
+): Promise<void> {
+    if (entityIds.length === 0) return;
+    await dbConnect();
+    await ActivityEvent.deleteMany({ entityId: { $in: entityIds } });
+}
+
+/**
  * Get missed activity counts per feature for a user in a group.
  * Each feature is compared against its own lastSeenAt timestamp.
  * Excludes events created by the requesting user.

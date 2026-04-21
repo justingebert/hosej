@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { FcGoogle } from "react-icons/fc";
 import { signIn, useSession } from "next-auth/react";
@@ -11,6 +11,9 @@ import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { HoseJLoader } from "@/components/ui/custom/HoseJLoader";
 import PWAInstallButton from "@/components/common/PWAInstallButton";
+import ResponsiveConfirm from "@/components/common/ResponsiveConfirm";
+
+const SUPPORT_EMAIL = "pregame_acid_9o@icloud.com";
 
 function LoginPage() {
     const { data: session, status } = useSession();
@@ -87,6 +90,16 @@ function LoginPage() {
         await handleSignIn("google", { callbackUrl });
     };
 
+    const handleRecoverWithDeviceId = useCallback(
+        async (deviceId: string) => {
+            const trimmed = deviceId.trim();
+            if (!trimmed) return;
+            localStorage.setItem("deviceId", trimmed);
+            await handleSignIn("credentials", { deviceId: trimmed });
+        },
+        [handleSignIn]
+    );
+
     useEffect(() => {
         if (!navigator.onLine) {
             router.replace("/offline");
@@ -138,6 +151,8 @@ function LoginPage() {
                     onStartWithoutAccount={handleStartWithoutAccount}
                     onGoogleSignIn={handleGoogleSignIn}
                 />
+
+                <LostAccountPrompt onRecover={handleRecoverWithDeviceId} />
             </main>
             <Footer />
         </div>
@@ -173,6 +188,94 @@ function SignInButtons({
     );
 }
 
+const RECOVERY_WINDOW_MS = 60 * 1000;
+const RECOVERY_MAX_ATTEMPTS = 5;
+
+function LostAccountPrompt({ onRecover }: { onRecover: (deviceId: string) => Promise<void> }) {
+    const [deviceId, setDeviceId] = useState("");
+    const [submitting, setSubmitting] = useState(false);
+    const attemptsRef = useRef<number[]>([]);
+    const { toast } = useToast();
+
+    const canAttempt = () => {
+        const now = Date.now();
+        attemptsRef.current = attemptsRef.current.filter((t) => now - t < RECOVERY_WINDOW_MS);
+        return attemptsRef.current.length < RECOVERY_MAX_ATTEMPTS;
+    };
+
+    const handleConfirm = async () => {
+        const trimmed = deviceId.trim();
+        if (!trimmed) {
+            toast({ title: "Please enter your device ID", variant: "destructive" });
+            return;
+        }
+        if (!canAttempt()) {
+            toast({
+                title: "Too many attempts",
+                description: "Please wait a minute before trying again.",
+                variant: "destructive",
+            });
+            return;
+        }
+        attemptsRef.current.push(Date.now());
+        setSubmitting(true);
+        try {
+            await onRecover(trimmed);
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    return (
+        <ResponsiveConfirm
+            trigger={
+                <button
+                    type="button"
+                    className="text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground transition-colors"
+                >
+                    Lost your account?
+                </button>
+            }
+            title="Lost your account?"
+            description={
+                <>
+                    Device-based accounts live on this device. Paste your device ID below to
+                    restore, or reach out to{" "}
+                    <a
+                        href={`mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent("HoseJ — Lost account")}`}
+                        className="underline"
+                    >
+                        {SUPPORT_EMAIL}
+                    </a>
+                    .
+                </>
+            }
+            confirmLabel={submitting ? "Restoring…" : "Restore"}
+            cancelLabel="Close"
+            confirmVariant="default"
+            confirmDisabled={submitting || !deviceId.trim()}
+            onConfirm={handleConfirm}
+            onOpenChange={(open) => {
+                if (!open) setDeviceId("");
+            }}
+        >
+            <div className="px-4 sm:px-0">
+                <Input
+                    type="text"
+                    placeholder="Device ID"
+                    value={deviceId}
+                    onChange={(e) => setDeviceId(e.target.value)}
+                    autoComplete="off"
+                    autoCapitalize="off"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    className="text-center"
+                />
+            </div>
+        </ResponsiveConfirm>
+    );
+}
+
 function Footer() {
     return (
         <footer className="text-center p-4">
@@ -194,7 +297,7 @@ function Footer() {
 function Header() {
     return (
         <header className="text-center p-6">
-            <Link href={"/deviceauth"}>
+            <Link href={"/"}>
                 <h1 className="text-4xl font-bold">HoseJ</h1>
             </Link>
         </header>

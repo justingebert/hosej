@@ -7,7 +7,7 @@ import { generateSignedUrl } from "@/lib/integrations/storage";
 import { resolveAvatarUrl } from "@/lib/services/user/user";
 import { CREATED_QUESTION_POINTS, VOTED_QUESTION_POINTS } from "@/lib/utils/POINT_CONFIG";
 import { createChatForEntity } from "@/lib/services/chat";
-import { recordActivity } from "@/lib/services/activity";
+import { clearActivityForEntities, recordActivity } from "@/lib/services/activity";
 import { ActivityFeature, ActivityType } from "@/types/models/activityEvent";
 import { EntityModel } from "@/types/models/chat";
 import type {
@@ -526,6 +526,11 @@ export async function deactivateCurrentQuestions(groupId: Types.ObjectId): Promi
     for (const question of currentQuestions) {
         question.active = false;
         await question.save();
+    }
+    if (currentQuestions.length > 0) {
+        clearActivityForEntities(currentQuestions.map((q) => q._id)).catch((err) =>
+            console.error("Activity cleanup failed", err)
+        );
     }
 }
 
