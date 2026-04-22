@@ -299,6 +299,38 @@ describe("activateJukeboxes", () => {
         const monthName = new Intl.DateTimeFormat("en-US", { month: "long" }).format(today);
         expect(pushes[0].title).toContain(monthName);
     });
+
+    it("activates on last day of month when 0 is in activationDays", async () => {
+        vi.useFakeTimers();
+        try {
+            vi.setSystemTime(new Date("2026-02-28T12:00:00Z"));
+            const group = await makeJukeboxGroup([0], ["Theme A"]);
+
+            await activateJukeboxes(group as unknown as IGroup);
+
+            const active = await Jukebox.find({ groupId: group._id, active: true });
+            expect(active).toHaveLength(1);
+            expect(active[0].title).toBe("Theme A");
+            expect(getPushCalls()).toHaveLength(1);
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    it("skips activation on non-last day when only 0 is set", async () => {
+        vi.useFakeTimers();
+        try {
+            vi.setSystemTime(new Date("2026-02-15T12:00:00Z"));
+            const group = await makeJukeboxGroup([0], ["Theme A"]);
+
+            await activateJukeboxes(group as unknown as IGroup);
+
+            expect(await Jukebox.countDocuments({ groupId: group._id })).toBe(0);
+            expect(getPushCalls()).toHaveLength(0);
+        } finally {
+            vi.useRealTimers();
+        }
+    });
 });
 
 describe("createGroupJukebox", () => {

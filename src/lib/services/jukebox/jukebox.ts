@@ -222,7 +222,13 @@ export async function rateSong(jukeboxId: string, songId: string, userId: string
 
 export async function activateJukeboxes(group: IGroup) {
     const today = new Date();
-    if (!group.features.jukebox.settings.activationDays.includes(today.getDate())) {
+    const activationDays = group.features.jukebox.settings.activationDays;
+    const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+    const isLastDayOfMonth = today.getDate() === lastDayOfMonth;
+    const shouldActivate =
+        activationDays.includes(today.getDate()) ||
+        (activationDays.includes(0) && isLastDayOfMonth);
+    if (!shouldActivate) {
         return;
     }
 

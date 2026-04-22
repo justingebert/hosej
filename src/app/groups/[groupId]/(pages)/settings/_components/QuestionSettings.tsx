@@ -1,7 +1,6 @@
 "use client";
 
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
@@ -9,6 +8,9 @@ import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
 import { useState } from "react";
 import type { QuestionPackDTO } from "@/types/models/questionPack";
+import { cn } from "@/lib/utils/utils";
+
+const COUNT_CHOICES = [1, 2, 3];
 
 interface QuestionSettingsProps {
     groupId: string;
@@ -72,21 +74,32 @@ export function QuestionSettings({
     return (
         <div className="space-y-6">
             <div className="space-y-4">
-                <div className="flex items-center justify-between gap-4">
-                    <Label htmlFor="questionCount">Question Count</Label>
-                    <Input
-                        id="questionCount"
-                        type="number"
-                        pattern="\d*"
-                        name="questionCount"
-                        value={questionCount || ""}
-                        onChange={(e) => onQuestionCountChange(Number(e.target.value))}
-                        className="w-20 text-center"
-                    />
-                </div>
-                <div className="text-sm text-muted-foreground">
-                    Last Question Date:{" "}
-                    {lastQuestionDate ? new Date(lastQuestionDate).toLocaleDateString() : "N/A"}
+                <div className="space-y-1">
+                    <div className="flex items-center justify-between gap-4">
+                        <Label>Questions per Day</Label>
+                        <div className="inline-flex rounded-md border border-input overflow-hidden">
+                            {COUNT_CHOICES.map((n, idx) => {
+                                const selected = questionCount === n;
+                                return (
+                                    <button
+                                        key={n}
+                                        type="button"
+                                        onClick={() => onQuestionCountChange(n)}
+                                        aria-pressed={selected}
+                                        className={cn(
+                                            "h-9 w-10 text-sm font-medium transition-colors",
+                                            idx > 0 && "border-l border-input",
+                                            selected
+                                                ? "bg-primary text-primary-foreground"
+                                                : "bg-background hover:bg-accent"
+                                        )}
+                                    >
+                                        {n}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
                 </div>
             </div>
 

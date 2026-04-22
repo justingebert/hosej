@@ -1,7 +1,8 @@
 "use client";
 
+import { Camera, HelpCircle, Music } from "lucide-react";
 import { Accordion } from "@/components/ui/accordion";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FeatureSettingsAccordionSimple } from "@/app/groups/[groupId]/(pages)/settings/_components/FeatureSettingsAccordionSimple";
 import { JukeboxSettings } from "@/app/groups/[groupId]/(pages)/settings/_components/JukeboxSettings";
 import { QuestionSettings } from "@/app/groups/[groupId]/(pages)/settings/_components/QuestionSettings";
@@ -30,6 +31,15 @@ export function GroupFeatureSettingsCard({
     onJukeboxConcurrentChange: (value: string[]) => void;
     onJukeboxActivationDaysChange: (value: number[]) => void;
 }) {
+    const { questions, rallies, jukebox } = features;
+
+    const questionSummary = `${questions.settings.questionCount}/day`;
+    const rallySummary = `${rallies.settings.rallyCount} at once • every ${rallies.settings.rallyGapDays}d`;
+    const jukeboxSummary = buildJukeboxSummary(
+        jukebox.settings.concurrent.length,
+        jukebox.settings.activationDays.length
+    );
+
     return (
         <Card>
             <CardHeader>
@@ -41,11 +51,13 @@ export function GroupFeatureSettingsCard({
                         featureName="Questions"
                         featureKey="questions"
                         globalStatus={globalFeatures?.questions?.status}
+                        icon={HelpCircle}
+                        summary={questionSummary}
                     >
                         <QuestionSettings
                             groupId={groupId}
-                            questionCount={features.questions.settings.questionCount}
-                            lastQuestionDate={features.questions.settings.lastQuestionDate}
+                            questionCount={questions.settings.questionCount}
+                            lastQuestionDate={questions.settings.lastQuestionDate}
                             onQuestionCountChange={onQuestionCountChange}
                         />
                     </FeatureSettingsAccordionSimple>
@@ -54,10 +66,12 @@ export function GroupFeatureSettingsCard({
                         featureName="Rallies"
                         featureKey="rallies"
                         globalStatus={globalFeatures?.rallies?.status}
+                        icon={Camera}
+                        summary={rallySummary}
                     >
                         <RallySettings
-                            rallyCount={features.rallies.settings.rallyCount}
-                            rallyGapDays={features.rallies.settings.rallyGapDays}
+                            rallyCount={rallies.settings.rallyCount}
+                            rallyGapDays={rallies.settings.rallyGapDays}
                             onRallyCountChange={onRallyCountChange}
                             onRallyGapDaysChange={onRallyGapDaysChange}
                         />
@@ -67,10 +81,12 @@ export function GroupFeatureSettingsCard({
                         featureName="Jukebox"
                         featureKey="jukebox"
                         globalStatus={globalFeatures?.jukebox?.status}
+                        icon={Music}
+                        summary={jukeboxSummary}
                     >
                         <JukeboxSettings
-                            concurrent={features.jukebox.settings.concurrent}
-                            activationDays={features.jukebox.settings.activationDays}
+                            concurrent={jukebox.settings.concurrent}
+                            activationDays={jukebox.settings.activationDays}
                             onConcurrentChange={onJukeboxConcurrentChange}
                             onActivationDaysChange={onJukeboxActivationDaysChange}
                         />
@@ -79,4 +95,10 @@ export function GroupFeatureSettingsCard({
             </CardContent>
         </Card>
     );
+}
+
+function buildJukeboxSummary(concurrentCount: number, activationDayCount: number): string {
+    const themeLabel = concurrentCount === 1 ? "theme" : "themes";
+    const dayLabel = activationDayCount === 1 ? "day" : "days";
+    return `${concurrentCount} ${themeLabel} • ${activationDayCount} ${dayLabel}/mo`;
 }
