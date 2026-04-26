@@ -272,31 +272,77 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
             }
         }
 
-        const questionPayload: Record<string, unknown> = {
-            groupId: groupId,
-            category: "Daily",
-            questionType: questionData.questionType,
-            question: questionData.question,
-            multiSelect: questionData.multiSelect,
-            options: questionData.questionType === "custom" ? trimmedOptions : [],
-            submittedBy: user!._id,
-        };
-
-        if (isPairing && questionData.pairing) {
-            questionPayload.pairing = {
-                keySource: questionData.pairing.keySource,
-                mode: questionData.pairing.mode,
-                keys: (questionData.pairing.keys || [])
-                    .map((k) => k.trim())
-                    .filter((k) => k !== ""),
-                values: (questionData.pairing.values || [])
-                    .map((v) => v.trim())
-                    .filter((v) => v !== ""),
-            };
-        }
-
         try {
-            // Create the question without options first
+            const tempEntityId = crypto.randomUUID();
+
+            let mainImageKey: string | undefined;
+            if (questionData.mainImageFile) {
+                const [compressedMainImage] = await compressImages([questionData.mainImageFile]);
+                const uploaded = await handleImageUpload(
+                    groupId,
+                    "question",
+                    tempEntityId,
+                    user!._id,
+                    [compressedMainImage]
+                );
+                if (!uploaded || uploaded.length === 0) {
+                    toast({ title: "Failed to upload image", variant: "destructive" });
+                    setIsSubmitting(false);
+                    return;
+                }
+                mainImageKey = uploaded[0].key;
+            }
+
+            let optionImageData: UploadedFileData[] = [];
+            if (questionData.questionType === "image") {
+                const compressedFiles = await compressImages(trimmedOptionsFiles);
+                const uploaded = (await handleImageUpload(
+                    groupId,
+                    "question-option",
+                    tempEntityId,
+                    user!._id,
+                    compressedFiles
+                )) as UploadedFileData[] | null;
+                if (!uploaded || uploaded.length === 0) {
+                    toast({ title: "Failed to upload option images", variant: "destructive" });
+                    setIsSubmitting(false);
+                    return;
+                }
+                optionImageData = uploaded;
+            }
+
+            const questionPayload: Record<string, unknown> = {
+                groupId: groupId,
+                category: "Daily",
+                questionType: questionData.questionType,
+                question: questionData.question,
+                multiSelect: questionData.multiSelect,
+                options:
+                    questionData.questionType === "custom"
+                        ? trimmedOptions
+                        : questionData.questionType === "image"
+                          ? optionImageData
+                          : [],
+                submittedBy: user!._id,
+            };
+
+            if (mainImageKey) {
+                questionPayload.image = mainImageKey;
+            }
+
+            if (isPairing && questionData.pairing) {
+                questionPayload.pairing = {
+                    keySource: questionData.pairing.keySource,
+                    mode: questionData.pairing.mode,
+                    keys: (questionData.pairing.keys || [])
+                        .map((k) => k.trim())
+                        .filter((k) => k !== ""),
+                    values: (questionData.pairing.values || [])
+                        .map((v) => v.trim())
+                        .filter((v) => v !== ""),
+                };
+            }
+
             const response = await fetch(`/api/groups/${groupId}/question/`, {
                 method: "POST",
                 headers: {
@@ -309,71 +355,6 @@ const CreateQuestion = ({ questionData, setQuestionData }: CreateQuestionProps) 
                 toast({ title: "Failed to create question", variant: "destructive" });
                 setIsSubmitting(false);
                 return;
-            }
-            const { newQuestion } = await response.json();
-
-            // Upload the main image if there is one
-            if (questionData.mainImageFile) {
-                const [compressedMainImage] = await compressImages([questionData.mainImageFile]);
-                const imageUrl = await handleImageUpload(
-                    groupId,
-                    "question",
-                    newQuestion._id,
-                    user!._id,
-                    [compressedMainImage]
-                );
-
-                if (imageUrl && imageUrl.length > 0) {
-                    // Attach the main image to the question
-                    const response = await fetch(
-                        `/api/groups/${groupId}/question/${newQuestion._id}`,
-                        {
-                            method: "PATCH",
-                            headers: {
-                                "Content-Type": "application/json",
-                            },
-                            body: JSON.stringify({ imageKey: imageUrl[0].key }),
-                        }
-                    );
-                    if (!response.ok) {
-                        toast({ title: "Failed to create question", variant: "destructive" });
-                        //TODO delte question
-                        setIsSubmitting(false);
-                        return;
-                    }
-                }
-            }
-
-            if (questionData.questionType === "image") {
-                // Upload option images and update the options array
-                const compressedFiles = await compressImages(trimmedOptionsFiles);
-                const optionImageUrls = (await handleImageUpload(
-                    groupId,
-                    "question-option",
-                    newQuestion._id,
-                    user!._id,
-                    compressedFiles
-                )) as UploadedFileData[] | null;
-
-                if (!optionImageUrls || optionImageUrls.length === 0) {
-                    toast({ title: "Failed to upload option images", variant: "destructive" });
-                    setIsSubmitting(false);
-                    return;
-                }
-
-                // Update the question with options
-                const res = await fetch(`/api/groups/${groupId}/question/${newQuestion._id}`, {
-                    method: "PATCH",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ options: optionImageUrls }),
-                });
-                if (!res.ok) {
-                    toast({ title: "Failed to create question", variant: "destructive" });
-                    setIsSubmitting(false);
-                    return;
-                }
             }
 
             resetForm();
