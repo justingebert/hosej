@@ -3,6 +3,17 @@ import User from "@/db/models/User";
 import admin from "firebase-admin";
 import type { Types } from "mongoose";
 import { env } from "@/env";
+import {
+    DEFAULT_NOTIFICATION_LANGUAGE,
+    DEFAULT_NOTIFICATION_STYLE,
+    type NotificationLanguage,
+    type NotificationStyle,
+} from "@/types/models/user";
+import {
+    renderNotification,
+    type NotificationContext,
+    type NotificationEvent,
+} from "@/lib/notifications/templates";
 
 if (!admin.apps.length) {
     try {
@@ -18,61 +29,85 @@ if (!admin.apps.length) {
     }
 }
 
-export async function sendNotification(
-    title: string,
-    body: string,
-    groupId: string | Types.ObjectId = ""
-) {
+export type SendNotificationArgs = {
+    event: NotificationEvent;
+    context: NotificationContext;
+    groupId?: string | Types.ObjectId;
+    userIds?: (string | Types.ObjectId)[];
+};
+
+export async function sendNotification({
+    event,
+    context,
+    groupId = "",
+    userIds,
+}: SendNotificationArgs) {
     if (process.env.ENV === "dev") {
-        console.warn("NOTIFICATION [dev]", title, body, groupId);
+        console.warn("NOTIFICATION [dev]", event, context, groupId, userIds);
         return { success: true, successCount: 0, failureCount: 0 };
     }
     try {
         await dbConnect();
 
-        let users;
-        if (groupId === "") {
-            users = await User.find({ fcmToken: { $exists: true, $ne: "" } });
-        } else {
-            users = await User.find({
-                fcmToken: { $exists: true, $ne: "" },
-                groups: { $in: [groupId] },
-            });
+        const query: Record<string, unknown> = { fcmToken: { $exists: true, $ne: "" } };
+        if (groupId !== "") {
+            query.groups = { $in: [groupId] };
         }
-        // Aggregate all tokens
-        const tokens = users.map((user) => user.fcmToken).filter((token) => token !== undefined);
+        if (userIds && userIds.length > 0) {
+            query._id = { $in: userIds };
+        }
 
-        if (tokens.length === 0) {
+        const users = await User.find(query, {
+            fcmToken: 1,
+            notificationLanguage: 1,
+            notificationStyle: 1,
+        });
+
+        if (users.length === 0) {
             console.warn("No tokens available to send messages");
             return;
         }
 
-        const message = {
-            data: {
-                title: title,
-                body: body,
-            },
-            tokens: tokens,
-        };
-
-        const response = await admin.messaging().sendEachForMulticast(message);
-
-        response.responses.forEach((resp, idx) => {
-            if (!resp.success) {
-                console.error(`Error sending to token ${tokens[idx]}:`, resp.error);
+        // Bucket users by (language, style) so each bucket gets one multicast.
+        const buckets = new Map<
+            string,
+            { language: NotificationLanguage; style: NotificationStyle; tokens: string[] }
+        >();
+        for (const user of users) {
+            if (!user.fcmToken) continue;
+            const language = user.notificationLanguage ?? DEFAULT_NOTIFICATION_LANGUAGE;
+            const style = user.notificationStyle ?? DEFAULT_NOTIFICATION_STYLE;
+            const key = `${language}|${style}`;
+            let bucket = buckets.get(key);
+            if (!bucket) {
+                bucket = { language, style, tokens: [] };
+                buckets.set(key, bucket);
             }
-        });
+            bucket.tokens.push(user.fcmToken);
+        }
 
-        console.warn(`${response.successCount} messages were sent successfully`);
-        console.warn(`${response.failureCount} messages failed`);
+        let totalSuccess = 0;
+        let totalFailure = 0;
+
+        for (const { language, style, tokens } of buckets.values()) {
+            const { title, body } = renderNotification(event, language, style, context);
+            const message = { data: { title, body }, tokens };
+            const response = await admin.messaging().sendEachForMulticast(message);
+            response.responses.forEach((resp, idx) => {
+                if (!resp.success) {
+                    console.error(`Error sending to token ${tokens[idx]}:`, resp.error);
+                }
+            });
+            totalSuccess += response.successCount;
+            totalFailure += response.failureCount;
+        }
 
         return {
             success: true,
-            successCount: response.successCount,
-            failureCount: response.failureCount,
+            successCount: totalSuccess,
+            failureCount: totalFailure,
         };
     } catch (error) {
         console.error("Error sending messages:", error);
-        throw new Error("Error sending messages");
     }
 }

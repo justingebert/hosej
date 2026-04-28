@@ -7,6 +7,7 @@ import type { IUser } from "@/types/models/user";
 import type { IGroup } from "@/types/models/group";
 import { ConflictError, NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 import { sendNotification } from "@/lib/integrations/push";
+import { NotificationEvent } from "@/lib/notifications/templates";
 import { createChatForEntity } from "@/lib/services/chat";
 import { EntityModel } from "@/types/models/chat";
 import { clearActivityForEntities, recordActivity } from "@/lib/services/activity";
@@ -245,7 +246,11 @@ export async function activateJukeboxes(group: IGroup) {
     }
 
     const monthName = new Intl.DateTimeFormat("en-US", { month: "long" }).format(today);
-    await sendNotification(`🎶JUKEBOX - ${monthName} 🎶`, "🎶SUBMIT YOUR SONGS🎶", group._id);
+    await sendNotification({
+        event: NotificationEvent.JukeboxNew,
+        context: { monthName },
+        groupId: group._id,
+    });
 }
 
 export async function createGroupJukebox(

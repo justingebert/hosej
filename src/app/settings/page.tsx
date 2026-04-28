@@ -18,6 +18,7 @@ import BackLink from "@/components/ui/custom/BackLink";
 import { UserDataTable } from "@/app/settings/_components/userDataTable";
 import { GoogleConnectButton } from "@/app/settings/_components/googleConnectButton";
 import { ProfileEditor } from "@/app/settings/_components/ProfileEditor";
+import { NotificationPrefs } from "@/app/settings/_components/NotificationPrefs";
 
 export default function SettingsPage() {
     const { status, user } = useAuthRedirect();
@@ -98,7 +99,7 @@ export default function SettingsPage() {
                                     Preferences
                                 </CardTitle>
                             </CardHeader>
-                            <CardContent>
+                            <CardContent className="space-y-4">
                                 <div className="flex items-center justify-between">
                                     <div className="space-y-0.5">
                                         <div className="font-medium text-sm">
@@ -112,6 +113,9 @@ export default function SettingsPage() {
                                         checked={notificationsEnabled}
                                         onCheckedChange={handleNotificationToggle}
                                     />
+                                </div>
+                                <div className="border-t pt-4">
+                                    <NotificationPrefs />
                                 </div>
                             </CardContent>
                         </Card>

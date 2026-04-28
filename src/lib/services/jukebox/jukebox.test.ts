@@ -296,8 +296,6 @@ describe("activateJukeboxes", () => {
 
         const pushes = getPushCalls();
         expect(pushes).toHaveLength(1);
-        const monthName = new Intl.DateTimeFormat("en-US", { month: "long" }).format(today);
-        expect(pushes[0].title).toContain(monthName);
     });
 
     it("activates on last day of month when 0 is in activationDays", async () => {

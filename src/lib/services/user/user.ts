@@ -74,6 +74,20 @@ export async function updateUser(userId: string, data: UpdateUserData): Promise<
     if (data.onboardingCompleted !== undefined) {
         set.onboardingCompleted = data.onboardingCompleted;
     }
+    if (data.notificationLanguage !== undefined) {
+        set.notificationLanguage = data.notificationLanguage;
+    }
+    if (data.notificationStyle !== undefined) {
+        set.notificationStyle = data.notificationStyle;
+    }
+    if (data.notificationPrefs !== undefined) {
+        // Dot-path merge so partial updates don't clobber sibling toggles.
+        for (const [key, value] of Object.entries(data.notificationPrefs)) {
+            if (value !== undefined) {
+                set[`notificationPrefs.${key}`] = value;
+            }
+        }
+    }
     const addToSet: Record<string, unknown> = {};
     if (data.announcementsSeen !== undefined) {
         const unique = Array.from(new Set(data.announcementsSeen));
