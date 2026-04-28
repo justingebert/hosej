@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Send } from "lucide-react";
+import { MessageSquareDashed, Send } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import useSWR from "swr";
 import fetcher from "@/lib/fetcher";
@@ -117,7 +117,12 @@ function ChatComponent({ user, entity, available }: ChatComponentProps) {
                         ))}
                     </>
                 ) : (
-                    <div className="flex-grow"></div> /* Empty space to push input to bottom */
+                    <div className="flex flex-col items-center justify-center h-full py-10">
+                        <MessageSquareDashed className="text-muted mb-2" />
+                        <p className="text-sm text-muted-foreground text-center">
+                            {available ? "No messages yet" : "No messages"}
+                        </p>
+                    </div>
                 )}
             </div>
             {available && (

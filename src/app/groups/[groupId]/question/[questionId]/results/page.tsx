@@ -52,9 +52,9 @@ const ResultsPage = () => {
                         />
                     )}
                     <div className="flex w-full justify-around my-4">
-                        <Badge>🐟{question.rating.bad?.length || 0}</Badge>
-                        <Badge>👍{question.rating.ok?.length || 0}</Badge>
-                        <Badge>🐐{question.rating.good?.length || 0}</Badge>
+                        <Badge>👎{question.rating.bad?.length || 0}</Badge>
+                        <Badge>👌{question.rating.ok?.length || 0}</Badge>
+                        <Badge>👍{question.rating.good?.length || 0}</Badge>
                     </div>
                     <div className="flex flex-col items-center mb-10">
                         {question.questionType === "image" &&

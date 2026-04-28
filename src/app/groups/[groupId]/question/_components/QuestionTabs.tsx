@@ -187,6 +187,14 @@ function QuestionContent({
     );
 }
 
+function SectionLabel({ children }: { children: React.ReactNode }) {
+    return (
+        <div className="text-xs uppercase tracking-wide text-muted-foreground font-medium mb-3 text-center">
+            {children}
+        </div>
+    );
+}
+
 function RatingDrawer({
     drawerOpen,
     setDrawerOpen,
@@ -212,13 +220,14 @@ function RatingDrawer({
             </DrawerTrigger>
             <DrawerContent className="p-4 max-h-[80vh] flex flex-col">
                 <DrawerHeader>
-                    <DrawerTitle>Rate the Question</DrawerTitle>
+                    <DrawerTitle>Todays Question</DrawerTitle>
                     <DrawerDescription></DrawerDescription>
                 </DrawerHeader>
                 {question.questionType !== "text" && question.questionType !== "pairing" && (
                     <>
                         <div className="overflow-y-auto">
-                            <div className="grid grid-cols-2 gap-4">
+                            <SectionLabel>Options</SectionLabel>
+                            <div className="grid grid-cols-2 gap-3 opacity-90">
                                 {question.questionType === "image" &&
                                     question.options &&
                                     question.options.map((option: QuestionOptionDTO, index) => {
@@ -226,7 +235,7 @@ function RatingDrawer({
                                         return (
                                             <div
                                                 key={index}
-                                                className="text-primary-foreground rounded-lg w-full max-w-md h-40"
+                                                className="text-primary-foreground rounded-lg w-full max-w-md h-24 ring-1 ring-border/60"
                                             >
                                                 <Image
                                                     src={option.url}
@@ -244,7 +253,7 @@ function RatingDrawer({
                                     question.options.map((option: QuestionOptionDTO, index) => (
                                         <div
                                             key={index}
-                                            className="text-sm p-2 bg-secondary rounded-lg max-w-md text-center flex items-center justify-center overflow-hidden"
+                                            className="text-xs p-2 bg-secondary/60 text-muted-foreground rounded-lg max-w-md text-center flex items-center justify-center overflow-hidden"
                                         >
                                             <span className="line-clamp-3">
                                                 {typeof option === "string" ? option : option.key}
@@ -259,28 +268,29 @@ function RatingDrawer({
                 {question.questionType === "pairing" && (
                     <>
                         <div className="overflow-y-auto">
-                            <div className="grid grid-cols-2 gap-3">
+                            <SectionLabel>Options</SectionLabel>
+                            <div className="grid grid-cols-2 gap-3 opacity-90">
                                 <div className="flex flex-col gap-1">
-                                    <span className="text-xs text-muted-foreground font-medium mb-1">
+                                    <span className="text-[10px] uppercase tracking-wide text-muted-foreground/80 mb-1">
                                         Match these
                                     </span>
                                     {question.pairing?.keys?.map((key, i) => (
                                         <div
                                             key={i}
-                                            className="p-2 bg-secondary rounded-lg text-center text-sm"
+                                            className="p-2 bg-secondary/60 text-muted-foreground rounded-lg text-center text-xs"
                                         >
                                             {key}
                                         </div>
                                     ))}
                                 </div>
                                 <div className="flex flex-col gap-1">
-                                    <span className="text-xs text-muted-foreground font-medium mb-1">
+                                    <span className="text-[10px] uppercase tracking-wide text-muted-foreground/80 mb-1">
                                         With these
                                     </span>
                                     {question.pairing?.values?.map((value, i) => (
                                         <div
                                             key={i}
-                                            className="p-2 bg-secondary rounded-lg text-center text-sm"
+                                            className="p-2 bg-secondary/60 text-muted-foreground rounded-lg text-center text-xs"
                                         >
                                             {value}
                                         </div>
@@ -292,10 +302,11 @@ function RatingDrawer({
                     </>
                 )}
                 <div>
+                    <SectionLabel>How was this question?</SectionLabel>
                     <div className="flex flex-row justify-center space-x-4">
-                        <Badge>🐟{question.rating.bad.length || 0}</Badge>
-                        <Badge>👍{question.rating.ok.length || 0}</Badge>
-                        <Badge>🐐{question.rating.good.length || 0}</Badge>
+                        <Badge>👎{question.rating.bad.length || 0}</Badge>
+                        <Badge>👌{question.rating.ok.length || 0}</Badge>
+                        <Badge>👍{question.rating.good.length || 0}</Badge>
                     </div>
                     <div className="flex flex-row space-x-4 py-4">
                         <Button
@@ -304,7 +315,7 @@ function RatingDrawer({
                             onClick={() => rateQuestion(question._id, "bad")}
                             disabled={question.userRating === "bad"}
                         >
-                            🐟
+                            👎
                         </Button>
                         <Button
                             className="text-3xl flex-1 py-8"
@@ -312,7 +323,7 @@ function RatingDrawer({
                             onClick={() => rateQuestion(question._id, "ok")}
                             disabled={question.userRating === "ok"}
                         >
-                            👍
+                            👌
                         </Button>
                         <Button
                             className="text-3xl flex-1 py-8"
@@ -320,7 +331,7 @@ function RatingDrawer({
                             onClick={() => rateQuestion(question._id, "good")}
                             disabled={question.userRating === "good"}
                         >
-                            🐐
+                            👍
                         </Button>
                     </div>
                 </div>
