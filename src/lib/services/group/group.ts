@@ -235,6 +235,9 @@ export async function getGroupStats(userId: string, groupId: string): Promise<Gr
         questionsLeftCount,
         questionsByType,
         questionsByUser,
+        selfCreatedUsedCount,
+        selfCreatedLeftCount,
+        packBreakdown,
         ralliesCompletedCount,
         ralliesCreatedCount,
         rallyWins,
@@ -267,6 +270,60 @@ export async function getGroupStats(userId: string, groupId: string): Promise<Gr
             { $unwind: "$user" },
             { $project: { _id: 0, username: "$user.username", count: 1 } },
             { $sort: { count: -1 } },
+        ]),
+        Question.countDocuments({
+            groupId,
+            used: true,
+            submittedBy: { $exists: true, $ne: null },
+        }),
+        Question.countDocuments({
+            groupId,
+            used: false,
+            submittedBy: { $exists: true, $ne: null },
+        }),
+        Question.aggregate([
+            {
+                $match: {
+                    groupId: objectId,
+                    templateId: { $exists: true, $ne: null },
+                },
+            },
+            {
+                $lookup: {
+                    from: "questiontemplates",
+                    localField: "templateId",
+                    foreignField: "_id",
+                    as: "template",
+                },
+            },
+            { $unwind: "$template" },
+            {
+                $group: {
+                    _id: "$template.packId",
+                    total: { $sum: 1 },
+                    used: { $sum: { $cond: ["$used", 1, 0] } },
+                },
+            },
+            {
+                $lookup: {
+                    from: "questionpacks",
+                    localField: "_id",
+                    foreignField: "packId",
+                    as: "pack",
+                },
+            },
+            { $unwind: { path: "$pack", preserveNullAndEmptyArrays: true } },
+            {
+                $project: {
+                    _id: 0,
+                    packId: "$_id",
+                    name: { $ifNull: ["$pack.name", "$_id"] },
+                    total: 1,
+                    used: 1,
+                    left: { $subtract: ["$total", "$used"] },
+                },
+            },
+            { $sort: { name: 1 } },
         ]),
         Rally.countDocuments({ groupId, status: RallyStatus.Completed }),
         Rally.countDocuments({ groupId, status: RallyStatus.Created }),
@@ -311,12 +368,20 @@ export async function getGroupStats(userId: string, groupId: string): Promise<Gr
         ]),
     ]);
 
+    const packQuestionsUsedCount = packBreakdown.reduce((sum, p) => sum + (p.used as number), 0);
+    const packQuestionsLeftCount = packBreakdown.reduce((sum, p) => sum + (p.left as number), 0);
+
     return {
         group: group.toObject(),
         questionsUsedCount,
         questionsLeftCount,
         questionsByType,
         questionsByUser,
+        selfCreatedUsedCount,
+        selfCreatedLeftCount,
+        packQuestionsUsedCount,
+        packQuestionsLeftCount,
+        packs: packBreakdown as GroupStatsDTO["packs"],
         ralliesCompletedCount,
         ralliesCreatedCount,
         rallyWins,

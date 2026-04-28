@@ -15,6 +15,7 @@ import {
     QuestionsByType,
     QuestionsByUser,
 } from "@/app/groups/[groupId]/(pages)/stats/_components/QuestionCharts";
+import RemainingQuestionsDetails from "@/app/groups/[groupId]/(pages)/stats/_components/RemainingQuestionsDetails";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import useSWR from "swr";
@@ -27,17 +28,38 @@ function StatCard({
     label,
     value,
     icon,
+    onClick,
+    hint,
 }: {
     label: string;
     value: string | number;
     icon?: React.ReactNode;
+    onClick?: () => void;
+    hint?: string;
 }) {
+    const interactive = !!onClick;
     return (
-        <Card>
+        <Card
+            onClick={onClick}
+            role={interactive ? "button" : undefined}
+            tabIndex={interactive ? 0 : undefined}
+            onKeyDown={
+                interactive
+                    ? (e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              onClick?.();
+                          }
+                      }
+                    : undefined
+            }
+            className={interactive ? "cursor-pointer transition-colors" : undefined}
+        >
             <CardContent className="flex flex-col items-center justify-center p-4">
                 {icon && <div className="text-muted-foreground mb-1">{icon}</div>}
                 <div className="text-2xl font-bold">{value}</div>
                 <div className="text-xs text-muted-foreground">{label}</div>
+                {hint && <div className="text-[10px] text-muted-foreground/50 mt-1">{hint}</div>}
             </CardContent>
         </Card>
     );
@@ -50,6 +72,7 @@ function SectionHeader({ children }: { children: React.ReactNode }) {
 const StatsPage = () => {
     const params = useParams<{ groupId: string }>();
     const groupId = params ? params.groupId : "";
+    const [remainingOpen, setRemainingOpen] = React.useState(false);
 
     const { data: stats, isLoading: statsLoading } = useSWR<GroupStatsDTO>(
         `/api/groups/${groupId}/stats`,
@@ -162,13 +185,27 @@ const StatsPage = () => {
                 {statsReady ? (
                     <>
                         <StatCard label="used" value={stats!.questionsUsedCount} />
-                        <StatCard label="remaining" value={stats!.questionsLeftCount} />
+                        <StatCard
+                            label="remaining"
+                            value={stats!.questionsLeftCount}
+                            onClick={() => setRemainingOpen(true)}
+                            hint="tap for details"
+                        />
                         <StatCard label="total" value={totalQuestions} />
                     </>
                 ) : (
                     [0, 1, 2].map((i) => <Skeleton key={i} className="h-24" />)
                 )}
             </div>
+
+            {statsReady && (
+                <RemainingQuestionsDetails
+                    open={remainingOpen}
+                    onOpenChange={setRemainingOpen}
+                    stats={stats!}
+                />
+            )}
+
             <div className="space-y-3">
                 {statsReady ? (
                     <>

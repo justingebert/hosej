@@ -105,6 +105,17 @@ export interface GroupStatsDTO {
     questionsLeftCount: number;
     questionsByType: { _id: string; count: number }[];
     questionsByUser: { username: string; count: number }[];
+    selfCreatedUsedCount: number;
+    selfCreatedLeftCount: number;
+    packQuestionsUsedCount: number;
+    packQuestionsLeftCount: number;
+    packs: {
+        packId: string;
+        name: string;
+        total: number;
+        used: number;
+        left: number;
+    }[];
     ralliesCompletedCount: number;
     ralliesCreatedCount: number;
     rallyWins: { username: string; wins: number }[];
