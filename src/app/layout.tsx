@@ -7,6 +7,10 @@ import "./globals.css";
 import { ThemeColorMeta } from "@/components/wrappers/ThemeColorViewport";
 import SWRErrorHandlingProvider from "@/components/wrappers/SWRErrorHandelingProvider";
 import { AppWrapper } from "@/components/wrappers/AppWrapper";
+import { PostHogProvider } from "@/components/wrappers/PostHogProvider";
+import { PostHogPageview } from "@/components/wrappers/PostHogPageview";
+import { ConsentProvider } from "@/components/wrappers/ConsentProvider";
+import CookieBanner from "@/components/common/CookieBanner";
 
 export const metadata: Metadata = {
     title: "HoseJ",
@@ -35,7 +39,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <SWRErrorHandlingProvider>
                     <div className="p-6 h-[100dvh]">
                         <AppWrapper>
-                            <ViewTransition name="page">{children}</ViewTransition>
+                            <ConsentProvider>
+                                <PostHogProvider>
+                                    <PostHogPageview />
+                                    <ViewTransition name="page">{children}</ViewTransition>
+                                </PostHogProvider>
+                                <CookieBanner />
+                            </ConsentProvider>
                         </AppWrapper>
                     </div>
                     <Toaster />

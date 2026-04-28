@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { HoseJLoader } from "@/components/ui/custom/HoseJLoader";
 import PWAInstallButton from "@/components/common/PWAInstallButton";
 import ResponsiveConfirm from "@/components/common/ResponsiveConfirm";
+import { trackSignup } from "@/lib/analytics/events";
 
 const SUPPORT_EMAIL = "pregame_acid_9o@icloud.com";
 
@@ -74,6 +75,7 @@ function LoginPage() {
 
             if (response.ok) {
                 localStorage.setItem("deviceId", deviceId);
+                trackSignup("device");
             } else {
                 console.error("Failed to create user:", await response.text());
             }

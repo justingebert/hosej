@@ -50,4 +50,7 @@ export const env = {
     // Upstash (optional — rate limiting disabled when missing)
     UPSTASH_REDIS_REST_URL: optionalEnv("UPSTASH_REDIS_REST_URL"),
     UPSTASH_REDIS_REST_TOKEN: optionalEnv("UPSTASH_REDIS_REST_TOKEN"),
+
+    // Sentry (optional - error tracking/session replay for deployment
+    SENTRY_AUTH_TOKEN: optionalEnv("SENTRY_AUTH_TOKEN"),
 } as const;

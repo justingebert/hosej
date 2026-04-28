@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Camera, Info, Users, MessageSquareText, Radio, ChevronRight } from "lucide-react";
@@ -13,6 +14,7 @@ import { useAppHaptics } from "@/hooks/useAppHaptics";
 import type { QuestionWithUserStateDTO } from "@/types/models/question";
 import { ActivityFeature } from "@/types/models/activityEvent";
 import type { MissedActivitySummary } from "@/types/models/activityEvent";
+import { trackGroupOpened } from "@/lib/analytics/events";
 
 // Lazy load CompletionChart (uses recharts ~200KB)
 const CompletionChart = dynamic(
@@ -34,6 +36,10 @@ export default function Dashboard() {
     const groupId = params?.groupId;
 
     const { data: group } = useSWR<GroupDTO>(groupId ? `/api/groups/${groupId}` : null, fetcher);
+
+    useEffect(() => {
+        if (groupId) trackGroupOpened(groupId);
+    }, [groupId]);
 
     const { data: questionsData, isLoading: questionLoading } = useSWR<{
         questions: QuestionWithUserStateDTO[];

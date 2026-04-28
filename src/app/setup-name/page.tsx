@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { HoseJLoader } from "@/components/ui/custom/HoseJLoader";
+import { trackSignup } from "@/lib/analytics/events";
 
 function SetupNameContent() {
     const { data: session, status, update } = useSession();
@@ -55,6 +56,7 @@ function SetupNameContent() {
                 return;
             }
 
+            trackSignup("google");
             // Refresh session — clears needsNameSetup flag since DB doesn't have it
             await update();
             router.push(callbackUrl);

@@ -61,6 +61,12 @@ Models (src/db/models/)    → Mongoose schemas, MongoDB
 
 **Data fetching:** Client components use SWR w/ fetcher from `src/lib/fetcher.ts`.
 
+**Observability:** Sentry (errors, perf, replay-on-error) in `src/sentry.*.config.ts` + `src/instrumentation-client.ts`. PostHog (product analytics) in `src/components/wrappers/PostHogProvider.tsx`. Both gated to production only — PostHog disabled when `NODE_ENV !== "production"` or `NEXT_PUBLIC_POSTHOG_KEY` missing; Sentry disabled when `ENV === "dev"`.
+
+**Analytics events:** Funnel events live in `src/lib/analytics/events.ts` — `trackSignup(method)`, `trackGroupCreated(id)`, `trackGroupOpened(id)`. Each reads the `hosej_src` cookie (set by `/r/[code]` QR redirect) and attaches it as `source`. Wire new funnel events here, never call `posthog.capture` directly from feature code.
+
+**QR / acquisition tracking:** `/r/[code]` (`src/app/r/[code]/route.ts`) is a public 302 redirect. `[code]` becomes `utm_source`, cookie `hosej_src=<code>` (30d) bridges anonymous scan → identified signup. No DB lookup, no auth — `code` is regex-validated `[a-zA-Z0-9_-]{1,64}`. Whitelisted in `src/proxy.ts`. PostHog is the analytics source of truth — do not add a `RedirectCode` model unless destinations need to be editable post-print.
+
 ## Tech Stack
 
 - **Framework:** Next.js 16 (App Router), TypeScript, React 19
@@ -72,6 +78,7 @@ Models (src/db/models/)    → Mongoose schemas, MongoDB
 - **Notifications:** Firebase Cloud Messaging
 - **Storage:** AWS S3 (presigned uploads)
 - **PWA:** Serwist service worker
+- **Observability:** Sentry (errors), PostHog EU cloud (product analytics, funnels)
 - **Deployment:** Vercel (free tier)
 
 ## Styling & Layout Patterns

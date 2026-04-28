@@ -40,6 +40,8 @@ HoseJ is a Next.js 16 App Router application. The UI is built with client compon
 - **Charts:** recharts
 - **Testing:** Vitest + @testing-library/react + jsdom
 - **Deployment:** Vercel
+- **Monitoring:** Sentry
+- **Analytics:** Vercel Analytics & Posthog
 
 ---
 

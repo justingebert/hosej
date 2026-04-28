@@ -50,7 +50,11 @@ export async function proxy(req: NextRequest) {
         "/",
         "/login",
     ]);
-    if (publicRoutes.has(pathname) || (pathname == "/api/users" && req.method === "POST")) {
+    if (
+        publicRoutes.has(pathname) ||
+        pathname.startsWith("/r/") ||
+        (pathname == "/api/users" && req.method === "POST")
+    ) {
         return NextResponse.next();
     }
 

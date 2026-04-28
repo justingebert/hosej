@@ -13,6 +13,7 @@ import { mutate } from "swr";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { trackGroupCreated } from "@/lib/analytics/events";
 import {
     Select,
     SelectContent,
@@ -40,6 +41,8 @@ export function CreateGroupDrawer() {
                 return;
             }
 
+            const created = await res.json();
+            trackGroupCreated(String(created?._id ?? ""));
             mutate(`/api/groups`);
         } catch (error) {
             console.error("Failed to create group: ", error);

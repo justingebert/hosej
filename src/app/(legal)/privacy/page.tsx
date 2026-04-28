@@ -1,5 +1,6 @@
 import BackLink from "@/components/ui/custom/BackLink";
 import Header from "@/components/ui/custom/Header";
+import CookiePreferences from "@/components/common/CookiePreferences";
 
 export default function PrivacyPage() {
     return (
@@ -35,20 +36,17 @@ export default function PrivacyPage() {
                     <ul className="list-disc pl-5 space-y-1">
                         <li>Display name or username</li>
                         <li>Profile photo (if uploaded)</li>
+                        <li>Content you create</li>
                         <li>
-                            Content you create: questions, answers, photos, chat messages, jukebox
-                            submissions
-                        </li>
-                        <li>
-                            Google account information (name, email, profile picture) — only if you
-                            sign in with Google
+                            Google account information (name, accountID) — only if you sign in with
+                            Google
                         </li>
                     </ul>
 
                     <h3 className="font-medium mt-2">Collected automatically</h3>
                     <ul className="list-disc pl-5 space-y-1">
                         <li>
-                            Device credentials for passwordless authentication (a device-bound
+                            i Generated Device Id for passwordless authentication (a device-bound
                             identifier stored in our database)
                         </li>
                         <li>
@@ -104,6 +102,15 @@ export default function PrivacyPage() {
                         <li>
                             <strong>Vercel</strong> — application hosting and edge infrastructure
                         </li>
+                        <li>
+                            <strong>Sentry</strong> — error monitoring, hosted in the EU (Functional
+                            Software, Inc.). Always-on for crash reports without personal
+                            identifiers; session replay only with your consent.
+                        </li>
+                        <li>
+                            <strong>PostHog</strong> — product analytics, hosted in the EU (PostHog
+                            Inc.). Only loaded after you accept analytics cookies.
+                        </li>
                     </ul>
                     <p>
                         Each provider has its own privacy policy which we encourage you to review.
@@ -111,11 +118,14 @@ export default function PrivacyPage() {
                 </section>
 
                 <section className="space-y-2">
-                    <h2 className="text-base font-semibold">5. Cookies</h2>
+                    <h2 className="text-base font-semibold">5. Cookies & Analytics</h2>
                     <p>
-                        hosej uses session cookies set by NextAuth solely to maintain your login
-                        state. We do not use cookies for advertising, analytics, or tracking.
+                        Essential cookies (Auth, theme) keep you logged in and stay on no matter
+                        what. Analytics cookies (PostHog product analytics, Sentry session replay)
+                        only load if you accept them. You can change your choice any time below —
+                        withdrawing consent is as easy as giving it.
                     </p>
+                    <CookiePreferences />
                 </section>
 
                 <section className="space-y-2">
