@@ -6,6 +6,14 @@ export const CreateDeviceUserSchema = z.object({
     userName: z.string().min(1, "userName is required").max(50),
 });
 
+export const DeviceLoginSchema = z.object({
+    deviceId: z.string().min(1, "deviceId is required"),
+});
+
+export const GoogleIdTokenSchema = z.object({
+    idToken: z.string().min(1, "idToken is required"),
+});
+
 const NotificationPrefsSchema = z
     .object({
         questionUnanswered: z.boolean(),

@@ -55,6 +55,52 @@ export async function createDeviceUser(deviceId: string, username: string): Prom
 }
 
 /**
+ * Look up an existing device account for mobile sign-in. Throws NotFoundError
+ * when the deviceId is unknown — never creates (creation is createDeviceUser).
+ */
+export async function getUserByDeviceId(deviceId: string): Promise<UserDocument> {
+    if (!deviceId) throw new ValidationError("deviceId is required");
+    const user = await User.findOne({ deviceId });
+    if (!user) throw new NotFoundError("No account found for this device");
+    return user;
+}
+
+/**
+ * Find a user by Google ID, or create a fresh Google account. Used by the mobile
+ * Google sign-in endpoint. (The web flow handles this inline in the jwt callback,
+ * where it also runs the cookie-based device-link merge that mobile doesn't use.)
+ */
+export async function findOrCreateGoogleUser(
+    googleId: string,
+    name?: string
+): Promise<{ user: UserDocument; isNew: boolean }> {
+    const existing = await User.findOne({ googleId });
+    if (existing) return { user: existing, isNew: false };
+    const user = new User({ googleId, googleConnected: true, username: name?.trim() || "New user" });
+    await user.save();
+    return { user, isNew: true };
+}
+
+/**
+ * Link a Google account to an already-authenticated user (mobile connect flow).
+ * Clears the device credential so Google becomes the sole identity — the client
+ * must also wipe its stored deviceId. Throws ConflictError if the Google account
+ * already belongs to a different user.
+ */
+export async function linkGoogleToUser(userId: string, googleId: string): Promise<UserDocument> {
+    const owner = await User.findOne({ googleId });
+    if (owner && owner._id.toString() !== userId) {
+        throw new ConflictError("This Google account is already linked to another user");
+    }
+    const user = await getUserById(userId);
+    user.googleId = googleId;
+    user.googleConnected = true;
+    user.deviceId = undefined;
+    await user.save();
+    return user;
+}
+
+/**
  * Update allowed user fields. Only accepts allowlisted fields via UpdateUserData.
  */
 export async function updateUser(userId: string, data: UpdateUserData): Promise<UserDocument> {
