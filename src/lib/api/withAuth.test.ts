@@ -10,7 +10,8 @@ import { withAuth } from "./withAuth";
 import { getToken } from "next-auth/jwt";
 import { AuthError } from "./errorHandling";
 
-const mockReq = {} as NextRequest;
+// No Authorization header → getAuthToken falls through to the (mocked) cookie path.
+const mockReq = { headers: { get: () => null } } as unknown as NextRequest;
 
 beforeEach(() => {
     vi.clearAllMocks();

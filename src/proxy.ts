@@ -1,7 +1,6 @@
-import { getToken } from "next-auth/jwt";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { env } from "@/env";
+import { getAuthToken } from "@/lib/auth/getAuthToken";
 import { generalLimiter, authLimiter, rateLimitEnabled } from "@/lib/rateLimit";
 
 export async function proxy(req: NextRequest) {
@@ -38,6 +37,9 @@ export async function proxy(req: NextRequest) {
         "/api/auth/signin/google",
         "/api/auth/callback",
         "/api/auth/callback/credentials",
+        "/api/auth/mobile/device/login",
+        "/api/auth/mobile/device/register",
+        "/api/auth/mobile/google",
         "/manifest.json",
         "/api/cron",
         "/api/auth/callback/google",
@@ -58,7 +60,7 @@ export async function proxy(req: NextRequest) {
         return NextResponse.next();
     }
 
-    const token = await getToken({ req, secret: env.NEXTAUTH_SECRET });
+    const token = await getAuthToken(req);
     if (!token) {
         if (pathname.startsWith("/api")) {
             return NextResponse.json({ message: "Unauthorized" }, { status: 401 });

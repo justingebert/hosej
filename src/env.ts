@@ -32,6 +32,12 @@ export const env = {
     NEXTAUTH_SECRET: requireEnv("NEXTAUTH_SECRET"),
     AUTH_GOOGLE_ID: requireEnv("AUTH_GOOGLE_ID"),
     AUTH_GOOGLE_SECRET: requireEnv("AUTH_GOOGLE_SECRET"),
+    // Native (iOS/Android) Google OAuth client IDs accepted as id_token audiences,
+    // comma-separated. The web AUTH_GOOGLE_ID is always accepted in addition.
+    GOOGLE_MOBILE_CLIENT_IDS: optionalEnv("GOOGLE_MOBILE_CLIENT_IDS")
+        ?.split(",")
+        .map((s) => s.trim())
+        .filter(Boolean),
 
     // Firebase
     FIREBASE_SERVICE_ACCOUNT: requireEnv("FIREBASE_SERVICE_ACCOUNT"),
