@@ -1,14 +1,53 @@
 import crypto from "crypto";
+import type { JWT } from "next-auth/jwt";
 import User from "@/db/models/User";
 import type { UserDocument, UserDTO } from "@/types/models/user";
 import type { UpdateUserData } from "@/types/models/user";
-import { ConflictError, NotFoundError, ValidationError } from "@/lib/api/errorHandling";
+import { AuthError, ConflictError, NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 import { generateSignedUrl } from "@/lib/integrations/storage";
+import {
+    generateMobileRefreshToken,
+    hashMobileRefreshToken,
+    buildMobileAuthBody,
+    MOBILE_REFRESH_TOKEN_TTL_MS,
+} from "@/lib/auth/mobileToken";
+import { hashDeviceId, isValidDeviceId, normalizeDeviceId } from "@/lib/auth/deviceCredential";
 
 const CONNECT_TOKEN_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const MAX_MOBILE_REFRESH_TOKENS = 5;
 
 // Throttle lastOnline writes — only update if more than this many ms have passed
 const LAST_ONLINE_THROTTLE_MS = 5 * 60 * 1000; // 5 minutes
+
+function requireValidDeviceId(deviceId: string): string {
+    const normalized = normalizeDeviceId(deviceId);
+    if (!isValidDeviceId(normalized)) {
+        throw new ValidationError("deviceId must be a valid UUID");
+    }
+    return normalized;
+}
+
+function hasDeviceCredential(user: Pick<UserDocument, "deviceId" | "deviceIdHash">): boolean {
+    return Boolean(user.deviceIdHash || user.deviceId);
+}
+
+function invalidateMobileSessions(user: UserDocument): void {
+    user.mobileSessionVersion = (user.mobileSessionVersion ?? 0) + 1;
+    user.mobileRefreshTokens = [];
+}
+
+async function migrateLegacyDeviceCredential(
+    user: UserDocument,
+    deviceId: string,
+    deviceIdHash: string
+): Promise<void> {
+    if (!user.deviceId || user.deviceIdHash) return;
+    if (normalizeDeviceId(user.deviceId) !== deviceId) return;
+
+    user.deviceIdHash = deviceIdHash;
+    user.deviceId = undefined;
+    await user.save();
+}
 
 export async function getUserById(userId: string): Promise<UserDocument> {
     const user = await User.findById(userId);
@@ -34,24 +73,41 @@ export async function resolveAvatarUrl(avatarKey?: string | null): Promise<strin
  */
 export async function getUserDTOById(userId: string): Promise<UserDTO> {
     const user = await getUserById(userId);
-    const obj = user.toObject();
-    const avatarUrl = await resolveAvatarUrl(obj.avatar);
-    return { ...obj, avatarUrl: avatarUrl ?? undefined } as unknown as UserDTO;
+    const avatarUrl = await resolveAvatarUrl(user.avatar);
+    return { ...user.toJSON(), avatarUrl: avatarUrl ?? undefined } as unknown as UserDTO;
 }
 
 export async function createDeviceUser(deviceId: string, username: string): Promise<UserDocument> {
-    if (!deviceId || !username) {
-        throw new ValidationError("Device ID and username are required");
-    }
+    const normalizedDeviceId = requireValidDeviceId(deviceId);
+    if (!username) throw new ValidationError("Device ID and username are required");
+    const deviceIdHash = hashDeviceId(normalizedDeviceId);
 
-    const existingUser = await User.findOne({ deviceId });
+    const existingUser = await User.findOne({
+        $or: [{ deviceIdHash }, { deviceId: normalizedDeviceId }],
+    });
     if (existingUser) {
         throw new ConflictError("User with this device ID already exists");
     }
 
-    const newUser = new User({ username, deviceId });
+    const newUser = new User({ username, deviceIdHash });
     await newUser.save();
     return newUser;
+}
+
+/**
+ * Find a device account by raw deviceId, matching either the hashed credential or
+ * a legacy plaintext one and migrating the latter to a hash on hit. Returns null
+ * when no account matches. Shared by mobile sign-in and the NextAuth device authorize.
+ */
+export async function findDeviceUser(deviceId: string): Promise<UserDocument | null> {
+    const normalizedDeviceId = requireValidDeviceId(deviceId);
+    const deviceIdHash = hashDeviceId(normalizedDeviceId);
+    const user = await User.findOne({
+        $or: [{ deviceIdHash }, { deviceId: normalizedDeviceId }],
+    });
+    if (!user) return null;
+    await migrateLegacyDeviceCredential(user, normalizedDeviceId, deviceIdHash);
+    return user;
 }
 
 /**
@@ -59,10 +115,76 @@ export async function createDeviceUser(deviceId: string, username: string): Prom
  * when the deviceId is unknown — never creates (creation is createDeviceUser).
  */
 export async function getUserByDeviceId(deviceId: string): Promise<UserDocument> {
-    if (!deviceId) throw new ValidationError("deviceId is required");
-    const user = await User.findOne({ deviceId });
+    const user = await findDeviceUser(deviceId);
     if (!user) throw new NotFoundError("No account found for this device");
     return user;
+}
+
+export async function issueMobileAuthBody(user: UserDocument, needsNameSetup = false) {
+    const now = Date.now();
+    const refreshToken = generateMobileRefreshToken();
+    const tokenHash = hashMobileRefreshToken(refreshToken);
+    const unexpiredTokens = (user.mobileRefreshTokens ?? []).filter(
+        (token) => token.expiresAt.getTime() > now
+    );
+
+    user.mobileRefreshTokens = [
+        ...unexpiredTokens.slice(-(MAX_MOBILE_REFRESH_TOKENS - 1)),
+        {
+            tokenHash,
+            expiresAt: new Date(now + MOBILE_REFRESH_TOKEN_TTL_MS),
+            createdAt: new Date(now),
+        },
+    ];
+    await user.save();
+
+    return buildMobileAuthBody(user, { refreshToken, needsNameSetup });
+}
+
+export async function getUserByMobileRefreshToken(refreshToken: string): Promise<UserDocument> {
+    const tokenHash = hashMobileRefreshToken(refreshToken);
+    const now = new Date();
+    const user = await User.findOne({
+        mobileRefreshTokens: {
+            $elemMatch: {
+                tokenHash,
+                expiresAt: { $gt: now },
+            },
+        },
+    });
+    if (!user) throw new AuthError("Invalid refresh token");
+
+    const nowMs = now.getTime();
+    user.mobileRefreshTokens = (user.mobileRefreshTokens ?? []).filter(
+        (token) => token.tokenHash !== tokenHash && token.expiresAt.getTime() > nowMs
+    );
+    return user;
+}
+
+/**
+ * Revoke a single mobile refresh token (sign out on one device). Idempotent — a
+ * no-op when the token is unknown, so it never reveals whether it existed. The
+ * matching access token is left to expire on its own (≤15 min).
+ */
+export async function revokeMobileRefreshToken(refreshToken: string): Promise<void> {
+    const tokenHash = hashMobileRefreshToken(refreshToken);
+    await User.updateOne(
+        { "mobileRefreshTokens.tokenHash": tokenHash },
+        { $pull: { mobileRefreshTokens: { tokenHash } } }
+    );
+}
+
+export async function assertValidMobileAccessToken(token: JWT): Promise<void> {
+    const userId = token.userId ? String(token.userId) : "";
+    const tokenVersion = token.mobileSessionVersion;
+    if (!userId || !Number.isInteger(tokenVersion)) {
+        throw new AuthError("Unauthorized");
+    }
+
+    const user = await User.findById(userId).select("mobileSessionVersion").lean();
+    if (!user || (user.mobileSessionVersion ?? 0) !== tokenVersion) {
+        throw new AuthError("Unauthorized");
+    }
 }
 
 /**
@@ -76,7 +198,11 @@ export async function findOrCreateGoogleUser(
 ): Promise<{ user: UserDocument; isNew: boolean }> {
     const existing = await User.findOne({ googleId });
     if (existing) return { user: existing, isNew: false };
-    const user = new User({ googleId, googleConnected: true, username: name?.trim() || "New user" });
+    const user = new User({
+        googleId,
+        googleConnected: true,
+        username: name?.trim() || "New user",
+    });
     await user.save();
     return { user, isNew: true };
 }
@@ -93,9 +219,20 @@ export async function linkGoogleToUser(userId: string, googleId: string): Promis
         throw new ConflictError("This Google account is already linked to another user");
     }
     const user = await getUserById(userId);
+    if (!hasDeviceCredential(user)) {
+        throw new ValidationError("Only device accounts can link Google");
+    }
+    if (user.googleId || user.googleConnected) {
+        throw new ConflictError("This account is already linked to Google");
+    }
+
+    invalidateMobileSessions(user);
     user.googleId = googleId;
     user.googleConnected = true;
     user.deviceId = undefined;
+    user.deviceIdHash = undefined;
+    user.connectToken = undefined;
+    user.connectTokenExpiresAt = undefined;
     await user.save();
     return user;
 }
@@ -203,7 +340,7 @@ export async function unregisterPushToken(userId: string, token: string): Promis
 export async function generateConnectToken(userId: string): Promise<string> {
     const user = await User.findById(userId);
     if (!user) throw new NotFoundError("User not found");
-    if (!user.deviceId)
+    if (!hasDeviceCredential(user))
         throw new ValidationError("Only device-authenticated users can generate a connect token");
 
     const token = crypto.randomUUID();
@@ -217,13 +354,26 @@ export async function generateConnectToken(userId: string): Promise<string> {
  * Unlink a Google account from a user, re-establishing device auth.
  */
 export async function disconnectGoogleAccount(userId: string, deviceId: string): Promise<void> {
-    if (!deviceId) throw new ValidationError("No deviceId provided");
+    const normalizedDeviceId = requireValidDeviceId(deviceId);
+    const deviceIdHash = hashDeviceId(normalizedDeviceId);
 
     const user = await User.findById(userId);
     if (!user) throw new NotFoundError("User not found");
+    if (!user.googleId && !user.googleConnected) {
+        throw new ValidationError("No Google account linked");
+    }
 
-    user.deviceId = deviceId;
+    invalidateMobileSessions(user);
+    user.deviceId = undefined;
+    user.deviceIdHash = deviceIdHash;
     user.googleId = undefined;
     user.googleConnected = false;
-    await user.save();
+    try {
+        await user.save();
+    } catch (err) {
+        if ((err as { code?: number }).code === 11000) {
+            throw new ConflictError("This device is already linked to another account");
+        }
+        throw err;
+    }
 }

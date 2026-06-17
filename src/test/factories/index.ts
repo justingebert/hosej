@@ -1,4 +1,5 @@
 import { Types } from "mongoose";
+import crypto from "crypto";
 import User from "@/db/models/User";
 import Group from "@/db/models/Group";
 import Question from "@/db/models/Question";
@@ -28,7 +29,7 @@ export async function makeUser(overrides: UserOverrides = {}) {
     const n = uniq();
     return User.create({
         username: overrides.username ?? `user_${n}`,
-        deviceId: overrides.deviceId ?? `device_${n}`,
+        deviceId: overrides.deviceId ?? crypto.randomUUID(),
         groups: overrides.groups ?? [],
         ...overrides,
     });

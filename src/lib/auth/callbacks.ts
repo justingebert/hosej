@@ -4,6 +4,8 @@ import { cookies } from "next/headers";
 import dbConnect from "@/db/dbConnect";
 import User from "@/db/models/User";
 import { CONNECT_TOKEN_COOKIE } from "@/lib/auth/connectToken";
+import { isValidDeviceId } from "@/lib/auth/deviceCredential";
+import { findDeviceUser } from "@/lib/services/user/user";
 
 /**
  * CredentialsProvider authorize function for device-based auth.
@@ -13,15 +15,15 @@ export async function authorizeDevice(
     credentials: Record<"deviceId", string> | undefined
 ): Promise<NextAuthUser | null> {
     await dbConnect();
-    const deviceId = credentials?.deviceId;
-    if (!deviceId) {
+    const rawDeviceId = credentials?.deviceId;
+    if (!rawDeviceId || !isValidDeviceId(rawDeviceId)) {
         return null;
     }
-    const userDoc = await User.findOne({ deviceId }).lean();
+    const userDoc = await findDeviceUser(rawDeviceId);
     if (!userDoc) {
         return null;
     }
-    return { ...userDoc, id: userDoc._id.toString() } as NextAuthUser;
+    return { ...userDoc.toObject(), id: userDoc._id.toString() } as NextAuthUser;
 }
 
 /**
@@ -71,8 +73,11 @@ export async function jwtCallback({
                 deviceUser.googleId = account.providerAccountId;
                 deviceUser.googleConnected = true;
                 deviceUser.deviceId = undefined;
+                deviceUser.deviceIdHash = undefined;
                 deviceUser.connectToken = undefined;
                 deviceUser.connectTokenExpiresAt = undefined;
+                deviceUser.mobileSessionVersion = (deviceUser.mobileSessionVersion ?? 0) + 1;
+                deviceUser.mobileRefreshTokens = [];
                 await deviceUser.save();
 
                 // Best-effort cookie clear. The connect token is already

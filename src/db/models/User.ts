@@ -19,6 +19,15 @@ const NotificationPrefsSchema = new Schema<NotificationPrefs>(
     { _id: false }
 );
 
+const MobileRefreshTokenSchema = new Schema(
+    {
+        tokenHash: { type: String, required: true },
+        expiresAt: { type: Date, required: true },
+        createdAt: { type: Date, default: Date.now },
+    },
+    { _id: false }
+);
+
 const UserSchema = new Schema<IUser>({
     username: {
         type: String,
@@ -33,6 +42,11 @@ const UserSchema = new Schema<IUser>({
     ],
 
     deviceId: {
+        type: String,
+        unique: true,
+        sparse: true,
+    },
+    deviceIdHash: {
         type: String,
         unique: true,
         sparse: true,
@@ -58,6 +72,14 @@ const UserSchema = new Schema<IUser>({
     },
     connectTokenExpiresAt: {
         type: Date,
+    },
+    mobileSessionVersion: {
+        type: Number,
+        default: 0,
+    },
+    mobileRefreshTokens: {
+        type: [MobileRefreshTokenSchema],
+        default: [],
     },
     avatar: {
         type: String,
@@ -92,6 +114,26 @@ const UserSchema = new Schema<IUser>({
         default: Date.now,
     },
 });
+
+// Strip auth secrets and verifiers from every client-facing serialization
+// (NextResponse.json / JSON.stringify / .toJSON()). Server code reads these
+// fields directly off the document, which this transform does not affect.
+UserSchema.set("toJSON", {
+    transform(_doc, ret) {
+        delete ret.deviceId;
+        delete ret.deviceIdHash;
+        delete ret.connectToken;
+        delete ret.connectTokenExpiresAt;
+        delete ret.mobileRefreshTokens;
+        delete ret.mobileSessionVersion;
+        delete ret.googleId;
+        delete ret.fcmToken;
+        return ret;
+    },
+});
+
+// The mobile refresh endpoint looks users up by hashed refresh token.
+UserSchema.index({ "mobileRefreshTokens.tokenHash": 1 });
 
 const User =
     (mongoose.models.User as mongoose.Model<IUser>) || mongoose.model<IUser>("User", UserSchema);

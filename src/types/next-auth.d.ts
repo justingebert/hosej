@@ -26,5 +26,6 @@ declare module "next-auth/jwt" {
         needsNameSetup?: boolean;
         onboardingCompleted?: boolean;
         announcementsSeen?: string[];
+        mobileSessionVersion?: number;
     }
 }

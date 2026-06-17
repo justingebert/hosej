@@ -45,9 +45,13 @@ describe("mobileToken", () => {
     });
 
     it("buildMobileAuthBody carries the token and the needsNameSetup hint", async () => {
-        const body = await buildMobileAuthBody({ _id: new Types.ObjectId(), username: "x" }, true);
+        const body = await buildMobileAuthBody(
+            { _id: new Types.ObjectId(), username: "x" },
+            { refreshToken: "refresh-token", needsNameSetup: true }
+        );
 
-        expect(typeof body.token).toBe("string");
+        expect(typeof body.accessToken).toBe("string");
+        expect(body.refreshToken).toBe("refresh-token");
         expect(body.needsNameSetup).toBe(true);
         expect(body.user.username).toBe("x");
     });

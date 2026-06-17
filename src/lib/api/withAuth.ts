@@ -1,7 +1,8 @@
 import type { NextRequest } from "next/server";
 import type { ApiRoute, NextRouteHandler } from "./errorHandling";
 import { AuthError, withErrorHandling } from "./errorHandling";
-import { getAuthToken } from "@/lib/auth/getAuthToken";
+import { resolveAuthToken } from "@/lib/auth/getAuthToken";
+import { assertValidMobileAccessToken } from "@/lib/services/user/user";
 
 export type AuthedContext<T = {}> = T & { userId: string };
 
@@ -11,9 +12,13 @@ export type AuthedContext<T = {}> = T & { userId: string };
  */
 export function withAuth<TCtx = {}>(handler: ApiRoute<AuthedContext<TCtx>>): ApiRoute<TCtx> {
     return async (req: NextRequest, context: TCtx) => {
-        const token = await getAuthToken(req);
+        const auth = await resolveAuthToken(req);
+        const token = auth?.token;
         if (!token?.userId) {
             throw new AuthError("Unauthorized");
+        }
+        if (auth?.source === "mobile") {
+            await assertValidMobileAccessToken(token);
         }
         const userId = String(token.userId);
         return handler(req, Object.assign({}, context, { userId }));

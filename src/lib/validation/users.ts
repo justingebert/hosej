@@ -1,17 +1,27 @@
 import { z } from "zod";
 import { NOTIFICATION_LANGUAGES, NOTIFICATION_STYLES } from "@/types/models/user";
+import { isValidDeviceId, normalizeDeviceId } from "@/lib/auth/deviceCredential";
+
+const DeviceIdSchema = z
+    .string()
+    .transform(normalizeDeviceId)
+    .refine(isValidDeviceId, "deviceId must be a valid UUID");
 
 export const CreateDeviceUserSchema = z.object({
-    deviceId: z.string().min(1, "deviceId is required"),
+    deviceId: DeviceIdSchema,
     userName: z.string().min(1, "userName is required").max(50),
 });
 
 export const DeviceLoginSchema = z.object({
-    deviceId: z.string().min(1, "deviceId is required"),
+    deviceId: DeviceIdSchema,
 });
 
 export const GoogleIdTokenSchema = z.object({
     idToken: z.string().min(1, "idToken is required"),
+});
+
+export const MobileRefreshSchema = z.object({
+    refreshToken: z.string().min(32, "refreshToken is required").max(512),
 });
 
 const NotificationPrefsSchema = z
@@ -36,7 +46,7 @@ export const UpdateUserSchema = z.object({
 });
 
 export const GoogleDisconnectSchema = z.object({
-    deviceId: z.string().min(1, "deviceId is required"),
+    deviceId: DeviceIdSchema,
 });
 
 export const PushTokenSchema = z.object({

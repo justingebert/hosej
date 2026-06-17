@@ -3,8 +3,7 @@ import { NextResponse } from "next/server";
 import { withErrorHandling } from "@/lib/api/errorHandling";
 import { parseBody } from "@/lib/validation/parseBody";
 import { CreateDeviceUserSchema } from "@/lib/validation/users";
-import { createDeviceUser } from "@/lib/services/user/user";
-import { buildMobileAuthBody } from "@/lib/auth/mobileToken";
+import { createDeviceUser, issueMobileAuthBody } from "@/lib/services/user/user";
 
 // POST /api/auth/mobile/device/register — create a new device account, return a Bearer token.
 // 409 if the deviceId already exists (mirrors the web create path; never silently re-creates,
@@ -12,5 +11,5 @@ import { buildMobileAuthBody } from "@/lib/auth/mobileToken";
 export const POST = withErrorHandling(async (req: NextRequest) => {
     const { deviceId, userName } = await parseBody(req, CreateDeviceUserSchema);
     const user = await createDeviceUser(deviceId, userName);
-    return NextResponse.json(await buildMobileAuthBody(user), { status: 201 });
+    return NextResponse.json(await issueMobileAuthBody(user), { status: 201 });
 });
