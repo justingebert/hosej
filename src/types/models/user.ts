@@ -30,17 +30,26 @@ export const DEFAULT_NOTIFICATION_PREFS: NotificationPrefs = {
     jukeboxRate: true,
 };
 
+export type MobileRefreshToken = {
+    tokenHash: string;
+    expiresAt: Date;
+    createdAt: Date;
+};
+
 export interface IUser {
     _id: Types.ObjectId;
     username: string;
     groups: (Types.ObjectId | string)[];
 
     deviceId?: string;
+    deviceIdHash?: string;
     fcmToken?: string;
     googleConnected: boolean;
     googleId?: string;
     connectToken?: string;
     connectTokenExpiresAt?: Date;
+    mobileSessionVersion?: number;
+    mobileRefreshTokens?: MobileRefreshToken[];
 
     avatar?: string;
     lastOnline?: Date;

@@ -1,16 +1,16 @@
 import { encode, decode } from "next-auth/jwt";
 import type { JWT } from "next-auth/jwt";
+import crypto from "crypto";
 import { env } from "@/env";
 
 /**
- * Mobile (Expo) clients can't use NextAuth's cookie session, so we hand them a
- * Bearer token instead. It's the same encrypted NextAuth JWT, just minted with a
- * fixed salt (rather than the env-dependent cookie name NextAuth uses) so it
- * decodes identically in every environment. Read back via `decodeMobileToken`
- * (and, for requests, `getAuthToken`).
+ * Mobile (Expo) clients can't use NextAuth's cookie session, so API calls use a
+ * short-lived Bearer access token. Refresh tokens are opaque random secrets,
+ * stored hashed on the user document and rotated via /api/auth/mobile/refresh.
  */
 export const MOBILE_TOKEN_SALT = "hosej-mobile-session";
-export const MOBILE_TOKEN_MAX_AGE = 60 * 60 * 24 * 90; // 90 days
+export const MOBILE_ACCESS_TOKEN_MAX_AGE = 60 * 15; // 15 minutes
+export const MOBILE_REFRESH_TOKEN_TTL_MS = 1000 * 60 * 60 * 24 * 90; // 90 days
 
 /** Minimal shape needed to build claims — satisfied by a User document or a lean object. */
 type UserLike = {
@@ -21,6 +21,7 @@ type UserLike = {
     createdAt?: Date | string;
     onboardingCompleted?: boolean;
     announcementsSeen?: string[];
+    mobileSessionVersion?: number;
 };
 
 /** Build the JWT claim set from a user — mirrors the fields set by the web `jwt` callback. */
@@ -36,7 +37,9 @@ export function userTokenClaims(user: UserLike): JWT {
         // app reads the `needsNameSetup` hint from the auth response body instead.
         needsNameSetup: false,
         onboardingCompleted: user.onboardingCompleted ?? false,
-        announcementsSeen: user.announcementsSeen ?? [],
+        // announcementsSeen is intentionally omitted from the access token: it can
+        // grow unbounded and isn't read server-side — the app gets it from the user DTO.
+        mobileSessionVersion: user.mobileSessionVersion ?? 0,
     };
 }
 
@@ -51,10 +54,10 @@ export function authUserSummary(user: UserLike) {
 
 export function mintMobileToken(claims: JWT): Promise<string> {
     return encode({
-        token: claims,
+        token: JSON.parse(JSON.stringify(claims)) as JWT,
         secret: env.NEXTAUTH_SECRET,
         salt: MOBILE_TOKEN_SALT,
-        maxAge: MOBILE_TOKEN_MAX_AGE,
+        maxAge: MOBILE_ACCESS_TOKEN_MAX_AGE,
     });
 }
 
@@ -67,14 +70,36 @@ export async function decodeMobileToken(token: string): Promise<JWT | null> {
     }
 }
 
+export function generateMobileRefreshToken(): string {
+    return crypto.randomBytes(32).toString("base64url");
+}
+
+export function hashMobileRefreshToken(refreshToken: string): string {
+    return crypto.createHash("sha256").update(refreshToken).digest("hex");
+}
+
 /**
- * Token + user summary body shared by every mobile auth endpoint. `needsNameSetup`
- * is a hint for the app to prompt for a display name (e.g. a fresh Google sign-up);
- * it's deliberately kept out of the token itself — see `userTokenClaims`.
+ * Access token + refresh token body shared by every mobile auth endpoint.
+ * `needsNameSetup` is a hint for the app to prompt for a display name (e.g. a
+ * fresh Google sign-up); it's deliberately kept out of the token itself — see
+ * `userTokenClaims`.
  */
-export async function buildMobileAuthBody(user: UserLike, needsNameSetup = false) {
+export async function buildMobileAuthBody(
+    user: UserLike,
+    {
+        refreshToken,
+        needsNameSetup = false,
+    }: {
+        refreshToken: string;
+        needsNameSetup?: boolean;
+    }
+) {
+    const accessToken = await mintMobileToken(userTokenClaims(user));
     return {
-        token: await mintMobileToken(userTokenClaims(user)),
+        accessToken,
+        refreshToken,
+        tokenType: "Bearer",
+        expiresIn: MOBILE_ACCESS_TOKEN_MAX_AGE,
         user: authUserSummary(user),
         needsNameSetup,
     };

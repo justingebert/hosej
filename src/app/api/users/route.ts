@@ -36,7 +36,9 @@ export const POST = withErrorHandling(async (req: NextRequest) => {
 export const PUT = withAuthAndErrors(async (req: NextRequest, { userId }: AuthedContext) => {
     const body = await parseBody(req, UpdateUserSchema);
     const user = await updateUser(userId, body);
-    const obj = user.toObject();
-    const avatarUrl = await resolveAvatarUrl(obj.avatar);
-    return NextResponse.json({ ...obj, avatarUrl: avatarUrl ?? undefined }, { status: 200 });
+    const avatarUrl = await resolveAvatarUrl(user.avatar);
+    return NextResponse.json(
+        { ...user.toJSON(), avatarUrl: avatarUrl ?? undefined },
+        { status: 200 }
+    );
 });

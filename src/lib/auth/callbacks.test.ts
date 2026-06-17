@@ -31,8 +31,10 @@ function setCookieToken(value: string | undefined) {
 
 import { authorizeDevice, jwtCallback, sessionCallback } from "./callbacks";
 import User from "@/db/models/User";
+import { hashDeviceId } from "@/lib/auth/deviceCredential";
 
 const mockId = new Types.ObjectId();
+const DEVICE_ID_A = "11111111-1111-4111-8111-111111111111";
 
 function baseToken(overrides: Partial<JWT> = {}): JWT {
     return {
@@ -58,15 +60,21 @@ describe("authorizeDevice", () => {
         const userDoc = {
             _id: mockId,
             username: "alice",
-            deviceId: "dev-1",
+            deviceIdHash: hashDeviceId(DEVICE_ID_A),
             groups: [],
             googleConnected: false,
+            toObject: vi.fn(function (this: Record<string, unknown>) {
+                return { ...this };
+            }),
         };
-        (User.findOne as Mock).mockReturnValue({ lean: vi.fn().mockResolvedValue(userDoc) });
+        (User.findOne as Mock).mockResolvedValue(userDoc);
 
-        const result = await authorizeDevice({ deviceId: "dev-1" });
+        const result = await authorizeDevice({ deviceId: DEVICE_ID_A });
 
         expect(result).toMatchObject({ id: mockId.toString(), username: "alice" });
+        expect(User.findOne as Mock).toHaveBeenCalledWith({
+            $or: [{ deviceIdHash: hashDeviceId(DEVICE_ID_A) }, { deviceId: DEVICE_ID_A }],
+        });
     });
 
     it("should return null when deviceId is missing", async () => {
@@ -80,9 +88,9 @@ describe("authorizeDevice", () => {
     });
 
     it("should return null when user not found", async () => {
-        (User.findOne as Mock).mockReturnValue({ lean: vi.fn().mockResolvedValue(null) });
+        (User.findOne as Mock).mockResolvedValue(null);
 
-        const result = await authorizeDevice({ deviceId: "unknown" });
+        const result = await authorizeDevice({ deviceId: "22222222-2222-4222-8222-222222222222" });
         expect(result).toBeNull();
     });
 });
@@ -120,7 +128,7 @@ describe("jwtCallback", () => {
             username: "alice",
             groups: ["group-1"],
             createdAt: "2024-01-01",
-            deviceId: "dev-1",
+            deviceId: DEVICE_ID_A,
             connectToken: "tok-valid",
             connectTokenExpiresAt: new Date(Date.now() + 60_000),
             googleId: undefined as string | undefined,

@@ -14,6 +14,11 @@ import {
 } from "./user";
 import User from "@/db/models/User";
 import { ConflictError, NotFoundError, ValidationError } from "@/lib/api/errorHandling";
+import { hashDeviceId } from "@/lib/auth/deviceCredential";
+
+const DEVICE_ID_A = "11111111-1111-4111-8111-111111111111";
+const DEVICE_ID_B = "22222222-2222-4222-8222-222222222222";
+const DEVICE_ID_C = "33333333-3333-4333-8333-333333333333";
 
 beforeAll(setupTestDb);
 afterAll(teardownTestDb);
@@ -35,10 +40,11 @@ describe("getUserById", () => {
 
 describe("createDeviceUser", () => {
     it("creates and persists a new user", async () => {
-        const result = await createDeviceUser("device-123", "testuser");
+        const result = await createDeviceUser(DEVICE_ID_A, "testuser");
 
         expect(result.username).toBe("testuser");
-        expect(result.deviceId).toBe("device-123");
+        expect(result.deviceId).toBeUndefined();
+        expect(result.deviceIdHash).toBe(hashDeviceId(DEVICE_ID_A));
 
         const stored = await User.findById(result._id);
         expect(stored).not.toBeNull();
@@ -49,13 +55,13 @@ describe("createDeviceUser", () => {
     });
 
     it("throws ValidationError when username is missing", async () => {
-        await expect(createDeviceUser("device-123", "")).rejects.toThrow(ValidationError);
+        await expect(createDeviceUser(DEVICE_ID_A, "")).rejects.toThrow(ValidationError);
     });
 
     it("throws ConflictError when deviceId already exists", async () => {
-        await makeUser({ deviceId: "device-123" });
+        await makeUser({ deviceId: DEVICE_ID_A });
 
-        await expect(createDeviceUser("device-123", "testuser")).rejects.toThrow(ConflictError);
+        await expect(createDeviceUser(DEVICE_ID_A, "testuser")).rejects.toThrow(ConflictError);
     });
 });
 
@@ -165,7 +171,7 @@ describe("unregisterPushToken", () => {
 
 describe("generateConnectToken", () => {
     it("generates and stores a connect token for a device user", async () => {
-        const user = await makeUser({ deviceId: "device-123" });
+        const user = await makeUser({ deviceId: DEVICE_ID_A });
 
         const token = await generateConnectToken(user._id.toString());
         const reloaded = await User.findById(user._id);
@@ -184,7 +190,7 @@ describe("generateConnectToken", () => {
 
     it("throws ValidationError for a non-device user", async () => {
         const user = await makeUser();
-        await User.findByIdAndUpdate(user._id, { $unset: { deviceId: "" } });
+        await User.findByIdAndUpdate(user._id, { $unset: { deviceId: "", deviceIdHash: "" } });
 
         await expect(generateConnectToken(user._id.toString())).rejects.toThrow(ValidationError);
     });
@@ -194,10 +200,11 @@ describe("disconnectGoogleAccount", () => {
     it("sets deviceId and clears google fields", async () => {
         const user = await makeUser({ googleId: "google-123", googleConnected: true });
 
-        await disconnectGoogleAccount(user._id.toString(), "new-device-id");
+        await disconnectGoogleAccount(user._id.toString(), DEVICE_ID_B);
         const reloaded = await User.findById(user._id);
 
-        expect(reloaded?.deviceId).toBe("new-device-id");
+        expect(reloaded?.deviceId).toBeUndefined();
+        expect(reloaded?.deviceIdHash).toBe(hashDeviceId(DEVICE_ID_B));
         expect(reloaded?.googleId).toBeUndefined();
         expect(reloaded?.googleConnected).toBe(false);
     });
@@ -212,7 +219,43 @@ describe("disconnectGoogleAccount", () => {
 
     it("throws NotFoundError when user not found", async () => {
         await expect(
-            disconnectGoogleAccount(new Types.ObjectId().toString(), "device-id")
+            disconnectGoogleAccount(new Types.ObjectId().toString(), DEVICE_ID_C)
         ).rejects.toThrow(NotFoundError);
+    });
+
+    it("throws ValidationError when no Google account is linked", async () => {
+        const user = await makeUser({ deviceId: DEVICE_ID_A });
+
+        await expect(disconnectGoogleAccount(user._id.toString(), DEVICE_ID_B)).rejects.toThrow(
+            ValidationError
+        );
+    });
+});
+
+describe("user serialization", () => {
+    it("omits auth secrets and verifiers from JSON", async () => {
+        const user = await makeUser({ googleId: "g-secret", fcmToken: "fcm-secret" });
+        user.connectToken = "live-connect-token";
+        user.mobileRefreshTokens = [
+            { tokenHash: "h", expiresAt: new Date(Date.now() + 60_000), createdAt: new Date() },
+        ];
+        await user.save();
+
+        const json = JSON.parse(JSON.stringify(user));
+
+        for (const field of [
+            "deviceId",
+            "deviceIdHash",
+            "connectToken",
+            "connectTokenExpiresAt",
+            "mobileRefreshTokens",
+            "mobileSessionVersion",
+            "googleId",
+            "fcmToken",
+        ]) {
+            expect(json[field]).toBeUndefined();
+        }
+        expect(json.username).toBe(user.username);
+        expect(json._id).toBeTruthy();
     });
 });

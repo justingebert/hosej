@@ -5,8 +5,7 @@ import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { parseBody } from "@/lib/validation/parseBody";
 import { GoogleIdTokenSchema } from "@/lib/validation/users";
 import { verifyGoogleIdToken } from "@/lib/integrations/googleAuth";
-import { linkGoogleToUser } from "@/lib/services/user/user";
-import { buildMobileAuthBody } from "@/lib/auth/mobileToken";
+import { linkGoogleToUser, issueMobileAuthBody } from "@/lib/services/user/user";
 
 // POST /api/auth/mobile/google/link — link Google to the authenticated device account.
 // Clears the device credential (Google becomes the sole identity), so the client MUST
@@ -15,5 +14,5 @@ export const POST = withAuthAndErrors(async (req: NextRequest, { userId }: Authe
     const { idToken } = await parseBody(req, GoogleIdTokenSchema);
     const identity = await verifyGoogleIdToken(idToken);
     const user = await linkGoogleToUser(userId, identity.googleId);
-    return NextResponse.json(await buildMobileAuthBody(user), { status: 200 });
+    return NextResponse.json(await issueMobileAuthBody(user), { status: 200 });
 });

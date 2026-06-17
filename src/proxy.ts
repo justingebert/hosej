@@ -40,6 +40,8 @@ export async function proxy(req: NextRequest) {
         "/api/auth/mobile/device/login",
         "/api/auth/mobile/device/register",
         "/api/auth/mobile/google",
+        "/api/auth/mobile/refresh",
+        "/api/auth/mobile/logout",
         "/manifest.json",
         "/api/cron",
         "/api/auth/callback/google",
@@ -60,7 +62,7 @@ export async function proxy(req: NextRequest) {
         return NextResponse.next();
     }
 
-    const token = await getAuthToken(req);
+    const token = await getAuthToken(req, { allowBearer: pathname.startsWith("/api") });
     if (!token) {
         if (pathname.startsWith("/api")) {
             return NextResponse.json({ message: "Unauthorized" }, { status: 401 });

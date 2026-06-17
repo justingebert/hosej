@@ -94,3 +94,9 @@ certificates
 plans
 # Sentry Config File
 .env.sentry-build-plugin
+
+.claude
+.agents
+skills-lock.json
+fallow.json
+
