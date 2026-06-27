@@ -21,6 +21,7 @@ import { hashDeviceId, isValidDeviceId, normalizeDeviceId } from "@/lib/auth/dev
 
 const CONNECT_TOKEN_TTL_MS = 5 * 60 * 1000; // 5 minutes
 const MAX_MOBILE_REFRESH_TOKENS = 5;
+const DELETED_USER_SUFFIX = " (deleted)";
 
 // Throttle lastOnline writes — only update if more than this many ms have passed
 const LAST_ONLINE_THROTTLE_MS = 5 * 60 * 1000; // 5 minutes
@@ -40,6 +41,10 @@ function hasDeviceCredential(user: Pick<UserDocument, "deviceId" | "deviceIdHash
 function invalidateMobileSessions(user: UserDocument): void {
     user.mobileSessionVersion = (user.mobileSessionVersion ?? 0) + 1;
     user.mobileRefreshTokens = [];
+}
+
+function deletedUsername(username: string): string {
+    return username.endsWith(DELETED_USER_SUFFIX) ? username : `${username}${DELETED_USER_SUFFIX}`;
 }
 
 async function migrateLegacyDeviceCredential(
@@ -197,10 +202,15 @@ export async function assertValidMobileAccessToken(token: JWT): Promise<void> {
         throw new AuthError("Unauthorized");
     }
 
-    const user = await User.findById(userId).select("mobileSessionVersion").lean();
-    if (!user || (user.mobileSessionVersion ?? 0) !== tokenVersion) {
+    const user = await User.findById(userId).select("deletedAt mobileSessionVersion").lean();
+    if (!user || user.deletedAt || (user.mobileSessionVersion ?? 0) !== tokenVersion) {
         throw new AuthError("Unauthorized");
     }
+}
+
+export async function assertActiveUser(userId: string): Promise<void> {
+    const user = await User.findById(userId).select("deletedAt").lean();
+    if (!user || user.deletedAt) throw new AuthError("Unauthorized");
 }
 
 /**
@@ -306,9 +316,9 @@ export async function updateUser(userId: string, data: UpdateUserData): Promise<
 }
 
 /**
- * Delete the user and remove their group memberships. If they are the only
- * member of a group, delete that group and its child content. If they are admin
- * of a remaining group, transfer admin to the earliest joined remaining member.
+ * Delete the user's account without deleting the document. Historical documents
+ * can still populate this _id, but credentials and personal fields are removed.
+ * Live group memberships are removed; solo groups are deleted with child content.
  */
 export async function deleteUser(userId: string): Promise<void> {
     const user = await User.findById(userId);
@@ -349,7 +359,22 @@ export async function deleteUser(userId: string): Promise<void> {
         );
     }
 
-    await User.findByIdAndDelete(user._id);
+    invalidateMobileSessions(user);
+    user.username = deletedUsername(user.username);
+    user.groups = [];
+    user.avatar = undefined;
+    user.lastOnline = undefined;
+    user.announcementsSeen = [];
+    user.onboardingCompleted = false;
+    user.googleConnected = false;
+    user.googleId = undefined;
+    user.deviceId = undefined;
+    user.deviceIdHash = undefined;
+    user.fcmToken = undefined;
+    user.connectToken = undefined;
+    user.connectTokenExpiresAt = undefined;
+    user.deletedAt = new Date();
+    await user.save();
 }
 
 /**

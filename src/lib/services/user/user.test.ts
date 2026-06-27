@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, beforeEach, afterAll } from "vitest";
 import { Types } from "mongoose";
 
 import { setupTestDb, teardownTestDb, clearCollections } from "@/test/db";
-import { makeGroup, makeUser } from "@/test/factories";
+import { makeGroup, makeQuestion, makeUser } from "@/test/factories";
 import {
     getUserById,
     createDeviceUser,
@@ -14,6 +14,7 @@ import {
     disconnectGoogleAccount,
 } from "./user";
 import Group from "@/db/models/Group";
+import Question from "@/db/models/Question";
 import User from "@/db/models/User";
 import { ConflictError, NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 import { hashDeviceId } from "@/lib/auth/deviceCredential";
@@ -117,8 +118,22 @@ describe("updateUser", () => {
 });
 
 describe("deleteUser", () => {
-    it("deletes the user and removes them from remaining groups", async () => {
-        const user = await makeUser();
+    it("anonymizes the user and removes them from remaining groups", async () => {
+        const user = await makeUser({ username: "Alice" });
+        user.avatar = "avatar-key";
+        user.googleId = "google-delete";
+        user.googleConnected = true;
+        user.fcmToken = "delete-fcm-token";
+        user.mobileRefreshTokens = [
+            {
+                tokenHash: "token-hash",
+                expiresAt: new Date(Date.now() + 60_000),
+                createdAt: new Date(),
+            },
+        ];
+        user.mobileSessionVersion = 3;
+        await user.save();
+
         const member = await makeUser();
         const group = await makeGroup({
             admin: member._id,
@@ -131,10 +146,27 @@ describe("deleteUser", () => {
             { _id: { $in: [user._id, member._id] } },
             { $push: { groups: group._id } }
         );
+        const question = await makeQuestion({ groupId: group._id, submittedBy: user._id });
 
         await deleteUser(user._id.toString());
 
-        expect(await User.findById(user._id)).toBeNull();
+        const deletedUser = await User.findById(user._id);
+        expect(deletedUser).not.toBeNull();
+        expect(deletedUser?.username).toBe("Alice (deleted)");
+        expect(deletedUser?.groups).toEqual([]);
+        expect(deletedUser?.avatar).toBeUndefined();
+        expect(deletedUser?.googleConnected).toBe(false);
+        expect(deletedUser?.googleId).toBeUndefined();
+        expect(deletedUser?.deviceId).toBeUndefined();
+        expect(deletedUser?.fcmToken).toBeUndefined();
+        expect(deletedUser?.mobileRefreshTokens).toEqual([]);
+        expect(deletedUser?.mobileSessionVersion).toBe(4);
+        expect(deletedUser?.deletedAt).toBeInstanceOf(Date);
+
+        const reloadedQuestion = await Question.findById(question._id).populate("submittedBy");
+        expect((reloadedQuestion?.submittedBy as unknown as { username: string }).username).toBe(
+            "Alice (deleted)"
+        );
 
         const reloadedGroup = await Group.findById(group._id);
         expect(reloadedGroup?.members.map((m) => m.user.toString())).toEqual([
@@ -178,7 +210,7 @@ describe("deleteUser", () => {
 
         await deleteUser(user._id.toString());
 
-        expect(await User.findById(user._id)).toBeNull();
+        expect((await User.findById(user._id))?.deletedAt).toBeInstanceOf(Date);
         expect(await Group.findById(group._id)).toBeNull();
     });
 

@@ -53,6 +53,7 @@ export interface IUser {
 
     avatar?: string;
     lastOnline?: Date;
+    deletedAt?: Date;
     onboardingCompleted?: boolean;
     announcementsSeen?: string[];
 

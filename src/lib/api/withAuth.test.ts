@@ -6,15 +6,23 @@ vi.mock("next-auth/jwt", () => ({
     getToken: vi.fn(),
 }));
 
+vi.mock("@/lib/services/user/user", () => ({
+    assertActiveUser: vi.fn(),
+    assertValidMobileAccessToken: vi.fn(),
+}));
+
 import { withAuth } from "./withAuth";
 import { getToken } from "next-auth/jwt";
 import { AuthError } from "./errorHandling";
+import { assertActiveUser, assertValidMobileAccessToken } from "@/lib/services/user/user";
 
 // No Authorization header → getAuthToken falls through to the (mocked) cookie path.
 const mockReq = { headers: { get: () => null } } as unknown as NextRequest;
 
 beforeEach(() => {
     vi.clearAllMocks();
+    (assertActiveUser as Mock).mockResolvedValue(undefined);
+    (assertValidMobileAccessToken as Mock).mockResolvedValue(undefined);
 });
 
 describe("withAuth", () => {
@@ -26,6 +34,18 @@ describe("withAuth", () => {
         await wrapped(mockReq, {});
 
         expect(handler).toHaveBeenCalledWith(mockReq, { userId: "user-123" });
+        expect(assertActiveUser).toHaveBeenCalledWith("user-123");
+    });
+
+    it("should throw AuthError when user is deleted", async () => {
+        (getToken as Mock).mockResolvedValue({ userId: "user-123" });
+        (assertActiveUser as Mock).mockRejectedValue(new AuthError("Unauthorized"));
+        const handler = vi.fn();
+
+        const wrapped = withAuth(handler);
+
+        await expect(wrapped(mockReq, {})).rejects.toThrow(AuthError);
+        expect(handler).not.toHaveBeenCalled();
     });
 
     it("should throw AuthError when no token", async () => {

@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import type { ApiRoute, NextRouteHandler } from "./errorHandling";
 import { AuthError, withErrorHandling } from "./errorHandling";
 import { resolveAuthToken } from "@/lib/auth/getAuthToken";
-import { assertValidMobileAccessToken } from "@/lib/services/user/user";
+import { assertActiveUser, assertValidMobileAccessToken } from "@/lib/services/user/user";
 
 export type AuthedContext<T = {}> = T & { userId: string };
 
@@ -19,6 +19,8 @@ export function withAuth<TCtx = {}>(handler: ApiRoute<AuthedContext<TCtx>>): Api
         }
         if (auth?.source === "mobile") {
             await assertValidMobileAccessToken(token);
+        } else {
+            await assertActiveUser(String(token.userId));
         }
         const userId = String(token.userId);
         return handler(req, Object.assign({}, context, { userId }));
