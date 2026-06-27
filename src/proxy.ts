@@ -57,6 +57,12 @@ export async function proxy(req: NextRequest) {
     if (
         publicRoutes.has(pathname) ||
         pathname.startsWith("/r/") ||
+        // Public invite surfaces: the app-first landing page and the preview API
+        // (GET only — POST /api/invites/[code] still requires auth to join), plus
+        // the Apple App Site Association file for iOS Universal Links.
+        pathname.startsWith("/join/") ||
+        pathname === "/.well-known/apple-app-site-association" ||
+        (pathname.startsWith("/api/invites/") && req.method === "GET") ||
         (pathname == "/api/users" && req.method === "POST")
     ) {
         return NextResponse.next();

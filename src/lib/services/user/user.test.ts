@@ -2,16 +2,18 @@ import { describe, it, expect, beforeAll, beforeEach, afterAll } from "vitest";
 import { Types } from "mongoose";
 
 import { setupTestDb, teardownTestDb, clearCollections } from "@/test/db";
-import { makeUser } from "@/test/factories";
+import { makeGroup, makeUser } from "@/test/factories";
 import {
     getUserById,
     createDeviceUser,
     updateUser,
+    deleteUser,
     registerPushToken,
     unregisterPushToken,
     generateConnectToken,
     disconnectGoogleAccount,
 } from "./user";
+import Group from "@/db/models/Group";
 import User from "@/db/models/User";
 import { ConflictError, NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 import { hashDeviceId } from "@/lib/auth/deviceCredential";
@@ -111,6 +113,77 @@ describe("updateUser", () => {
         });
 
         expect(result.announcementsSeen?.sort()).toEqual(["a", "b"]);
+    });
+});
+
+describe("deleteUser", () => {
+    it("deletes the user and removes them from remaining groups", async () => {
+        const user = await makeUser();
+        const member = await makeUser();
+        const group = await makeGroup({
+            admin: member._id,
+            members: [
+                { user: member._id, name: "member" },
+                { user: user._id, name: "delete me" },
+            ],
+        });
+        await User.updateMany(
+            { _id: { $in: [user._id, member._id] } },
+            { $push: { groups: group._id } }
+        );
+
+        await deleteUser(user._id.toString());
+
+        expect(await User.findById(user._id)).toBeNull();
+
+        const reloadedGroup = await Group.findById(group._id);
+        expect(reloadedGroup?.members.map((m) => m.user.toString())).toEqual([
+            member._id.toString(),
+        ]);
+        expect(reloadedGroup?.admin.toString()).toBe(member._id.toString());
+
+        const memberAfter = await User.findById(member._id);
+        expect(memberAfter?.groups.map((g) => g.toString())).toContain(group._id.toString());
+    });
+
+    it("transfers admin to the earliest joined remaining member", async () => {
+        const admin = await makeUser();
+        const earlyMember = await makeUser();
+        const lateMember = await makeUser();
+        const group = await makeGroup({
+            admin: admin._id,
+            members: [
+                { user: admin._id, name: "admin" },
+                { user: lateMember._id, name: "late" },
+                { user: earlyMember._id, name: "early" },
+            ],
+        });
+        group.members[1].joinedAt = new Date("2024-02-01T00:00:00.000Z");
+        group.members[2].joinedAt = new Date("2024-01-01T00:00:00.000Z");
+        await group.save();
+
+        await deleteUser(admin._id.toString());
+
+        const reloadedGroup = await Group.findById(group._id);
+        expect(reloadedGroup?.admin.toString()).toBe(earlyMember._id.toString());
+        expect(reloadedGroup?.members.some((m) => m.user.equals(admin._id))).toBe(false);
+    });
+
+    it("deletes groups where the user is the only member", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({
+            admin: user._id,
+            members: [{ user: user._id, name: "solo" }],
+        });
+
+        await deleteUser(user._id.toString());
+
+        expect(await User.findById(user._id)).toBeNull();
+        expect(await Group.findById(group._id)).toBeNull();
+    });
+
+    it("throws NotFoundError when user not found", async () => {
+        await expect(deleteUser(new Types.ObjectId().toString())).rejects.toThrow(NotFoundError);
     });
 });
 

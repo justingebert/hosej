@@ -55,6 +55,8 @@ export interface IGroup {
     _id: Types.ObjectId;
     name: string;
     admin: Types.ObjectId;
+    // Optional: legacy groups generate one lazily on first share.
+    inviteCode?: string;
     language: GroupLanguage;
     members: IGroupMember[];
     features: IGroupFeatures;

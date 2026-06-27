@@ -7,6 +7,7 @@ import { authLimiter } from "@/lib/rateLimit";
 import {
     getUserDTOById,
     createDeviceUser,
+    deleteUser,
     updateUser,
     resolveAvatarUrl,
 } from "@/lib/services/user/user";
@@ -41,4 +42,9 @@ export const PUT = withAuthAndErrors(async (req: NextRequest, { userId }: Authed
         { ...user.toJSON(), avatarUrl: avatarUrl ?? undefined },
         { status: 200 }
     );
+});
+
+export const DELETE = withAuthAndErrors(async (req: NextRequest, { userId }: AuthedContext) => {
+    await deleteUser(userId);
+    return NextResponse.json({ message: "User deleted" }, { status: 200 });
 });

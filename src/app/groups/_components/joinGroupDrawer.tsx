@@ -15,11 +15,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 export function JoinGroupDrawer() {
-    const [groupId, setGroupId] = useState("");
+    const [code, setCode] = useState("");
     const { toast } = useToast();
     const { user } = useAuthRedirect();
 
-    const extractGroupId = (input: string): string => {
+    // Accept a bare invite code or a full /join/<code> link.
+    const extractInviteCode = (input: string): string => {
         const trimmed = input.trim();
         const match = trimmed.match(/\/join\/([^\s/?#]+)/);
         if (match) return match[1];
@@ -27,10 +28,10 @@ export function JoinGroupDrawer() {
     };
 
     const handleJoin = async () => {
-        if (groupId.trim() === "") return;
-        const parsedId = extractGroupId(groupId);
+        if (code.trim() === "") return;
+        const parsedCode = extractInviteCode(code);
         try {
-            const res = await fetch(`/api/groups/${parsedId}/members`, {
+            const res = await fetch(`/api/invites/${parsedCode}`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -48,7 +49,7 @@ export function JoinGroupDrawer() {
             console.error("Failed to join group: ", error);
             toast({ title: "Failed to join group!", variant: "destructive" });
         } finally {
-            setGroupId("");
+            setCode("");
         }
     };
 
@@ -65,17 +66,17 @@ export function JoinGroupDrawer() {
                     <div className="p-4 pb-0">
                         <Input
                             autoFocus
-                            id="groupId"
-                            placeholder="Group ID or invite link"
-                            value={groupId}
-                            onChange={(e) => setGroupId(e.target.value)}
+                            id="inviteCode"
+                            placeholder="Invite code or link"
+                            value={code}
+                            onChange={(e) => setCode(e.target.value)}
                         />
                     </div>
                     <DrawerFooter>
                         <DrawerClose asChild>
                             <Button
                                 onClick={handleJoin}
-                                disabled={!groupId}
+                                disabled={!code}
                                 className="mb-6 w-full h-12 text-lg font-bold"
                             >
                                 Join

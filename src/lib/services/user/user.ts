@@ -1,8 +1,14 @@
 import crypto from "crypto";
 import type { JWT } from "next-auth/jwt";
+import Chat from "@/db/models/Chat";
+import Group from "@/db/models/Group";
+import Jukebox from "@/db/models/Jukebox";
+import Question from "@/db/models/Question";
+import Rally from "@/db/models/Rally";
 import User from "@/db/models/User";
 import type { UserDocument, UserDTO } from "@/types/models/user";
 import type { UpdateUserData } from "@/types/models/user";
+import type { IGroupMember } from "@/types/models/group";
 import { AuthError, ConflictError, NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 import { generateSignedUrl } from "@/lib/integrations/storage";
 import {
@@ -77,9 +83,13 @@ export async function getUserDTOById(userId: string): Promise<UserDTO> {
     return { ...user.toJSON(), avatarUrl: avatarUrl ?? undefined } as unknown as UserDTO;
 }
 
-export async function createDeviceUser(deviceId: string, username: string): Promise<UserDocument> {
+export async function createDeviceUser(deviceId: string, username?: string): Promise<UserDocument> {
     const normalizedDeviceId = requireValidDeviceId(deviceId);
-    if (!username) throw new ValidationError("Device ID and username are required");
+    // An omitted name is allowed (mobile "start without account") and falls back
+    // to the "New user" placeholder; an explicit empty string is still rejected.
+    if (username !== undefined && !username.trim()) {
+        throw new ValidationError("username must not be empty");
+    }
     const deviceIdHash = hashDeviceId(normalizedDeviceId);
 
     const existingUser = await User.findOne({
@@ -89,7 +99,7 @@ export async function createDeviceUser(deviceId: string, username: string): Prom
         throw new ConflictError("User with this device ID already exists");
     }
 
-    const newUser = new User({ username, deviceIdHash });
+    const newUser = new User({ username: username?.trim() || "New user", deviceIdHash });
     await newUser.save();
     return newUser;
 }
@@ -120,7 +130,13 @@ export async function getUserByDeviceId(deviceId: string): Promise<UserDocument>
     return user;
 }
 
-export async function issueMobileAuthBody(user: UserDocument, needsNameSetup = false) {
+export async function issueMobileAuthBody(
+    user: UserDocument,
+    // Derived from the placeholder so the hint survives every path (register,
+    // login, refresh, 409-retry): the app keeps prompting for a real name until
+    // one is set. Callers (e.g. Google sign-up) can still pass an explicit value.
+    needsNameSetup = user.username === "New user"
+) {
     const now = Date.now();
     const refreshToken = generateMobileRefreshToken();
     const tokenHash = hashMobileRefreshToken(refreshToken);
@@ -287,6 +303,53 @@ export async function updateUser(userId: string, data: UpdateUserData): Promise<
     const updatedUser = await User.findByIdAndUpdate(userId, update, { new: true });
     if (!updatedUser) throw new NotFoundError("User not found");
     return updatedUser;
+}
+
+/**
+ * Delete the user and remove their group memberships. If they are the only
+ * member of a group, delete that group and its child content. If they are admin
+ * of a remaining group, transfer admin to the earliest joined remaining member.
+ */
+export async function deleteUser(userId: string): Promise<void> {
+    const user = await User.findById(userId);
+    if (!user) throw new NotFoundError("User not found");
+
+    const groups = await Group.find({ "members.user": user._id });
+    const deletedGroupIds = [];
+
+    for (const group of groups) {
+        const remainingMembers = group.members.filter(
+            (member: IGroupMember) => member.user.toString() !== userId
+        );
+
+        if (remainingMembers.length === 0) {
+            deletedGroupIds.push(group._id);
+            await Group.findByIdAndDelete(group._id);
+            await Chat.deleteMany({ group: group._id });
+            await Jukebox.deleteMany({ group: group._id });
+            await Question.deleteMany({ groupId: group._id });
+            await Rally.deleteMany({ groupId: group._id });
+            continue;
+        }
+
+        group.members = remainingMembers;
+        if (group.admin.equals(user._id)) {
+            const [newAdmin] = [...remainingMembers].sort(
+                (a, b) => a.joinedAt.getTime() - b.joinedAt.getTime()
+            );
+            group.admin = newAdmin.user;
+        }
+        await group.save();
+    }
+
+    if (deletedGroupIds.length > 0) {
+        await User.updateMany(
+            { _id: { $ne: user._id } },
+            { $pull: { groups: { $in: deletedGroupIds } } }
+        );
+    }
+
+    await User.findByIdAndDelete(user._id);
 }
 
 /**

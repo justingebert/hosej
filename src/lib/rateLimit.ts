@@ -27,5 +27,8 @@ export const authLimiter = createLimiter("auth", 20, 60);
 /** 20 req / 60s — voting endpoints */
 export const voteLimiter = createLimiter("vote", 20, 60);
 
+/** 20 req / 60s — invite join (per authed user) */
+export const inviteLimiter = createLimiter("invite", 20, 60);
+
 /** 10 req / 60s — image uploads */
 export const uploadLimiter = createLimiter("upload", 10, 60);

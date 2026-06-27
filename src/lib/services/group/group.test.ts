@@ -367,4 +367,56 @@ describe("getGroupHistory", () => {
         expect(result).toHaveLength(1);
         expect(result[0].question).toBe("Used?");
     });
+
+    it("filters by questionType and submittedBy", async () => {
+        const userA = await makeUser();
+        const userB = await makeUser();
+        const group = await makeGroup({
+            admin: userA._id,
+            members: [
+                { user: userA._id, name: "a" },
+                { user: userB._id, name: "b" },
+            ],
+        });
+
+        const base = { groupId: group._id, used: true, active: false };
+        await makeQuestion({
+            ...base,
+            question: "Custom by A",
+            questionType: QuestionType.Custom,
+            submittedBy: userA._id,
+        });
+        await makeQuestion({
+            ...base,
+            question: "Text by B",
+            questionType: QuestionType.Text,
+            submittedBy: userB._id,
+        });
+        await makeQuestion({
+            ...base,
+            question: "Rating by A",
+            questionType: QuestionType.Rating,
+            submittedBy: userA._id,
+        });
+
+        const gid = group._id.toString();
+        const uidA = userA._id.toString();
+
+        const byType = await getGroupHistory(uidA, gid, 10, 0, undefined, [QuestionType.Text]);
+        expect(byType.map((q) => q.question)).toEqual(["Text by B"]);
+
+        const bySubmitter = await getGroupHistory(uidA, gid, 10, 0, undefined, undefined, [uidA]);
+        expect(bySubmitter.map((q) => q.question).sort()).toEqual(["Custom by A", "Rating by A"]);
+
+        const combined = await getGroupHistory(
+            uidA,
+            gid,
+            10,
+            0,
+            undefined,
+            [QuestionType.Rating],
+            [uidA]
+        );
+        expect(combined.map((q) => q.question)).toEqual(["Rating by A"]);
+    });
 });

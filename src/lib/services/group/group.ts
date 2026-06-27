@@ -6,6 +6,7 @@ import Rally from "@/db/models/Rally";
 import { RallyStatus } from "@/types/models/rally";
 import Chat from "@/db/models/Chat";
 import Jukebox from "@/db/models/Jukebox";
+import type { QuestionType } from "@/types/models/question";
 import type {
     GroupDocument,
     GroupLanguage,
@@ -398,7 +399,9 @@ export async function getGroupHistory(
     groupId: string,
     limit: number,
     offset: number,
-    search?: string
+    search?: string,
+    questionType?: QuestionType[],
+    submittedBy?: string[]
 ) {
     await isUserInGroup(userId, groupId);
 
@@ -410,6 +413,14 @@ export async function getGroupHistory(
 
     if (search) {
         filter.question = { $regex: search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), $options: "i" };
+    }
+
+    if (questionType?.length) {
+        filter.questionType = { $in: questionType };
+    }
+
+    if (submittedBy?.length) {
+        filter.submittedBy = { $in: submittedBy };
     }
 
     return Question.find(filter).skip(offset).limit(limit).sort({ usedAt: -1, createdAt: -1 });

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { GROUP_LANGUAGES } from "@/types/models/group";
+import { QuestionType } from "@/types/models/question";
 
 const FeatureStatusSchema = z.enum(["enabled", "disabled", "comingSoon"]);
 
@@ -61,6 +62,18 @@ export const GroupHistoryQuerySchema = z.object({
     limit: z.coerce.number().int().min(1).max(1000).default(1000),
     offset: z.coerce.number().int().min(0).default(0),
     search: z.string().max(200).optional(),
+    // Multi-select filters arrive comma-separated (parseQuery flattens repeated
+    // params to one value, so `?questionType=text,custom` is the only encoding
+    // that survives). Empty/absent → undefined.
+    questionType: z
+        .string()
+        .optional()
+        .transform((value) => (value ? value.split(",").filter(Boolean) : undefined))
+        .pipe(z.array(z.enum(QuestionType)).optional()),
+    submittedBy: z
+        .string()
+        .optional()
+        .transform((value) => (value ? value.split(",").filter(Boolean) : undefined)),
 });
 
 export const UpdateAdminConfigSchema = z.object({

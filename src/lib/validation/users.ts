@@ -9,7 +9,10 @@ const DeviceIdSchema = z
 
 export const CreateDeviceUserSchema = z.object({
     deviceId: DeviceIdSchema,
-    userName: z.string().min(1, "userName is required").max(50),
+    // Optional for mobile "start without account": an omitted name creates the
+    // account under the "New user" placeholder and the app prompts for a real
+    // name afterwards (see createDeviceUser / issueMobileAuthBody).
+    userName: z.string().min(1, "userName is required").max(50).optional(),
 });
 
 export const DeviceLoginSchema = z.object({

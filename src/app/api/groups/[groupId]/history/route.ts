@@ -11,12 +11,20 @@ export const GET = withAuthAndErrors(
         req: NextRequest,
         { params, userId }: AuthedContext<{ params: { groupId: string } }>
     ) => {
-        const { limit, offset, search } = parseQuery(
+        const { limit, offset, search, questionType, submittedBy } = parseQuery(
             req.nextUrl.searchParams,
             GroupHistoryQuerySchema
         );
 
-        const questions = await getGroupHistory(userId, params.groupId, limit, offset, search);
+        const questions = await getGroupHistory(
+            userId,
+            params.groupId,
+            limit,
+            offset,
+            search,
+            questionType,
+            submittedBy
+        );
         return NextResponse.json({ questions: questions || [] });
     }
 );

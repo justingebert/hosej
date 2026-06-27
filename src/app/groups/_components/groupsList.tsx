@@ -84,7 +84,16 @@ export function GroupsList({ user }: { user?: Session["user"] }) {
     };
 
     async function shareGroup(groupId: string, groupName: string) {
-        const joinLink = `${window.location.origin}/join/${groupId}`;
+        let code: string;
+        try {
+            const res = await fetch(`/api/groups/${groupId}/invite`);
+            if (!res.ok) throw new Error("invite fetch failed");
+            code = (await res.json()).code;
+        } catch {
+            toast({ title: "Could not get invite link", variant: "destructive" });
+            return;
+        }
+        const joinLink = `${window.location.origin}/join/${code}`;
 
         if (navigator.share) {
             try {

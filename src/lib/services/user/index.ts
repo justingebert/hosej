@@ -4,6 +4,7 @@ export {
     resolveAvatarUrl,
     createDeviceUser,
     updateUser,
+    deleteUser,
     touchLastOnline,
     registerPushToken,
     unregisterPushToken,
