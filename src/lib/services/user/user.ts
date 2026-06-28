@@ -18,6 +18,7 @@ import {
     MOBILE_REFRESH_TOKEN_TTL_MS,
 } from "@/lib/auth/mobileToken";
 import { hashDeviceId, isValidDeviceId, normalizeDeviceId } from "@/lib/auth/deviceCredential";
+import { deleteAllPushTokensForUser } from "@/lib/services/pushToken";
 
 const CONNECT_TOKEN_TTL_MS = 5 * 60 * 1000; // 5 minutes
 const MAX_MOBILE_REFRESH_TOKENS = 5;
@@ -360,6 +361,7 @@ export async function deleteUser(userId: string): Promise<void> {
     }
 
     invalidateMobileSessions(user);
+    await deleteAllPushTokensForUser(userId);
     user.username = deletedUsername(user.username);
     user.groups = [];
     user.avatar = undefined;

@@ -95,6 +95,8 @@ describe("runRemindersForGroup — question unanswered", () => {
             rallyFirstSubmission: true,
             jukeboxSubmit: true,
             jukeboxRate: true,
+            questionNew: true,
+            chatMessage: true,
         };
         await users[0].save();
 

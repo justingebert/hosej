@@ -15,6 +15,8 @@ const NotificationPrefsSchema = new Schema<NotificationPrefs>(
         rallyFirstSubmission: { type: Boolean, default: true },
         jukeboxSubmit: { type: Boolean, default: true },
         jukeboxRate: { type: Boolean, default: true },
+        questionNew: { type: Boolean, default: true },
+        chatMessage: { type: Boolean, default: true },
     },
     { _id: false }
 );

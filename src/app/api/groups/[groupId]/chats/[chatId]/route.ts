@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import type { AuthedContext } from "@/lib/api/withAuth";
 import { withAuthAndErrors } from "@/lib/api/withAuth";
 import { isUserInGroup } from "@/lib/services/group";
-import { getChatById } from "@/lib/services/chat";
+import { getChatByIdForGroup } from "@/lib/services/chat";
 
 export const GET = withAuthAndErrors(
     async (
@@ -13,7 +13,7 @@ export const GET = withAuthAndErrors(
         const { groupId, chatId } = params;
         await isUserInGroup(userId, groupId);
 
-        const chat = await getChatById(chatId);
+        const chat = await getChatByIdForGroup(groupId, chatId);
 
         return NextResponse.json(chat);
     }

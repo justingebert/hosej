@@ -3,7 +3,13 @@ import { Types } from "mongoose";
 
 import { setupTestDb, teardownTestDb, clearCollections } from "@/test/db";
 import { makeUser, makeGroup, makeChat } from "@/test/factories";
-import { createChatForEntity, getChatById, addMessage } from "./chat";
+import {
+    createChatForEntity,
+    getChatById,
+    getChatByIdForGroup,
+    addMessage,
+    addMessageToGroupChat,
+} from "./chat";
 import Chat from "@/db/models/Chat";
 import { NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 import { EntityModel } from "@/types/models/chat";
@@ -53,6 +59,33 @@ describe("getChatById", () => {
 
     it("throws NotFoundError when chat not found", async () => {
         await expect(getChatById(new Types.ObjectId().toString())).rejects.toThrow(NotFoundError);
+    });
+});
+
+describe("getChatByIdForGroup", () => {
+    it("returns a chat when it belongs to the requested group", async () => {
+        const group = await makeGroup();
+        const user = await makeUser({ username: "TestUser" });
+        const chat = await makeChat({
+            group: group._id,
+            messages: [{ user: user._id, message: "Hello" }],
+        });
+
+        const result = await getChatByIdForGroup(group._id.toString(), chat._id.toString());
+
+        expect(result._id.toString()).toBe(chat._id.toString());
+        const msgUser = result.messages[0].user as unknown as { username: string };
+        expect(msgUser.username).toBe("TestUser");
+    });
+
+    it("throws NotFoundError when the chat belongs to another group", async () => {
+        const realGroup = await makeGroup();
+        const urlGroup = await makeGroup();
+        const chat = await makeChat({ group: realGroup._id });
+
+        await expect(
+            getChatByIdForGroup(urlGroup._id.toString(), chat._id.toString())
+        ).rejects.toThrow(NotFoundError);
     });
 });
 
@@ -109,6 +142,42 @@ describe("addMessage", () => {
 
         await expect(
             addMessage(new Types.ObjectId().toString(), user._id.toString(), "Hello")
+        ).rejects.toThrow(NotFoundError);
+    });
+});
+
+describe("addMessageToGroupChat", () => {
+    it("adds a message when the chat belongs to the requested group", async () => {
+        const user = await makeUser();
+        const group = await makeGroup();
+        const chat = await makeChat({ group: group._id });
+
+        const result = await addMessageToGroupChat(
+            group._id.toString(),
+            chat._id.toString(),
+            user._id.toString(),
+            "Hello!"
+        );
+
+        expect(result.message).toBe("Hello!");
+
+        const reloaded = await Chat.findById(chat._id);
+        expect(reloaded?.messages).toHaveLength(1);
+    });
+
+    it("throws NotFoundError when the chat belongs to another group", async () => {
+        const user = await makeUser();
+        const realGroup = await makeGroup();
+        const urlGroup = await makeGroup();
+        const chat = await makeChat({ group: realGroup._id });
+
+        await expect(
+            addMessageToGroupChat(
+                urlGroup._id.toString(),
+                chat._id.toString(),
+                user._id.toString(),
+                "Hello!"
+            )
         ).rejects.toThrow(NotFoundError);
     });
 });

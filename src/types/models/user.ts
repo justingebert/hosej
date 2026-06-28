@@ -17,6 +17,9 @@ export const NOTIFICATION_PREF_KEYS = [
     "rallyFirstSubmission",
     "jukeboxSubmit",
     "jukeboxRate",
+    // Mobile push (Expo). Web FCM ignores these.
+    "questionNew",
+    "chatMessage",
 ] as const;
 export type NotificationPrefKey = (typeof NOTIFICATION_PREF_KEYS)[number];
 export type NotificationPrefs = Record<NotificationPrefKey, boolean>;
@@ -28,6 +31,8 @@ export const DEFAULT_NOTIFICATION_PREFS: NotificationPrefs = {
     rallyFirstSubmission: true,
     jukeboxSubmit: true,
     jukeboxRate: true,
+    questionNew: true,
+    chatMessage: true,
 };
 
 export type MobileRefreshToken = {

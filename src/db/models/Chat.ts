@@ -38,6 +38,9 @@ const chatSchema = new mongoose.Schema<IChat>({
         type: Date,
         default: Date.now,
     },
+    lastNotifiedAt: {
+        type: Date,
+    },
 });
 
 chatSchema.index({ group: 1, entity: 1 });

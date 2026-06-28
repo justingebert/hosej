@@ -42,6 +42,9 @@ export const env = {
     // Firebase
     FIREBASE_SERVICE_ACCOUNT: requireEnv("FIREBASE_SERVICE_ACCOUNT"),
 
+    // Expo Push (optional — recommended to prevent spoofed sends if a token leaks)
+    EXPO_ACCESS_TOKEN: optionalEnv("EXPO_ACCESS_TOKEN"),
+
     // AWS
     AWS_REGION: requireEnv("AWS_REGION"),
     AWS_BUCKET_NAME: requireEnv("AWS_BUCKET_NAME"),

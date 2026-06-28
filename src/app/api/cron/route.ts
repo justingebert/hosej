@@ -8,6 +8,7 @@ import { activateJukeboxes } from "@/lib/services/jukebox";
 import { processRallyStateTransitions } from "@/lib/services/rally";
 import { getGlobalConfig } from "@/lib/services/user";
 import { sendNotification } from "@/lib/integrations/push";
+import { notify } from "@/lib/integrations/expoPush";
 import { NotificationEvent } from "@/lib/notifications/templates";
 import { NextResponse } from "next/server";
 
@@ -39,6 +40,14 @@ export const GET = withErrorHandling(async (req: NextRequest) => {
                         event: NotificationEvent.QuestionNew,
                         context: { groupName: group.name },
                         groupId: group._id,
+                    });
+                    // Mobile push (Expo) — disjoint audience from the legacy FCM send above.
+                    await notify({
+                        event: NotificationEvent.QuestionNew,
+                        context: { groupName: group.name },
+                        groupId: group._id,
+                        prefKey: "questionNew",
+                        data: { type: "questionNew", groupId: group._id.toString() },
                     });
                     group.features.questions.settings.lastQuestionDate = new Date();
                     await group.save();

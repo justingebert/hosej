@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { NOTIFICATION_LANGUAGES, NOTIFICATION_STYLES } from "@/types/models/user";
+import { PUSH_PLATFORMS } from "@/types/models/pushToken";
 import { isValidDeviceId, normalizeDeviceId } from "@/lib/auth/deviceCredential";
 
 const DeviceIdSchema = z
@@ -35,6 +36,8 @@ const NotificationPrefsSchema = z
         rallyFirstSubmission: z.boolean(),
         jukeboxSubmit: z.boolean(),
         jukeboxRate: z.boolean(),
+        questionNew: z.boolean(),
+        chatMessage: z.boolean(),
     })
     .partial();
 
@@ -53,5 +56,19 @@ export const GoogleDisconnectSchema = z.object({
 });
 
 export const PushTokenSchema = z.object({
+    token: z.string().min(1, "token is required"),
+});
+
+// Expo-push token collection (mobile). Distinct from the legacy singular
+// PushTokenSchema above (web FCM).
+export const RegisterPushTokenSchema = z.object({
+    token: z
+        .string()
+        .min(1, "token is required")
+        .regex(/^Expo(nent)?PushToken\[.+\]$/, "must be an Expo push token"),
+    platform: z.enum(PUSH_PLATFORMS),
+});
+
+export const UnregisterPushTokenSchema = z.object({
     token: z.string().min(1, "token is required"),
 });

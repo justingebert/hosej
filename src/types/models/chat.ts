@@ -20,6 +20,8 @@ export interface IChat {
     entity: Types.ObjectId;
     entityModel: EntityModel;
     createdAt: Date;
+    /** Last time a chat push was sent for this chat — drives the per-burst throttle. */
+    lastNotifiedAt?: Date;
 }
 
 export type ChatDocument = HydratedDocument<IChat>;

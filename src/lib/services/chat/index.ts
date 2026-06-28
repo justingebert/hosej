@@ -1,1 +1,7 @@
-export { createChatForEntity, getChatById, addMessage } from "./chat";
+export {
+    createChatForEntity,
+    getChatById,
+    getChatByIdForGroup,
+    addMessage,
+    addMessageToGroupChat,
+} from "./chat";
