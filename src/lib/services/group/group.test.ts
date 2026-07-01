@@ -249,6 +249,33 @@ describe("updateGroup", () => {
         expect(reloaded?.name).toBe("New Name");
     });
 
+    it("updates question settings without replacing sibling feature branches", async () => {
+        const admin = await makeUser();
+        const group = await makeGroup({
+            admin: admin._id,
+            members: [{ user: admin._id, name: "a" }],
+        });
+
+        const result = await updateGroup(admin._id.toString(), group._id.toString(), {
+            features: {
+                questions: {
+                    settings: { questionCount: 2 },
+                },
+            },
+        });
+
+        expect(result.features.questions.settings.questionCount).toBe(2);
+        expect(result.features.questions.settings.lastQuestionDate).toEqual(
+            group.features.questions.settings.lastQuestionDate
+        );
+        expect(result.features.rallies.settings.rallyCount).toBe(
+            group.features.rallies.settings.rallyCount
+        );
+        expect(result.features.jukebox.settings.concurrent).toEqual(
+            group.features.jukebox.settings.concurrent
+        );
+    });
+
     it("throws ForbiddenError when user is not admin", async () => {
         const admin = await makeUser();
         const other = await makeUser();

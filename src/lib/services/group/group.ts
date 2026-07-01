@@ -13,6 +13,7 @@ import type {
     IGroup,
     IGroupMember,
     GroupStatsDTO,
+    UpdateGroupFeatures,
     UpdateGroupData,
 } from "@/types/models/group";
 import { ForbiddenError, NotFoundError, ValidationError } from "@/lib/api/errorHandling";
@@ -193,10 +194,29 @@ export async function updateGroup(
     await isUserAdmin(userId, groupId, group);
 
     if (data.name !== undefined) group.name = data.name;
-    if (data.features !== undefined) group.set("features", { ...group.features, ...data.features });
+    if (data.features !== undefined) applyFeatureUpdates(group, data.features);
 
     await group.save();
     return group;
+}
+
+function applyFeatureUpdates(group: GroupDocument, features: UpdateGroupFeatures): void {
+    for (const featureName of ["questions", "rallies", "jukebox"] as const) {
+        const feature = features[featureName];
+        if (!feature) continue;
+
+        if (feature.enabled !== undefined) {
+            group.set(`features.${featureName}.enabled`, feature.enabled);
+        }
+
+        if (feature.settings) {
+            for (const [settingName, value] of Object.entries(feature.settings)) {
+                if (value !== undefined) {
+                    group.set(`features.${featureName}.settings.${settingName}`, value);
+                }
+            }
+        }
+    }
 }
 
 /**

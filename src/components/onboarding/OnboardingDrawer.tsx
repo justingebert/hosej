@@ -128,7 +128,7 @@ export function OnboardingDrawer({
     const completeOnboarding = async () => {
         if (completing) return;
 
-        // Replay mode (e.g. from /help): no persistence needed — just close.
+        // Replay mode (e.g. from /support): no persistence needed — just close.
         if (replay) {
             closeDrawer();
             return;

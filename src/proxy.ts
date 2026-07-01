@@ -47,6 +47,7 @@ export async function proxy(req: NextRequest) {
         "/api/auth/callback/google",
         "/terms",
         "/privacy",
+        "/support",
         "/setup-name",
         "/auth/error",
         "/offline",

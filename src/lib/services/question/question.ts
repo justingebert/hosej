@@ -361,7 +361,7 @@ export async function getQuestionResults(questionId: string): Promise<{
     multiSelect: boolean;
 }> {
     type PopulatedAnswer = Omit<IAnswer, "user"> & {
-        user: Pick<IUser, "username" | "avatar"> | null;
+        user: Pick<IUser, "_id" | "username" | "avatar"> | null;
     };
 
     const question = await Question.findById(questionId).populate<{
@@ -379,19 +379,20 @@ export async function getQuestionResults(questionId: string): Promise<{
     const totalVotes = question.answers.length || 0;
 
     // Resolve every voting user's avatar once and reuse.
-    const avatarUrlByUsername = new Map<string, string | undefined>();
+    const avatarUrlByUserId = new Map<string, string | undefined>();
     await Promise.all(
         question.answers.map(async (answer) => {
-            const username = answer.user?.username ?? "Unknown";
-            if (avatarUrlByUsername.has(username)) return;
+            const userId = answer.user?._id.toString() ?? "unknown";
+            if (avatarUrlByUserId.has(userId)) return;
             const avatarUrl = (await resolveAvatarUrl(answer.user?.avatar)) ?? undefined;
-            avatarUrlByUsername.set(username, avatarUrl);
+            avatarUrlByUserId.set(userId, avatarUrl);
         })
     );
 
-    const makeResultUser = (username: string) => ({
-        username,
-        avatarUrl: avatarUrlByUsername.get(username),
+    const makeResultUser = (user: { userId: string; username: string }) => ({
+        userId: user.userId,
+        username: user.username,
+        avatarUrl: avatarUrlByUserId.get(user.userId),
     });
 
     // Pairing results
@@ -399,7 +400,7 @@ export async function getQuestionResults(questionId: string): Promise<{
         const pairingKeys = question.pairing?.keys || [];
         const keyAggregation: Record<
             string,
-            Record<string, { count: number; users: string[] }>
+            Record<string, { count: number; users: { userId: string; username: string }[] }>
         > = {};
 
         for (const key of pairingKeys) {
@@ -407,7 +408,10 @@ export async function getQuestionResults(questionId: string): Promise<{
         }
 
         for (const answer of question.answers) {
-            const username = answer.user?.username ?? "Unknown";
+            const user = {
+                userId: answer.user?._id.toString() ?? "unknown",
+                username: answer.user?.username ?? "Unknown",
+            };
             const response = answer.response as Record<string, string>;
 
             for (const [key, value] of Object.entries(response)) {
@@ -416,7 +420,7 @@ export async function getQuestionResults(questionId: string): Promise<{
                     keyAggregation[key][value] = { count: 0, users: [] };
                 }
                 keyAggregation[key][value].count += 1;
-                keyAggregation[key][value].users.push(username);
+                keyAggregation[key][value].users.push(user);
             }
         }
 
@@ -449,18 +453,21 @@ export async function getQuestionResults(questionId: string): Promise<{
     }
 
     // Standard results
-    type VoteDetail = { count: number; users: string[] };
+    type VoteDetail = { count: number; users: { userId: string; username: string }[] };
     const voteDetails: Record<string, VoteDetail> = {};
 
     for (const answer of question.answers) {
-        const username = answer.user?.username ?? "Unknown";
+        const user = {
+            userId: answer.user?._id.toString() ?? "unknown",
+            username: answer.user?.username ?? "Unknown",
+        };
         const rawResponses = Array.isArray(answer.response) ? answer.response : [answer.response];
 
         for (const response of rawResponses) {
             if (typeof response !== "string" || response.length === 0) continue;
             voteDetails[response] = voteDetails[response] || { count: 0, users: [] };
             voteDetails[response].count += 1;
-            voteDetails[response].users.push(username);
+            voteDetails[response].users.push(user);
         }
     }
 

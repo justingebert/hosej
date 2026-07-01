@@ -23,8 +23,7 @@ export default function TermsPage() {
                 <section className="space-y-2">
                     <h2 className="text-base font-semibold">1. The Service</h2>
                     <p>
-                        hosej is a personal side project by Justin (&quot;we&quot;, &quot;us&quot;,
-                        &quot;the developer&quot;), an individual developer based in Berlin,
+                        hosej is a personal side project by Justin, an individual developer based in
                         Germany. It is not a registered business. The service is provided free of
                         charge.
                     </p>
@@ -55,13 +54,12 @@ export default function TermsPage() {
                     <p>You may use hosej:</p>
                     <ul className="list-disc pl-5 space-y-1">
                         <li>
-                            <strong>Without a Google account</strong> — access is tied to your
-                            device via a device credential. No personally identifiable information
-                            is required.
+                            <strong>Device Bound account</strong>: access is tied to your device via
+                            a device credential. No personally identifiable information is required.
                         </li>
                         <li>
-                            <strong>With a Google account</strong> — enables cross-device access. We
-                            store your Google ID, name, and profile picture.
+                            <strong>With a Google account</strong>: enables cross-device access. We
+                            store your Google Account ID, no email for profile pictures.
                         </li>
                     </ul>
                     <p>See our Privacy Policy for full details on data handling.</p>

@@ -577,6 +577,9 @@ describe("getQuestionResults", () => {
         expect(result.results[0].option).toBe("A");
         expect(result.results[0].count).toBe(2);
         expect(result.results[0].users.map((u) => u.username).sort()).toEqual(["Alice", "Bob"]);
+        expect(result.results[0].users.map((u) => u.userId).sort()).toEqual(
+            [alice._id.toString(), bob._id.toString()].sort()
+        );
         expect(result.results[1].option).toBe("B");
         expect(result.results[1].count).toBe(1);
     });
@@ -655,6 +658,9 @@ describe("getQuestionResults", () => {
         const aliceResult = result.pairingResults!.find((r) => r.key === "Alice")!;
         expect(aliceResult.valueCounts).toHaveLength(2);
         expect(aliceResult.valueCounts[0].count).toBe(1);
+        expect(
+            aliceResult.valueCounts.flatMap((vc) => vc.users.map((u) => u.userId)).sort()
+        ).toEqual([u1._id.toString(), u2._id.toString()].sort());
     });
 });
 

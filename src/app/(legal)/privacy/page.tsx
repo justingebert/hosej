@@ -38,23 +38,20 @@ export default function PrivacyPage() {
                         <li>Profile photo (if uploaded)</li>
                         <li>Content you create</li>
                         <li>
-                            Google account information (name, accountID) — only if you sign in with
-                            Google
+                            Google account information (accountID), only if you sign in with Google
                         </li>
                     </ul>
 
                     <h3 className="font-medium mt-2">Collected automatically</h3>
                     <ul className="list-disc pl-5 space-y-1">
+                        <li>Generated Device Id for passwordless authentication</li>
                         <li>
-                            i Generated Device Id for passwordless authentication (a device-bound
-                            identifier stored in our database)
-                        </li>
-                        <li>
-                            Firebase Cloud Messaging (FCM) tokens — stored to deliver push
+                            Push notificaiton Tokens (APNs, FCM): stored to deliver push
                             notifications you have opted into
                         </li>
                         <li>
-                            Session cookies set by NextAuth to keep you logged in across page loads
+                            Session cookies/tokens set by NextAuth to keep you logged in across page
+                            loads
                         </li>
                         <li>Basic server logs and error traces</li>
                     </ul>
@@ -62,7 +59,7 @@ export default function PrivacyPage() {
                     <h3 className="font-medium mt-2">What we do NOT collect</h3>
                     <ul className="list-disc pl-5 space-y-1">
                         <li>Payment or financial information</li>
-                        <li>Precise GPS location</li>
+                        <li>GPS location</li>
                         <li>Contacts or address book</li>
                     </ul>
                 </section>

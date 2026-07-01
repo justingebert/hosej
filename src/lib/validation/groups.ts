@@ -22,7 +22,7 @@ const JukeboxSettingsSchema = z
 const GroupFeaturesSchema = z
     .object({
         questions: z.object({
-            enabled: z.boolean(),
+            enabled: z.boolean().optional(),
             settings: z
                 .object({
                     questionCount: z.number().int().min(1).max(3),
@@ -32,7 +32,7 @@ const GroupFeaturesSchema = z
                 .optional(),
         }),
         rallies: z.object({
-            enabled: z.boolean(),
+            enabled: z.boolean().optional(),
             settings: z
                 .object({
                     rallyCount: z.number().int().min(1).max(3),
@@ -42,7 +42,7 @@ const GroupFeaturesSchema = z
                 .optional(),
         }),
         jukebox: z.object({
-            enabled: z.boolean(),
+            enabled: z.boolean().optional(),
             settings: JukeboxSettingsSchema.optional(),
         }),
     })

@@ -74,15 +74,15 @@ export type GroupDocument = HydratedDocument<IGroup, IGroupMethods>;
 
 export interface UpdateGroupFeatures {
     questions?: {
-        enabled: boolean;
+        enabled?: boolean;
         settings?: Partial<IGroupFeatures["questions"]["settings"]>;
     };
     rallies?: {
-        enabled: boolean;
+        enabled?: boolean;
         settings?: Partial<IGroupFeatures["rallies"]["settings"]>;
     };
     jukebox?: {
-        enabled: boolean;
+        enabled?: boolean;
         settings?: Partial<IGroupJukeboxSettings>;
     };
 }

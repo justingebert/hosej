@@ -65,6 +65,7 @@ export interface IAnswer {
 }
 
 export interface IResultUser {
+    userId: string;
     username: string;
     avatarUrl?: string;
 }
