@@ -262,8 +262,11 @@ export async function voteOnQuestion(
     userId: string,
     rawResponse: unknown
 ): Promise<{ alreadyVoted: boolean }> {
-    const question = await Question.findById(questionId);
+    // Scoped to the group so a member of one group can't vote on another
+    // group's question through their own group's URL.
+    const question = await Question.findOne({ _id: questionId, groupId });
     if (!question) throw new NotFoundError("Question not found");
+    if (!question.active) throw new ValidationError("Question is no longer active");
 
     const response = parseVoteResponse(rawResponse, question.questionType);
 
@@ -319,6 +322,7 @@ export async function voteOnQuestion(
 }
 
 export async function rateQuestion(
+    groupId: string,
     questionId: string,
     userId: string,
     rating: string
@@ -327,7 +331,7 @@ export async function rateQuestion(
         throw new ValidationError("rating must be one of good | ok | bad");
     }
 
-    const question = await Question.findById(questionId);
+    const question = await Question.findOne({ _id: questionId, groupId });
     if (!question) throw new NotFoundError("Question not found");
 
     const userObjectId = new Types.ObjectId(userId);
@@ -352,7 +356,10 @@ export async function rateQuestion(
     return { previousRating, newRating: ratingKey };
 }
 
-export async function getQuestionResults(questionId: string): Promise<{
+export async function getQuestionResults(
+    groupId: string,
+    questionId: string
+): Promise<{
     results: IResult[];
     pairingResults?: IPairingResult[];
     totalVotes: number;
@@ -364,7 +371,7 @@ export async function getQuestionResults(questionId: string): Promise<{
         user: Pick<IUser, "_id" | "username" | "avatar"> | null;
     };
 
-    const question = await Question.findById(questionId).populate<{
+    const question = await Question.findOne({ _id: questionId, groupId }).populate<{
         answers: PopulatedAnswer[];
     }>({
         path: "answers.user",

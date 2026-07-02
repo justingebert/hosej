@@ -310,7 +310,7 @@ describe("voteOnQuestion", () => {
             admin: user._id,
             members: [{ user: user._id, name: "U", points: 0 }],
         });
-        const q = await makeQuestion({ groupId: group._id, options: ["A", "B"] });
+        const q = await makeQuestion({ groupId: group._id, options: ["A", "B"], active: true });
 
         const result = await voteOnQuestion(
             group._id.toString(),
@@ -335,7 +335,7 @@ describe("voteOnQuestion", () => {
             admin: user._id,
             members: [{ user: user._id, name: "U" }],
         });
-        const q = await makeQuestion({ groupId: group._id });
+        const q = await makeQuestion({ groupId: group._id, active: true });
         q.answers.push(
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             { user: user._id, response: "A", time: new Date() } as any
@@ -369,7 +369,7 @@ describe("voteOnQuestion", () => {
     it("throws ValidationError for invalid response", async () => {
         const user = await makeUser();
         const group = await makeGroup({ admin: user._id });
-        const q = await makeQuestion({ groupId: group._id });
+        const q = await makeQuestion({ groupId: group._id, active: true });
 
         await expect(
             voteOnQuestion(
@@ -378,6 +378,33 @@ describe("voteOnQuestion", () => {
                 user._id.toString(),
                 123 as unknown as string
             )
+        ).rejects.toThrow(ValidationError);
+    });
+
+    it("throws NotFoundError when question belongs to another group", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({
+            admin: user._id,
+            members: [{ user: user._id, name: "U" }],
+        });
+        const otherGroup = await makeGroup({ admin: user._id });
+        const q = await makeQuestion({ groupId: otherGroup._id, active: true });
+
+        await expect(
+            voteOnQuestion(group._id.toString(), q._id.toString(), user._id.toString(), "A")
+        ).rejects.toThrow(NotFoundError);
+    });
+
+    it("throws ValidationError when question is not active", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({
+            admin: user._id,
+            members: [{ user: user._id, name: "U" }],
+        });
+        const q = await makeQuestion({ groupId: group._id, active: false, used: true });
+
+        await expect(
+            voteOnQuestion(group._id.toString(), q._id.toString(), user._id.toString(), "A")
         ).rejects.toThrow(ValidationError);
     });
 
@@ -390,6 +417,7 @@ describe("voteOnQuestion", () => {
         const q = await makeQuestion({
             groupId: group._id,
             questionType: QuestionType.Pairing,
+            active: true,
         });
         q.pairing = {
             keySource: PairingKeySource.Custom,
@@ -412,7 +440,11 @@ describe("voteOnQuestion", () => {
     it("rejects exclusive pairing vote with duplicate values", async () => {
         const user = await makeUser();
         const group = await makeGroup({ admin: user._id });
-        const q = await makeQuestion({ groupId: group._id, questionType: QuestionType.Pairing });
+        const q = await makeQuestion({
+            groupId: group._id,
+            questionType: QuestionType.Pairing,
+            active: true,
+        });
         q.pairing = {
             keySource: PairingKeySource.Custom,
             mode: PairingMode.Exclusive,
@@ -435,7 +467,11 @@ describe("voteOnQuestion", () => {
             admin: user._id,
             members: [{ user: user._id, name: "U" }],
         });
-        const q = await makeQuestion({ groupId: group._id, questionType: QuestionType.Pairing });
+        const q = await makeQuestion({
+            groupId: group._id,
+            questionType: QuestionType.Pairing,
+            active: true,
+        });
         q.pairing = {
             keySource: PairingKeySource.Custom,
             mode: PairingMode.Open,
@@ -457,7 +493,11 @@ describe("voteOnQuestion", () => {
     it("rejects pairing vote with invalid key", async () => {
         const user = await makeUser();
         const group = await makeGroup({ admin: user._id });
-        const q = await makeQuestion({ groupId: group._id, questionType: QuestionType.Pairing });
+        const q = await makeQuestion({
+            groupId: group._id,
+            questionType: QuestionType.Pairing,
+            active: true,
+        });
         q.pairing = {
             keySource: PairingKeySource.Custom,
             mode: PairingMode.Open,
@@ -480,7 +520,12 @@ describe("rateQuestion", () => {
         const group = await makeGroup({ admin: user._id });
         const q = await makeQuestion({ groupId: group._id });
 
-        const result = await rateQuestion(q._id.toString(), user._id.toString(), "good");
+        const result = await rateQuestion(
+            group._id.toString(),
+            q._id.toString(),
+            user._id.toString(),
+            "good"
+        );
 
         expect(result.previousRating).toBeNull();
         expect(result.newRating).toBe("good");
@@ -496,7 +541,12 @@ describe("rateQuestion", () => {
         q.rating.good.push(user._id);
         await q.save();
 
-        const result = await rateQuestion(q._id.toString(), user._id.toString(), "ok");
+        const result = await rateQuestion(
+            group._id.toString(),
+            q._id.toString(),
+            user._id.toString(),
+            "ok"
+        );
 
         expect(result.previousRating).toBe("good");
         expect(result.newRating).toBe("ok");
@@ -513,7 +563,12 @@ describe("rateQuestion", () => {
         q.rating.ok.push(user._id);
         await q.save();
 
-        const result = await rateQuestion(q._id.toString(), user._id.toString(), "ok");
+        const result = await rateQuestion(
+            group._id.toString(),
+            q._id.toString(),
+            user._id.toString(),
+            "ok"
+        );
 
         expect(result.previousRating).toBe("ok");
         expect(result.newRating).toBe("ok");
@@ -528,15 +583,32 @@ describe("rateQuestion", () => {
         const q = await makeQuestion({ groupId: group._id });
 
         await expect(
-            rateQuestion(q._id.toString(), user._id.toString(), "excellent")
+            rateQuestion(group._id.toString(), q._id.toString(), user._id.toString(), "excellent")
         ).rejects.toThrow(ValidationError);
     });
 
     it("throws NotFoundError when question not found", async () => {
         const user = await makeUser();
+        const group = await makeGroup({ admin: user._id });
 
         await expect(
-            rateQuestion(new Types.ObjectId().toString(), user._id.toString(), "good")
+            rateQuestion(
+                group._id.toString(),
+                new Types.ObjectId().toString(),
+                user._id.toString(),
+                "good"
+            )
+        ).rejects.toThrow(NotFoundError);
+    });
+
+    it("throws NotFoundError when question belongs to another group", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({ admin: user._id });
+        const otherGroup = await makeGroup({ admin: user._id });
+        const q = await makeQuestion({ groupId: otherGroup._id });
+
+        await expect(
+            rateQuestion(group._id.toString(), q._id.toString(), user._id.toString(), "good")
         ).rejects.toThrow(NotFoundError);
     });
 });
@@ -570,7 +642,7 @@ describe("getQuestionResults", () => {
         );
         await q.save();
 
-        const result = await getQuestionResults(q._id.toString());
+        const result = await getQuestionResults(group._id.toString(), q._id.toString());
 
         expect(result.totalVotes).toBe(3);
         expect(result.totalUsers).toBe(3);
@@ -585,7 +657,18 @@ describe("getQuestionResults", () => {
     });
 
     it("throws NotFoundError when question not found", async () => {
-        await expect(getQuestionResults(new Types.ObjectId().toString())).rejects.toThrow(
+        await expect(
+            getQuestionResults(new Types.ObjectId().toString(), new Types.ObjectId().toString())
+        ).rejects.toThrow(NotFoundError);
+    });
+
+    it("throws NotFoundError when question belongs to another group", async () => {
+        const user = await makeUser();
+        const group = await makeGroup({ admin: user._id });
+        const otherGroup = await makeGroup({ admin: user._id });
+        const q = await makeQuestion({ groupId: otherGroup._id });
+
+        await expect(getQuestionResults(group._id.toString(), q._id.toString())).rejects.toThrow(
             NotFoundError
         );
     });
@@ -607,7 +690,7 @@ describe("getQuestionResults", () => {
         );
         await q.save();
 
-        const result = await getQuestionResults(q._id.toString());
+        const result = await getQuestionResults(group._id.toString(), q._id.toString());
 
         expect(result.totalVotes).toBe(1);
         expect(result.results).toHaveLength(2);
@@ -649,7 +732,7 @@ describe("getQuestionResults", () => {
         );
         await q.save();
 
-        const result = await getQuestionResults(q._id.toString());
+        const result = await getQuestionResults(group._id.toString(), q._id.toString());
 
         expect(result.pairingResults).toBeDefined();
         expect(result.pairingResults).toHaveLength(2);

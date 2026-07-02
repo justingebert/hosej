@@ -13,7 +13,7 @@ export const GET = withAuthAndErrors(
         const { groupId, questionId } = params;
         await isUserInGroup(userId, groupId);
 
-        const results = await getQuestionResults(questionId);
+        const results = await getQuestionResults(groupId, questionId);
 
         return NextResponse.json(results, { status: 200 });
     }

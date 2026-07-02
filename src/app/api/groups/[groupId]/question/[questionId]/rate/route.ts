@@ -15,7 +15,7 @@ export const POST = withAuthAndErrors(
         await isUserInGroup(userId, groupId);
 
         const { rating } = await parseBody(req, RateQuestionSchema);
-        const result = await rateQuestion(questionId, userId, rating);
+        const result = await rateQuestion(groupId, questionId, userId, rating);
 
         return NextResponse.json(result);
     }

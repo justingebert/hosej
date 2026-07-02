@@ -1,3 +1,4 @@
+import { after } from "next/server";
 import Chat from "@/db/models/Chat";
 import User from "@/db/models/User";
 import Group from "@/db/models/Group";
@@ -9,8 +10,7 @@ import { ActivityFeature, ActivityType } from "@/types/models/activityEvent";
 import { notify } from "@/lib/integrations/expoPush";
 
 // One chat push per burst, per chat.
-const CHAT_NOTIFY_THROTTLE_MS = 10;
-//const CHAT_NOTIFY_THROTTLE_MS = 5 * 60 * 1000;
+const CHAT_NOTIFY_THROTTLE_MS = 5 * 60 * 1000;
 
 /**
  * Create a chat for any entity (Question, Rally, Jukebox).
@@ -116,18 +116,25 @@ async function addMessageToChat(
     };
     const feature = featureMap[chat.entityModel] ?? ActivityFeature.System;
 
-    recordActivity({
-        groupId: chat.group.toString(),
-        actorUser: userId,
-        type: ActivityType.ChatMessage,
-        feature,
-        entityId: chat.entity.toString(),
-        meta: { chatId: chat._id.toString() },
-    }).catch((err) => console.error("Activity log failed", err));
+    // after(): let the response flush, but keep the serverless function alive until
+    // this background work finishes. A bare fire-and-forget promise is killed when
+    // Vercel freezes the instance post-response — the Expo send never completes.
+    after(() =>
+        recordActivity({
+            groupId: chat.group.toString(),
+            actorUser: userId,
+            type: ActivityType.ChatMessage,
+            feature,
+            entityId: chat.entity.toString(),
+            meta: { chatId: chat._id.toString() },
+        }).catch((err) => console.error("Activity log failed", err))
+    );
 
     if (shouldNotify) {
-        notifyChatMessage(chat, userId, trimmed).catch((err) =>
-            console.error("Chat notify failed", err)
+        after(() =>
+            notifyChatMessage(chat, userId, trimmed).catch((err) =>
+                console.error("Chat notify failed", err)
+            )
         );
     }
 
