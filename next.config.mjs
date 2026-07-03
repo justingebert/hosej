@@ -29,6 +29,7 @@ const securityHeaders = [
 
 export default withSentryConfig(
     withSerwist({
+        serverExternalPackages: ["expo-server-sdk"],
         experimental: {
             viewTransition: true,
             staleTimes: {
