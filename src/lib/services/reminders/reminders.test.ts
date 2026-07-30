@@ -13,6 +13,7 @@ import { runRemindersForGroup, runFirstSubmissionReminder } from "./reminders";
 import { ReminderCategory, ReminderEntityType } from "@/types/models/notificationLog";
 import { RallyStatus } from "@/types/models/rally";
 import { NotificationEvent } from "@/lib/notifications/templates";
+import { DEFAULT_NOTIFICATION_PREFS } from "@/types/models/user";
 
 beforeAll(setupTestDb);
 afterAll(teardownTestDb);
@@ -89,14 +90,8 @@ describe("runRemindersForGroup — question unanswered", () => {
         await makeQuestion({ groupId: group._id, active: true });
 
         users[0].notificationPrefs = {
+            ...DEFAULT_NOTIFICATION_PREFS,
             questionUnanswered: false,
-            rallySubmitDeadline: true,
-            rallyVoteDeadline: true,
-            rallyFirstSubmission: true,
-            jukeboxSubmit: true,
-            jukeboxRate: true,
-            questionNew: true,
-            chatMessage: true,
         };
         await users[0].save();
 

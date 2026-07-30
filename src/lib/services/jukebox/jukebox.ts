@@ -7,6 +7,7 @@ import type { IUser } from "@/types/models/user";
 import type { IGroup } from "@/types/models/group";
 import { ConflictError, NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 import { sendNotification } from "@/lib/integrations/push";
+import { notify } from "@/lib/integrations/expoPush";
 import { NotificationEvent } from "@/lib/notifications/templates";
 import { createChatForEntity } from "@/lib/services/chat";
 import { EntityModel } from "@/types/models/chat";
@@ -250,6 +251,14 @@ export async function activateJukeboxes(group: IGroup) {
         event: NotificationEvent.JukeboxNew,
         context: { monthName },
         groupId: group._id,
+    });
+    // Mobile push (Expo) — disjoint audience from the legacy FCM send above.
+    await notify({
+        event: NotificationEvent.JukeboxNew,
+        context: { monthName },
+        groupId: group._id,
+        prefKey: "jukeboxNew",
+        data: { type: "jukeboxNew", groupId: group._id.toString() },
     });
 }
 

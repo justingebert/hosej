@@ -19,6 +19,7 @@ export const NOTIFICATION_PREF_KEYS = [
     "jukeboxRate",
     // Mobile push (Expo). Web FCM ignores these.
     "questionNew",
+    "jukeboxNew",
     "chatMessage",
 ] as const;
 export type NotificationPrefKey = (typeof NOTIFICATION_PREF_KEYS)[number];
@@ -32,6 +33,7 @@ export const DEFAULT_NOTIFICATION_PREFS: NotificationPrefs = {
     jukeboxSubmit: true,
     jukeboxRate: true,
     questionNew: true,
+    jukeboxNew: true,
     chatMessage: true,
 };
 
