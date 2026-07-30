@@ -1,12 +1,10 @@
 import { AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import type { FeatureStatus } from "@/types/models/appConfig";
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
 interface FeatureSettingsAccordionSimpleProps {
     featureName: string;
     featureKey: "questions" | "rallies" | "jukebox";
-    globalStatus?: FeatureStatus;
     icon?: LucideIcon;
     summary?: string;
     children?: ReactNode;
@@ -15,18 +13,10 @@ interface FeatureSettingsAccordionSimpleProps {
 export function FeatureSettingsAccordionSimple({
     featureName,
     featureKey,
-    globalStatus,
     icon: Icon,
     summary,
     children,
 }: FeatureSettingsAccordionSimpleProps) {
-    const isGloballyEnabled = globalStatus === "enabled";
-
-    // Don't render if feature is not enabled globally
-    if (!isGloballyEnabled) {
-        return null;
-    }
-
     return (
         <AccordionItem value={featureKey}>
             <AccordionTrigger>

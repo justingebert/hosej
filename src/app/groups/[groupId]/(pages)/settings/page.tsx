@@ -10,7 +10,6 @@ import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import useSWR, { mutate as globalMutate } from "swr";
 import fetcher from "@/lib/fetcher";
-import type { FeatureStatus } from "@/types/models/appConfig";
 import { GroupInfoCard } from "@/app/groups/[groupId]/(pages)/settings/_components/GroupInfoCard";
 import { GroupFeatureSettingsCard } from "@/app/groups/[groupId]/(pages)/settings/_components/GroupFeatureSettingsCard";
 import { GroupMembersCard } from "@/app/groups/[groupId]/(pages)/settings/_components/GroupMembersCard";
@@ -32,12 +31,6 @@ export default function GroupSettingsPage() {
         error,
         mutate,
     } = useSWR<GroupProcessedDTO>(`/api/groups/${groupId}`, fetcher, {});
-
-    const { data: globalFeatures } = useSWR<{
-        questions: { status: FeatureStatus };
-        rallies: { status: FeatureStatus };
-        jukebox: { status: FeatureStatus };
-    }>("/api/features/status", fetcher);
 
     useEffect(() => {
         if (group) {
@@ -180,7 +173,6 @@ export default function GroupSettingsPage() {
                         <GroupFeatureSettingsCard
                             groupId={groupId}
                             features={features!}
-                            globalFeatures={globalFeatures}
                             onQuestionCountChange={(value) =>
                                 updateQuestionSettings({ questionCount: value })
                             }

@@ -7,15 +7,11 @@ import { FeatureSettingsAccordionSimple } from "@/app/groups/[groupId]/(pages)/s
 import { JukeboxSettings } from "@/app/groups/[groupId]/(pages)/settings/_components/JukeboxSettings";
 import { QuestionSettings } from "@/app/groups/[groupId]/(pages)/settings/_components/QuestionSettings";
 import { RallySettings } from "@/app/groups/[groupId]/(pages)/settings/_components/RallySettings";
-import type { FeatureStatus } from "@/types/models/appConfig";
 import type { GroupDTO } from "@/types/models/group";
-
-type GlobalFeatures = Partial<Record<keyof GroupDTO["features"], { status: FeatureStatus }>>;
 
 export function GroupFeatureSettingsCard({
     groupId,
     features,
-    globalFeatures,
     onQuestionCountChange,
     onRallyCountChange,
     onRallyGapDaysChange,
@@ -24,7 +20,6 @@ export function GroupFeatureSettingsCard({
 }: {
     groupId: string;
     features: GroupDTO["features"];
-    globalFeatures?: GlobalFeatures;
     onQuestionCountChange: (value: number) => void;
     onRallyCountChange: (value: number) => void;
     onRallyGapDaysChange: (value: number) => void;
@@ -50,7 +45,6 @@ export function GroupFeatureSettingsCard({
                     <FeatureSettingsAccordionSimple
                         featureName="Questions"
                         featureKey="questions"
-                        globalStatus={globalFeatures?.questions?.status}
                         icon={HelpCircle}
                         summary={questionSummary}
                     >
@@ -65,7 +59,6 @@ export function GroupFeatureSettingsCard({
                     <FeatureSettingsAccordionSimple
                         featureName="Rallies"
                         featureKey="rallies"
-                        globalStatus={globalFeatures?.rallies?.status}
                         icon={Camera}
                         summary={rallySummary}
                     >
@@ -80,7 +73,6 @@ export function GroupFeatureSettingsCard({
                     <FeatureSettingsAccordionSimple
                         featureName="Jukebox"
                         featureKey="jukebox"
-                        globalStatus={globalFeatures?.jukebox?.status}
                         icon={Music}
                         summary={jukeboxSummary}
                     >

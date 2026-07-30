@@ -25,9 +25,9 @@ export interface IGroupJukeboxSettings {
     activationDays: number[];
 }
 
+// Every group runs every feature — these carry settings only, no on/off flag.
 export interface IGroupFeatures {
     questions: {
-        enabled: boolean;
         settings: {
             questionCount: number;
             lastQuestionDate: Date | null;
@@ -35,14 +35,12 @@ export interface IGroupFeatures {
         };
     };
     rallies: {
-        enabled: boolean;
         settings: {
             rallyCount: number;
             rallyGapDays: number;
         };
     };
     jukebox: {
-        enabled: boolean;
         settings: IGroupJukeboxSettings;
     };
 }
@@ -74,15 +72,12 @@ export type GroupDocument = HydratedDocument<IGroup, IGroupMethods>;
 
 export interface UpdateGroupFeatures {
     questions?: {
-        enabled?: boolean;
         settings?: Partial<IGroupFeatures["questions"]["settings"]>;
     };
     rallies?: {
-        enabled?: boolean;
         settings?: Partial<IGroupFeatures["rallies"]["settings"]>;
     };
     jukebox?: {
-        enabled?: boolean;
         settings?: Partial<IGroupJukeboxSettings>;
     };
 }

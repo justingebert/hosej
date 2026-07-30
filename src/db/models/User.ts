@@ -9,14 +9,9 @@ import {
 
 const NotificationPrefsSchema = new Schema<NotificationPrefs>(
     {
-        questionUnanswered: { type: Boolean, default: true },
-        rallySubmitDeadline: { type: Boolean, default: true },
-        rallyVoteDeadline: { type: Boolean, default: true },
-        rallyFirstSubmission: { type: Boolean, default: true },
-        jukeboxSubmit: { type: Boolean, default: true },
-        jukeboxRate: { type: Boolean, default: true },
         questionNew: { type: Boolean, default: true },
         jukeboxNew: { type: Boolean, default: true },
+        rallyNew: { type: Boolean, default: true },
         chatMessage: { type: Boolean, default: true },
     },
     { _id: false }

@@ -12,4 +12,4 @@ export {
     disconnectGoogleAccount,
 } from "./user";
 
-export { isGlobalAdmin, getGlobalConfig, updateGlobalConfig } from "./admin";
+export { isGlobalAdmin, getGlobalConfig } from "./admin";

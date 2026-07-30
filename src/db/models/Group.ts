@@ -37,7 +37,6 @@ const groupSchema = new mongoose.Schema<
     members: [memberSchema],
     features: {
         questions: {
-            enabled: { type: Boolean, default: true },
             settings: {
                 questionCount: { type: Number, default: 1 },
                 lastQuestionDate: { type: Date, default: null },
@@ -45,14 +44,12 @@ const groupSchema = new mongoose.Schema<
             },
         },
         rallies: {
-            enabled: { type: Boolean, default: true },
             settings: {
                 rallyCount: { type: Number, default: 1 },
                 rallyGapDays: { type: Number, default: 14 },
             },
         },
         jukebox: {
-            enabled: { type: Boolean, default: true },
             settings: {
                 concurrent: { type: [String], default: ["Jukebox"] },
                 activationDays: { type: [Number], default: [1] },

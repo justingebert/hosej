@@ -2,8 +2,6 @@ import { z } from "zod";
 import { GROUP_LANGUAGES } from "@/types/models/group";
 import { QuestionType } from "@/types/models/question";
 
-const FeatureStatusSchema = z.enum(["enabled", "disabled", "comingSoon"]);
-
 const JukeboxSettingsSchema = z
     .object({
         concurrent: z
@@ -22,7 +20,6 @@ const JukeboxSettingsSchema = z
 const GroupFeaturesSchema = z
     .object({
         questions: z.object({
-            enabled: z.boolean().optional(),
             settings: z
                 .object({
                     questionCount: z.number().int().min(1).max(3),
@@ -32,7 +29,6 @@ const GroupFeaturesSchema = z
                 .optional(),
         }),
         rallies: z.object({
-            enabled: z.boolean().optional(),
             settings: z
                 .object({
                     rallyCount: z.number().int().min(1).max(3),
@@ -42,7 +38,6 @@ const GroupFeaturesSchema = z
                 .optional(),
         }),
         jukebox: z.object({
-            enabled: z.boolean().optional(),
             settings: JukeboxSettingsSchema.optional(),
         }),
     })
@@ -74,14 +69,4 @@ export const GroupHistoryQuerySchema = z.object({
         .string()
         .optional()
         .transform((value) => (value ? value.split(",").filter(Boolean) : undefined)),
-});
-
-export const UpdateAdminConfigSchema = z.object({
-    features: z
-        .object({
-            questions: z.object({ status: FeatureStatusSchema }).optional(),
-            rallies: z.object({ status: FeatureStatusSchema }).optional(),
-            jukebox: z.object({ status: FeatureStatusSchema }).optional(),
-        })
-        .optional(),
 });

@@ -4,30 +4,10 @@ import { FeatureSettingsAccordionSimple } from "@/app/groups/[groupId]/(pages)/s
 import { describe, expect, it } from "vitest";
 
 describe("FeatureSettingsAccordionSimple", () => {
-    it("does not render when global status is not enabled", () => {
+    it("renders and expands to reveal its settings", () => {
         render(
             <Accordion type="single" collapsible>
-                <FeatureSettingsAccordionSimple
-                    featureName="Questions"
-                    featureKey="questions"
-                    globalStatus="comingSoon"
-                >
-                    <div>Child</div>
-                </FeatureSettingsAccordionSimple>
-            </Accordion>
-        );
-
-        expect(screen.queryByRole("button", { name: /questions/i })).not.toBeInTheDocument();
-    });
-
-    it("renders and expands when globally enabled", () => {
-        render(
-            <Accordion type="single" collapsible>
-                <FeatureSettingsAccordionSimple
-                    featureName="Questions"
-                    featureKey="questions"
-                    globalStatus="enabled"
-                >
+                <FeatureSettingsAccordionSimple featureName="Questions" featureKey="questions">
                     <div>Child content</div>
                 </FeatureSettingsAccordionSimple>
             </Accordion>

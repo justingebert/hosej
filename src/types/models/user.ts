@@ -10,30 +10,21 @@ export type NotificationStyle = (typeof NOTIFICATION_STYLES)[number];
 export const DEFAULT_NOTIFICATION_LANGUAGE: NotificationLanguage = "en";
 export const DEFAULT_NOTIFICATION_STYLE: NotificationStyle = "default";
 
+// Mobile push (Expo) opt-outs. Web FCM ignores these. Reminder/nag keys were
+// removed with the reminders service — every remaining event is a real event.
 export const NOTIFICATION_PREF_KEYS = [
-    "questionUnanswered",
-    "rallySubmitDeadline",
-    "rallyVoteDeadline",
-    "rallyFirstSubmission",
-    "jukeboxSubmit",
-    "jukeboxRate",
-    // Mobile push (Expo). Web FCM ignores these.
     "questionNew",
     "jukeboxNew",
+    "rallyNew",
     "chatMessage",
 ] as const;
 export type NotificationPrefKey = (typeof NOTIFICATION_PREF_KEYS)[number];
 export type NotificationPrefs = Record<NotificationPrefKey, boolean>;
 
 export const DEFAULT_NOTIFICATION_PREFS: NotificationPrefs = {
-    questionUnanswered: true,
-    rallySubmitDeadline: true,
-    rallyVoteDeadline: true,
-    rallyFirstSubmission: true,
-    jukeboxSubmit: true,
-    jukeboxRate: true,
     questionNew: true,
     jukeboxNew: true,
+    rallyNew: true,
     chatMessage: true,
 };
 

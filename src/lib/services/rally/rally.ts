@@ -9,6 +9,7 @@ import { isUserAdmin, isUserInGroup, addPointsToMember } from "@/lib/services/gr
 import { createChatForEntity } from "@/lib/services/chat";
 import { EntityModel } from "@/types/models/chat";
 import { sendNotification } from "@/lib/integrations/push";
+import { notify } from "@/lib/integrations/expoPush";
 import { NotificationEvent } from "@/lib/notifications/templates";
 import {
     CREATED_RALLY_POINTS,
@@ -19,7 +20,6 @@ import { RallyStatus } from "@/types/models/rally";
 import type { RallyDocument } from "@/types/models/rally";
 import { clearActivityForEntities, recordActivity } from "@/lib/services/activity";
 import { ActivityFeature, ActivityType } from "@/types/models/activityEvent";
-import { runFirstSubmissionReminder } from "@/lib/services/reminders";
 
 const VOTING_DURATION_MS = 24 * 60 * 60 * 1000;
 const RESULTS_DURATION_MS = 24 * 60 * 60 * 1000;
@@ -62,6 +62,14 @@ async function advanceRallyStates(
                     context: { groupName },
                     groupId,
                 });
+                // Mobile push (Expo) — disjoint audience from the legacy FCM send above.
+                await notify({
+                    event: NotificationEvent.RallyStarted,
+                    context: { groupName },
+                    groupId,
+                    prefKey: "rallyNew",
+                    data: { type: "rallyNew", groupId },
+                });
                 break;
             }
 
@@ -77,6 +85,13 @@ async function advanceRallyStates(
                     context: { groupName },
                     groupId,
                 });
+                await notify({
+                    event: NotificationEvent.RallyVoting,
+                    context: { groupName },
+                    groupId,
+                    prefKey: "rallyNew",
+                    data: { type: "rallyNew", groupId },
+                });
                 break;
             }
 
@@ -91,6 +106,13 @@ async function advanceRallyStates(
                     event: NotificationEvent.RallyResults,
                     context: { groupName },
                     groupId,
+                });
+                await notify({
+                    event: NotificationEvent.RallyResults,
+                    context: { groupName },
+                    groupId,
+                    prefKey: "rallyNew",
+                    data: { type: "rallyNew", groupId },
                 });
                 break;
             }
@@ -359,8 +381,6 @@ export async function addSubmission(
         throw new ConflictError("You have already submitted to this rally");
     }
 
-    const wasFirst = rally.submissions.length === 0;
-
     const newSubmission = {
         userId: sendUser._id,
         username: sendUser.username,
@@ -385,12 +405,6 @@ export async function addSubmission(
         feature: ActivityFeature.Rally,
         entityId: rallyId,
     }).catch((err) => console.error("Activity log failed", err));
-
-    if (wasFirst) {
-        runFirstSubmissionReminder(updatedRally, groupId, userId).catch((err) =>
-            console.error("First-submission reminder failed", err)
-        );
-    }
 
     return updatedRally;
 }

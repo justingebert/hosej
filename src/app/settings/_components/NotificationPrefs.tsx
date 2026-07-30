@@ -17,7 +17,6 @@ import {
     DEFAULT_NOTIFICATION_PREFS,
     DEFAULT_NOTIFICATION_STYLE,
     type NotificationLanguage,
-    type NotificationPrefKey,
     type NotificationPrefs,
     type NotificationStyle,
     type UserDTO,
@@ -33,56 +32,12 @@ const STYLE_LABELS: Record<NotificationStyle, string> = {
     chaos: "Chaos",
 };
 
-type PrefRow = {
-    key: NotificationPrefKey;
-    label: string;
-    description: string;
-};
-
-const PREF_ROWS: PrefRow[] = [
-    {
-        key: "questionUnanswered",
-        label: "Unanswered questions",
-        description: "Nudge when today's questions are still open.",
-    },
-    {
-        key: "rallySubmitDeadline",
-        label: "Rally deadline",
-        description: "Heads up 24h before a rally's submission closes.",
-    },
-    {
-        key: "rallyVoteDeadline",
-        label: "Rally voting deadline",
-        description: "Heads up 24h before rally voting closes.",
-    },
-    {
-        key: "rallyFirstSubmission",
-        label: "First rally submission",
-        description: "Ping when someone submits to a rally you haven't joined.",
-    },
-    {
-        key: "jukeboxSubmit",
-        label: "Jukebox song nudge",
-        description: "Remind you to add a track if you haven't yet.",
-    },
-    {
-        key: "jukeboxRate",
-        label: "Jukebox rating nudge",
-        description: "Remind you to rate the submitted songs.",
-    },
-];
-
 export function NotificationPrefs() {
     const { toast } = useToast();
     const { data, mutate, isLoading } = useSWR<UserDTO>("/api/users", fetcher);
 
     const language = data?.notificationLanguage ?? DEFAULT_NOTIFICATION_LANGUAGE;
     const style = data?.notificationStyle ?? DEFAULT_NOTIFICATION_STYLE;
-    const prefs: NotificationPrefs = {
-        ...DEFAULT_NOTIFICATION_PREFS,
-        ...(data?.notificationPrefs ?? {}),
-    };
-
     type UpdatePatch = {
         notificationLanguage?: NotificationLanguage;
         notificationStyle?: NotificationStyle;
@@ -195,26 +150,6 @@ export function NotificationPrefs() {
                     </Select>
                 </div>
             </div>
-
-            {/*<div className="space-y-3">*/}
-            {/*    <div className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">*/}
-            {/*        Participation reminders*/}
-            {/*    </div>*/}
-            {/*    {PREF_ROWS.map((row) => (*/}
-            {/*        <div key={row.key} className="flex items-center justify-between gap-3">*/}
-            {/*            <div className="space-y-0.5 flex-1 min-w-0">*/}
-            {/*                <div className="font-medium text-sm">{row.label}</div>*/}
-            {/*                <div className="text-sm text-muted-foreground line-clamp-2">*/}
-            {/*                    {row.description}*/}
-            {/*                </div>*/}
-            {/*            </div>*/}
-            {/*            <Switch*/}
-            {/*                checked={prefs[row.key]}*/}
-            {/*                onCheckedChange={(checked) => togglePref(row.key, checked)}*/}
-            {/*            />*/}
-            {/*        </div>*/}
-            {/*    ))}*/}
-            {/*</div>*/}
         </div>
     );
 }

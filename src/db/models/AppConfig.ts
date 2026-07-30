@@ -8,29 +8,6 @@ const appConfigSchema = new Schema<IAppConfig>({
         unique: true,
         default: "global_features",
     },
-    features: {
-        questions: {
-            status: {
-                type: String,
-                enum: ["enabled", "disabled", "comingSoon"],
-                default: "enabled",
-            },
-        },
-        rallies: {
-            status: {
-                type: String,
-                enum: ["enabled", "disabled", "comingSoon"],
-                default: "enabled",
-            },
-        },
-        jukebox: {
-            status: {
-                type: String,
-                enum: ["enabled", "disabled", "comingSoon"],
-                default: "enabled",
-            },
-        },
-    },
     adminUsers: [
         {
             type: mongoose.Schema.Types.ObjectId,

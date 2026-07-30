@@ -1,27 +1,20 @@
 import type { NotificationLanguage, NotificationStyle } from "@/types/models/user";
 
+// Event notifications only — "the group did something". Reminder/nag events
+// (unanswered questions, submission and voting deadlines, rate-the-songs) were
+// deliberately removed along with the reminders service; chat pings don't live
+// here because they send a ready-made title/body rather than a template.
 export enum NotificationEvent {
     QuestionNew = "question_new",
-    QuestionEmpty = "question_empty",
     JukeboxNew = "jukebox_new",
     RallyStarted = "rally_started",
     RallyVoting = "rally_voting",
     RallyResults = "rally_results",
-    QuestionUnanswered = "question_unanswered",
-    RallySubmitDeadline = "rally_submit_deadline",
-    RallyVoteDeadline = "rally_vote_deadline",
-    RallyFirstSubmission = "rally_first_submission",
-    JukeboxSubmit = "jukebox_submit",
-    JukeboxRate = "jukebox_rate",
 }
 
 export type NotificationContext = {
     groupName?: string;
     monthName?: string;
-    nextStart?: string;
-    rallyTask?: string;
-    hoursLeft?: string | number;
-    jukeboxTitle?: string;
 };
 
 type Copy = { title: string; body: string };
@@ -48,28 +41,6 @@ const TEMPLATES: Record<NotificationEvent, LangMap> = {
             chaos: {
                 title: "🚨 {groupName} Fragen sind live 🚨",
                 body: "Alle anderen voten schon. Was ist deine Ausrede??",
-            },
-        },
-    },
-    [NotificationEvent.QuestionEmpty]: {
-        en: {
-            default: {
-                title: "The question jar is empty 🫙",
-                body: "{groupName} has nothing to vote on. Create new votings to keep the group alive.",
-            },
-            chaos: {
-                title: "🥗 No questions left 🥗",
-                body: "{groupName} is running on fumes. Add some questions or the group dies 💀",
-            },
-        },
-        de: {
-            default: {
-                title: "Es hat sich ausgefragt 🫙",
-                body: "{groupName} hat nichts zum Abstimmen. Erstelle neue Fragen und halte die Gruppe am Leben.",
-            },
-            chaos: {
-                title: "🥗 Keine Fragen mehr 🥗",
-                body: "{groupName} läuft leer. Füge Fragen hinzu oder die Gruppe stirbt 💀",
             },
         },
     },
@@ -158,138 +129,6 @@ const TEMPLATES: Record<NotificationEvent, LangMap> = {
             chaos: {
                 title: "📷 {groupName} Ergebnisse sind da 📷",
                 body: "Jemand hat gewonnen und es ist vielleicht nicht wer du denkst 👑",
-            },
-        },
-    },
-    [NotificationEvent.QuestionUnanswered]: {
-        en: {
-            default: {
-                title: "You haven't answered today's questions ❓",
-                body: "{groupName} is waiting. Only takes a minute.",
-            },
-            chaos: {
-                title: "❓ {groupName} is waiting for you ❓",
-                body: "Everyone else answered. You're the holdout 🫵",
-            },
-        },
-        de: {
-            default: {
-                title: "Du hast heutige Fragen noch nicht beantwortet ❓",
-                body: "{groupName} wartet. Dauert nur eine Minute.",
-            },
-            chaos: {
-                title: "❓ {groupName} wartet auf dich ❓",
-                body: "Alle anderen haben geantwortet. Du bist der Einzige 🫵",
-            },
-        },
-    },
-    [NotificationEvent.RallySubmitDeadline]: {
-        en: {
-            default: {
-                title: "⏰ Rally ends in {hoursLeft}h",
-                body: "{rallyTask} — get your shot in before time runs out.",
-            },
-            chaos: {
-                title: "⏰ {hoursLeft}h left ⏰",
-                body: "{rallyTask} — submit now or cry 😭",
-            },
-        },
-        de: {
-            default: {
-                title: "⏰ Rally endet in {hoursLeft}h",
-                body: "{rallyTask} — reich dein Foto ein bevor die Zeit abläuft.",
-            },
-            chaos: {
-                title: "⏰ Noch {hoursLeft}h ⏰",
-                body: "{rallyTask} — jetzt einreichen oder heulen 😭",
-            },
-        },
-    },
-    [NotificationEvent.RallyVoteDeadline]: {
-        en: {
-            default: {
-                title: "Voting closes in {hoursLeft}h 🗳️",
-                body: "Your vote still counts. Don't skip it.",
-            },
-            chaos: {
-                title: "🗳️ {hoursLeft}h to vote or forever hold your peace 🗳️",
-                body: "Your vote could be the difference. No pressure 😇",
-            },
-        },
-        de: {
-            default: {
-                title: "Abstimmung endet in {hoursLeft}h 🗳️",
-                body: "Deine Stimme zählt. Nicht verpassen.",
-            },
-            chaos: {
-                title: "🗳️ Noch {hoursLeft}h zum Voten oder für immer schweigen 🗳️",
-                body: "Deine Stimme könnte den Unterschied machen. No pressure 😇",
-            },
-        },
-    },
-    [NotificationEvent.RallyFirstSubmission]: {
-        en: {
-            default: {
-                title: "First photo is in 📸",
-                body: "{rallyTask} — someone set the bar. Your turn.",
-            },
-            chaos: {
-                title: "📸 First shot landed and it's good 📸",
-                body: "{rallyTask} — are you really gonna let them win unopposed 🏆",
-            },
-        },
-        de: {
-            default: {
-                title: "Erstes Foto ist drin 📸",
-                body: "{rallyTask} — jemand hat die Messlatte gesetzt. Jetzt du.",
-            },
-            chaos: {
-                title: "📸 Erstes Foto ist da und es ist gut 📸",
-                body: "{rallyTask} — lässt du die wirklich unangefochten gewinnen 🏆",
-            },
-        },
-    },
-    [NotificationEvent.JukeboxSubmit]: {
-        en: {
-            default: {
-                title: "{jukeboxTitle} needs a song 🎧",
-                body: "You haven't added one yet — drop a track.",
-            },
-            chaos: {
-                title: "🎧 Where's your song 🎧",
-                body: "{jukeboxTitle} — add a track and farm some aura 💥",
-            },
-        },
-        de: {
-            default: {
-                title: "{jukeboxTitle} braucht einen Song 🎧",
-                body: "Du hast noch keinen hinzugefügt — pack einen rein.",
-            },
-            chaos: {
-                title: "🎧 Wo ist dein Song 🎧",
-                body: "{jukeboxTitle} — pack einen Track rein und farm etwas Aura 💥",
-            },
-        },
-    },
-    [NotificationEvent.JukeboxRate]: {
-        en: {
-            default: {
-                title: "{jukeboxTitle} — songs need ratings ⭐",
-                body: "A few tracks are sitting unrated. Take a listen.",
-            },
-            chaos: {
-                title: "⭐ Rate the songs or your opinion doesn't count ⭐",
-                body: "{jukeboxTitle} — others are farming votes, this must be stopped 🎵",
-            },
-        },
-        de: {
-            default: {
-                title: "{jukeboxTitle} — Songs warten auf Bewertungen ⭐",
-                body: "Ein paar Tracks sind noch unbewertet. Hör mal rein.",
-            },
-            chaos: {
-                title: "⭐ Bewerte die Songs oder deine Meinung zählt nicht ⭐",
-                body: "{jukeboxTitle} — andere farmen Votes, das muss gestoppt werden 🎵",
             },
         },
     },

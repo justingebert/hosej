@@ -263,7 +263,6 @@ describe("activateJukeboxes", () => {
             admin: admin._id,
             members: [{ user: admin._id, name: "a" }],
         });
-        group.features.jukebox.enabled = true;
         group.features.jukebox.settings.activationDays = activationDays;
         group.features.jukebox.settings.concurrent = concurrent;
         await group.save();

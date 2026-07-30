@@ -6,7 +6,7 @@ import { makeUser, makeGroup } from "@/test/factories";
 import AppConfig from "@/db/models/AppConfig";
 import { ForbiddenError, NotFoundError } from "@/lib/api/errorHandling";
 import { isUserAdmin, isUserInGroup } from "@/lib/services/group";
-import { getGlobalConfig, isGlobalAdmin, updateGlobalConfig } from "./admin";
+import { getGlobalConfig, isGlobalAdmin } from "./admin";
 
 beforeAll(setupTestDb);
 afterAll(teardownTestDb);
@@ -122,43 +122,5 @@ describe("getGlobalConfig", () => {
 
     it("throws when config does not exist", async () => {
         await expect(getGlobalConfig()).rejects.toThrow();
-    });
-});
-
-describe("updateGlobalConfig", () => {
-    it("updates features and persists", async () => {
-        await AppConfig.create({ configKey: "global_features" });
-
-        // NOTE: service currently expects a full features object (see src/lib/services/user/admin.ts:58
-        // where the spread overwrites sibling keys with undefined). Passing the full shape works.
-        const result = await updateGlobalConfig({
-            features: {
-                questions: { status: "disabled" },
-                rallies: { status: "enabled" },
-                jukebox: { status: "enabled" },
-            },
-        });
-
-        expect(result.features.questions.status).toBe("disabled");
-
-        const reloaded = await AppConfig.findOne({ configKey: "global_features" });
-        expect(reloaded?.features.questions.status).toBe("disabled");
-    });
-
-    it("saves without changes when no features provided", async () => {
-        await AppConfig.create({ configKey: "global_features" });
-
-        const before = await AppConfig.findOne({ configKey: "global_features" });
-        const beforeUpdatedAt = before!.updatedAt.getTime();
-
-        await new Promise((r) => setTimeout(r, 5));
-        await updateGlobalConfig({});
-
-        const after = await AppConfig.findOne({ configKey: "global_features" });
-        expect(after!.updatedAt.getTime()).toBeGreaterThan(beforeUpdatedAt);
-    });
-
-    it("throws NotFoundError when config does not exist", async () => {
-        await expect(updateGlobalConfig({ features: {} })).rejects.toThrow(NotFoundError);
     });
 });

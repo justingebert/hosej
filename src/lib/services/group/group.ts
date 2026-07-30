@@ -205,10 +205,6 @@ function applyFeatureUpdates(group: GroupDocument, features: UpdateGroupFeatures
         const feature = features[featureName];
         if (!feature) continue;
 
-        if (feature.enabled !== undefined) {
-            group.set(`features.${featureName}.enabled`, feature.enabled);
-        }
-
         if (feature.settings) {
             for (const [settingName, value] of Object.entries(feature.settings)) {
                 if (value !== undefined) {

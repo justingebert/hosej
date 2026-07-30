@@ -2,8 +2,6 @@ import { z } from "zod";
 import { PairingKeySource, PairingMode, QuestionType } from "@/types/models/question";
 import { QuestionPackStatus } from "@/types/models/questionPack";
 
-export { UpdateAdminConfigSchema } from "./groups";
-
 export const UpdatePackSchema = z
     .object({
         status: z.enum(QuestionPackStatus).optional(),
