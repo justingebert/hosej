@@ -23,6 +23,7 @@ import { ActivityFeature, ActivityType } from "@/types/models/activityEvent";
 
 const VOTING_DURATION_MS = 24 * 60 * 60 * 1000;
 const RESULTS_DURATION_MS = 24 * 60 * 60 * 1000;
+const SIGNED_URL_TTL_SECONDS = 60 * 60;
 
 // ─── State Machine ──────────────────────────────────────────────────────────
 
@@ -331,7 +332,10 @@ export async function getSubmissions(
     const submissions = await Promise.all(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         rally.submissions.map(async (submission: any) => {
-            const { url } = await generateSignedUrl(submission.imageKey, 300);
+            // An hour, not minutes: the mobile client holds a rally screen open far
+            // longer than a browser tab, and an expired URL renders as a blank image
+            // with no error to catch (the query already succeeded).
+            const { url } = await generateSignedUrl(submission.imageKey, SIGNED_URL_TTL_SECONDS);
             const avatarKey = avatarKeyById.get(submission.userId.toString());
             const avatarUrl = (await resolveAvatarUrl(avatarKey)) ?? undefined;
 

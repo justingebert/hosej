@@ -56,6 +56,8 @@ export type NotifyArgs = NotifyAudience & NotifyPayload & NotifyContent;
 export async function notify(args: NotifyArgs): Promise<void> {
     const { groupId, userIds, excludeUserId, prefKey, data, collapseId } = args;
 
+    const dryRun = process.env.ENV === "dev";
+
     try {
         await dbConnect();
 
@@ -75,7 +77,10 @@ export async function notify(args: NotifyArgs): Promise<void> {
             notificationLanguage: 1,
             notificationStyle: 1,
         }).lean();
-        if (users.length === 0) return;
+        if (users.length === 0) {
+            if (dryRun) console.warn("NOTIFICATION [dev] no audience", { prefKey, groupId });
+            return;
+        }
 
         const prefsByUser = new Map<
             string,
@@ -92,7 +97,15 @@ export async function notify(args: NotifyArgs): Promise<void> {
             { userId: { $in: users.map((u) => u._id) } },
             { token: 1, userId: 1 }
         ).lean();
-        if (tokens.length === 0) return;
+        if (tokens.length === 0) {
+            if (dryRun) {
+                console.warn("NOTIFICATION [dev] no registered devices", {
+                    prefKey,
+                    users: users.length,
+                });
+            }
+            return;
+        }
 
         // One message per valid token. Event mode localizes copy per the owner's
         // language/style; raw mode sends the same title/body to every device.
@@ -128,7 +141,25 @@ export async function notify(args: NotifyArgs): Promise<void> {
             });
             tokenByIndex.push(token);
         }
-        if (messages.length === 0) return;
+        if (messages.length === 0) {
+            if (dryRun) {
+                console.warn("NOTIFICATION [dev] no valid Expo tokens", { tokens: tokens.length });
+            }
+            return;
+        }
+
+        if (dryRun) {
+            console.warn(
+                `NOTIFICATION [dev] would send ${messages.length} push(es)`,
+                messages.map(({ to, title, body, data: payload }) => ({
+                    to,
+                    title,
+                    body,
+                    data: payload,
+                }))
+            );
+            return;
+        }
 
         // Send in chunks. Reap tokens Expo reports as unregistered at the ticket
         // level. (DeviceNotRegistered more often surfaces in delivery *receipts* —
