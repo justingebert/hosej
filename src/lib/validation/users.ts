@@ -30,13 +30,9 @@ export const MobileRefreshSchema = z.object({
 
 const NotificationPrefsSchema = z
     .object({
-        questionUnanswered: z.boolean(),
-        rallySubmitDeadline: z.boolean(),
-        rallyVoteDeadline: z.boolean(),
-        rallyFirstSubmission: z.boolean(),
-        jukeboxSubmit: z.boolean(),
-        jukeboxRate: z.boolean(),
         questionNew: z.boolean(),
+        jukeboxNew: z.boolean(),
+        rallyNew: z.boolean(),
         chatMessage: z.boolean(),
     })
     .partial();
