@@ -28,10 +28,17 @@ export const DEFAULT_NOTIFICATION_PREFS: NotificationPrefs = {
     chatMessage: true,
 };
 
+/**
+ * One link in a device's refresh-token chain. A record with no `consumedAt` is
+ * live; once exchanged it becomes a tombstone pointing at its successor via
+ * `replacedByHash`. Tombstones are kept deliberately — see rotateMobileRefreshToken.
+ */
 export type MobileRefreshToken = {
     tokenHash: string;
     expiresAt: Date;
     createdAt: Date;
+    consumedAt?: Date;
+    replacedByHash?: string;
 };
 
 export interface IUser {

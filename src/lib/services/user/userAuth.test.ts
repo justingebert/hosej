@@ -9,6 +9,7 @@ import {
     linkGoogleToUser,
     issueMobileAuthBody,
     getUserByMobileRefreshToken,
+    rotateMobileRefreshToken,
     revokeMobileRefreshToken,
     assertValidMobileAccessToken,
 } from "./user";
@@ -113,12 +114,59 @@ describe("mobile sessions", () => {
         expect(first.refreshToken).not.toBe(stored?.mobileRefreshTokens?.[0]?.tokenHash);
         expect(stored?.mobileRefreshTokens).toHaveLength(1);
 
-        const refreshedUser = await getUserByMobileRefreshToken(first.refreshToken);
-        const second = await issueMobileAuthBody(refreshedUser);
+        const second = await rotateMobileRefreshToken(first.refreshToken);
 
-        await expect(getUserByMobileRefreshToken(first.refreshToken)).rejects.toThrow(AuthError);
+        expect(second.refreshToken).not.toBe(first.refreshToken);
         const fromSecondRefresh = await getUserByMobileRefreshToken(second.refreshToken);
         expect(fromSecondRefresh._id.equals(user._id)).toBe(true);
+    });
+
+    // The logout bug: rotation is destructive, so a response lost in transit (or an
+    // app suspended mid-request) left the client holding a spent token. Retrying
+    // with it must succeed rather than sign the user out.
+    it("re-issues when the rotation response never reached the client", async () => {
+        const user = await makeUser();
+        const first = await issueMobileAuthBody(user);
+
+        const lost = await rotateMobileRefreshToken(first.refreshToken);
+        const retried = await rotateMobileRefreshToken(first.refreshToken);
+
+        expect(retried.refreshToken).not.toBe(lost.refreshToken);
+        const owner = await getUserByMobileRefreshToken(retried.refreshToken);
+        expect(owner._id.equals(user._id)).toBe(true);
+
+        // The successor the client never saw must not stay redeemable.
+        await expect(rotateMobileRefreshToken(lost.refreshToken)).rejects.toThrow(AuthError);
+    });
+
+    // Once the successor is redeemed the client has proved receipt, so replaying
+    // the token it replaced is reuse rather than a lost response.
+    it("invalidates every session when a dead token is replayed", async () => {
+        const user = await makeUser();
+        const first = await issueMobileAuthBody(user);
+        const second = await rotateMobileRefreshToken(first.refreshToken);
+        const third = await rotateMobileRefreshToken(second.refreshToken);
+
+        await expect(rotateMobileRefreshToken(first.refreshToken)).rejects.toThrow(AuthError);
+
+        // Reuse detected — the live token is revoked too, so a thief racing the
+        // real client cannot keep the session alive.
+        await expect(rotateMobileRefreshToken(third.refreshToken)).rejects.toThrow(AuthError);
+        const stored = await User.findById(user._id);
+        expect(stored?.mobileRefreshTokens).toHaveLength(0);
+    });
+
+    it("keeps a device's live token across a long rotation chain", async () => {
+        const user = await makeUser();
+        const other = await issueMobileAuthBody(user);
+
+        let current = await issueMobileAuthBody(user);
+        for (let i = 0; i < 8; i++) current = await rotateMobileRefreshToken(current.refreshToken);
+
+        // A second device's untouched token must survive the tombstone churn.
+        const owner = await getUserByMobileRefreshToken(other.refreshToken);
+        expect(owner._id.equals(user._id)).toBe(true);
+        await expect(rotateMobileRefreshToken(current.refreshToken)).resolves.toBeDefined();
     });
 
     it("rejects old mobile access tokens after linking Google", async () => {

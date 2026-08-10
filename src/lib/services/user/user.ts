@@ -6,7 +6,7 @@ import Jukebox from "@/db/models/Jukebox";
 import Question from "@/db/models/Question";
 import Rally from "@/db/models/Rally";
 import User from "@/db/models/User";
-import type { UserDocument, UserDTO } from "@/types/models/user";
+import type { MobileRefreshToken, UserDocument, UserDTO } from "@/types/models/user";
 import type { UpdateUserData } from "@/types/models/user";
 import type { IGroupMember } from "@/types/models/group";
 import { AuthError, ConflictError, NotFoundError, ValidationError } from "@/lib/api/errorHandling";
@@ -22,6 +22,8 @@ import { deleteAllPushTokensForUser } from "@/lib/services/pushToken";
 
 const CONNECT_TOKEN_TTL_MS = 5 * 60 * 1000; // 5 minutes
 const MAX_MOBILE_REFRESH_TOKENS = 5;
+// Consumed tokens retained per user for replay tolerance and reuse detection.
+const MAX_MOBILE_REFRESH_TOMBSTONES = 5;
 const DELETED_USER_SUFFIX = " (deleted)";
 
 // Throttle lastOnline writes — only update if more than this many ms have passed
@@ -136,51 +138,115 @@ export async function getUserByDeviceId(deviceId: string): Promise<UserDocument>
     return user;
 }
 
+/** Copy a stored token to a plain object — the array is rebuilt from these, so
+ *  nothing depends on mongoose reusing subdocument instances across assignment. */
+function toPlainToken(token: MobileRefreshToken): MobileRefreshToken {
+    return {
+        tokenHash: token.tokenHash,
+        expiresAt: token.expiresAt,
+        createdAt: token.createdAt,
+        ...(token.consumedAt ? { consumedAt: token.consumedAt } : {}),
+        ...(token.replacedByHash ? { replacedByHash: token.replacedByHash } : {}),
+    };
+}
+
 export async function issueMobileAuthBody(
     user: UserDocument,
     // Derived from the placeholder so the hint survives every path (register,
     // login, refresh, 409-retry): the app keeps prompting for a real name until
     // one is set. Callers (e.g. Google sign-up) can still pass an explicit value.
-    needsNameSetup = user.username === "New user"
+    needsNameSetup = user.username === "New user",
+    // Hash of the token being rotated out (refresh path only). It is kept as a
+    // tombstone pointing at the token issued here — see rotateMobileRefreshToken.
+    rotatedFromHash?: string
 ) {
     const now = Date.now();
     const refreshToken = generateMobileRefreshToken();
     const tokenHash = hashMobileRefreshToken(refreshToken);
-    const unexpiredTokens = (user.mobileRefreshTokens ?? []).filter(
-        (token) => token.expiresAt.getTime() > now
-    );
 
+    const tokens = (user.mobileRefreshTokens ?? [])
+        .filter((token) => token.expiresAt.getTime() > now)
+        .map((token) =>
+            token.tokenHash === rotatedFromHash
+                ? {
+                      ...toPlainToken(token),
+                      consumedAt: token.consumedAt ?? new Date(now),
+                      replacedByHash: tokenHash,
+                  }
+                : toPlainToken(token)
+        );
+
+    tokens.push({
+        tokenHash,
+        expiresAt: new Date(now + MOBILE_REFRESH_TOKEN_TTL_MS),
+        createdAt: new Date(now),
+    });
+
+    // Live tokens (one per signed-in device) and tombstones are capped separately
+    // so a long rotation chain can never evict a device's usable credential.
     user.mobileRefreshTokens = [
-        ...unexpiredTokens.slice(-(MAX_MOBILE_REFRESH_TOKENS - 1)),
-        {
-            tokenHash,
-            expiresAt: new Date(now + MOBILE_REFRESH_TOKEN_TTL_MS),
-            createdAt: new Date(now),
-        },
+        ...tokens.filter((token) => token.consumedAt).slice(-MAX_MOBILE_REFRESH_TOMBSTONES),
+        ...tokens.filter((token) => !token.consumedAt).slice(-MAX_MOBILE_REFRESH_TOKENS),
     ];
     await user.save();
 
     return buildMobileAuthBody(user, { refreshToken, needsNameSetup });
 }
 
+/** Look up the owner of a live-or-tombstoned, unexpired refresh token. Read-only. */
 export async function getUserByMobileRefreshToken(refreshToken: string): Promise<UserDocument> {
     const tokenHash = hashMobileRefreshToken(refreshToken);
-    const now = new Date();
     const user = await User.findOne({
         mobileRefreshTokens: {
             $elemMatch: {
                 tokenHash,
-                expiresAt: { $gt: now },
+                expiresAt: { $gt: new Date() },
             },
         },
     });
     if (!user) throw new AuthError("Invalid refresh token");
-
-    const nowMs = now.getTime();
-    user.mobileRefreshTokens = (user.mobileRefreshTokens ?? []).filter(
-        (token) => token.tokenHash !== tokenHash && token.expiresAt.getTime() > nowMs
-    );
     return user;
+}
+
+/**
+ * Exchange a refresh token for a fresh pair.
+ *
+ * Rotation is destructive by nature: the moment the server issues the successor
+ * the presented token is spent. If that response never reaches the client — a
+ * dropped mobile connection, or the OS suspending the app mid-request — the
+ * client is stranded holding a dead token and the user is silently signed out.
+ * So a consumed token is kept as a tombstone and stays redeemable until its
+ * successor is actually used: the client proving receipt is what retires it.
+ *
+ * That leaves one ambiguous case, resolved by the successor's state:
+ *  - successor still unused → the client never received it. Re-issue, and drop
+ *    the orphaned successor so it can't be redeemed later.
+ *  - successor already used → the chain has moved on, so this is a replay of a
+ *    dead credential. Treat it as theft and invalidate every session.
+ */
+export async function rotateMobileRefreshToken(refreshToken: string) {
+    const tokenHash = hashMobileRefreshToken(refreshToken);
+    const user = await getUserByMobileRefreshToken(refreshToken);
+    const presented = (user.mobileRefreshTokens ?? []).find(
+        (token) => token.tokenHash === tokenHash
+    );
+    if (!presented) throw new AuthError("Invalid refresh token");
+
+    if (presented.consumedAt) {
+        const successor = (user.mobileRefreshTokens ?? []).find(
+            (token) => token.tokenHash === presented.replacedByHash
+        );
+        if (!successor || successor.consumedAt) {
+            invalidateMobileSessions(user);
+            await user.save();
+            throw new AuthError("Invalid refresh token");
+        }
+        user.mobileRefreshTokens = (user.mobileRefreshTokens ?? []).filter(
+            (token) => token.tokenHash !== successor.tokenHash
+        );
+    }
+
+    return issueMobileAuthBody(user, undefined, tokenHash);
 }
 
 /**
