@@ -130,7 +130,7 @@ export function GroupsList({ user }: { user?: Session["user"] }) {
         return map;
     }, [data?.groups]);
 
-    const { data: groupsActivity } = useSWR<Record<string, boolean>>(
+    const { data: groupsActivity } = useSWR<Record<string, number>>(
         user ? `/api/activity/groups` : null,
         fetcher
     );
@@ -174,7 +174,7 @@ export function GroupsList({ user }: { user?: Session["user"] }) {
                                     whileTap={{ scale: 0.97 }}
                                     transition={{ type: "spring", stiffness: 400, damping: 25 }}
                                 >
-                                    {groupsActivity?.[group._id] && (
+                                    {(groupsActivity?.[group._id] ?? 0) > 0 && (
                                         <Badge className="absolute -top-1.5 -right-1.5 z-10 h-4 w-4 rounded-full bg-destructive animate-pulse shadow-sm shadow-destructive/20 border-border" />
                                     )}
                                     <Link

@@ -14,6 +14,13 @@ const FEATURE_TO_SEEN_KEY: Record<string, "question" | "rally" | "jukebox"> = {
     [ActivityFeature.Jukebox]: "jukebox",
 };
 
+/** The features that carry a per-user "seen" watermark. */
+const TRACKED_FEATURES = [
+    ActivityFeature.Question,
+    ActivityFeature.Rally,
+    ActivityFeature.Jukebox,
+] as const;
+
 /**
  * Record an activity event. Intended to be called fire-and-forget
  * from feature services so it never blocks the main action.
@@ -76,14 +83,8 @@ export async function getMissedActivity(
     };
 
     // Query each feature separately using its own "since" timestamp
-    const features = [
-        ActivityFeature.Question,
-        ActivityFeature.Rally,
-        ActivityFeature.Jukebox,
-    ] as const;
-
     await Promise.all(
-        features.map(async (feature) => {
+        TRACKED_FEATURES.map(async (feature) => {
             const key = FEATURE_TO_SEEN_KEY[feature];
             const since = lastSeenAt[key] ?? defaultSince;
 
@@ -128,10 +129,13 @@ export async function markFeatureSeen(
 }
 
 /**
- * For each of the user's groups, check if there is any missed activity.
- * Returns a map of groupId → boolean (has activity since last visit).
+ * For each of the user's groups, count the activity they haven't seen.
+ * Returns a map of groupId → count (0 when there is nothing new).
+ *
+ * The count is the sum of the same per-feature counts getMissedActivity
+ * returns, so a group's badge always agrees with the feature badges inside it.
  */
-export async function getGroupsWithActivity(userId: string): Promise<Record<string, boolean>> {
+export async function getGroupsWithActivity(userId: string): Promise<Record<string, number>> {
     await dbConnect();
 
     const user = await User.findById(userId);
@@ -142,30 +146,42 @@ export async function getGroupsWithActivity(userId: string): Promise<Record<stri
 
     const groups = await Group.find({ _id: { $in: groupIds } }, { members: 1 });
 
-    const result: Record<string, boolean> = {};
+    const result: Record<string, number> = {};
     const userObjectId = new Types.ObjectId(userId);
     const defaultSince = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
+    // One clause per (group, feature) so every feature is compared against its
+    // OWN watermark. Collapsing to a single baseline (this previously used the
+    // oldest watermark across the three) widens each group's window to its most
+    // neglected feature, which re-counts activity the user has already seen —
+    // the group badge then lights up while the feature badges inside read zero.
+    const clauses: Record<string, unknown>[] = [];
+
     for (const group of groups) {
+        result[group._id.toString()] = 0;
+
         const member = group.members.find((m) => m.user.equals(userObjectId));
         const lastSeenAt = member?.lastSeenAt ?? { question: null, rally: null, jukebox: null };
 
-        // Use the oldest lastSeenAt across features as the baseline
-        const timestamps = [lastSeenAt.question, lastSeenAt.rally, lastSeenAt.jukebox].filter(
-            Boolean
-        ) as Date[];
-        const since =
-            timestamps.length > 0
-                ? new Date(Math.min(...timestamps.map((d) => d.getTime())))
-                : defaultSince;
+        for (const feature of TRACKED_FEATURES) {
+            clauses.push({
+                groupId: group._id,
+                feature,
+                createdAt: { $gt: lastSeenAt[FEATURE_TO_SEEN_KEY[feature]] ?? defaultSince },
+            });
+        }
+    }
 
-        const count = await ActivityEvent.countDocuments({
-            groupId: group._id,
-            createdAt: { $gt: since },
-            actorUser: { $ne: userObjectId },
-        });
+    if (clauses.length === 0) return result;
 
-        result[group._id.toString()] = count > 0;
+    // One aggregation for every group, replacing a countDocuments per group.
+    const counts = await ActivityEvent.aggregate<{ _id: Types.ObjectId; count: number }>([
+        { $match: { $or: clauses, actorUser: { $ne: userObjectId } } },
+        { $group: { _id: "$groupId", count: { $sum: 1 } } },
+    ]);
+
+    for (const { _id, count } of counts) {
+        result[_id.toString()] = count;
     }
 
     return result;
