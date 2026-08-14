@@ -22,8 +22,6 @@ const MobileRefreshTokenSchema = new Schema(
         tokenHash: { type: String, required: true },
         expiresAt: { type: Date, required: true },
         createdAt: { type: Date, default: Date.now },
-        consumedAt: { type: Date },
-        replacedByHash: { type: String },
     },
     { _id: false }
 );
@@ -72,10 +70,6 @@ const UserSchema = new Schema<IUser>({
     },
     connectTokenExpiresAt: {
         type: Date,
-    },
-    mobileSessionVersion: {
-        type: Number,
-        default: 0,
     },
     mobileRefreshTokens: {
         type: [MobileRefreshTokenSchema],
@@ -128,14 +122,14 @@ UserSchema.set("toJSON", {
         delete ret.connectToken;
         delete ret.connectTokenExpiresAt;
         delete ret.mobileRefreshTokens;
-        delete ret.mobileSessionVersion;
         delete ret.googleId;
         delete ret.fcmToken;
         return ret;
     },
 });
 
-// The mobile refresh endpoint looks users up by hashed refresh token.
+// Mobile refresh and every authenticated mobile request look sessions up by
+// hashed refresh token.
 UserSchema.index({ "mobileRefreshTokens.tokenHash": 1 });
 
 const User =

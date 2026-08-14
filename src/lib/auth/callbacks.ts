@@ -76,7 +76,8 @@ export async function jwtCallback({
                 deviceUser.deviceIdHash = undefined;
                 deviceUser.connectToken = undefined;
                 deviceUser.connectTokenExpiresAt = undefined;
-                deviceUser.mobileSessionVersion = (deviceUser.mobileSessionVersion ?? 0) + 1;
+                // The device credential just went away, so every mobile session
+                // authenticated by it has to go too.
                 deviceUser.mobileRefreshTokens = [];
                 await deviceUser.save();
 

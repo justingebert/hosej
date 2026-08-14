@@ -29,16 +29,14 @@ export const DEFAULT_NOTIFICATION_PREFS: NotificationPrefs = {
 };
 
 /**
- * One link in a device's refresh-token chain. A record with no `consumedAt` is
- * live; once exchanged it becomes a tombstone pointing at its successor via
- * `replacedByHash`. Tombstones are kept deliberately — see rotateMobileRefreshToken.
+ * One signed-in mobile device. `tokenHash` is sha256 of the opaque refresh
+ * token and doubles as the session id in the access token. Tokens do not
+ * rotate — see services/user/mobileSession.
  */
 export type MobileRefreshToken = {
     tokenHash: string;
     expiresAt: Date;
     createdAt: Date;
-    consumedAt?: Date;
-    replacedByHash?: string;
 };
 
 export interface IUser {
@@ -53,7 +51,6 @@ export interface IUser {
     googleId?: string;
     connectToken?: string;
     connectTokenExpiresAt?: Date;
-    mobileSessionVersion?: number;
     mobileRefreshTokens?: MobileRefreshToken[];
 
     avatar?: string;

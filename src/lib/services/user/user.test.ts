@@ -131,7 +131,6 @@ describe("deleteUser", () => {
                 createdAt: new Date(),
             },
         ];
-        user.mobileSessionVersion = 3;
         await user.save();
 
         const member = await makeUser();
@@ -160,7 +159,6 @@ describe("deleteUser", () => {
         expect(deletedUser?.deviceId).toBeUndefined();
         expect(deletedUser?.fcmToken).toBeUndefined();
         expect(deletedUser?.mobileRefreshTokens).toEqual([]);
-        expect(deletedUser?.mobileSessionVersion).toBe(4);
         expect(deletedUser?.deletedAt).toBeInstanceOf(Date);
 
         const reloadedQuestion = await Question.findById(question._id).populate("submittedBy");

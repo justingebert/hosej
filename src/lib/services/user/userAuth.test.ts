@@ -7,10 +7,8 @@ import {
     getUserByDeviceId,
     findOrCreateGoogleUser,
     linkGoogleToUser,
+    disconnectGoogleAccount,
     issueMobileAuthBody,
-    getUserByMobileRefreshToken,
-    rotateMobileRefreshToken,
-    revokeMobileRefreshToken,
     assertValidMobileAccessToken,
 } from "./user";
 import { NotFoundError, ConflictError, ValidationError, AuthError } from "@/lib/api/errorHandling";
@@ -103,72 +101,10 @@ describe("linkGoogleToUser", () => {
     });
 });
 
+// Session lifecycle — issuing, refreshing, expiry, revocation, the device cap
+// and legacy tokens — lives in mobileSession.test.ts. What's left here is the
+// account-level events that have to take every session down with them.
 describe("mobile sessions", () => {
-    it("stores refresh tokens hashed and rotates them on use", async () => {
-        const user = await makeUser();
-
-        const first = await issueMobileAuthBody(user);
-        const stored = await User.findById(user._id);
-
-        expect(typeof first.accessToken).toBe("string");
-        expect(first.refreshToken).not.toBe(stored?.mobileRefreshTokens?.[0]?.tokenHash);
-        expect(stored?.mobileRefreshTokens).toHaveLength(1);
-
-        const second = await rotateMobileRefreshToken(first.refreshToken);
-
-        expect(second.refreshToken).not.toBe(first.refreshToken);
-        const fromSecondRefresh = await getUserByMobileRefreshToken(second.refreshToken);
-        expect(fromSecondRefresh._id.equals(user._id)).toBe(true);
-    });
-
-    // The logout bug: rotation is destructive, so a response lost in transit (or an
-    // app suspended mid-request) left the client holding a spent token. Retrying
-    // with it must succeed rather than sign the user out.
-    it("re-issues when the rotation response never reached the client", async () => {
-        const user = await makeUser();
-        const first = await issueMobileAuthBody(user);
-
-        const lost = await rotateMobileRefreshToken(first.refreshToken);
-        const retried = await rotateMobileRefreshToken(first.refreshToken);
-
-        expect(retried.refreshToken).not.toBe(lost.refreshToken);
-        const owner = await getUserByMobileRefreshToken(retried.refreshToken);
-        expect(owner._id.equals(user._id)).toBe(true);
-
-        // The successor the client never saw must not stay redeemable.
-        await expect(rotateMobileRefreshToken(lost.refreshToken)).rejects.toThrow(AuthError);
-    });
-
-    // Once the successor is redeemed the client has proved receipt, so replaying
-    // the token it replaced is reuse rather than a lost response.
-    it("invalidates every session when a dead token is replayed", async () => {
-        const user = await makeUser();
-        const first = await issueMobileAuthBody(user);
-        const second = await rotateMobileRefreshToken(first.refreshToken);
-        const third = await rotateMobileRefreshToken(second.refreshToken);
-
-        await expect(rotateMobileRefreshToken(first.refreshToken)).rejects.toThrow(AuthError);
-
-        // Reuse detected — the live token is revoked too, so a thief racing the
-        // real client cannot keep the session alive.
-        await expect(rotateMobileRefreshToken(third.refreshToken)).rejects.toThrow(AuthError);
-        const stored = await User.findById(user._id);
-        expect(stored?.mobileRefreshTokens).toHaveLength(0);
-    });
-
-    it("keeps a device's live token across a long rotation chain", async () => {
-        const user = await makeUser();
-        const other = await issueMobileAuthBody(user);
-
-        let current = await issueMobileAuthBody(user);
-        for (let i = 0; i < 8; i++) current = await rotateMobileRefreshToken(current.refreshToken);
-
-        // A second device's untouched token must survive the tombstone churn.
-        const owner = await getUserByMobileRefreshToken(other.refreshToken);
-        expect(owner._id.equals(user._id)).toBe(true);
-        await expect(rotateMobileRefreshToken(current.refreshToken)).resolves.toBeDefined();
-    });
-
     it("rejects old mobile access tokens after linking Google", async () => {
         const user = await makeUser({ deviceId: DEVICE_ID_A });
         const body = await issueMobileAuthBody(user);
@@ -182,16 +118,18 @@ describe("mobile sessions", () => {
         await expect(assertValidMobileAccessToken(token!)).rejects.toThrow(AuthError);
     });
 
-    it("revokes a single refresh token on logout", async () => {
-        const user = await makeUser();
-        const { refreshToken } = await issueMobileAuthBody(user);
+    it("rejects old mobile access tokens after disconnecting Google", async () => {
+        const user = await makeUser({ deviceId: DEVICE_ID_A });
+        await linkGoogleToUser(user._id.toString(), "g-drop");
+        const other = await makeUser({ deviceId: DEVICE_ID_B });
 
-        await revokeMobileRefreshToken(refreshToken);
+        const token = await decodeMobileToken((await issueMobileAuthBody(user)).accessToken);
+        const otherToken = await decodeMobileToken((await issueMobileAuthBody(other)).accessToken);
 
-        await expect(getUserByMobileRefreshToken(refreshToken)).rejects.toThrow(AuthError);
-    });
+        await disconnectGoogleAccount(user._id.toString(), DEVICE_ID_C);
 
-    it("logout is idempotent for an unknown refresh token", async () => {
-        await expect(revokeMobileRefreshToken("does-not-exist")).resolves.toBeUndefined();
+        await expect(assertValidMobileAccessToken(token!)).rejects.toThrow(AuthError);
+        // Another account's sessions are untouched.
+        await expect(assertValidMobileAccessToken(otherToken!)).resolves.toBeUndefined();
     });
 });

@@ -15,18 +15,22 @@ describe("mobileToken", () => {
     it("mints a token that decodes back to the same claims", async () => {
         const _id = new Types.ObjectId();
         const groups = [new Types.ObjectId(), new Types.ObjectId()];
-        const claims = userTokenClaims({
-            _id,
-            username: "alice",
-            googleConnected: true,
-            groups,
-            createdAt: new Date("2024-01-01"),
-        });
+        const claims = userTokenClaims(
+            {
+                _id,
+                username: "alice",
+                googleConnected: true,
+                groups,
+                createdAt: new Date("2024-01-01"),
+            },
+            "session-hash"
+        );
 
         const token = await mintMobileToken(claims);
         const decoded = await decodeMobileToken(token);
 
         expect(decoded?.userId).toBe(_id.toString());
+        expect(decoded?.sessionId).toBe("session-hash");
         expect(decoded?.username).toBe("alice");
         expect(decoded?.googleConnected).toBe(true);
         expect(decoded?.groups).toEqual(groups.map(String));
@@ -47,7 +51,7 @@ describe("mobileToken", () => {
     it("buildMobileAuthBody carries the token and the needsNameSetup hint", async () => {
         const body = await buildMobileAuthBody(
             { _id: new Types.ObjectId(), username: "x" },
-            { refreshToken: "refresh-token", needsNameSetup: true }
+            { refreshToken: "refresh-token", sessionId: "session-hash", needsNameSetup: true }
         );
 
         expect(typeof body.accessToken).toBe("string");

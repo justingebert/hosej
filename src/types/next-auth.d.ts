@@ -26,6 +26,8 @@ declare module "next-auth/jwt" {
         needsNameSetup?: boolean;
         onboardingCompleted?: boolean;
         announcementsSeen?: string[];
-        mobileSessionVersion?: number;
+        // Mobile access tokens only: the device session that minted this token.
+        // Absent on cookie sessions, which NextAuth revokes its own way.
+        sessionId?: string;
     }
 }

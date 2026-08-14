@@ -15,7 +15,7 @@ describe("getAuthToken — Bearer path", () => {
     it("decodes a valid mobile Bearer token to its claims", async () => {
         const _id = new Types.ObjectId();
         const token = await mintMobileToken(
-            userTokenClaims({ _id, username: "alice", groups: [] })
+            userTokenClaims({ _id, username: "alice", groups: [] }, "session-hash")
         );
 
         const result = await getAuthToken(reqWithAuth(`Bearer ${token}`));

@@ -5,8 +5,9 @@ import { env } from "@/env";
 
 /**
  * Mobile (Expo) clients can't use NextAuth's cookie session, so API calls use a
- * short-lived Bearer access token. Refresh tokens are opaque random secrets,
- * stored hashed on the user document and rotated via /api/auth/mobile/refresh.
+ * short-lived Bearer access token, minted at /api/auth/mobile/refresh from an
+ * opaque refresh token. Refresh tokens are random secrets stored hashed on the
+ * user document and do NOT rotate — see services/user/mobileSession.
  */
 export const MOBILE_TOKEN_SALT = "hosej-mobile-session";
 export const MOBILE_ACCESS_TOKEN_MAX_AGE = 60 * 15; // 15 minutes
@@ -21,13 +22,15 @@ type UserLike = {
     createdAt?: Date | string;
     onboardingCompleted?: boolean;
     announcementsSeen?: string[];
-    mobileSessionVersion?: number;
 };
 
 /** Build the JWT claim set from a user — mirrors the fields set by the web `jwt` callback. */
-export function userTokenClaims(user: UserLike): JWT {
+export function userTokenClaims(user: UserLike, sessionId: string): JWT {
     return {
         userId: user._id.toString(),
+        // Which device session minted this token, checked on every request — so
+        // signing out one device takes effect immediately, not at token expiry.
+        sessionId,
         username: user.username,
         googleConnected: user.googleConnected ?? false,
         groups: (user.groups ?? []).map(String),
@@ -39,7 +42,6 @@ export function userTokenClaims(user: UserLike): JWT {
         onboardingCompleted: user.onboardingCompleted ?? false,
         // announcementsSeen is intentionally omitted from the access token: it can
         // grow unbounded and isn't read server-side — the app gets it from the user DTO.
-        mobileSessionVersion: user.mobileSessionVersion ?? 0,
     };
 }
 
@@ -88,13 +90,15 @@ export async function buildMobileAuthBody(
     user: UserLike,
     {
         refreshToken,
+        sessionId,
         needsNameSetup = false,
     }: {
         refreshToken: string;
+        sessionId: string;
         needsNameSetup?: boolean;
     }
 ) {
-    const accessToken = await mintMobileToken(userTokenClaims(user));
+    const accessToken = await mintMobileToken(userTokenClaims(user, sessionId));
     return {
         accessToken,
         refreshToken,
