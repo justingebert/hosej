@@ -4,11 +4,10 @@ import { Button } from "@/components/ui/button";
 
 interface EmptyRallyGuideProps {
     groupId: string;
-    userIsAdmin: boolean;
     onActivate: () => void;
 }
 
-export function EmptyRallyGuide({ groupId, userIsAdmin, onActivate }: EmptyRallyGuideProps) {
+export function EmptyRallyGuide({ groupId, onActivate }: EmptyRallyGuideProps) {
     return (
         <div className="flex-grow flex flex-col items-center justify-center pb-32 px-6">
             <div className="flex flex-col items-center space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -23,31 +22,24 @@ export function EmptyRallyGuide({ groupId, userIsAdmin, onActivate }: EmptyRally
                         No active rallies
                     </h2>
                     <p className="text-sm text-muted-foreground/60 max-w-[260px] leading-relaxed mx-auto">
-                        Group admins control when rallies start and how many active rallies run at
-                        once.
+                        Start the next rally from the pool, or create a new one.
                     </p>
                 </div>
             </div>
 
             <div className="mt-12 flex flex-col items-center gap-3 w-full max-w-xs animate-in fade-in slide-in-from-bottom-8 duration-700 delay-150 fill-mode-both relative z-10">
-                {userIsAdmin && (
-                    <Button
-                        className="w-full rounded-2xl h-14 shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
-                        onClick={onActivate}
-                    >
-                        <CirclePlay className="w-5 h-5 mr-3" />
-                        <span className="font-semibold text-base">Start Rally now</span>
-                    </Button>
-                )}
+                <Button
+                    className="w-full rounded-2xl h-14 shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                    onClick={onActivate}
+                >
+                    <CirclePlay className="w-5 h-5 mr-3" />
+                    <span className="font-semibold text-base">Start Rally now</span>
+                </Button>
 
                 <Link href={`/groups/${groupId}/create`} className="w-full block" prefetch={true}>
                     <Button
-                        variant={userIsAdmin ? "secondary" : "default"}
-                        className={`w-full rounded-2xl h-14 transition-all hover:scale-[1.02] active:scale-[0.98] font-semibold text-base ${
-                            !userIsAdmin
-                                ? "shadow-lg shadow-primary/20 font-semibold text-base"
-                                : "bg-secondary/50 hover:bg-secondary/80 backdrop-blur-sm shadow-sm"
-                        }`}
+                        variant="secondary"
+                        className="w-full rounded-2xl h-14 transition-all hover:scale-[1.02] active:scale-[0.98] font-semibold text-base bg-secondary/50 hover:bg-secondary/80 backdrop-blur-sm shadow-sm"
                     >
                         <PlusCircle className="w-5 h-5 mr-3" />
                         Create new Rally

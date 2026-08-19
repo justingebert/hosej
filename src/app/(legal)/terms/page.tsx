@@ -87,7 +87,38 @@ export default function TermsPage() {
                 </section>
 
                 <section className="space-y-2">
-                    <h2 className="text-base font-semibold">6. Content Ownership</h2>
+                    <h2 className="text-base font-semibold">
+                        6. Objectionable Content and Abusive Users
+                    </h2>
+                    <p>
+                        <strong>
+                            We have zero tolerance for objectionable content and abusive users.
+                        </strong>{" "}
+                        Content that is illegal, sexually explicit, hateful, violent, harassing, or
+                        that targets or endangers another person is not allowed anywhere in hosej —
+                        including chat messages, photos, question text, usernames, and profile
+                        pictures.
+                    </p>
+                    <p>
+                        Every piece of content another member posts can be reported from inside the
+                        app. Reported content is reviewed and, where it breaks these Terms, removed
+                        within 24 hours; the accounts responsible are suspended or terminated. Group
+                        admins can also remove a member from their group at any time.
+                    </p>
+                    <p>
+                        You can also report content or an account by email to{" "}
+                        <a
+                            href="mailto:pregame_acid_9o@icloud.com"
+                            className="underline text-primary"
+                        >
+                            pregame_acid_9o@icloud.com
+                        </a>
+                        .
+                    </p>
+                </section>
+
+                <section className="space-y-2">
+                    <h2 className="text-base font-semibold">7. Content Ownership</h2>
                     <p>
                         You retain ownership of content you upload or create on hosej. By submitting
                         content, you grant us a non-exclusive, royalty-free license to store,
@@ -97,7 +128,7 @@ export default function TermsPage() {
                 </section>
 
                 <section className="space-y-2">
-                    <h2 className="text-base font-semibold">7. Intellectual Property</h2>
+                    <h2 className="text-base font-semibold">8. Intellectual Property</h2>
                     <p>
                         The hosej application code, design, and interface are the intellectual
                         property of the developer and are protected by applicable copyright law. You
@@ -107,7 +138,7 @@ export default function TermsPage() {
                 </section>
 
                 <section className="space-y-2">
-                    <h2 className="text-base font-semibold">8. Disclaimer of Warranties</h2>
+                    <h2 className="text-base font-semibold">9. Disclaimer of Warranties</h2>
                     <p>
                         THE SERVICE IS PROVIDED &quot;AS IS&quot; AND &quot;AS AVAILABLE&quot;
                         WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
@@ -117,7 +148,7 @@ export default function TermsPage() {
                 </section>
 
                 <section className="space-y-2">
-                    <h2 className="text-base font-semibold">9. Limitation of Liability</h2>
+                    <h2 className="text-base font-semibold">10. Limitation of Liability</h2>
                     <p>
                         TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE DEVELOPER SHALL NOT
                         BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE
@@ -129,7 +160,7 @@ export default function TermsPage() {
                 </section>
 
                 <section className="space-y-2">
-                    <h2 className="text-base font-semibold">10. Termination</h2>
+                    <h2 className="text-base font-semibold">11. Termination</h2>
                     <p>
                         We reserve the right to suspend or terminate your access to hosej at any
                         time, for any reason, without notice or liability. We may also discontinue
@@ -138,7 +169,7 @@ export default function TermsPage() {
                 </section>
 
                 <section className="space-y-2">
-                    <h2 className="text-base font-semibold">11. Changes to These Terms</h2>
+                    <h2 className="text-base font-semibold">12. Changes to These Terms</h2>
                     <p>
                         We may update these Terms at any time. The &quot;Last updated&quot; date at
                         the top will reflect changes. Continued use of hosej after changes
@@ -147,7 +178,7 @@ export default function TermsPage() {
                 </section>
 
                 <section className="space-y-2">
-                    <h2 className="text-base font-semibold">12. Governing Law</h2>
+                    <h2 className="text-base font-semibold">13. Governing Law</h2>
                     <p>
                         These Terms are governed by the laws of Germany. Any disputes shall be
                         subject to the exclusive jurisdiction of the courts of Berlin, Germany.
@@ -155,7 +186,7 @@ export default function TermsPage() {
                 </section>
 
                 <section className="space-y-2">
-                    <h2 className="text-base font-semibold">13. Severability</h2>
+                    <h2 className="text-base font-semibold">14. Severability</h2>
                     <p>
                         If any provision of these Terms is found to be unenforceable, the remaining
                         provisions shall remain in full force and effect.
@@ -163,7 +194,7 @@ export default function TermsPage() {
                 </section>
 
                 <section className="space-y-2">
-                    <h2 className="text-base font-semibold">14. Contact</h2>
+                    <h2 className="text-base font-semibold">15. Contact</h2>
                     <p>
                         For questions about these Terms, contact:
                         <br />

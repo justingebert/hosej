@@ -5,7 +5,7 @@ import { Types } from "mongoose";
 import { ConflictError, NotFoundError, ValidationError } from "@/lib/api/errorHandling";
 import { generateSignedUrl } from "@/lib/integrations/storage";
 import { resolveAvatarUrl } from "@/lib/services/user/user";
-import { isUserAdmin, isUserInGroup, addPointsToMember } from "@/lib/services/group";
+import { isUserInGroup, addPointsToMember } from "@/lib/services/group";
 import { createChatForEntity } from "@/lib/services/chat";
 import { EntityModel } from "@/types/models/chat";
 import { sendNotification } from "@/lib/integrations/push";
@@ -286,13 +286,14 @@ export async function activateCreatedRallies(
 
 /**
  * Activate pending rallies up to the group's configured rally count.
- * Admin-only operation.
+ * Open to any member: the rally count below caps how many can ever be active,
+ * so the worst a member can do is start one the cron would have started anyway.
  */
 export async function activateRallies(
     userId: string,
     groupId: string
 ): Promise<{ rallies: RallyDocument[] }> {
-    await isUserAdmin(userId, groupId);
+    await isUserInGroup(userId, groupId);
 
     const group = await Group.findById(groupId);
     if (!group) throw new NotFoundError("Group not found");

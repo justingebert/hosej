@@ -112,6 +112,18 @@ export async function addTemplatePackToGroup(
         throw new NotFoundError(`No templates found for pack "${packId}"`);
     }
 
+    // Mark the pack *before* creating its questions, not after. There's no
+    // transaction here (nothing in this codebase uses one, and the test suite
+    // runs on a standalone mongodb-memory-server, where they'd throw), so a
+    // throw mid-loop has to fail in the recoverable direction: this way the
+    // retry is refused by the already-added check above and the pool is merely
+    // short, instead of the loop running twice and permanently duplicating
+    // every question in the pack — which nothing can undo, as there is no
+    // remove-pack endpoint.
+    await Group.findByIdAndUpdate(groupId, {
+        $push: { "features.questions.settings.packs": packId },
+    });
+
     for (const template of templates) {
         await createQuestionFromTemplate(
             groupId,
@@ -127,11 +139,6 @@ export async function addTemplatePackToGroup(
             }
         );
     }
-
-    // Track the pack on the group
-    await Group.findByIdAndUpdate(groupId, {
-        $push: { "features.questions.settings.packs": packId },
-    });
 }
 
 // ─── Pack queries ───────────────────────────────────────────────────────────

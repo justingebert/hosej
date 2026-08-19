@@ -310,7 +310,7 @@ describe("activateRallies", () => {
         expect(stillCreated).toHaveLength(1);
     });
 
-    it("requires admin authorization", async () => {
+    it("lets a non-admin member activate", async () => {
         const admin = await makeUser();
         const member = await makeUser();
         const group = await makeGroup({
@@ -320,10 +320,26 @@ describe("activateRallies", () => {
                 { user: member._id, name: "M" },
             ],
         });
+        const pending = await makeRally({ groupId: group._id, status: RallyStatus.Created });
 
-        await expect(activateRallies(member._id.toString(), group._id.toString())).rejects.toThrow(
-            ForbiddenError
-        );
+        const result = await activateRallies(member._id.toString(), group._id.toString());
+
+        expect(result.rallies).toHaveLength(1);
+        const reloaded = await Rally.findById(pending._id);
+        expect(reloaded?.status).toBe(RallyStatus.Submission);
+    });
+
+    it("rejects a user outside the group", async () => {
+        const admin = await makeUser();
+        const outsider = await makeUser();
+        const group = await makeGroup({
+            admin: admin._id,
+            members: [{ user: admin._id, name: "A" }],
+        });
+
+        await expect(
+            activateRallies(outsider._id.toString(), group._id.toString())
+        ).rejects.toThrow(ForbiddenError);
     });
 });
 

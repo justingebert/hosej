@@ -10,7 +10,6 @@ import { EmptyRallyGuide } from "./_components/emptyRallyGuide";
 import fetcher from "@/lib/fetcher";
 import type { RallyDTO } from "@/types/models/rally";
 import { useMemo } from "react";
-import type { GroupDTO } from "@/types/models/group";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMarkFeatureSeen } from "@/hooks/useMarkFeatureSeen";
 
@@ -20,7 +19,6 @@ const RallyPage = () => {
     const groupId = params?.groupId;
     useMarkFeatureSeen(groupId, "rally");
 
-    const { data: group } = useSWR<GroupDTO>(groupId ? `/api/groups/${groupId}` : null, fetcher);
     const {
         data,
         isLoading,
@@ -31,9 +29,6 @@ const RallyPage = () => {
     );
 
     const rallies = useMemo(() => data?.rallies || [], [data?.rallies]);
-
-    const userIsAdmin =
-        group && group.admin && user?._id && group.admin.toString() === user._id.toString();
 
     const userHasVoted = useMemo(() => {
         const map: Record<string, boolean> = {};
@@ -71,7 +66,6 @@ const RallyPage = () => {
             ) : rallies.length === 0 ? (
                 <EmptyRallyGuide
                     groupId={groupId}
-                    userIsAdmin={!!userIsAdmin}
                     onActivate={async () => {
                         await fetch(`/api/groups/${groupId}/rally/activate`, {
                             method: "POST",
